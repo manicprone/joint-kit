@@ -2,10 +2,38 @@
   "name": "joint",
   "version": "0.0.0",
   "description": "Good data, all rolled-up",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "|M|",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.com:manic-manifesto/joint.git"
+  },
+  "scripts": {
+    "start": "babel-node src/server.js",
+    "lint": "eslint ./ --cache --ignore-pattern .gitignore",
+    "test": "mocha --compilers js:babel-register",
+    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0"
+  },
+  "pre-commit": [
+    "precommit-message",
+    "lint"
+  ],
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-import": "^2.3.0",
+    "pre-commit": "^1.2.2"
+  }
 }
