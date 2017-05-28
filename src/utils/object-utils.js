@@ -1,6 +1,6 @@
-const lodashObject = require('lodash/object');
-const lodashLang = require('lodash/lang');
-const lodashCollection = require('lodash/collection');
+import lodashObject from 'lodash/object';
+import lodashLang from 'lodash/lang';
+import lodashCollection from 'lodash/collection';
 
 module.exports = {
   get: lodashObject.get,

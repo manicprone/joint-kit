@@ -1,4 +1,4 @@
-const lodashString = require('lodash/string');
+import lodashString from 'lodash/string';
 
 module.exports = {
   toCamelCase: lodashString.camelCase,
