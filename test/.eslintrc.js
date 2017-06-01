@@ -1,5 +1,8 @@
 module.exports = {
   'extends': 'airbnb-base',
+  'env': {
+    'mocha': true,
+  },
   'plugins': [
     'import',
   ],
@@ -13,6 +16,8 @@ module.exports = {
     'default-case': 'off',
     'dot-notation': 'off',
     'padded-blocks': 'off',
-    'camelcase': 'off',
+    'prefer-arrow-callback': 'off',
+    'func-names': 'off',
+    'no-unused-expressions': 'off',
   },
 };
