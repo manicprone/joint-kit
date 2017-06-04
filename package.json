@@ -13,7 +13,12 @@
     "start": "babel-node src/server.js",
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "test": "mocha --require babel-register test/**/*.spec.js",
-    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0"
+    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
+    "db-init": "babel-node db/init.js",
+    "knex": "babel-node ./node_modules/.bin/knex",
+    "migrate:make": "npm run knex migrate:make",
+    "migrate:latest": "NODE_ENV=dev npm run knex migrate:latest",
+    "migrate:rollback": "npm run knex migrate:rollback"
   },
   "pre-commit": [
     "precommit-message",
@@ -21,8 +26,13 @@
   ],
   "dependencies": {
     "body-parser": "^1.17.2",
+    "bookshelf": "^0.10.3",
     "express": "^4.15.3",
-    "lodash": "^4.17.4"
+    "knex": "0.12.0",
+    "knex-db-manager": "^0.3.0",
+    "lodash": "^4.17.4",
+    "pg": "^6.2.3",
+    "pg-escape": "^0.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
