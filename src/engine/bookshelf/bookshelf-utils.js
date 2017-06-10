@@ -3,6 +3,21 @@ import stringUtils from '../../utils/string-utils';
 
 const debug_loadDirect = false;
 
+export function registerModels(bookshelf, modelConfig) {
+  const enabledModels = modelConfig.modelsEnabled;
+  const modelDefs = modelConfig.models;
+
+  if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
+    enabledModels.forEach((modelName) => {
+      const modelDef = modelDefs[modelName];
+      console.log('[JOINT] [bookshelf-utils:registerBookshelfModels] model def =>', modelDef);
+      if (modelDef) {
+        // register bookshelf models !!!
+      }
+    });
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
 // the Bookshelf-compatible specification for an order-by clause.

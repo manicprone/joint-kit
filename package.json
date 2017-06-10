@@ -1,7 +1,7 @@
 {
   "name": "joint",
   "version": "0.0.0",
-  "description": "Good data, all rolled-up",
+  "description": "Spin up a data service with joints",
   "author": "|M|",
   "license": "MIT",
   "main": "server.js",
