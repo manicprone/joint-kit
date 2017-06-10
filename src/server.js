@@ -23,7 +23,7 @@ JointEngine.serviceKey = 'bookshelf';
 JointEngine.service = bookshelf;
 JointEngine.modelRegistry = jointEngineUtils.registerModels(bookshelf, modelConfig);
 JointEngine.actionRegistry = jointEngineUtils.registerActions(actionConfig);
-console.log('[SERVER] JointEngine =>', JointEngine);
+// console.log('[SERVER] JointEngine =>', JointEngine);
 
 // ----------------------
 // Load engine modules...
