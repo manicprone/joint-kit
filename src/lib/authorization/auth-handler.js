@@ -1,4 +1,4 @@
-import objectUtils from '../../utils/object-utils';
+import objectUtils from '../utils/object-utils';
 // import { authorizedApps as authorizedAppConfig } from '../config/server-config';
 
 // -----------------------------------------------------------------------------

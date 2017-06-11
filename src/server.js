@@ -2,10 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const serverConfig = require('./config/server-config');
 const bookshelf = require('./services/bookshelf');
-const modelConfig = require('./engine/config/model-config');
-const actionConfig = require('./engine/config/action-config');
-const jointEngineUtils = require('./engine/engine-utils');
-const JointEngine = require('./engine/joint-engine');
+const modelConfig = require('./engine/models/model-config');
+const methodConfig = require('./engine/methods/method-config');
+const JointEngine = require('./engine');
 const apiRoutes = require('./modules');
 
 const app = express();
@@ -16,14 +15,16 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// --------------------------
-// Initialize Joint Engine...
-// --------------------------
-JointEngine.serviceKey = 'bookshelf';
-JointEngine.service = bookshelf;
-JointEngine.modelRegistry = jointEngineUtils.registerModels(bookshelf, modelConfig);
-JointEngine.actionRegistry = jointEngineUtils.registerActions(actionConfig);
-// console.log('[SERVER] JointEngine =>', JointEngine);
+// ---------------------
+// Start Joint Engine...
+// ---------------------
+const Joint = new JointEngine({
+  serviceKey: 'bookshelf',
+  service: bookshelf,
+  modelConfig,
+  methodConfig,
+});
+Joint.start();
 
 // ----------------------
 // Load engine modules...

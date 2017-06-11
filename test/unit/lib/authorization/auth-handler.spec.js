@@ -1,12 +1,12 @@
 import chai from 'chai';
-import * as AuthHandler from '../../../../src/engine/authorization/auth-handler';
+import * as AuthHandler from '../../../../src/lib/authorization/auth-handler';
 
 const expect = chai.expect;
 
-// -------------------
-// ENGINE auth-handler
-// -------------------
-describe('ENGINE [auth-handler]', () => {
+// --------------------
+// LIBRARY auth-handler
+// --------------------
+describe('LIBRARY [auth-handler]', () => {
   // ------------------------
   // Testing: buildAuthBundle
   // ------------------------

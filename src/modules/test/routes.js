@@ -1,5 +1,5 @@
 import express from 'express';
-import Responder from '../../engine/routes/response-handler';
+import Responder from '../../lib/routes/response-handler';
 
 const router = express.Router(); // eslint-disable-line new-cap
 

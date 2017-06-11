@@ -1,5 +1,5 @@
-import objectUtils from '../../utils/object-utils';
-import ACTION from './constants';
+import objectUtils from '../utils/object-utils';
+import ACTION from './action-constants';
 
 // -----------------------------------------------------------------------------
 // Looks at the provided fieldSpec defintion, and ensures the provided

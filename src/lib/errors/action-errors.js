@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
-// Errors for the Join action layer
+// Errors for the Joint action layer
 // -----------------------------------------------------------------------------
-import JointError from '../errors/JointError';
+import JointError from './JointError';
 
 // ---------------------------------------------------------- Bad Requests (400)
 
