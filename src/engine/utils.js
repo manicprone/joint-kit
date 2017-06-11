@@ -1,6 +1,6 @@
 import objectUtils from '../lib/utils/object-utils';
 
-const namespace = 'JOINT';
+const namespace = 'ENGINE';
 const log_registration = true;
 const debug_registerModels = false;
 const debug_registerMethods = false;

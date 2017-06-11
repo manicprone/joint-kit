@@ -18,13 +18,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // ---------------------
 // Start Joint Engine...
 // ---------------------
-const Joint = new JointEngine({
+new JointEngine({
   serviceKey: 'bookshelf',
   service: bookshelf,
   modelConfig,
   methodConfig,
-});
-Joint.start();
+}).start();
 
 // ----------------------
 // Load engine modules...
