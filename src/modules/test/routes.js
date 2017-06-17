@@ -1,5 +1,5 @@
 import express from 'express';
-import Responder from '../../handlers/response-handler';
+import Responder from '../../lib/routes/response-handler';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -11,7 +11,7 @@ router.use((req, res, next) => {
   next();
 });
 
-// --------------------------------------------- /test
+// ----------------------------------------------------------------------- /test
 
 router.route('/test')
   .get((req, res) => {

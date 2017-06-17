@@ -1,5 +1,5 @@
 const dbManager = require('knex-db-manager');
-const dbConfig = require('../src/config/db-config');
+const dbConfig = require('./db-config');
 
 const log = true;
 

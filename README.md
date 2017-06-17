@@ -1,6 +1,6 @@
 # joint
 
-> Good data, all rolled-up.
+> Spin up a data service with joints.
 
 ## Install
 

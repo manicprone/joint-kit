@@ -17,10 +17,10 @@ module.exports = {
     },
     migrations: {
       tableName: 'knex_migrations',
-      directory: './db/migrations',
+      directory: './migrations',
     },
     seeds: {
-      directory: './db/seeds',
+      directory: './seeds',
     },
   },
 
@@ -42,22 +42,11 @@ module.exports = {
     },
     migrations: {
       tableName: 'knex_migrations',
-      directory: './db/migrations',
+      directory: './migrations',
     },
     seeds: {
-      directory: './db/seeds',
+      directory: './seeds',
     },
   },
 
-  // -----------
-  // Test (test)
-  // -----------
-  // test: {
-  //   // debug: true,
-  //   client: 'sqlite3',
-  //   connection: {
-  //     filename: './api/test/test.sqlite3',
-  //   },
-  //   useNullAsDefault: true,
-  // },
 };
