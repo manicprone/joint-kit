@@ -1,4 +1,4 @@
-import dbConfig from './src/config/db-config';
+import dbConfig from './db-config';
 
 const dev = dbConfig.dev;
 const prod = dbConfig.prod;
@@ -19,6 +19,4 @@ module.exports = {
     migrations: prod.migrations,
     seeds: prod.seeds,
   },
-
-  // test: dbConfig.test,
 };

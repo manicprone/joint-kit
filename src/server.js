@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const serverConfig = require('./config/server-config');
+const serverConfig = require('./server-config');
 const bookshelf = require('./services/bookshelf');
 const modelConfig = require('./engine/models/model-config');
 const methodConfig = require('./engine/methods/method-config');

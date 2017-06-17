@@ -1,4 +1,5 @@
 import objectUtils from '../lib/utils/object-utils';
+import * as JointActions from '../lib/actions';
 
 const namespace = 'ENGINE';
 const log_registration = true;
@@ -15,7 +16,7 @@ export function registerModels(dataPersistenceService, modelConfig) {
 
   if (log_registration) {
     console.log(`[${namespace}] ----------------------------------------------------`);
-    console.log(`[${namespace}] Registering models`);
+    console.log(`[${namespace}] Registering resource models`);
     console.log(`[${namespace}] ----------------------------------------------------`);
   }
 
@@ -36,7 +37,7 @@ export function registerModels(dataPersistenceService, modelConfig) {
   if (log_registration) console.log(`[${namespace}] ----------------------------------------------------`);
 
   return registry;
-}
+} // END - registerModels
 
 function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
   let registryEntry = null;
@@ -62,7 +63,7 @@ function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
   } // end-if (bookshelf.Model)
 
   return registryEntry;
-}
+} // END - registerBookshelfModel
 
 // -----------------------------------------------------------------------------
 //
@@ -98,12 +99,11 @@ export function registerMethods(methodConfig) {
           }
 
           // Add method to registry...
-          registry[modelNameForResource][methodName] = {
-            action: jointAction,
-            spec: methodSpec,
-          };
-
-          if (log_registration) console.log(`[${namespace}] ${modelNameForResource}.${methodName}`);
+          const methodLogic = generateMethod(jointAction, methodSpec);
+          if (methodLogic) {
+            registry[modelNameForResource][methodName] = methodLogic;
+            if (log_registration) console.log(`[${namespace}] ${modelNameForResource}.${methodName}`);
+          }
         });
       } else if (log_registration) {
         console.log(`[${namespace}] no methods configured`);
@@ -118,4 +118,13 @@ export function registerMethods(methodConfig) {
   if (log_registration) console.log('');
 
   return registry;
-}
+} // END - registerMethods
+
+function generateMethod(action, spec) {
+  if (!objectUtils.has(JointActions, action)) {
+    if (log_registration) console.log(`[${namespace}] X  action not recognized: ${action}`);
+    return null;
+  }
+
+  return function (input) { return JointActions[action](spec, input); }; // eslint-disable-line func-names
+} // END - generateMethod

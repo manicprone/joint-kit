@@ -12,6 +12,7 @@ module.exports = {
       spec: {
         fields: [
           { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'data', type: 'JSON', required: true },
           { name: 'version', type: 'String' },
           { name: 'key', type: 'String' },
         ],
