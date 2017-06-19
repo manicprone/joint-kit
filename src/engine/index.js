@@ -16,26 +16,60 @@ module.exports = class JointEngine {
     this.routeConfig = objectUtils.get(options, 'routeConfig', null);
   }
 
-  start() {
+  start(options) {
+    const logStart = objectUtils.get(options, 'logStart', true);
+
     if (!this.isRunning) {
-      if (this.service) {
-        this.isRunning = true;
+      if (logStart) {
+        console.log('====================================================');
+        console.log('Joint Engine');
+        console.log('version: 0.0.0'); // TODO: Load from config !!!
+        console.log('----------------------------------------------------');
+      }
 
-        // Build model registry...
-        if (this.modelConfig) {
-          this.model = engineUtils.registerModels(this.service, this.modelConfig);
-        }
+      // Abort if a service is not loaded...
+      if (!this.service) {
+        if (logStart) console.log('ERROR: A service must be configured to start the engine.');
+      }
 
-        // Build method registry...
-        if (this.methodConfig) {
-          this.method = engineUtils.registerMethods(this.methodConfig);
-        }
-      } else {
-        console.info('[ENGINE] A service must be configured before the engine can be started.');
-      } // end-if-else (this.service)
-    } else {
-      console.info('[ENGINE] The engine is already running.');
-    } // end-if-else (!this.isRunning)
+      this.isRunning = true;
+
+      if (logStart) {
+        console.log(`service: ${this.serviceKey}`);
+        console.log('====================================================\n');
+      }
+
+      // Build model registry...
+      if (this.modelConfig) {
+        this.model = engineUtils.registerModels(this.service, this.modelConfig);
+      }
+
+      // Build method registry...
+      if (this.methodConfig) {
+        this.method = engineUtils.registerMethods(this.methodConfig);
+      }
+
+      // if (this.service) {
+      //   this.isRunning = true;
+      //
+      //   if (logStart) {
+      //     console.log(`service: ${this.serviceKey}`);
+      //     console.log('======================================================');
+      //   }
+      //
+      //   // Build model registry...
+      //   if (this.modelConfig) {
+      //     this.model = engineUtils.registerModels(this.service, this.modelConfig);
+      //   }
+      //
+      //   // Build method registry...
+      //   if (this.methodConfig) {
+      //     this.method = engineUtils.registerMethods(this.methodConfig);
+      //   }
+      // } else if (logStart) {
+      //   console.info('ERROR: A service must be configured to use the engine.');
+      // } // end-if-else (this.service)
+    }
   } // END - start
 
   info() {

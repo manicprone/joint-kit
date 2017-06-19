@@ -15,14 +15,14 @@ export function registerModels(dataPersistenceService, modelConfig) {
   const registry = {};
 
   if (log_registration) {
-    console.log(`[${namespace}] ----------------------------------------------------`);
-    console.log(`[${namespace}] Registering resource models`);
-    console.log(`[${namespace}] ----------------------------------------------------`);
+    console.log('----------------------------------------------------');
+    console.log('Registering resource models');
+    console.log('----------------------------------------------------');
   }
 
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
-      if (log_registration) console.log(`[${namespace}] ${modelName}`);
+      if (log_registration) console.log(`${modelName}`);
 
       const modelDef = modelDefs[modelName];
       if (debug_registerModels) console.log(`[${namespace}] [engine-utils:registerModels] model def =>`, modelDef);
@@ -31,10 +31,10 @@ export function registerModels(dataPersistenceService, modelConfig) {
       registry[modelName] = modelObject;
     });
   } else if (log_registration) {
-    console.log(`[${namespace}] no models configured`);
+    console.log('no models configured');
   }
 
-  if (log_registration) console.log(`[${namespace}] ----------------------------------------------------`);
+  if (log_registration) console.log('----------------------------------------------------');
 
   return registry;
 } // END - registerModels
@@ -81,8 +81,8 @@ export function registerMethods(methodConfig) {
       registry[modelNameForResource] = {};
 
       if (log_registration) {
-        console.log(`[${namespace}] Registering methods for resource:`, modelNameForResource);
-        console.log(`[${namespace}] ----------------------------------------------------`);
+        console.log('Registering methods for resource:', modelNameForResource);
+        console.log('----------------------------------------------------');
       }
 
       // Load all methods...
@@ -102,15 +102,15 @@ export function registerMethods(methodConfig) {
           const methodLogic = generateMethod(jointAction, methodSpec);
           if (methodLogic) {
             registry[modelNameForResource][methodName] = methodLogic;
-            if (log_registration) console.log(`[${namespace}] ${modelNameForResource}.${methodName}`);
+            if (log_registration) console.log(`${modelNameForResource}.${methodName}`);
           }
         });
       } else if (log_registration) {
-        console.log(`[${namespace}] no methods configured`);
+        console.log('no methods configured');
       }
 
       if (log_registration) {
-        console.log(`[${namespace}] ----------------------------------------------------`);
+        console.log('----------------------------------------------------');
       }
     }); // end-resources.forEach
   }
@@ -122,7 +122,7 @@ export function registerMethods(methodConfig) {
 
 function generateMethod(action, spec) {
   if (!objectUtils.has(JointActions, action)) {
-    if (log_registration) console.log(`[${namespace}] X  action not recognized: ${action}`);
+    if (log_registration) console.log(`x  action not recognized: ${action}`);
     return null;
   }
 
