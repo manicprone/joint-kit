@@ -44,10 +44,11 @@ app.get('*', (req, res) => {
 // ---------------
 // Start server...
 // ---------------
+const host = 'localhost';
 const port = serverConfig.api.port;
 app.listen(port, () => {
-  console.info('======================================');
-  console.info(`joint server started on localhost:${port}`);
-  console.info('======================================');
+  console.info('====================================================');
+  console.info(`Joint Engine Server started on ${host}:${port}`);
+  console.info('====================================================');
   console.info('');
 });

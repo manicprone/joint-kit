@@ -1,10 +1,10 @@
 import Promise from 'bluebird';
-import bookshelf from '../../services/bookshelf';
-import objectUtils from '../utils/object-utils';
-import * as AuthHandler from '../authorization/auth-handler';
-import * as ActionErrors from '../errors/action-errors';
-import * as ActionUtils from './action-utils';
-import ACTION from './action-constants';
+import bookshelf from '../../../services/bookshelf';
+import objectUtils from '../../utils/object-utils';
+import * as AuthHandler from '../../authorization/auth-handler';
+import * as ActionErrors from '../../errors/action-errors';
+import * as ActionUtils from '../action-utils';
+import ACTION from '../action-constants';
 
 const debug = false;
 

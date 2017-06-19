@@ -1,15 +1,22 @@
 // -----------------------------------------------------------------------------
 // Joint Engine
 // -----------------------------------------------------------------------------
-const objectUtils = require('../lib/utils/object-utils');
-const engineUtils = require('./engine-utils');
+import objectUtils from '../lib/utils/object-utils';
+import * as EngineUtils from './engine-utils';
+
+// TODO: Use "start" for the server, load/init for the engine !!!
+// Either =>
+//   start() => load / init
+//   isRunning => isLoaded / isInitialized
+// Or =>
+//   just load everything in the constructor !!!
 
 module.exports = class JointEngine {
   constructor(options = {}) {
     this.isRunning = false;
 
     // Load options...
-    this.serviceKey = objectUtils.get(options, 'serviceKey', 'default');
+    this.serviceKey = objectUtils.get(options, 'serviceKey', null);
     this.service = objectUtils.get(options, 'service', null);
     this.modelConfig = objectUtils.get(options, 'modelConfig', null);
     this.methodConfig = objectUtils.get(options, 'methodConfig', null);
@@ -17,14 +24,15 @@ module.exports = class JointEngine {
   }
 
   start(options) {
+    // Parse options...
     const logStart = objectUtils.get(options, 'logStart', true);
+    const logRegister = objectUtils.get(options, 'logRegister', true);
 
     if (!this.isRunning) {
       if (logStart) {
         console.log('====================================================');
         console.log('Joint Engine');
         console.log('version: 0.0.0'); // TODO: Load from config !!!
-        console.log('----------------------------------------------------');
       }
 
       // Abort if a service is not loaded...
@@ -41,35 +49,14 @@ module.exports = class JointEngine {
 
       // Build model registry...
       if (this.modelConfig) {
-        this.model = engineUtils.registerModels(this.service, this.modelConfig);
+        this.model = EngineUtils.registerModels(this.service, this.modelConfig, logRegister);
       }
 
       // Build method registry...
       if (this.methodConfig) {
-        this.method = engineUtils.registerMethods(this.methodConfig);
+        this.method = EngineUtils.registerMethods(this.methodConfig, logRegister);
       }
-
-      // if (this.service) {
-      //   this.isRunning = true;
-      //
-      //   if (logStart) {
-      //     console.log(`service: ${this.serviceKey}`);
-      //     console.log('======================================================');
-      //   }
-      //
-      //   // Build model registry...
-      //   if (this.modelConfig) {
-      //     this.model = engineUtils.registerModels(this.service, this.modelConfig);
-      //   }
-      //
-      //   // Build method registry...
-      //   if (this.methodConfig) {
-      //     this.method = engineUtils.registerMethods(this.methodConfig);
-      //   }
-      // } else if (logStart) {
-      //   console.info('ERROR: A service must be configured to use the engine.');
-      // } // end-if-else (this.service)
-    }
+    } // end-if (!this.isRunning)
   } // END - start
 
   info() {

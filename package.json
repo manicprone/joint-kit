@@ -13,7 +13,7 @@
     "start": "babel-node src/server.js",
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "test": "mocha --require babel-register test/**/*.spec.js",
-    "precommit-message": "echo 'Pre-commit checks (linting & testing)...' && exit 0",
+    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
     "db-init": "babel-node db/init.js",
     "knex": "babel-node ./node_modules/.bin/knex --knexfile ./src/db/knexfile.js",
     "migrate:make": "npm run knex migrate:make",
@@ -22,8 +22,7 @@
   },
   "pre-commit": [
     "precommit-message",
-    "lint",
-    "test"
+    "lint"
   ],
   "dependencies": {
     "bluebird": "^3.5.0",

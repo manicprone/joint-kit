@@ -1,17 +1,8 @@
 import objectUtils from '../utils/object-utils';
 // import { authorizedApps as authorizedAppConfig } from '../config/server-config';
 
-// -----------------------------------------------------------------------------
-// NOTE:
-// This auth-handler logic is being used exclusively by the "template" layer.
-//
-// All action/route logic that does not yet use the template layer,
-// uses the original auth-handler found in: /src/handlers/auth-handler.js - |M|
-// -----------------------------------------------------------------------------
-
 // TODO: Fix the "owner / delegateRole" protection logic !!!
 // TODO: Add support for "rolesAll" !!!
-// TODO: Complete the support for "authorizedApps" !!!
 // TODO: Add CSRF check to rules & logic !!!
 // TODO: Define the session property names in the api-config
 //       (i.e. blogUser, originalUrl, roles, etc) !!!
@@ -44,7 +35,7 @@ const debugCheck = false;
 //                            rule in place. If provided, a requesting user with
 //                            this role can perform the action, even if they are
 //                            not the owner of the data. This rule effectively
-//                            grants "delegation" to the provided role.
+//                            grants ownership "delegation" to the provided role.
 //
 // rolesAny: <Array>       => The requesting user must have at least
 //                            one of the roles provided in the array (OR).
@@ -55,10 +46,11 @@ const debugCheck = false;
 //                            If an owner rule is provided, both rules must pass.
 //
 // authorizedApps: <Array> => Restricts the usage of the request to authorized
-//                            apps. The value is an array of app idendifiers. If
-//                            provided, the request must contain the proprietary
-//                            header pairs with the secret defined in the server
-//                            config.
+//                            apps. The value is an array of app idendifiers
+//                            that have registered with the API. The request
+//                            must contain the proprietary header and secret
+//                            that was shared with the app during registration
+//                            to be granted authorization.
 //
 // denyWhenAny: <Array>    => Restricts the usage of this request when any of
 //                            the provided name/value pairs is present in the
@@ -108,6 +100,7 @@ export function buildAuthBundle(request, rules = {}) {
 
     console.log('[JOINT] [AUTH-HANDLER] authBundle =>');
     console.log(bundle);
+    console.log('-------------------------------------------\n');
   }
 
   return bundle;
@@ -129,7 +122,7 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
   let result = false;
 
   const authRules = authBundle.rules || {};
-  const requestHeaders = authBundle.headers;
+  // const requestHeaders = authBundle.request_headers;
   const sessionUser = authBundle.user;
 
   if (debugCheck) {
@@ -138,13 +131,14 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
     console.log(ownerCreds);
     console.log('------------------- authRules');
     console.log(authRules);
+    console.log('');
   }
 
   // Parse auth rules...
   const ownerToCheck = authRules.owner;
   const delegateRoleToCheck = authRules.delegateRole;
   const rolesAnyToCheck = authRules.rolesAny;
-  const appsToCheck = authRules.authorizedApps;
+  // const appsToCheck = authRules.authorizedApps;
   const denyWhenAnyToCheck = authRules.denyWhenAny;
 
   // Check owner...
@@ -152,6 +146,8 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
     result = isAllowedOwner(ownerToCheck, ownerCreds, sessionUser);
   }
 
+  // TODO: This check should be executed inside the "if (ownerToCheck)" clause,
+  //       because it is only relevant if ownership auth is declared !!!
   // Check delegate role...
   if (!result && delegateRoleToCheck) {
     result = isAllowedRole(delegateRoleToCheck, sessionUser);
@@ -166,9 +162,9 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
   }
 
   // Check authorized apps...
-  if (!result && appsToCheck) {
-    result = isAuthorizedApp(appsToCheck, requestHeaders);
-  }
+  // if (!result && appsToCheck) {
+  //   result = isAuthorizedApp(appsToCheck, requestHeaders);
+  // }
 
   // Check for explicitly denied scenarios...
   if (result && denyWhenAnyToCheck) {
@@ -234,34 +230,38 @@ export function isAllowedRole(roleToCheck, sessionUser) {
   return result;
 }
 
-export function isAuthorizedApp(appsToCheck) {
-  // let result = false;
-  const result = false;
-
-  if (appsToCheck) {
-    // const secret = request.get(authorizedAppConfig.headerName);
-    // bundle.isAuthorizedApp = false;
-    //
-    // if (secret) {
-    //   for (const appName of rules.authorizedApps) {
-    //     if (debugPrep) console.log(appName, authorizedAppConfig.apps[appName].secret === secret);
-    //
-    //     if (authorizedAppConfig.apps[appName].secret === secret) {
-    //       bundle.isAuthorizedApp = true;
-    //
-    //       if (debugPrep) {
-    //         console.log('Authed app info:');
-    //         console.log('app name => ', appName);
-    //       }
-    //
-    //       break;
-    //     }
-    //   }
-    // }
-  } // end-if (appsToCheck)
-
-  return result;
-}
+// export function isAuthorizedApp(appsToCheck, requestHeaders) {
+//   let result = false;
+//   const authHeaderForAppKey = authorizedAppConfig.headerNameForAppKey.toLowerCase();
+//   const authHeaderForToken = authorizedAppConfig.headerNameForToken.toLowerCase();
+//   const authAppRegistry = authorizedAppConfig.apps;
+//
+//   if (debugCheck) {
+//     console.log('authorization is restricted to apps =>', appsToCheck);
+//     console.log('checking header info:');
+//     console.log(requestHeaders);
+//   }
+//
+//   if (appsToCheck && Array.isArray(appsToCheck) && requestHeaders) {
+//     const appKey = requestHeaders[authHeaderForAppKey];
+//     const appToken = requestHeaders[authHeaderForToken];
+//
+//     if (debugCheck) console.log('The requesting app has identified itself with key =>', appKey);
+//
+//     // Ensure app has been authorized...
+//     if (!objectUtils.includes(appsToCheck, appKey)) {
+//       if (debugCheck) console.log('The requesting app has not been authorized to perform this action');
+//       return false;
+//     }
+//
+//     // Ensure credentials are valid...
+//     const registeredToken = (authAppRegistry[appKey]) ? authAppRegistry[appKey].secret : null;
+//     result = (registeredToken && registeredToken === appToken);
+//     if (debugCheck) console.log(`Does the provided token: ${appToken} match the registry: ${registeredToken} ? ${result}`);
+//   } // end-if (appsToCheck && Array.isArray(appsToCheck) && requestHeaders)
+//
+//   return result;
+// }
 
 function isDeniedByAny(denyWhenAnyToCheck, sessionUser) {
   let result = false;

@@ -5,7 +5,7 @@ import JointError from './JointError';
 
 // ---------------------------------------------------------- Bad Requests (400)
 
-export function generateMissingFieldsErrorPackage(missingFields) {
+export function generateMissingFieldsErrorPackage(missingFields = {}) {
   const all = missingFields.all || [];
   const oneOf = missingFields.oneOf || [];
   const hasAllFields = (all.length > 0);
@@ -62,9 +62,19 @@ export function generateResourceNotFoundErrorPackage(resourceName = '') {
 
 // ------------------------------------- General System / 3rd-party Errors (500)
 
+// TODO: Rename to generateThirdPartyErrorPackage(error) !!!
 export function generateBookshelfErrorPackage(error) {
   return new JointError({
     status: 500,
     message: error.message,
+  });
+}
+
+// ---------------------------------------------------------------------- Custom
+
+export function generateCustomErrorPackage(message = '', status = 500) {
+  return new JointError({
+    status,
+    message,
   });
 }

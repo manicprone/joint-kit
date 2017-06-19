@@ -6,7 +6,7 @@ const expect = chai.expect;
 // --------------------
 // LIBRARY auth-handler
 // --------------------
-describe('LIBRARY [auth-handler]', () => {
+describe('LIBRARY UTILS [auth-handler]', () => {
   // ------------------------
   // Testing: buildAuthBundle
   // ------------------------

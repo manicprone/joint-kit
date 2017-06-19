@@ -15,13 +15,13 @@ const Joint = new JointEngine({
   modelConfig,
   methodConfig,
 });
-Joint.start();
+Joint.start({ logStart: false, logRegister: false });
 
 // console.log('[ ----- Joint --------------------------------------------- ]');
 // console.log(Joint.info());
 // console.log('[ --------------------------------------------------------- ]');
 
-describe('METHODS [AppContent]', () => {
+describe('ENGINE METHODS [AppContent]', () => {
   // -------------------------------
   // Testing: saveContent action...
   // -------------------------------
