@@ -7,7 +7,7 @@ const expect = chai.expect;
 // --------------------
 // LIBRARY action-utils
 // --------------------
-describe('LIBRARY [action-utils]', () => {
+describe('LIBRARY UTILS [action-utils]', () => {
   // ----------------------------
   // Testing: checkRequiredFields
   // ----------------------------

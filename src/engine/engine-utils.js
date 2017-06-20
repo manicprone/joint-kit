@@ -1,28 +1,27 @@
 import objectUtils from '../lib/utils/object-utils';
-import * as JointActions from '../lib/actions';
+import * as JointActions from '../lib/actions/bookshelf'; // TODO: Load from factory (based on service) !!!
 
 const namespace = 'ENGINE';
-const log_registration = true;
 const debug_registerModels = false;
 const debug_registerMethods = false;
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-export function registerModels(dataPersistenceService, modelConfig) {
+export function registerModels(dataPersistenceService, modelConfig, log = true) {
   const enabledModels = modelConfig.modelsEnabled;
   const modelDefs = modelConfig.models;
   const registry = {};
 
-  if (log_registration) {
-    console.log(`[${namespace}] ----------------------------------------------------`);
-    console.log(`[${namespace}] Registering resource models`);
-    console.log(`[${namespace}] ----------------------------------------------------`);
+  if (log) {
+    console.log('---------------------------');
+    console.log('Registering resource models');
+    console.log('---------------------------');
   }
 
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
-      if (log_registration) console.log(`[${namespace}] ${modelName}`);
+      if (log) console.log(`${modelName}`);
 
       const modelDef = modelDefs[modelName];
       if (debug_registerModels) console.log(`[${namespace}] [engine-utils:registerModels] model def =>`, modelDef);
@@ -30,11 +29,11 @@ export function registerModels(dataPersistenceService, modelConfig) {
       const modelObject = registerBookshelfModel(dataPersistenceService, modelDef, modelName);
       registry[modelName] = modelObject;
     });
-  } else if (log_registration) {
-    console.log(`[${namespace}] no models configured`);
+  } else if (log) {
+    console.log('no models configured');
   }
 
-  if (log_registration) console.log(`[${namespace}] ----------------------------------------------------`);
+  if (log) console.log('');
 
   return registry;
 } // END - registerModels
@@ -68,7 +67,7 @@ function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-export function registerMethods(methodConfig) {
+export function registerMethods(methodConfig, log = true) {
   const resources = methodConfig.resources;
   const registry = {};
 
@@ -80,9 +79,10 @@ export function registerMethods(methodConfig) {
       // Register resource...
       registry[modelNameForResource] = {};
 
-      if (log_registration) {
-        console.log(`[${namespace}] Registering methods for resource:`, modelNameForResource);
-        console.log(`[${namespace}] ----------------------------------------------------`);
+      if (log) {
+        console.log('----------------------------------------------------');
+        console.log('Registering methods for resource:', modelNameForResource);
+        console.log('----------------------------------------------------');
       }
 
       // Load all methods...
@@ -102,29 +102,24 @@ export function registerMethods(methodConfig) {
           const methodLogic = generateMethod(jointAction, methodSpec);
           if (methodLogic) {
             registry[modelNameForResource][methodName] = methodLogic;
-            if (log_registration) console.log(`[${namespace}] ${modelNameForResource}.${methodName}`);
+            if (log) console.log(`${modelNameForResource}.${methodName}`);
+          } else if (log) {
+            console.log(`x  ${modelNameForResource}.${methodName} (unknown action: ${jointAction})`);
           }
         });
-      } else if (log_registration) {
-        console.log(`[${namespace}] no methods configured`);
-      }
-
-      if (log_registration) {
-        console.log(`[${namespace}] ----------------------------------------------------`);
+      } else if (log) {
+        console.log('no methods configured');
       }
     }); // end-resources.forEach
   }
 
-  if (log_registration) console.log('');
+  if (log) console.log('');
 
   return registry;
 } // END - registerMethods
 
 function generateMethod(action, spec) {
-  if (!objectUtils.has(JointActions, action)) {
-    if (log_registration) console.log(`[${namespace}] X  action not recognized: ${action}`);
-    return null;
-  }
+  if (!objectUtils.has(JointActions, action)) return null;
 
   return function (input) { return JointActions[action](spec, input); }; // eslint-disable-line func-names
 } // END - generateMethod

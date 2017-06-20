@@ -1,5 +1,5 @@
-import objectUtils from '../utils/object-utils';
-import stringUtils from '../utils/string-utils';
+import objectUtils from '../../utils/object-utils';
+import stringUtils from '../../utils/string-utils';
 
 const debug_loadDirect = false;
 
