@@ -1,4 +1,4 @@
-import objectUtils from '../utils/object-utils';
+import objectUtils from '../../lib/utils/object-utils';
 // import serializer from '../serializers/json';
 
 function handleDataResponse(type, data, res, status = 200) {
