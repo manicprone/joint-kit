@@ -1,5 +1,4 @@
 import Promise from 'bluebird';
-import bookshelf from '../../../services/bookshelf';
 import objectUtils from '../../utils/object-utils';
 import * as AuthHandler from '../../authorization/auth-handler';
 import * as ActionErrors from '../../errors/action-errors';
@@ -8,21 +7,21 @@ import ACTION from '../action-constants';
 
 const debug = false;
 
-export default function upsertItem(spec = {}, input = {}) {
+export default function upsertItem(bookshelf, spec = {}, input = {}) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performUpsertItem(spec, input);
+  if (trx) return performUpsertItem(bookshelf, spec, input);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performUpsertItem(spec, newInput);
+    return performUpsertItem(bookshelf, spec, newInput);
   });
 }
 
-function performUpsertItem(spec = {}, input = {}) {
+function performUpsertItem(bookshelf, spec = {}, input = {}) {
   return new Promise((resolve, reject) => {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];

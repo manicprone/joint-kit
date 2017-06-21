@@ -42,10 +42,13 @@ export function registerModels(joint, log = true) {
 function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
   let registryEntry = null;
 
+  // If already registered on the servcie, just return it...
+  if (bookshelf.model(modelName)) return bookshelf.model(modelName);
+
+  // Otherwise, register the model...
   if (bookshelf.Model) {
     const tableName = objectUtils.get(modelDef, 'tableName', null);
     if (tableName) {
-      const registeredModelName = modelName || tableName;
       const idAttribute = objectUtils.get(modelDef, 'idAttribute', 'id');
       const timestamps = objectUtils.get(modelDef, 'timestamps', {});
       const hasTimestamps = [timestamps.created, timestamps.updated];
@@ -58,7 +61,7 @@ function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
       });
 
       // Add to bookshelf registry...
-      registryEntry = bookshelf.model(registeredModelName, modelObject);
+      registryEntry = bookshelf.model(modelName, modelObject);
     }
   } // end-if (bookshelf.Model)
 

@@ -5,9 +5,6 @@ import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
 import * as JointGenerate from './core/joint-generate';
 
-// TODO: Use Joint error class !!!
-// TODO: Leverage loaded service in the action source code !!!
-
 const defaultService = 'bookshelf';
 
 module.exports = class Joint {
@@ -32,7 +29,11 @@ module.exports = class Joint {
       const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
       throw new JointError({ message });
     }
-    if (actions) Object.assign(this, actions);
+    if (actions) {
+      Object.keys(actions).forEach((actionName) => {
+        this[actionName] = function (spec, input) { return actions[actionName](this.service, spec, input); }; // eslint-disable-line func-names
+      });
+    }
   } // END - constructor
 
   generate(options) {

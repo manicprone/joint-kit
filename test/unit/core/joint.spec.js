@@ -1,8 +1,8 @@
 import chai from 'chai';
-import bookshelf from '../../../src/services/bookshelf';
 import Joint from '../../../src/lib';
-import modelConfig from '../../test-configs/models/model-config';
-import methodConfig from '../../test-configs/methods/method-config';
+import modelConfig from '../../configs/models/model-config';
+import methodConfig from '../../configs/methods/method-config';
+import bookshelf from '../../db/bookshelf/bookshelf';
 
 const expect = chai.expect;
 
