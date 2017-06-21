@@ -15,7 +15,7 @@ const joint = new Joint({
 // ------------------------
 // BOOKSHELF ACTIONS (base)
 // ------------------------
-describe('ACTIONS [bookshelf]', () => {
+describe('BASE ACTIONS [bookshelf]', () => {
 
   // ---------------------------------
   // Testing: standard error scenarios

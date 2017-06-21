@@ -15,7 +15,7 @@ const joint = new Joint({
 });
 joint.generate({ modelConfig, methodConfig, log: false });
 
-describe('CUSTOM METHODS [bookshelf]', () => {
+describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
   // -------------------
   // Testing: upsertItem
