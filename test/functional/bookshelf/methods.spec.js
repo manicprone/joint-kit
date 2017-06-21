@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import Joint from '../../../src/lib';
+import Joint from '../../../src';
 import modelConfig from '../../configs/models/model-config';
 import methodConfig from '../../configs/methods/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';

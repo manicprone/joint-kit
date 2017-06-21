@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import Joint from '../../../src/lib';
+import Joint from '../../../src';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 

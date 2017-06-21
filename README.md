@@ -1,4 +1,4 @@
-# joint
+# Joint
 
 > Good data, all rolled-up.
 
