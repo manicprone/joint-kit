@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
-// Errors for the Joint action layer
+// Status Errors for the Joint action layer
 // -----------------------------------------------------------------------------
-import JointError from './JointError';
+import JointStatusError from './JointStatusError';
 
 // ---------------------------------------------------------- Bad Requests (400)
 
@@ -22,21 +22,21 @@ export function generateMissingFieldsErrorPackage(missingFields = {}) {
   if (hasAllFields && hasOneOfFields) message += ' AND';
   if (hasOneOfFields) message += ` at least one of => ("${oneOf.join('", "')}")`;
 
-  return new JointError({
+  return new JointStatusError({
     status: 400,
     message,
   });
 }
 
 export function generateModelNotRecognizedErrorPackage(modelName = '') {
-  return new JointError({
+  return new JointStatusError({
     status: 400,
     message: `The model "${modelName}" is not recognized.`,
   });
 }
 
 export function generateLookupFieldNotProvidedErrorPackage() {
-  return new JointError({
+  return new JointStatusError({
     status: 400,
     message: 'A "lookup field" was either not defined or not provided.',
   });
@@ -45,7 +45,7 @@ export function generateLookupFieldNotProvidedErrorPackage() {
 // -------------------------------------------------------- Not Authorized (403)
 
 export function generateNotAuthorizedErrorPackage() {
-  return new JointError({
+  return new JointStatusError({
     status: 403,
     message: 'You are not authorized to perform this action.',
   });
@@ -54,7 +54,7 @@ export function generateNotAuthorizedErrorPackage() {
 // ------------------------------------------------------------- Not Found (404)
 
 export function generateResourceNotFoundErrorPackage(resourceName = '') {
-  return new JointError({
+  return new JointStatusError({
     status: 404,
     message: `The requested "${resourceName}" was not found.`,
   });
@@ -64,7 +64,7 @@ export function generateResourceNotFoundErrorPackage(resourceName = '') {
 
 // TODO: Rename to generateThirdPartyErrorPackage(error) !!!
 export function generateBookshelfErrorPackage(error) {
-  return new JointError({
+  return new JointStatusError({
     status: 500,
     message: error.message,
   });
@@ -73,7 +73,7 @@ export function generateBookshelfErrorPackage(error) {
 // ---------------------------------------------------------------------- Custom
 
 export function generateCustomErrorPackage(message = '', status = 500) {
-  return new JointError({
+  return new JointStatusError({
     status,
     message,
   });

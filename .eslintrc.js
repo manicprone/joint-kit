@@ -14,5 +14,6 @@ module.exports = {
     'dot-notation': 'off',
     'padded-blocks': 'off',
     'camelcase': 'off',
+    'no-param-reassign': 'off',
   },
 };

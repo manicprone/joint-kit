@@ -1,12 +1,12 @@
 import chai from 'chai';
-import * as BookshelfUtils from '../../../../../src/lib/actions/bookshelf/bookshelf-utils';
+import * as BookshelfUtils from '../../../../src/lib/actions/bookshelf/bookshelf-utils';
 
 const expect = chai.expect;
 
 // -----------------------
 // LIBRARY bookshelf-utils
 // -----------------------
-describe('LIBRARY UTILS [bookshelf-utils]', function () {
+describe('BOOKSHELF-UTILS', function () {
   // ---------------------
   // Testing: buildOrderBy
   // ---------------------

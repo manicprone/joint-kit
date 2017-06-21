@@ -6,7 +6,7 @@ const db = knex({
   // debug: true,
   client: 'sqlite3',
   connection: {
-    filename: './test/joint_engine_test.sqlite3',
+    filename: './test/joint_core_test.sqlite3',
   },
   migrations: {
     directory: './src/db/migrations',

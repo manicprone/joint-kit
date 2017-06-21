@@ -1,13 +1,13 @@
 import chai from 'chai';
-import ACTION from '../../../../src/lib/actions/action-constants';
-import * as ActionUtils from '../../../../src/lib/actions/action-utils';
+import ACTION from '../../../src/lib/actions/action-constants';
+import * as ActionUtils from '../../../src/lib/actions/action-utils';
 
 const expect = chai.expect;
 
 // --------------------
 // LIBRARY action-utils
 // --------------------
-describe('LIBRARY UTILS [action-utils]', () => {
+describe('ACTION-UTILS', () => {
   // ----------------------------
   // Testing: checkRequiredFields
   // ----------------------------

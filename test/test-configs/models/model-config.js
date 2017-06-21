@@ -1,7 +1,8 @@
+// ---------------------------
+// Joint Models (model-config)
+// --------------------------
+
 module.exports = {
-  // ---------------------
-  // Joint Engine (Models)
-  // ---------------------
 
   modelsEnabled: [
     'AppRegistry',

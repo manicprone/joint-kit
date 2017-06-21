@@ -1,7 +1,7 @@
 {
   "name": "joint",
   "version": "0.0.0",
-  "description": "Spin up a data service with joints",
+  "description": "Good data, all rolled-up",
   "author": "|M|",
   "license": "MIT",
   "main": "server.js",
@@ -14,7 +14,6 @@
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "test": "mocha --require babel-register test/**/*.spec.js",
     "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
-    "db-init": "babel-node db/init.js",
     "knex": "babel-node ./node_modules/.bin/knex --knexfile ./src/db/knexfile.js",
     "migrate:make": "npm run knex migrate:make",
     "migrate:latest": "NODE_ENV=dev npm run knex migrate:latest",

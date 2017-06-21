@@ -1,12 +1,12 @@
 import chai from 'chai';
-import * as AuthHandler from '../../../../src/lib/authorization/auth-handler';
+import * as AuthHandler from '../../../src/lib/authorization/auth-handler';
 
 const expect = chai.expect;
 
 // --------------------
 // LIBRARY auth-handler
 // --------------------
-describe('LIBRARY UTILS [auth-handler]', () => {
+describe('AUTH-HANDLER', () => {
   // ------------------------
   // Testing: buildAuthBundle
   // ------------------------

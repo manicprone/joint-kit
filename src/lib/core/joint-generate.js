@@ -1,17 +1,20 @@
-import objectUtils from '../lib/utils/object-utils';
-import * as JointActions from '../lib/actions/bookshelf'; // TODO: Load from factory (based on service) !!!
+import objectUtils from '../utils/object-utils';
 
-const namespace = 'ENGINE';
+const namespace = 'JOINT';
 const debug_registerModels = false;
 const debug_registerMethods = false;
 
 // -----------------------------------------------------------------------------
-//
+// Register models from model-config...
 // -----------------------------------------------------------------------------
-export function registerModels(dataPersistenceService, modelConfig, log = true) {
+export function registerModels(joint, log = true) {
+  const modelConfig = joint.modelConfig;
+  const service = joint.service;
   const enabledModels = modelConfig.modelsEnabled;
   const modelDefs = modelConfig.models;
-  const registry = {};
+
+  // Register models to base joint object...
+  joint.model = {};
 
   if (log) {
     console.log('---------------------------');
@@ -24,18 +27,16 @@ export function registerModels(dataPersistenceService, modelConfig, log = true) 
       if (log) console.log(`${modelName}`);
 
       const modelDef = modelDefs[modelName];
-      if (debug_registerModels) console.log(`[${namespace}] [engine-utils:registerModels] model def =>`, modelDef);
+      if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] model def =>`, modelDef);
 
-      const modelObject = registerBookshelfModel(dataPersistenceService, modelDef, modelName);
-      registry[modelName] = modelObject;
+      const modelObject = registerBookshelfModel(service, modelDef, modelName);
+      joint.model[modelName] = modelObject;
     });
   } else if (log) {
     console.log('no models configured');
   }
 
   if (log) console.log('');
-
-  return registry;
 } // END - registerModels
 
 function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
@@ -65,19 +66,24 @@ function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
 } // END - registerBookshelfModel
 
 // -----------------------------------------------------------------------------
-//
+// Register methods from method-config...
 // -----------------------------------------------------------------------------
-export function registerMethods(methodConfig, log = true) {
+export function registerMethods(joint, log = true) {
+  const methodConfig = joint.methodConfig;
   const resources = methodConfig.resources;
-  const registry = {};
+
+  // Register methods within "joint.method" object...
+  joint.method = {};
 
   if (resources && Array.isArray(resources) && resources.length > 0) {
     resources.forEach((resourceConfig) => {
       const modelNameForResource = resourceConfig.modelName;
       const methods = resourceConfig.methods;
 
+      // TODO: Do not register methods, if the modelName does not exist !!!
+
       // Register resource...
-      registry[modelNameForResource] = {};
+      joint.method[modelNameForResource] = {};
 
       if (log) {
         console.log('----------------------------------------------------');
@@ -99,9 +105,9 @@ export function registerMethods(methodConfig, log = true) {
           }
 
           // Add method to registry...
-          const methodLogic = generateMethod(jointAction, methodSpec);
+          const methodLogic = generateMethod(joint, jointAction, methodSpec);
           if (methodLogic) {
-            registry[modelNameForResource][methodName] = methodLogic;
+            joint.method[modelNameForResource][methodName] = methodLogic;
             if (log) console.log(`${modelNameForResource}.${methodName}`);
           } else if (log) {
             console.log(`x  ${modelNameForResource}.${methodName} (unknown action: ${jointAction})`);
@@ -114,12 +120,10 @@ export function registerMethods(methodConfig, log = true) {
   }
 
   if (log) console.log('');
-
-  return registry;
 } // END - registerMethods
 
-function generateMethod(action, spec) {
-  if (!objectUtils.has(JointActions, action)) return null;
+function generateMethod(joint, action, spec) {
+  if (!objectUtils.has(joint, action)) return null;
 
-  return function (input) { return JointActions[action](spec, input); }; // eslint-disable-line func-names
+  return function (input) { return joint[action](spec, input); }; // eslint-disable-line func-names
 } // END - generateMethod
