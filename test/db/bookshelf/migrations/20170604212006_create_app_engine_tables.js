@@ -15,17 +15,14 @@ exports.up = function up(knex, Promise) {
       table.jsonb('data').nullable();
       table.timestamps();
     }),
-    knex.schema.dropTableIfExists('app_settings')
-      .then(() => {
-        return knex.schema.createTableIfNotExists('app_settings', (table) => {
-          table.increments();
-          table.string('app_id').notNullable();
-          table.string('version').nullable();
-          table.string('key').nullable();
-          table.jsonb('data').nullable();
-          table.timestamps();
-        });
-      }),
+    knex.schema.createTableIfNotExists('app_settings', (table) => {
+      table.increments();
+      table.string('app_id').notNullable();
+      table.string('version').nullable();
+      table.string('key').nullable();
+      table.jsonb('data').nullable();
+      table.timestamps();
+    }),
   ]);
 };
 

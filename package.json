@@ -12,7 +12,9 @@
   "scripts": {
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "test": "mocha --require babel-register test/**/*.spec.js",
-    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0"
+    "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
+    "knex": "babel-node ./node_modules/.bin/knex --knexfile ./test/db/bookshelf/knexfile.js",
+    "migrate:make": "npm run knex migrate:make"
   },
   "pre-commit": [
     "precommit-message",

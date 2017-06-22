@@ -67,7 +67,7 @@ describe('JOINT', () => {
 
       const info = joint.info();
 
-      expect(info.models).to.have.length(3);
+      expect(info.models).to.have.length(8);
     });
 
     it('should successfully register custom methods via method-config', () => {
