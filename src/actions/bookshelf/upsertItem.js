@@ -33,23 +33,23 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
     // Reject if model does not exist...
     const model = bookshelf.model(modelName);
     if (!model) {
-      if (debug) console.log(`[API] [action:upsertItem] The model "${modelName}" is not recognized`);
-      return reject(ActionErrors.generateModelNotRecognizedErrorPackage(modelName));
+      if (debug) console.log(`[JOINT] [action:upsertItem] The model "${modelName}" is not recognized`);
+      return reject(ActionErrors.generateModelNotRecognizedError(modelName));
     }
 
     // Reject when required fields are not provided...
     const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields);
     if (!requiredFieldCheck.satisfied) {
-      if (debug) console.log('[API] [action:upsertItem] Action has missing required fields:', requiredFieldCheck.missing);
-      return reject(ActionErrors.generateMissingFieldsErrorPackage(requiredFieldCheck.missing));
+      if (debug) console.log('[JOINT] [action:upsertItem] Action has missing required fields:', requiredFieldCheck.missing);
+      return reject(ActionErrors.generateMissingFieldsError(requiredFieldCheck.missing));
     }
 
     // Determine lookup field to fetch item...
     const lookupFieldData = ActionUtils.getLookupFieldData(specFields, inputFields);
     if (!lookupFieldData) {
       // Reject when a lookup field cannot be determined...
-      if (debug) console.log('[API] [action:upsertItem] Action did not define or provide a "lookup field"');
-      return reject(ActionErrors.generateLookupFieldNotProvidedErrorPackage());
+      if (debug) console.log('[JOINT] [action:upsertItem] Action did not define or provide a "lookup field"');
+      return reject(ActionErrors.generateLookupFieldNotProvidedError());
     }
 
     // Prepare upsert action options...
@@ -79,7 +79,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
         if (authBundle) {
           const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
           if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
-            return reject(ActionErrors.generateNotAuthorizedErrorPackage());
+            return reject(ActionErrors.generateNotAuthorizedError());
           }
         } // end-if (authBundle)
 
@@ -91,8 +91,8 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
             return resolve(data);
           })
           .catch((error) => {
-            if (debug) console.log('[API] [action:upsertItem] Action encountered an error on update =>', error);
-            return reject(ActionErrors.generateBookshelfErrorPackage(error));
+            if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on update =>', error);
+            return reject(ActionErrors.generateThirdPartyError(error));
           });
       })
       .catch((error) => {
@@ -101,7 +101,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
           if (authBundle) {
             const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
             if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
-              return reject(ActionErrors.generateNotAuthorizedErrorPackage());
+              return reject(ActionErrors.generateNotAuthorizedError());
             }
           } // end-if (authBundle)
 
@@ -113,13 +113,13 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
               return resolve(data);
             })
             .catch((createError) => {
-              if (debug) console.log('[API] [action:upsertItem] Action encountered an error on create =>', createError);
-              return reject(ActionErrors.generateBookshelfErrorPackage(createError));
+              if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on create =>', createError);
+              return reject(ActionErrors.generateThirdPartyError(createError));
             });
         }
 
-        if (debug) console.log('[API] [action:upsertItem] Action encountered an error =>', error);
-        return reject(ActionErrors.generateBookshelfErrorPackage(error));
+        if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error =>', error);
+        return reject(ActionErrors.generateThirdPartyError(error));
       });
   });
 } // END - performUpsertItem

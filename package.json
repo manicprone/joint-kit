@@ -14,7 +14,8 @@
     "test": "mocha --require babel-register test/**/*.spec.js",
     "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
     "knex": "babel-node ./node_modules/.bin/knex --knexfile ./test/db/bookshelf/knexfile.js",
-    "migrate:make": "npm run knex migrate:make"
+    "migrate:make": "npm run knex migrate:make",
+    "seed:make": "npm run knex seed:make"
   },
   "pre-commit": [
     "precommit-message",

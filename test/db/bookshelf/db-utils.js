@@ -2,12 +2,27 @@ import bookshelf from './bookshelf';
 
 const debug = false;
 
-export function resetDB() {
-  return teardownDB().then(() => setupDB());
+export function resetDB(seeds) {
+  return teardownDB().then(() => setupDB(seeds));
 }
 
-export function setupDB() {
+export function setupDB(seeds) {
   if (debug) console.log('[DB-UTILS] setting up database...');
+
+  // Setup tables and seed data...
+  if (seeds && Array.isArray(seeds) && seeds.length > 0) {
+    return bookshelf.knex.migrate.latest()
+      .then(() => {
+        const seedRootDir = bookshelf.knex.client.config.seeds.directory;
+        seeds.forEach((dirName) => {
+          if (debug) console.log('[DB-UTILS] seeding data:', dirName);
+          const directory = `${seedRootDir}/${dirName}`;
+          bookshelf.knex.seed.run({ directory });
+        });
+      });
+  }
+
+  // Otherwise, just setup tables...
   return bookshelf.knex.migrate.latest();
 }
 
