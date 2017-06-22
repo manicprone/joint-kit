@@ -4,18 +4,18 @@
 // serviceKey: 'bookshelf'
 // service: bookshelf/knex
 // -------------------------------------------
+import dbConfig from './knexfile';
+
+const test = dbConfig.test;
 
 // Configure knex for test database...
 const knex = require('knex')({
-  // debug: true,
-  client: 'sqlite3',
-  connection: {
-    filename: './test/db/bookshelf/joint_core_test.sqlite3',
-  },
-  migrations: {
-    directory: './test/db/bookshelf/migrations',
-  },
+  client: test.client,
+  connection: test.connection,
+  migrations: test.migrations,
+  seeds: test.seeds,
   useNullAsDefault: true,
+  // debug: true,
 });
 
 // Initialize bookshelf...
