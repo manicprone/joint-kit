@@ -93,6 +93,9 @@ module.exports = {
         created: 'created_at',
         updated: 'updated_at',
       },
+      relations: {
+        profile: { assocType: 'belongsTo', modelName: 'Profile', fk: 'profile_id' },
+      },
     },
   }, // END - models
 

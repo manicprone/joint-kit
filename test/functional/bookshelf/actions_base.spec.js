@@ -583,8 +583,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    // TODO: Support relation registration on models !!!
-    it.skip('should return relation data when the "input.relations" property is used', () => {
+    it('should return relation data when the "input.relations" property is used', () => {
       const relationName = 'profile';
 
       const specPost = {

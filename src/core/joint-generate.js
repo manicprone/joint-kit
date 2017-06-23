@@ -52,12 +52,28 @@ function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
       const idAttribute = objectUtils.get(modelDef, 'idAttribute', 'id');
       const timestamps = objectUtils.get(modelDef, 'timestamps', {});
       const hasTimestamps = [timestamps.created, timestamps.updated];
+      const relations = objectUtils.get(modelDef, 'relations', null);
+
+      // Define relations...
+      const relationHooks = {};
+      if (relations) {
+        Object.keys(relations).forEach((relationName) => {
+          if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] defining relation =>`, relationName);
+          const relationDef = relations[relationName];
+          const assocType = relationDef.assocType;
+          const assocModel = relationDef.modelName;
+          const fkToAssoc = relationDef.fk;
+
+          relationHooks[relationName] = function () { return this[assocType](assocModel, fkToAssoc); }; // eslint-disable-line func-names
+        });
+      }
 
       // Define model...
       const modelObject = bookshelf.Model.extend({
         tableName,
         idAttribute,
         hasTimestamps,
+        ...relationHooks,
       });
 
       // Add to bookshelf registry...
