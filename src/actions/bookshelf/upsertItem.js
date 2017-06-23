@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
 import * as AuthHandler from '../../authorization/auth-handler';
-import * as ActionErrors from '../../errors/action-errors';
+import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
 
@@ -34,14 +34,14 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
     const model = bookshelf.model(modelName);
     if (!model) {
       if (debug) console.log(`[JOINT] [action:upsertItem] The model "${modelName}" is not recognized`);
-      return reject(ActionErrors.generateModelNotRecognizedError(modelName));
+      return reject(StatusErrors.generateModelNotRecognizedError(modelName));
     }
 
     // Reject when required fields are not provided...
     const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields);
     if (!requiredFieldCheck.satisfied) {
       if (debug) console.log('[JOINT] [action:upsertItem] Action has missing required fields:', requiredFieldCheck.missing);
-      return reject(ActionErrors.generateMissingFieldsError(requiredFieldCheck.missing));
+      return reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing));
     }
 
     // Determine lookup field to fetch item...
@@ -49,7 +49,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
     if (!lookupFieldData) {
       // Reject when a lookup field cannot be determined...
       if (debug) console.log('[JOINT] [action:upsertItem] Action did not define or provide a "lookup field"');
-      return reject(ActionErrors.generateLookupFieldNotProvidedError());
+      return reject(StatusErrors.generateLookupFieldNotProvidedError());
     }
 
     // Prepare upsert action options...
@@ -79,7 +79,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
         if (authBundle) {
           const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
           if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
-            return reject(ActionErrors.generateNotAuthorizedError());
+            return reject(StatusErrors.generateNotAuthorizedError());
           }
         } // end-if (authBundle)
 
@@ -92,7 +92,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
           })
           .catch((error) => {
             if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on update =>', error);
-            return reject(ActionErrors.generateThirdPartyError(error));
+            return reject(StatusErrors.generateThirdPartyError(error));
           });
       })
       .catch((error) => {
@@ -101,7 +101,7 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
           if (authBundle) {
             const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
             if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
-              return reject(ActionErrors.generateNotAuthorizedError());
+              return reject(StatusErrors.generateNotAuthorizedError());
             }
           } // end-if (authBundle)
 
@@ -114,12 +114,12 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
             })
             .catch((createError) => {
               if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on create =>', createError);
-              return reject(ActionErrors.generateThirdPartyError(createError));
+              return reject(StatusErrors.generateThirdPartyError(createError));
             });
         }
 
         if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error =>', error);
-        return reject(ActionErrors.generateThirdPartyError(error));
+        return reject(StatusErrors.generateThirdPartyError(error));
       });
   });
 } // END - performUpsertItem

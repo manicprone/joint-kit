@@ -5,7 +5,7 @@ import objectUtils from '../utils/object-utils';
 // TODO: Add support for "rolesAll" !!!
 // TODO: Add CSRF check to rules & logic !!!
 // TODO: Define the session property names in the api-config
-//       (i.e. blogUser, originalUrl, roles, etc) !!!
+//       (i.e. jointUser, originalUrl, roles, etc) !!!
 
 const debugPrep = false;
 const debugCheck = false;
@@ -88,11 +88,11 @@ export function buildAuthBundle(request, rules = {}) {
   bundle.rules = rules;
 
   // Load authenticated info from the session...
-  bundle.user = objectUtils.get(request, 'session.blogUser', null);
+  bundle.user = objectUtils.get(request, 'session.jointUser', null);
 
   if (debugPrep) {
     if (bundle.user) {
-      console.log('Authed session info (blogUser):');
+      console.log('Authed session info (jointUser):');
       console.log(bundle.user);
     }
     console.log('Request headers:');

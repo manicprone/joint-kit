@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import bookshelf from './bookshelf';
 
 const debug = false;
@@ -14,10 +15,11 @@ export function setupDB(seeds) {
     return bookshelf.knex.migrate.latest()
       .then(() => {
         const seedRootDir = bookshelf.knex.client.config.seeds.directory;
-        seeds.forEach((dirName) => {
+
+        return Promise.mapSeries(seeds, (dirName) => {
           if (debug) console.log('[DB-UTILS] seeding data:', dirName);
           const directory = `${seedRootDir}/${dirName}`;
-          bookshelf.knex.seed.run({ directory });
+          return bookshelf.knex.seed.run({ directory });
         });
       });
   }
