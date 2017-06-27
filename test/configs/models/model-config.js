@@ -11,6 +11,8 @@ module.exports = {
     'User',
     'Role',
     'UserRole',
+    'CodingLanguageTag',
+    'ProjectCodingLanguageTag',
     'Profile',
     'Project',
   ],
@@ -65,9 +67,29 @@ module.exports = {
       },
     },
 
-    // The reference mapping a role to a user
+    // The reference that maps a role to a user
     UserRole: {
       tableName: 'user_roles_ref',
+      idAttribute: 'id',
+      timestamps: {
+        created: 'created_at',
+        updated: 'updated_at',
+      },
+    },
+
+    // Tags for identifying programming languages
+    CodingLanguageTag: {
+      tableName: 'tags_coding_languages',
+      idAttribute: 'id',
+      timestamps: {
+        created: 'created_at',
+        updated: 'updated_at',
+      },
+    },
+
+    // The reference that maps a coding language tag to a project
+    ProjectCodingLanguageTag: {
+      tableName: 'project_coding_language_tags_ref',
       idAttribute: 'id',
       timestamps: {
         created: 'created_at',
@@ -94,7 +116,9 @@ module.exports = {
         updated: 'updated_at',
       },
       relations: {
+        user: { assocType: 'belongsTo', modelName: 'User', fk: 'user_id', through: { modelName: 'Profile', fk: 'profile_id' } },
         profile: { assocType: 'belongsTo', modelName: 'Profile', fk: 'profile_id' },
+        // codingLanguageTags: { assocType: 'toMany', modelName: 'CodingLanguageTag', refTableName: 'project_coding_language_tags_ref' fk: 'project_id', refFk: 'coding_language_tag_id' },
       },
     },
   }, // END - models

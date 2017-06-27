@@ -586,28 +586,28 @@ describe('BASE ACTIONS [bookshelf]', () => {
     it('should return relation data when the "input.relations" property is used', () => {
       const relationName = 'profile';
 
-      const specPost = {
+      const specProject = {
         modelName: 'Project',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputPostWithRelation = {
+      const inputProjectWithRelation = {
         fields: { id: 1 },
         relations: [relationName],
       };
-      const inputPostWithoutRelation = {
+      const inputProjectWithoutRelation = {
         fields: { id: 1 },
       };
 
-      const withRelation = joint.getItem(specPost, inputPostWithRelation)
+      const withRelation = joint.getItem(specProject, inputProjectWithRelation)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
             .that.has.property(relationName);
         });
 
-      const withoutRelation = joint.getItem(specPost, inputPostWithoutRelation)
+      const withoutRelation = joint.getItem(specProject, inputProjectWithoutRelation)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
@@ -617,65 +617,68 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withRelation, withoutRelation]);
     });
 
-    // it(`should load relation data directly to the base attributes when the "input.${TEMPLATE.INPUT_LOAD_DIRECT}" property is used`, () => {
-    //   const specPost = {
-    //     modelName: 'BlogPost',
-    //     fields: [
-    //       { name: 'id', type: 'Number', required: true },
-    //     ],
-    //   };
-    //   const inputPost = {
-    //     fields: { id: 1 },
-    //     loadDirect: ['profile:title', 'user:username', 'customTags:key'],
-    //   };
-    //
-    //   const withLoadDirect = joint.getItem(specPost, inputPost)
-    //     .then((data) => {
-    //       expect(data.attributes)
-    //         .to.contain({
-    //           profile: 'Heavy Synapse',
-    //           user: 'super-admin',
-    //         });
-    //
-    //       expect(data.attributes)
-    //         .to.have.property('custom_tags')
-    //         .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
-    //
-    //       expect(data)
-    //         .to.have.property('relations')
-    //         .that.is.empty;
-    //     });
-    //
-    //   return Promise.all([withLoadDirect]);
-    // });
+    it('should load relation data directly to the base attributes when the "input.loadDirect" property is used', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+      const inputProject = {
+        fields: { id: 2 },
+        // loadDirect: ['profile:title', 'user:username', 'customTags:key'],
+        // loadDirect: ['profile:title', 'user:username'],
+        loadDirect: ['profile:title'],
+      };
 
-    // it(`should support the combined usage of "input.${TEMPLATE.INPUT_RELATIONS}" and "input.${TEMPLATE.INPUT_LOAD_DIRECT}" properties`, () => {
-    //   const specPost = {
-    //     modelName: 'BlogPost',
-    //     fields: [
-    //       { name: 'id', type: 'Number', required: true },
-    //     ],
-    //   };
-    //   const inputPost = {
-    //     fields: { id: 1 },
-    //     relations: ['profile'],
-    //     loadDirect: ['customTags:key', 'user:username'],
-    //   };
-    //
-    //   const withBoth = joint.getItem(specPost, inputPost)
-    //     .then((data) => {
-    //       expect(data.attributes)
-    //         .to.have.property('custom_tags')
-    //         .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
-    //
-    //       expect(data.attributes)
-    //         .to.contain({ user: 'super-admin' });
-    //
-    //       expect(data.relations).to.have.keys('profile');
-    //     });
-    //
-    //   return Promise.all([withBoth]);
-    // });
+      const withLoadDirect = joint.getItem(specProject, inputProject)
+        .then((data) => {
+          expect(data.attributes)
+            .to.contain({
+              profile: 'Heavy Synapse',
+              // user: 'the_manic_edge',
+            });
+
+          // expect(data.attributes)
+          //   .to.have.property('custom_tags')
+          //   .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
+
+          expect(data)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([withLoadDirect]);
+    });
+
+    it.skip('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+      const inputProject = {
+        fields: { id: 2 },
+        relations: ['profile'],
+        // loadDirect: ['customTags:key', 'user:username'],
+        loadDirect: ['user:username'],
+      };
+
+      const withBoth = joint.getItem(specProject, inputProject)
+        .then((data) => {
+          // expect(data.attributes)
+          //   .to.have.property('custom_tags')
+          //   .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
+
+          expect(data.attributes)
+            .to.contain({ user: 'the_manic_edge' });
+
+          expect(data.relations).to.have.keys('profile');
+        });
+
+      return Promise.all([withBoth]);
+    });
   }); // END - getItem
 
   // -------------------
