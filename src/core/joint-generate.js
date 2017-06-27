@@ -1,4 +1,5 @@
 import objectUtils from '../utils/object-utils';
+import JointError from '../errors/JointError';
 
 const namespace = 'JOINT';
 const debug_registerModels = false;
@@ -9,6 +10,7 @@ const debug_registerMethods = false;
 // -----------------------------------------------------------------------------
 export function registerModels(joint, log = true) {
   const modelConfig = joint.modelConfig;
+  const serviceKey = joint.serviceKey;
   const service = joint.service;
   const enabledModels = modelConfig.modelsEnabled;
   const modelDefs = modelConfig.models;
@@ -22,6 +24,15 @@ export function registerModels(joint, log = true) {
     console.log('---------------------------');
   }
 
+  // Load the registerModel function for the service implementation...
+  let registerModel = null;
+  try {
+    registerModel = require(`./${serviceKey}/registerModel`).default; // eslint-disable-line global-require, import/no-dynamic-require
+  } catch (err) {
+    const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
+    throw new JointError({ message });
+  }
+
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
       if (log) console.log(`${modelName}`);
@@ -29,7 +40,7 @@ export function registerModels(joint, log = true) {
       const modelDef = modelDefs[modelName];
       if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] model def =>`, modelDef);
 
-      const modelObject = registerBookshelfModel(service, modelDef, modelName);
+      const modelObject = registerModel(service, modelDef, modelName, debug_registerModels);
       joint.model[modelName] = modelObject;
     });
   } else if (log) {
@@ -38,51 +49,6 @@ export function registerModels(joint, log = true) {
 
   if (log) console.log('');
 } // END - registerModels
-
-function registerBookshelfModel(bookshelf = {}, modelDef = {}, modelName) {
-  let registryEntry = null;
-
-  // If already registered on the service, just return it...
-  if (bookshelf.model(modelName)) return bookshelf.model(modelName);
-
-  // Otherwise, register the model...
-  if (bookshelf.Model) {
-    const tableName = objectUtils.get(modelDef, 'tableName', null);
-    if (tableName) {
-      const idAttribute = objectUtils.get(modelDef, 'idAttribute', 'id');
-      const timestamps = objectUtils.get(modelDef, 'timestamps', {});
-      const hasTimestamps = [timestamps.created, timestamps.updated];
-      const relations = objectUtils.get(modelDef, 'relations', null);
-
-      // Define relations...
-      const relationHooks = {};
-      if (relations) {
-        Object.keys(relations).forEach((relationName) => {
-          if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] defining relation =>`, relationName);
-          const relationDef = relations[relationName];
-          const assocType = relationDef.assocType;
-          const assocModel = relationDef.modelName;
-          const fkToAssoc = relationDef.fk;
-
-          relationHooks[relationName] = function () { return this[assocType](assocModel, fkToAssoc); }; // eslint-disable-line func-names
-        });
-      }
-
-      // Define model...
-      const modelObject = bookshelf.Model.extend({
-        tableName,
-        idAttribute,
-        hasTimestamps,
-        ...relationHooks,
-      });
-
-      // Add to bookshelf registry...
-      registryEntry = bookshelf.model(modelName, modelObject);
-    }
-  } // end-if (bookshelf.Model)
-
-  return registryEntry;
-} // END - registerBookshelfModel
 
 // -----------------------------------------------------------------------------
 // Register methods from method-config...

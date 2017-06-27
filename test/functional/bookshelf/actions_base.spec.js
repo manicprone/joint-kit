@@ -626,9 +626,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProject = {
         fields: { id: 2 },
-        // loadDirect: ['profile:title', 'user:username', 'customTags:key'],
-        // loadDirect: ['profile:title', 'user:username'],
-        loadDirect: ['profile:title'],
+        loadDirect: ['profile:title', 'user:username', 'codingLanguageTags:key'],
       };
 
       const withLoadDirect = joint.getItem(specProject, inputProject)
@@ -636,12 +634,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.attributes)
             .to.contain({
               profile: 'Heavy Synapse',
-              // user: 'the_manic_edge',
+              user: 'the_manic_edge',
             });
 
-          // expect(data.attributes)
-          //   .to.have.property('custom_tags')
-          //   .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
+          expect(data.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['java', 'jsp', 'javascript']);
 
           expect(data)
             .to.have.property('relations')
@@ -651,7 +649,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withLoadDirect]);
     });
 
-    it.skip('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
+    it('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -661,15 +659,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const inputProject = {
         fields: { id: 2 },
         relations: ['profile'],
-        // loadDirect: ['customTags:key', 'user:username'],
-        loadDirect: ['user:username'],
+        loadDirect: ['codingLanguageTags:key', 'user:username'],
       };
 
       const withBoth = joint.getItem(specProject, inputProject)
         .then((data) => {
-          // expect(data.attributes)
-          //   .to.have.property('custom_tags')
-          //   .that.has.members(['custom-tag-001', 'custom-tag-004', 'custom-tag-005']);
+          expect(data.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['java', 'jsp', 'javascript']);
 
           expect(data.attributes)
             .to.contain({ user: 'the_manic_edge' });

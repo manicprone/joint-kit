@@ -21,7 +21,6 @@ module.exports = {
     // Manages all registered client applications
     AppRegistry: {
       tableName: 'app_registry',
-      idAttribute: 'id',
       timestamps: {
         created: 'registered_at',
       },
@@ -30,7 +29,6 @@ module.exports = {
     // Provides a modest content persistence solution for registered applications
     AppContent: {
       tableName: 'app_content',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -40,7 +38,6 @@ module.exports = {
     // Provides version and key-based storage of settings data for registered applications
     AppSettings: {
       tableName: 'app_settings',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -50,7 +47,6 @@ module.exports = {
     // A user model, for managing authorization, identity, and permissions
     User: {
       tableName: 'users',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -60,7 +56,6 @@ module.exports = {
     // A user role
     Role: {
       tableName: 'roles',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -70,7 +65,6 @@ module.exports = {
     // The reference that maps a role to a user
     UserRole: {
       tableName: 'user_roles_ref',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -80,7 +74,6 @@ module.exports = {
     // Tags for identifying programming languages
     CodingLanguageTag: {
       tableName: 'tags_coding_languages',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -90,7 +83,6 @@ module.exports = {
     // The reference that maps a coding language tag to a project
     ProjectCodingLanguageTag: {
       tableName: 'project_coding_language_tags_ref',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -100,7 +92,6 @@ module.exports = {
     // An abstract user profile
     Profile: {
       tableName: 'profiles',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
@@ -110,15 +101,23 @@ module.exports = {
     // A project entry
     Project: {
       tableName: 'projects',
-      idAttribute: 'id',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
       },
-      relations: {
-        user: { assocType: 'belongsTo', modelName: 'User', fk: 'user_id', through: { modelName: 'Profile', fk: 'profile_id' } },
-        profile: { assocType: 'belongsTo', modelName: 'Profile', fk: 'profile_id' },
-        // codingLanguageTags: { assocType: 'toMany', modelName: 'CodingLanguageTag', refTableName: 'project_coding_language_tags_ref' fk: 'project_id', refFk: 'coding_language_tag_id' },
+      associations: {
+        profile: {
+          type: 'toOne',
+          path: 'profile_id => Profile.id',
+        },
+        user: {
+          type: 'toOne',
+          path: 'profile_id => Profile.id => Profile.user_id => User.id',
+        },
+        codingLanguageTags: {
+          type: 'toMany',
+          path: 'id => ProjectCodingLanguageTag.project_id => ProjectCodingLanguageTag.coding_language_tag_id => CodingLanguageTag.id',
+        },
       },
     },
   }, // END - models
