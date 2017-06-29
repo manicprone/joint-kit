@@ -28,7 +28,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // ---------------------------------
   // Testing: standard error scenarios
   // ---------------------------------
-  describe('standard error scenarios (createItem, getItem, getItems, updateItem, upsertItem, deleteItem)', () => {
+  describe('standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem)', () => {
     before(() => resetDB(['users', 'projects']));
 
     it('should return an error (400) when the specified model does not exist', () => {
@@ -49,6 +49,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const createItemAction = expect(joint.createItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
+      // upsertItem
+      const upsertItemAction = expect(joint.upsertItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
+      // updateItem
+      const updateItemAction = expect(joint.updateItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
       // getItem
       const getItemAction = expect(joint.getItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
@@ -57,24 +65,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
       // const getItemsAction = expect(joint.getItems(spec, input))
       //   .to.eventually.be.rejectedWithJointStatusError(400);
 
-      // updateItem
-      // const updateItemAction = expect(joint.updateItem(spec, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-
-      // upsertItem
-      const upsertItemAction = expect(joint.upsertItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400);
-
       // deleteItem
       // const deleteItemAction = expect(joint.deleteItem(spec, input))
       //   .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
         createItemAction,
+        upsertItemAction,
+        updateItemAction,
         getItemAction,
         // getItemsAction,
-        // updateItemAction,
-        upsertItemAction,
         // deleteItemAction,
       ]);
     });
@@ -116,6 +116,18 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const createItem02 = expect(joint.createItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
+      // upsertItem
+      const upsertItem01 = expect(joint.upsertItem(spec01, input01))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const upsertItem02 = expect(joint.upsertItem(spec02, input02))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
+      // updateItem
+      const updateItem01 = expect(joint.updateItem(spec01, input01))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const updateItem02 = expect(joint.updateItem(spec02, input02))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
       // getItem
       const getItem01 = expect(joint.getItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
@@ -128,18 +140,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
       // const getItems02 = expect(joint.getItems(spec02, input02))
       //   .to.eventually.be.rejectedWithJointStatusError(400);
 
-      // updateItem
-      // const updateItem01 = expect(joint.updateItem(spec01, input01))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-      // const updateItem02 = expect(joint.updateItem(spec02, input02))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-
-      // upsertItem
-      const upsertItem01 = expect(joint.upsertItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400);
-      const upsertItem02 = expect(joint.upsertItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400);
-
       // deleteItem
       // const deleteItem01 = expect(joint.deleteItem(spec01, input01))
       //   .to.eventually.be.rejectedWithJointStatusError(400);
@@ -149,14 +149,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([
         createItem01,
         createItem02,
+        upsertItem01,
+        upsertItem02,
+        updateItem01,
+        updateItem02,
         getItem01,
         getItem02,
         // getItems01,
         // getItems02,
-        // updateItem01,
-        // updateItem02,
-        upsertItem01,
-        upsertItem02,
         // deleteItem01,
         // deleteItem02,
       ]);
@@ -201,6 +201,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const createItemAction = expect(joint.createItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
+      // upsertItem
+      const upsertItemAction = expect(joint.upsertItem(specForUpdate, inputForUpdate))
+        .to.eventually.be.rejectedWithJointStatusError(403);
+
+      // updateItem
+      const updateItemAction = expect(joint.updateItem(specForUpdate, inputForUpdate))
+        .to.eventually.be.rejectedWithJointStatusError(403);
+
       // getItem
       const getItemAction = expect(joint.getItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
@@ -209,24 +217,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
       // const getItemsAction = expect(joint.getItems(spec, input))
       //   .to.eventually.be.rejectedWithJointStatusError(403);
 
-      // updateItem
-      // const updateItemAction = expect(joint.updateItem(specForUpdate, inputForUpdate))
-      //   .to.eventually.be.rejectedWithJointStatusError(403);
-
-      // upsertItem
-      const upsertItemAction = expect(joint.upsertItem(specForUpdate, inputForUpdate))
-        .to.eventually.be.rejectedWithJointStatusError(403);
-
       // deleteItem
       // const deleteItemAction = expect(joint.deleteItem(spec, input))
       //   .to.eventually.be.rejectedWithJointStatusError(403);
 
       return Promise.all([
         createItemAction,
+        upsertItemAction,
+        updateItemAction,
         getItemAction,
         // getItemsAction,
-        // updateItemAction,
-        upsertItemAction,
         // deleteItemAction,
       ]);
     });
@@ -368,6 +368,197 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([createUser, createProfile]);
     });
   }); // END - createItem
+
+  // -------------------
+  // Testing: upsertItem
+  // -------------------
+  describe('upsertItem', () => {
+    before(() => resetDB());
+
+    it('should return an error (400) when the input does not provide a "lookupField"', () => {
+      const spec = {
+        modelName: 'AppSettings',
+        fields: [
+          { name: 'app_id', type: 'String', lookupField: true },
+          { name: 'data', type: 'JSON', required: true },
+        ],
+      };
+
+      const settingsData = { a: true, b: false, c: 'string-value' };
+
+      const input = {
+        fields: { data: settingsData },
+      };
+
+      return expect(joint.upsertItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+    });
+
+    it('should perform a create action when the resource does not exist', () => {
+      const spec = {
+        modelName: 'AppSettings',
+        fields: [
+          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'data', type: 'JSON', required: true },
+        ],
+      };
+
+      const appID = 'app-12345';
+      const settingsData = { a: true, b: false, c: 'string-value' };
+
+      const input = {
+        fields: { app_id: appID, data: settingsData },
+      };
+
+      return joint.upsertItem(spec, input)
+        .then((data) => {
+          expect(data.attributes.id).to.equal(1);
+          expect(data.attributes.app_id).to.equal(appID);
+
+          const dataJSON = JSON.parse(data.attributes.data);
+          expect(dataJSON.c).to.equal('string-value');
+        });
+    });
+
+    it('should perform an update action when the resource already exists', () => {
+      const spec = {
+        modelName: 'AppSettings',
+        fields: [
+          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'data', type: 'JSON', required: true },
+        ],
+      };
+
+      const appID = 'app-12345';
+      const settingsData = { a: true, b: false, c: 'updated-string-value' };
+
+      const input = {
+        fields: { app_id: appID, data: settingsData },
+      };
+
+      return joint.upsertItem(spec, input)
+        .then((data) => {
+          expect(data.attributes.id).to.equal(1);
+          expect(data.attributes.app_id).to.equal(appID);
+
+          const dataJSON = JSON.parse(data.attributes.data);
+          expect(dataJSON.c).to.equal('updated-string-value');
+        });
+    });
+  }); // END - upsertItem
+
+  // -------------------
+  // Testing: updateItem
+  // -------------------
+  describe('updateItem', () => {
+    before(() => resetDB(['projects']));
+
+    it('should return an error (400) when the input does not provide a "lookupField"', () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'name', type: 'String' },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+      const input = {
+        fields: {
+          name: 'Updated Name',
+        },
+      };
+
+      return expect(joint.updateItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+    });
+
+    it('should return an error (404) when the requested resource is not found', () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'name', type: 'String' },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+      const input = {
+        fields: {
+          id: 999,
+          name: 'Updated Name',
+        },
+      };
+
+      return expect(joint.updateItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(404);
+    });
+
+    it('should udpate the resource when the spec is satisfied', () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'name', type: 'String' },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+
+      const id = 2;
+      const name = 'Updated Name';
+
+      const input = {
+        fields: { id, name },
+      };
+
+      return joint.updateItem(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id,
+            name,
+          });
+        });
+    });
+
+    it('should support an "ownerCreds" authorization from a field on the looked-up item data', () => {
+      const mockSession = {
+        is_logged_in: true,
+        id: 4,
+        external_id: 304,
+        username: 'the_manic_edge',
+        roles: [],
+        profile_ids: [1, 2, 3],
+      };
+      const mockRequest = {
+        method: 'POST',
+        originalUrl: '/api/project/4',
+        session: { jointUser: mockSession },
+      };
+      const authRules = { owner: 'me' };
+      const authBundle = AuthHandler.buildAuthBundle(mockRequest, authRules);
+
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'name', type: 'String' },
+          { name: 'brief_description', type: 'String' },
+        ],
+        auth: {
+          ownerCreds: ['profile_id => profile_ids'],
+        },
+      };
+
+      const input = {
+        fields: {
+          id: 4,
+          name: 'A New Title for a New Day',
+        },
+        authBundle,
+      };
+
+      return expect(joint.updateItem(spec, input))
+        .to.be.fulfilled;
+    });
+  }); // END - updateItem
 
   // ----------------
   // Testing: getItem
@@ -1093,83 +1284,5 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
   }); // END - getItems
-
-  // -------------------
-  // Testing: upsertItem
-  // -------------------
-  describe('upsertItem', () => {
-    before(() => resetDB());
-
-    it('should return an error (400) when the input does not provide a "lookupField"', () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', lookupField: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      };
-
-      const settingsData = { a: true, b: false, c: 'string-value' };
-
-      const input = {
-        fields: { data: settingsData },
-      };
-
-      return expect(joint.upsertItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400);
-    });
-
-    it('should perform a create action when the resource does not exist', () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      };
-
-      const appID = 'app-12345';
-      const settingsData = { a: true, b: false, c: 'string-value' };
-
-      const input = {
-        fields: { app_id: appID, data: settingsData },
-      };
-
-      return joint.upsertItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.id).to.equal(1);
-          expect(data.attributes.app_id).to.equal(appID);
-
-          const dataJSON = JSON.parse(data.attributes.data);
-          expect(dataJSON.c).to.equal('string-value');
-        });
-    });
-
-    it('should perform an update action when the resource already exists', () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      };
-
-      const appID = 'app-12345';
-      const settingsData = { a: true, b: false, c: 'updated-string-value' };
-
-      const input = {
-        fields: { app_id: appID, data: settingsData },
-      };
-
-      return joint.upsertItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.id).to.equal(1);
-          expect(data.attributes.app_id).to.equal(appID);
-
-          const dataJSON = JSON.parse(data.attributes.data);
-          expect(dataJSON.c).to.equal('updated-string-value');
-        });
-    });
-  }); // END - upsertItem
 
 });
