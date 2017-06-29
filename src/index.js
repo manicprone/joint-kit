@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
-import * as JointGenerate from './core/joint-generate';
+import * as JointGenerate from './core/generate';
 
 const defaultService = 'bookshelf';
 

@@ -91,7 +91,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}) {
           })
           .catch((error) => {
             if (debug) console.log('[JOINT] [action:updateItem] Action encountered an error =>', error);
-            return reject(StatusErrors.generateBookshelfError(error));
+            return reject(StatusErrors.generateThirdPartyError(error));
           });
       })
       .catch((error) => {
@@ -101,7 +101,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}) {
         }
         // (500)
         if (debug) console.log('[JOINT] [action:updateItem] Action encountered an error =>', error);
-        return reject(StatusErrors.generateBookshelfError(error));
+        return reject(StatusErrors.generateThirdPartyError(error));
       });
   });
 } // END - performUpdateItem

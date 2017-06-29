@@ -62,20 +62,20 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItems
-      // const getItemsAction = expect(joint.getItems(spec, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const getItemsAction = expect(joint.getItems(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // deleteItem
-      // const deleteItemAction = expect(joint.deleteItem(spec, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const deleteItemAction = expect(joint.deleteItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
         createItemAction,
         upsertItemAction,
         updateItemAction,
         getItemAction,
-        // getItemsAction,
-        // deleteItemAction,
+        getItemsAction,
+        deleteItemAction,
       ]);
     });
 
@@ -135,16 +135,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItems
-      // const getItems01 = expect(joint.getItems(spec01, input01))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-      // const getItems02 = expect(joint.getItems(spec02, input02))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const getItems01 = expect(joint.getItems(spec01, input01))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const getItems02 = expect(joint.getItems(spec02, input02))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // deleteItem
-      // const deleteItem01 = expect(joint.deleteItem(spec01, input01))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-      // const deleteItem02 = expect(joint.deleteItem(spec02, input02))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const deleteItem01 = expect(joint.deleteItem(spec01, input01))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const deleteItem02 = expect(joint.deleteItem(spec02, input02))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
         createItem01,
@@ -155,10 +155,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
         updateItem02,
         getItem01,
         getItem02,
-        // getItems01,
-        // getItems02,
-        // deleteItem01,
-        // deleteItem02,
+        getItems01,
+        getItems02,
+        deleteItem01,
+        deleteItem02,
       ]);
     });
 
@@ -214,20 +214,20 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // getItems
-      // const getItemsAction = expect(joint.getItems(spec, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(403);
+      const getItemsAction = expect(joint.getItems(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(403);
 
       // deleteItem
-      // const deleteItemAction = expect(joint.deleteItem(spec, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(403);
+      const deleteItemAction = expect(joint.deleteItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(403);
 
       return Promise.all([
         createItemAction,
         upsertItemAction,
         updateItemAction,
         getItemAction,
-        // getItemsAction,
-        // deleteItemAction,
+        getItemsAction,
+        deleteItemAction,
       ]);
     });
 
@@ -1284,5 +1284,88 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
   }); // END - getItems
+
+  // -------------------
+  // Testing: deleteItem
+  // -------------------
+  describe('deleteItem', () => {
+    before(() => resetDB(['profiles', 'projects']));
+
+    it('should return an error (404) when the requested resource is not found', () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+      const input = {
+        fields: {
+          id: 999,
+        },
+      };
+
+      return expect(joint.deleteItem(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(404);
+    });
+
+    it('should delete the resource when the spec is satisfied', () => {
+      const spec = {
+        modelName: 'Profile',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+
+      const input = {
+        fields: {
+          id: 1,
+        },
+      };
+
+      return joint.deleteItem(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.be.empty;
+
+          return expect(joint.getItem(spec, input))
+            .to.eventually.be.rejectedWithJointStatusError(404);
+        });
+    });
+
+    it('should support the "lookupField" option, in order to defer authorization on the retrieved item', () => {
+      const mockSession = {
+        is_logged_in: true,
+        id: 4,
+        external_id: 304,
+        username: 'the_manic_edge',
+        roles: [],
+        profile_ids: [1, 2, 3],
+      };
+      const mockRequest = {
+        method: 'DELETE',
+        originalUrl: '/api/project/4',
+        session: { jointUser: mockSession },
+      };
+      const authRules = { owner: 'me' };
+      const authBundle = AuthHandler.buildAuthBundle(mockRequest, authRules);
+
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+        ],
+        auth: {
+          ownerCreds: ['profile_id => profile_ids'],
+        },
+      };
+
+      const input = {
+        fields: { id: 4 },
+        authBundle,
+      };
+
+      return expect(joint.deleteItem(spec, input))
+        .to.be.fulfilled;
+    });
+  }); // END - deleteItem
 
 });
