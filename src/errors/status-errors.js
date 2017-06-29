@@ -5,7 +5,7 @@ import JointStatusError from './JointStatusError';
 
 // ---------------------------------------------------------- Bad Requests (400)
 
-export function generateMissingFieldsErrorPackage(missingFields = {}) {
+export function generateMissingFieldsError(missingFields = {}) {
   const all = missingFields.all || [];
   const oneOf = missingFields.oneOf || [];
   const hasAllFields = (all.length > 0);
@@ -28,14 +28,14 @@ export function generateMissingFieldsErrorPackage(missingFields = {}) {
   });
 }
 
-export function generateModelNotRecognizedErrorPackage(modelName = '') {
+export function generateModelNotRecognizedError(modelName = '') {
   return new JointStatusError({
     status: 400,
     message: `The model "${modelName}" is not recognized.`,
   });
 }
 
-export function generateLookupFieldNotProvidedErrorPackage() {
+export function generateLookupFieldNotProvidedError() {
   return new JointStatusError({
     status: 400,
     message: 'A "lookup field" was either not defined or not provided.',
@@ -44,7 +44,7 @@ export function generateLookupFieldNotProvidedErrorPackage() {
 
 // -------------------------------------------------------- Not Authorized (403)
 
-export function generateNotAuthorizedErrorPackage() {
+export function generateNotAuthorizedError() {
   return new JointStatusError({
     status: 403,
     message: 'You are not authorized to perform this action.',
@@ -53,17 +53,16 @@ export function generateNotAuthorizedErrorPackage() {
 
 // ------------------------------------------------------------- Not Found (404)
 
-export function generateResourceNotFoundErrorPackage(resourceName = '') {
+export function generateResourceNotFoundError(resourceName = '') {
   return new JointStatusError({
     status: 404,
     message: `The requested "${resourceName}" was not found.`,
   });
 }
 
-// ------------------------------------- General System / 3rd-party Errors (500)
+// -------------------------------------------- General System / 3rd-party (500)
 
-// TODO: Rename to generateThirdPartyErrorPackage(error) !!!
-export function generateBookshelfErrorPackage(error) {
+export function generateThirdPartyError(error) {
   return new JointStatusError({
     status: 500,
     message: error.message,
@@ -72,7 +71,7 @@ export function generateBookshelfErrorPackage(error) {
 
 // ---------------------------------------------------------------------- Custom
 
-export function generateCustomErrorPackage(message = '', status = 500) {
+export function generateCustomError(message = '', status = 500) {
   return new JointStatusError({
     status,
     message,

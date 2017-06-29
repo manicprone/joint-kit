@@ -3,11 +3,11 @@ exports.up = function up(knex, Promise) {
   return Promise.all([
     knex.schema.createTableIfNotExists('users', (table) => {
       table.increments();
-      table.string('email').notNullable().unique();
+      table.integer('external_id').nullable();
+      table.string('email').nullable().unique();
       table.string('username').notNullable().unique();
       table.string('display_name').nullable();
       table.string('avatar_url').nullable();
-      table.integer('external_id').nullable();
       table.dateTime('last_login_at').nullable();
       table.timestamps();
     }),
@@ -31,13 +31,15 @@ exports.up = function up(knex, Promise) {
       table.string('slug').nullable();
       table.string('tagline').nullable();
       table.text('description').nullable();
+      table.boolean('is_default').notNullable().defaultTo(false);
+      table.boolean('is_live').notNullable().defaultTo(false);
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('projects', (table) => {
       table.increments();
       table.integer('profile_id').notNullable().unsigned().references('profiles.id');
       table.string('name').nullable();
-      table.string('responsibility').nullable();
+      table.string('role').nullable();
       table.string('slug').nullable();
       table.string('tagline').nullable();
       table.string('organization').nullable();

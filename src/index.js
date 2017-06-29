@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
-import * as JointGenerate from './core/joint-generate';
+import * as JointGenerate from './core/generate';
 
 const defaultService = 'bookshelf';
 
@@ -47,8 +47,6 @@ module.exports = class Joint {
       throw new JointError({ message });
     }
 
-    // TODO: Merge into this.model !!!
-    //      (to permit pre-existing models already declared on the service)
     // Build model registry...
     if (this.modelConfig) JointGenerate.registerModels(this, log);
 

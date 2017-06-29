@@ -8,7 +8,7 @@ const expect = chai.expect;
 
 // Values for expectation...
 const jointProps = ['serviceKey', 'service'];
-const actionsBookshelf = ['upsertItem'];
+const actionsBookshelf = ['createItem', 'upsertItem', 'updateItem', 'getItem', 'getItems', 'deleteItem'];
 
 // -------------
 // LIBRARY Joint
@@ -67,7 +67,7 @@ describe('JOINT', () => {
 
       const info = joint.info();
 
-      expect(info.models).to.have.length(8);
+      expect(info.models).to.have.length(10);
     });
 
     it('should successfully register custom methods via method-config', () => {

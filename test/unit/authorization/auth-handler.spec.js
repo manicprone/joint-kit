@@ -18,7 +18,7 @@ describe('AUTH-HANDLER', () => {
         method: 'POST',
         originalUrl: '/api/blog/post/7/workflow/unpublish',
         session: {
-          blogUser: mockSessionInfo,
+          jointUser: mockSessionInfo,
         },
       };
 

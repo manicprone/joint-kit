@@ -9,13 +9,16 @@ import { resetDB } from '../../db/bookshelf/db-utils';
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-const joint = new Joint({
-  serviceKey: 'bookshelf',
-  service: bookshelf,
-});
-joint.generate({ modelConfig, methodConfig, log: false });
+let joint = null;
 
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
+  before(() => {
+    joint = new Joint({
+      serviceKey: 'bookshelf',
+      service: bookshelf,
+    });
+    joint.generate({ modelConfig, methodConfig, log: false });
+  });
 
   // -------------------
   // Testing: upsertItem
