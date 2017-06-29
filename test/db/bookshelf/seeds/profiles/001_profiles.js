@@ -1,3 +1,4 @@
+import moment from 'moment';
 
 const tableName = 'profiles';
 
@@ -79,12 +80,57 @@ const seeds = [
     is_default: true,
     is_live: true,
   },
+
+  // ----------------------------------------------------- Profiles from user: 8
+
+  {
+    id: 8,
+    user_id: 8,
+    title: 'Hello. I am Jerry',
+    slug: null,
+    tagline: '',
+    description: null,
+    is_default: false,
+    is_live: false,
+  },
+  {
+    id: 9,
+    user_id: 8,
+    title: 'The Jerry',
+    slug: null,
+    tagline: '',
+    description: null,
+    is_default: false,
+    is_live: false,
+  },
+  {
+    id: 10,
+    user_id: 8,
+    title: 'Ideas by Jrry',
+    slug: 'ideas-by-jrry',
+    tagline: '',
+    description: null,
+    is_default: false,
+    is_live: false,
+  },
+  {
+    id: 11,
+    user_id: 8,
+    title: 'Bright Ideas by Jerry',
+    slug: 'jerry-ideas',
+    tagline: '',
+    description: null,
+    is_default: true,
+    is_live: true,
+  },
 ];
 
 exports.seed = function seed(knex, Promise) {
   return knex(tableName).del().then(() => {
+    const time = moment().utc();
+
     return Promise.all(seeds.map((data) => {
-      const timestamp = '';
+      const timestamp = time.add(5, 'minutes');
 
       return knex(tableName).insert({
         ...data,

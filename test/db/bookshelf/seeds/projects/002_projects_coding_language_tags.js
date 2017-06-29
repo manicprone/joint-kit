@@ -1,3 +1,4 @@
+import moment from 'moment';
 
 const tableName = 'project_coding_language_tags_ref';
 
@@ -62,8 +63,10 @@ const seeds = [
 
 exports.seed = function seed(knex, Promise) {
   return knex(tableName).del().then(() => {
+    const time = moment().utc();
+
     return Promise.all(seeds.map((data) => {
-      const timestamp = '';
+      const timestamp = time.add(5, 'minutes');
 
       return knex(tableName).insert({
         ...data,

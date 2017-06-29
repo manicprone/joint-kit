@@ -678,6 +678,422 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
   }); // END - getItem
 
+  // -----------------
+  // Testing: getItems
+  // -----------------
+  describe('getItems', () => {
+    before(() => resetDB(['users', 'tags', 'profiles', 'projects']));
+
+    it('should return all rows according to the provided spec and input', () => {
+      // ----
+      // User
+      // ----
+      const specUser = {
+        modelName: 'User',
+        defaultOrderBy: '-created_at',
+      };
+      const inputUsers = {};
+
+      // -------
+      // Profile
+      // -------
+      const specProfile = {
+        modelName: 'Profile',
+        fields: [
+          { name: 'user_id', type: 'Number' },
+          { name: 'is_live', type: 'Boolean' },
+        ],
+        defaultOrderBy: '-created_at',
+      };
+      const inputAllProfiles = {};
+      const inputLiveProfiles = {
+        fields: {
+          is_live: true,
+        },
+      };
+      const inputNotLiveProfiles = {
+        fields: {
+          is_live: false,
+        },
+      };
+
+      const getUsers = joint.getItems(specUser, inputUsers)
+        .then((data) => {
+          expect(data.models).to.have.length(10);
+        });
+
+      const getAllProfiles = joint.getItems(specProfile, inputAllProfiles)
+        .then((data) => {
+          expect(data.models).to.have.length(11);
+        });
+
+      const getLiveProfiles = joint.getItems(specProfile, inputLiveProfiles)
+        .then((data) => {
+          expect(data.models).to.have.length(7);
+        });
+
+      const getNotLiveProfiles = joint.getItems(specProfile, inputNotLiveProfiles)
+        .then((data) => {
+          expect(data.models).to.have.length(4);
+        });
+
+      return Promise.all([getUsers, getAllProfiles, getLiveProfiles, getNotLiveProfiles]);
+    });
+
+    it('should only return the column data that is permitted by the spec', () => {
+      const allAvailableCols = ['id', 'external_id', 'email', 'username', 'display_name', 'avatar_url', 'last_login_at', 'created_at', 'updated_at'];
+
+      const specBase = {
+        modelName: 'User',
+        defaultOrderBy: '-created_at',
+      };
+
+      const specColsSpecified = Object.assign({}, specBase);
+      specColsSpecified.columnsToReturn = ['id', 'username', 'display_name'];
+
+      const input = {};
+
+      const getAllColsFromBase = joint.getItems(specBase, input)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
+        });
+
+      const getSpecifiedCols = joint.getItems(specColsSpecified, input)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(specColsSpecified.columnsToReturn);
+        });
+
+      return Promise.all([getAllColsFromBase, getSpecifiedCols]);
+    });
+
+    it('should support the "columnSet" syntax, permitting various sets of returned column data', () => {
+      const allAvailableCols = ['id', 'external_id', 'email', 'username', 'display_name', 'avatar_url', 'last_login_at', 'created_at', 'updated_at'];
+
+      const specBase = {
+        modelName: 'User',
+        defaultOrderBy: '-created_at',
+      };
+
+      const specColsWithDefault = Object.assign({}, specBase);
+      specColsWithDefault.columnsToReturn = {
+        default: ['id', 'email', 'username', 'display_name', 'external_id'],
+        list: ['id', 'username', 'display_name'],
+        avatar: ['display_name', 'avatar_url'],
+      };
+
+      const specColsWithoutDefault = Object.assign({}, specBase);
+      specColsWithoutDefault.columnsToReturn = {
+        list: ['id', 'username', 'display_name'],
+        avatar: ['display_name', 'avatar_url'],
+      };
+
+      const inputWithUndefinedSet = { columnSet: 'unknown' };
+      const inputWithDefaultSet = { columnSet: 'default' };
+      const inputWithListSet = { columnSet: 'list' };
+
+      const getAllColsWithBase = joint.getItems(specBase, inputWithListSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
+        });
+
+      const getDefaultSetImplicitly = joint.getItems(specColsWithDefault, inputWithUndefinedSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+        });
+
+      const getAllColsWithUnknownSetAndNoDefault = joint.getItems(specColsWithoutDefault, inputWithUndefinedSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
+        });
+
+      const getDefaultSetExplicitly = joint.getItems(specColsWithDefault, inputWithDefaultSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+        });
+
+      const getListSet = joint.getItems(specColsWithDefault, inputWithListSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.list);
+        });
+
+      return Promise.all([
+        getAllColsWithBase,
+        getDefaultSetImplicitly,
+        getAllColsWithUnknownSetAndNoDefault,
+        getDefaultSetExplicitly,
+        getListSet,
+      ]);
+    });
+
+    it('should return relation data when the "input.relations" property is used', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+      const inputProjectWithRelation = {
+        fields: { profile_id: 2 },
+        relations: ['profile'],
+      };
+      const inputProjectWithoutRelation = {
+        fields: { profile_id: 2 },
+      };
+
+      const withRelation = joint.getItems(specProject, inputProjectWithRelation)
+        .then((data) => {
+          expect(data.models[0])
+            .to.have.property('relations')
+            .that.has.property('profile');
+
+          const firstProject = data.models[0];
+          const profileData = firstProject.relations.profile;
+          expect(profileData)
+            .to.have.property('attributes')
+            .that.contains({ id: 2 });
+        });
+
+      const withoutRelation = joint.getItems(specProject, inputProjectWithoutRelation)
+        .then((data) => {
+          expect(data.models[0])
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([withRelation, withoutRelation]);
+    });
+
+    it('should load relation data directly to the base attributes when the "input.relations" property is used', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+
+      const inputProject = {
+        fields: { profile_id: 2 },
+        loadDirect: ['user:username', 'codingLanguageTags:key'],
+      };
+
+      const withLoadDirect = joint.getItems(specProject, inputProject)
+        .then((data) => {
+          const secondProject = data.models[1];
+
+          expect(secondProject.attributes)
+            .to.contain({ user: 'the_manic_edge' });
+
+          expect(secondProject.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['java', 'jsp', 'xslt', 'html']);
+
+          expect(secondProject)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([withLoadDirect]);
+    });
+
+    it('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+
+      const inputProject = {
+        fields: { profile_id: 2 },
+        relations: ['profile'],
+        loadDirect: ['user:username', 'codingLanguageTags:key'],
+      };
+
+      const withBoth = joint.getItems(specProject, inputProject)
+        .then((data) => {
+          const thirdProject = data.models[2];
+
+          expect(thirdProject.attributes)
+            .to.contain({ user: 'the_manic_edge' });
+
+          expect(thirdProject.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['javascript', 'coffee-script']);
+
+          expect(thirdProject.relations).to.have.keys('profile');
+        });
+
+      return Promise.all([withBoth]);
+    });
+
+    it('should return paginated results when the "input.paginate" option is used', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+      const inputFirstThree = {
+        fields: { profile_id: 11 },
+        paginate: { skip: 0, limit: 3 },
+      };
+      const inputSecondThree = {
+        fields: { profile_id: 11 },
+        paginate: { skip: 3, limit: 3 },
+      };
+      const inputThirdAndFourth = {
+        fields: { profile_id: 11 },
+        paginate: { skip: 2, limit: 2 },
+      };
+      const inputTheRest = {
+        fields: { profile_id: 11 },
+        paginate: { skip: 6, limit: 99 },
+      };
+
+      const firstThree = joint.getItems(specProject, inputFirstThree)
+        .then((data) => {
+          expect(data.models).to.have.length(3);
+          expect(data.models[0]).to.contain({ id: 5 });
+          expect(data.models[1]).to.contain({ id: 6 });
+          expect(data.models[2]).to.contain({ id: 7 });
+        });
+
+      const secondThree = joint.getItems(specProject, inputSecondThree)
+        .then((data) => {
+          expect(data.models).to.have.length(3);
+          expect(data.models[0]).to.contain({ id: 8 });
+          expect(data.models[1]).to.contain({ id: 9 });
+          expect(data.models[2]).to.contain({ id: 10 });
+        });
+
+      const theThirdAndFourth = joint.getItems(specProject, inputThirdAndFourth)
+        .then((data) => {
+          expect(data.models).to.have.length(2);
+          expect(data.models[0]).to.contain({ id: 7 });
+          expect(data.models[1]).to.contain({ id: 8 });
+        });
+
+      const theRest = joint.getItems(specProject, inputTheRest)
+        .then((data) => {
+          expect(data.models).to.have.length(4);
+          expect(data.models[0]).to.contain({ id: 11 });
+          expect(data.models[1]).to.contain({ id: 12 });
+          expect(data.models[2]).to.contain({ id: 13 });
+          expect(data.models[3]).to.contain({ id: 14 });
+        });
+
+      return Promise.all([firstThree, secondThree, theThirdAndFourth, theRest]);
+    });
+
+    it('should return an empty array when requesting a pagination offset that does not exist', () => {
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+      const inputProjects = {
+        fields: { profile_id: 11 },
+        paginate: { skip: 99999, limit: 10 },
+      };
+
+      return joint.getItems(specProject, inputProjects)
+        .then((data) => {
+          expect(data.models).to.have.length(0);
+        });
+    });
+
+    it('should order the results according to the "spec.defaultOrderBy" and "input.orderBy" options', () => {
+      // -------
+      // Profile
+      // -------
+      const specProfile = {
+        modelName: 'Profile',
+        defaultOrderBy: '-created_at',
+      };
+      const profilesDefaultOrder = {};
+
+      // -------
+      // Project
+      // -------
+      const specProject = {
+        modelName: 'Project',
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+      const projectsDefaultOrder = {
+        fields: {
+          profile_id: 11,
+        },
+      };
+      const projectsNameASC = {
+        fields: {
+          profile_id: 11,
+        },
+        orderBy: 'name',
+      };
+
+      const getProfilesInDefaultOrder = joint.getItems(specProfile, profilesDefaultOrder)
+        .then((data) => {
+          expect(data.models).to.have.length(11);
+          expect(data.models[0]).to.contain({ id: 1 });
+          expect(data.models[1]).to.contain({ id: 2 });
+          expect(data.models[2]).to.contain({ id: 3 });
+          expect(data.models[3]).to.contain({ id: 4 });
+          expect(data.models[4]).to.contain({ id: 5 });
+          expect(data.models[5]).to.contain({ id: 6 });
+          expect(data.models[6]).to.contain({ id: 7 });
+          expect(data.models[7]).to.contain({ id: 8 });
+          expect(data.models[8]).to.contain({ id: 9 });
+          expect(data.models[9]).to.contain({ id: 10 });
+          expect(data.models[10]).to.contain({ id: 11 });
+        });
+
+      const getProjectsInDefaultOrder = joint.getItems(specProject, projectsDefaultOrder)
+        .then((data) => {
+          expect(data.models).to.have.length(10);
+          expect(data.models[0]).to.contain({ id: 5 });
+          expect(data.models[1]).to.contain({ id: 6 });
+          expect(data.models[2]).to.contain({ id: 7 });
+          expect(data.models[3]).to.contain({ id: 8 });
+          expect(data.models[4]).to.contain({ id: 9 });
+          expect(data.models[5]).to.contain({ id: 10 });
+          expect(data.models[6]).to.contain({ id: 11 });
+          expect(data.models[7]).to.contain({ id: 12 });
+          expect(data.models[8]).to.contain({ id: 13 });
+          expect(data.models[9]).to.contain({ id: 14 });
+        });
+
+      const getProjectsInNameASC = joint.getItems(specProject, projectsNameASC)
+        .then((data) => {
+          expect(data.models).to.have.length(10);
+          expect(data.models[0]).to.contain({ id: 12 }); // A
+          expect(data.models[1]).to.contain({ id: 5 });  // E
+          expect(data.models[2]).to.contain({ id: 11 }); // H
+          expect(data.models[3]).to.contain({ id: 6 });  // J
+          expect(data.models[4]).to.contain({ id: 14 }); // K
+          expect(data.models[5]).to.contain({ id: 9 });  // L
+          expect(data.models[6]).to.contain({ id: 13 }); // N
+          expect(data.models[7]).to.contain({ id: 7 });  // P
+          expect(data.models[8]).to.contain({ id: 10 }); // T
+          expect(data.models[9]).to.contain({ id: 8 });  // W
+        });
+
+      return Promise.all([
+        getProfilesInDefaultOrder,
+        getProjectsInDefaultOrder,
+        getProjectsInNameASC,
+      ]);
+    });
+  }); // END - getItems
+
   // -------------------
   // Testing: upsertItem
   // -------------------
