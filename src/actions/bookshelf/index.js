@@ -7,3 +7,8 @@ export { default as updateItem } from './updateItem';
 export { default as getItem } from './getItem';
 export { default as getItems } from './getItems';
 export { default as deleteItem } from './deleteItem';
+
+// ----------------------
+// Association actions...
+// ----------------------
+export { default as addAssociatedItem } from './addAssociatedItem';

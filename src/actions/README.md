@@ -229,6 +229,52 @@ input: {
 ```
 
 
+### addAssociatedItem
+
+##### _spec_
+
+```
+spec: {
+  main: {
+    modelName: 'Post',
+    fields: [
+      { name: 'id', type: 'Number', required: true },
+    ],
+    auth: {
+      ownerCreds: ['profile_id'],
+    },
+  },
+  association: {
+    modelName: 'Tag',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'key', type: 'String', requiredOr: true },
+    ],
+  },
+  associationName: 'tags',
+}
+```
+
+##### _input_
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
+  },
+  association: {
+    fields: {
+      key: 'tag-001',
+    },
+  },
+  trx: trx | null,
+}
+```
+
+
 ## To Do
 
 * Consistently reference "relations" as "associations".

@@ -8,7 +8,15 @@ const expect = chai.expect;
 
 // Values for expectation...
 const jointProps = ['serviceKey', 'service'];
-const actionsBookshelf = ['createItem', 'upsertItem', 'updateItem', 'getItem', 'getItems', 'deleteItem'];
+const actionsBookshelf = [
+  'createItem',
+  'upsertItem',
+  'updateItem',
+  'getItem',
+  'getItems',
+  'deleteItem',
+  'addAssociatedItem',
+];
 
 // -------------
 // LIBRARY Joint
