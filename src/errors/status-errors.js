@@ -28,6 +28,13 @@ export function generateMissingFieldsError(missingFields = {}) {
   });
 }
 
+export function generateInvalidAssociationPropertiesError(missingProperties = []) {
+  return new JointStatusError({
+    status: 400,
+    message: `The association action is invalid due to missing properties: "${missingProperties.join('", "')}"`,
+  });
+}
+
 export function generateModelNotRecognizedError(modelName = '') {
   return new JointStatusError({
     status: 400,
@@ -57,6 +64,13 @@ export function generateResourceNotFoundError(resourceName = '') {
   return new JointStatusError({
     status: 404,
     message: `The requested "${resourceName}" was not found.`,
+  });
+}
+
+export function generateAssociationDoesNotExistError(resourceName = '') {
+  return new JointStatusError({
+    status: 404,
+    message: `The requested "${resourceName}" association does not exist.`,
   });
 }
 

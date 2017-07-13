@@ -53,12 +53,15 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
             // Handle "toMany" association...
             // ------------------------------
             if (assocType === 'toMany') {
-              const assocMethod = 'hasMany';
+              const assocMethod = 'belongsToMany';
               // Handle through path...
               if (info.through) {
+                // TODO: Throw error if through Model is not defined !!!
+
+                const throughModel = bookshelf.model(info.through.modelName);
+                const throughTableName = throughModel.prototype.tableName;
                 assocHooks[assocName] = function () {
-                  return this[assocMethod](info.targetModelName, info.through.toField, info.targetField)
-                    .through(info.through.modelName, info.sourceField, info.through.fromField, info.through.toField);
+                  return this[assocMethod](info.targetModelName, throughTableName, info.through.fromField, info.through.toField, info.sourceField, info.targetField);
                 };
               }
             } // end-if (assocType === 'toMany')

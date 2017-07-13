@@ -3,6 +3,16 @@
 // -----------------------------------
 
 const constants = {
+  // ------------------------------- Association Options
+  // Main Resource Wrapper
+  RESOURCE_MAIN: 'main',
+
+  // Association Resource Wrapper
+  RESOURCE_ASSOCIATION: 'association',
+
+  // Association Name
+  ASSOCIATION_NAME: 'associationName',
+
   // ------------------------------- Spec Options
   // Resource
   SPEC_MODEL_NAME: 'modelName',
