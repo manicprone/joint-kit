@@ -33,20 +33,20 @@ powerful persisted data action logic.
 | getItem      | The base operation for retrieving a single item  |
 | getItems     | The base operation for retrieving a collection of items |
 | deleteItem   | The base delete operation for a single item |
-| addAssociatedItem  | Add an item association to a main resource |
-| hasAssociatedItem  | Returns the requested associated item, if it is associated, otherwise returns a 404 |
+| addAssociatedItem        | Add an item association to a main resource |
+| hasAssociatedItem        | Returns the requested associated item, if it is associated, otherwise returns a 404 |
+| removeAssociatedItem     | Removes an associated item from a main resource |
 
-> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem
+> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem, removeAssociatedItem
 
 
 ### Upcoming actions
 
-| Action             | Description |
-| ------------------ | ----------- |
-| getAssociatedItems | Retrieves a collection of associated items from a main resource |
-| removeAssociatedItem     | Removes an associated item from a main resource |
+| Action                   | Description |
+| ------------------------ | ----------- |
+| getAssociatedItems       | Retrieves a collection of associated items from a main resource |
 | removeAllAssociatedItems | Removes all item instances of an association from a main resource |
-| snapshotItem       | An advanced create operation for "snapshotting" a single item (with associations) |
+| snapshotItem             | An advanced create operation for "snapshotting" a single item (with associations) |
 
 
 ## Spec/Input Options
@@ -322,6 +322,96 @@ input: {
 ```
 
 
+### getAssociatedItems
+
+##### _spec_
+
+```
+spec: {
+  main: {
+    modelName: 'Post',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+    auth: {
+      ownerCreds: ['profile_id'],
+    },
+  },
+  association: {
+    modelName: 'Tag',
+    defaultOrderBy: 'title',
+  },
+  associationName: 'tags',
+}
+```
+
+##### _input_
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
+  },
+  association: {
+    orderBy: '-title',
+    paginate: { skip, limit },
+  },
+  trx: trx | null,
+}
+```
+
+
+### removeAssociatedItem
+
+##### _spec_
+
+```
+spec: {
+  main: {
+    modelName: 'Post',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+    auth: {
+      ownerCreds: ['profile_id'],
+    },
+  },
+  association: {
+    modelName: 'Tag',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'key', type: 'String', requiredOr: true },
+    ],
+  },
+  associationName: 'tags',
+}
+```
+
+##### _input_
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
+  },
+  association: {
+    fields: {
+      key: 'tag-001',
+    },
+  },
+  trx: trx | null,
+}
+```
+
+
 ## To Do
 
 * Consistently reference "relations" as "associations".
@@ -331,9 +421,6 @@ input: {
 * Provide action: "snapshotItem" => which implements "createItem" (copy) on a source
   item (i.e. it looks up a source item, auth checks the source, creates a copy
   or subset copy). Also, handles associations to chain with the snapshot.
-
-* Provide association action logic => "addAssociatedItem", "getAssociatedItem",
-  "getAssociatedItems", "removeAssociatedItem", "removeAllAssociatedItems", "hasAssociatedItem" => returns true|false as convenience method.
 
 * Add "view count" tracking as a built-in feature.
 
