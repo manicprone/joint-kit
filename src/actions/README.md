@@ -36,8 +36,9 @@ powerful persisted data action logic.
 | addAssociatedItem        | Add an item association to a main resource |
 | hasAssociatedItem        | Returns the requested associated item, if it is associated, otherwise returns a 404 |
 | removeAssociatedItem     | Removes an associated item from a main resource |
+| removeAllAssociatedItems | Removes all item instances of an association from a main resource |
 
-> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem, removeAssociatedItem
+> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem, removeAssociatedItem, removeAllAssociatedItems
 
 
 ### Upcoming actions
@@ -45,7 +46,6 @@ powerful persisted data action logic.
 | Action                   | Description |
 | ------------------------ | ----------- |
 | getAssociatedItems       | Retrieves a collection of associated items from a main resource |
-| removeAllAssociatedItems | Removes all item instances of an association from a main resource |
 | snapshotItem             | An advanced create operation for "snapshotting" a single item (with associations) |
 
 
@@ -406,6 +406,41 @@ input: {
     fields: {
       key: 'tag-001',
     },
+  },
+  trx: trx | null,
+}
+```
+
+
+### removeAllAssociatedItems
+
+##### _spec_
+
+```
+spec: {
+  main: {
+    modelName: 'Post',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+    auth: {
+      ownerCreds: ['profile_id'],
+    },
+  },
+  associationName: 'tags',
+}
+```
+
+##### _input_
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
   },
   trx: trx | null,
 }

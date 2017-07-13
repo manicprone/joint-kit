@@ -27,7 +27,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------
   // Testing: standard error scenarios
   // ---------------------------------
-  describe('standard error scenarios (addAssociatedItem, hasAssociatedItem, removeAssociatedItem)', () => {
+  describe('standard error scenarios (addAssociatedItem, hasAssociatedItem, removeAssociatedItem, removeAllAssociatedItems)', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should return an error (400) when the spec and input cannot be parsed for association actions', () => {
@@ -82,6 +82,23 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         associationName: 'codingLanguageTags',
       };
+      const specMissingAssocName = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        association: {
+          modelName: 'CodingLanguageTag',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'key', type: 'String', requiredOr: true },
+          ],
+        },
+        noAssociationName: 'codingLanguageTags',
+      };
 
       const input = {
         main: {
@@ -129,6 +146,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(400);
       const addAssociatedItem04 = expect(joint.addAssociatedItem(spec, inputMissingAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
+      const addAssociatedItem05 = expect(joint.addAssociatedItem(specMissingAssocName, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // hasAssociatedItem
       const hasAssociatedItem01 = expect(joint.hasAssociatedItem(specMissingMain, input))
@@ -138,6 +157,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const hasAssociatedItem03 = expect(joint.hasAssociatedItem(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
       const hasAssociatedItem04 = expect(joint.hasAssociatedItem(spec, inputMissingAssoc))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const hasAssociatedItem05 = expect(joint.hasAssociatedItem(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAssociatedItem
@@ -149,22 +170,39 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(400);
       const removeAssociatedItem04 = expect(joint.removeAssociatedItem(spec, inputMissingAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAssociatedItem05 = expect(joint.removeAssociatedItem(specMissingAssocName, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
+      // removeAllAssociatedItems
+      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(specMissingMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAllAssociatedItems02 = expect(joint.removeAllAssociatedItems(spec, inputMissingMain))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAllAssociatedItems03 = expect(joint.removeAllAssociatedItems(specMissingAssocName, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
         addAssociatedItem01,
         addAssociatedItem02,
         addAssociatedItem03,
         addAssociatedItem04,
+        addAssociatedItem05,
 
         hasAssociatedItem01,
         hasAssociatedItem02,
         hasAssociatedItem03,
         hasAssociatedItem04,
+        hasAssociatedItem05,
 
         removeAssociatedItem01,
         removeAssociatedItem02,
         removeAssociatedItem03,
         removeAssociatedItem04,
+        removeAssociatedItem05,
+
+        removeAllAssociatedItems01,
+        removeAllAssociatedItems02,
+        removeAllAssociatedItems03,
       ]);
     });
 
@@ -234,6 +272,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const removeAssociatedItem02 = expect(joint.removeAssociatedItem(specNoAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
+      // removeAllAssociatedItems
+      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
       return Promise.all([
         addAssociatedItem01,
         addAssociatedItem02,
@@ -241,6 +283,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         hasAssociatedItem02,
         removeAssociatedItem01,
         removeAssociatedItem02,
+        removeAllAssociatedItems01,
       ]);
     });
 
@@ -305,6 +348,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const removeAssociatedItem02 = expect(joint.removeAssociatedItem(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
+      // removeAllAssociatedItems
+      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, inputNoMain))
+        .to.eventually.be.rejectedWithJointStatusError(404);
+
       return Promise.all([
         addAssociatedItem01,
         addAssociatedItem02,
@@ -312,6 +359,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         hasAssociatedItem02,
         removeAssociatedItem01,
         removeAssociatedItem02,
+        removeAllAssociatedItems01,
       ]);
     });
 
@@ -376,6 +424,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const removeAssociatedItem02 = expect(joint.removeAssociatedItem(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
+      // removeAllAssociatedItems
+      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, inputNoMain))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+
       return Promise.all([
         addAssociatedItem01,
         addAssociatedItem02,
@@ -383,6 +435,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         hasAssociatedItem02,
         removeAssociatedItem01,
         removeAssociatedItem02,
+        removeAllAssociatedItems01,
       ]);
     });
 
@@ -433,10 +486,15 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const removeAssociatedItem01 = expect(joint.removeAssociatedItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
+      // removeAllAssociatedItems
+      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(403);
+
       return Promise.all([
         addAssociatedItem01,
         hasAssociatedItem01,
         removeAssociatedItem01,
+        removeAllAssociatedItems01,
       ]);
     });
   });
@@ -736,4 +794,78 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         });
     });
   }); // END - removeAssociatedItem
+
+  // ---------------------------------
+  // Testing: removeAllAssociatedItems
+  // ---------------------------------
+  // TODO: Add passing test for auth / owner creds !!!
+  describe('removeAllAssociatedItems', () => {
+    before(() => resetDB(['tags', 'projects']));
+
+    it('should remove the associatons from the main resource, and return the affected main resource', () => {
+      const mainID = 2;
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+      };
+
+      return joint.removeAllAssociatedItems(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id: mainID,
+          });
+
+          const associatedTags = data.relations[associationName];
+          expect(associatedTags.models).to.have.length(0);
+        });
+    });
+
+    it('should succeed and return the unaffected main resource, if the associations did not exist', () => {
+      const mainID = 1; // no tags
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+      };
+
+      return joint.removeAllAssociatedItems(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id: mainID,
+          });
+
+          const associatedTags = data.relations[associationName];
+          expect(associatedTags.models).to.have.length(0);
+        });
+    });
+  }); // END - removeAllAssociatedItems
 });

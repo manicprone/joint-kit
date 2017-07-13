@@ -34,8 +34,9 @@ function performRemoveAssociatedItem(bookshelf, spec = {}, input = {}) {
     if (!specAssoc) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}`);
     if (!inputMain) missingProps.push(`input.${ACTION.RESOURCE_MAIN}`);
     if (!inputAssoc) missingProps.push(`input.${ACTION.RESOURCE_ASSOCIATION}`);
+    if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
-      if (debug) console.log(`[JOINT] [action:addAssociatedItem] Required properties missing: "${missingProps.join('", "')}"`);
+      if (debug) console.log(`[JOINT] [action:removeAssociatedItem] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
