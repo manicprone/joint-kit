@@ -33,15 +33,15 @@ powerful persisted data action logic.
 | getItem      | The base operation for retrieving a single item  |
 | getItems     | The base operation for retrieving a collection of items |
 | deleteItem   | The base delete operation for a single item |
+| addAssociatedItem  | Add an item association to a main resource |
 
-> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem
+> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem
 
 
 ### Upcoming actions
 
 | Action             | Description |
 | ------------------ | ----------- |
-| addAssociatedItem  | Add an item association to a main resource |
 | getAssociatedItem  | Retrieve an associated item from a main resource |
 | hasAssociatedItem  | Performs getAssociatedItem, but conveniently only returns true or false |
 | getAssociatedItems | Retrieves a collection of associated items from a main resource |

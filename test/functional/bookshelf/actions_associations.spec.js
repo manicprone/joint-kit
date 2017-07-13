@@ -46,7 +46,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const specMissingMain = {
         notMain: {
@@ -63,7 +63,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const specMissingAssoc = {
         main: {
@@ -80,7 +80,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
 
       const input = {
@@ -154,7 +154,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const spec02 = {
         main: {
@@ -171,7 +171,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const input = {
         main: {
@@ -214,7 +214,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const input01 = {
         main: {
@@ -272,7 +272,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const input = {
         main: {
@@ -301,6 +301,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // --------------------------
   // Testing: addAssociatedItem
   // --------------------------
+
+  // TODO: Add passing test for auth / owner creds !!!
+
   describe('addAssociatedItem', () => {
     before(() => resetDB(['tags', 'projects']));
 
@@ -320,7 +323,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'key', type: 'String', requiredOr: true },
           ],
         },
-        via: 'codingLanguageTags',
+        associationName: 'codingLanguageTags',
       };
       const inputNoMain = {
         main: {
@@ -387,7 +390,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           fields: {
-            id: 10, // HTML
+            id: 10, // html
           },
         },
       };
@@ -406,5 +409,52 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(associatedTags.models[3].attributes.key).to.equal('html');
         });
     });
-  }); // END - updateItem
+
+    it('should ensure a duplicate association is not created, if the association already exists', () => {
+      const mainID = 4;
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        association: {
+          modelName: 'CodingLanguageTag',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'key', type: 'String', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+        association: {
+          fields: {
+            id: 3, // javascript
+          },
+        },
+      };
+
+      return joint.addAssociatedItem(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id: mainID,
+          });
+
+          const associatedTags = data.relations[associationName];
+          expect(associatedTags.models).to.have.length(2);
+          expect(associatedTags.models[0].attributes.key).to.equal('javascript');
+          expect(associatedTags.models[1].attributes.key).to.equal('coffee-script');
+        });
+    });
+  }); // END - addAssociatedItem
 });
