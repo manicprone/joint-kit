@@ -12,3 +12,4 @@ export { default as deleteItem } from './deleteItem';
 // Association actions...
 // ----------------------
 export { default as addAssociatedItem } from './addAssociatedItem';
+export { default as hasAssociatedItem } from './hasAssociatedItem';

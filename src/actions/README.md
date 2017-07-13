@@ -34,6 +34,7 @@ powerful persisted data action logic.
 | getItems     | The base operation for retrieving a collection of items |
 | deleteItem   | The base delete operation for a single item |
 | addAssociatedItem  | Add an item association to a main resource |
+| hasAssociatedItem  | Returns the requested associated item, if it is associated, otherwise returns a 404 |
 
 > The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem
 
@@ -42,8 +43,6 @@ powerful persisted data action logic.
 
 | Action             | Description |
 | ------------------ | ----------- |
-| getAssociatedItem  | Retrieve an associated item from a main resource |
-| hasAssociatedItem  | Performs getAssociatedItem, but conveniently only returns true or false |
 | getAssociatedItems | Retrieves a collection of associated items from a main resource |
 | removeAssociatedItem     | Removes an associated item from a main resource |
 | removeAllAssociatedItems | Removes all item instances of an association from a main resource |
@@ -238,7 +237,55 @@ spec: {
   main: {
     modelName: 'Post',
     fields: [
-      { name: 'id', type: 'Number', required: true },
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+    auth: {
+      ownerCreds: ['profile_id'],
+    },
+  },
+  association: {
+    modelName: 'Tag',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'key', type: 'String', requiredOr: true },
+    ],
+  },
+  associationName: 'tags',
+}
+```
+
+##### _input_
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
+  },
+  association: {
+    fields: {
+      key: 'tag-001',
+    },
+  },
+  trx: trx | null,
+}
+```
+
+
+### hasAssociatedItem
+
+##### _spec_
+
+```
+spec: {
+  main: {
+    modelName: 'Post',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
     ],
     auth: {
       ownerCreds: ['profile_id'],

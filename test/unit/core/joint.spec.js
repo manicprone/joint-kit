@@ -16,6 +16,7 @@ const actionsBookshelf = [
   'getItems',
   'deleteItem',
   'addAssociatedItem',
+  'hasAssociatedItem',
 ];
 
 // -------------

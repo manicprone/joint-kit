@@ -67,6 +67,13 @@ export function generateResourceNotFoundError(resourceName = '') {
   });
 }
 
+export function generateAssociationDoesNotExistError(resourceName = '') {
+  return new JointStatusError({
+    status: 404,
+    message: `The requested "${resourceName}" association does not exist.`,
+  });
+}
+
 // -------------------------------------------- General System / 3rd-party (500)
 
 export function generateThirdPartyError(error) {
