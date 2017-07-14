@@ -1,5 +1,5 @@
 {
-  "name": "joint",
+  "name": "joint-lib",
   "version": "0.0.0",
   "description": "Good data, all rolled-up",
   "author": "|M|",
@@ -7,7 +7,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:manicprone/joint.git"
+    "url": "git@github.com:manicprone/joint-lib.git"
   },
   "scripts": {
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
