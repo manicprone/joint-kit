@@ -20,7 +20,6 @@ export default function getItem(bookshelf, spec = {}, input = {}) {
 
     // Reject if model does not exist...
     const model = bookshelf.model(modelName);
-
     if (!model) {
       if (debug) console.log(`[JOINT] [action:getItem] The model "${modelName}" is not recognized`);
       return reject(StatusErrors.generateModelNotRecognizedError(modelName));
@@ -73,13 +72,21 @@ export default function getItem(bookshelf, spec = {}, input = {}) {
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name;
+        const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
         const hasInput = objectUtils.has(inputFields, fieldName);
 
-        if (hasInput) {
-          whereOpts[fieldName] = inputFields[fieldName];
+        if (hasInput || hasDefault) {
+          const fieldValue = (hasInput)
+              ? inputFields[fieldName]
+              : fieldSpec.defaultValue;
+
+          whereOpts[fieldName] = fieldValue;
         }
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
+
+    // Debug executing logic...
+    if (debug) console.log(`[JOINT] [action:getItem] EXECUTING => GET ${modelName} WHERE`, whereOpts);
 
     // Get item...
     return model.where(whereOpts).fetch(actionOpts)

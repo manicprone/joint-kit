@@ -25,14 +25,14 @@ powerful persisted data action logic.
 
 ### Supported actions
 
-| Action       | Description |
-| ------------ | ----------- |
-| createItem   | The base create operation for a single item |
-| upsertItem   | The base upsert operation for a single item |
-| updateItem   | The base update operation for a single item |
-| getItem      | The base operation for retrieving a single item  |
-| getItems     | The base operation for retrieving a collection of items |
-| deleteItem   | The base delete operation for a single item |
+| Action                   | Description                                 |
+| ------------------------ | ------------------------------------------- |
+| createItem               | The base create operation for a single item |
+| upsertItem               | The base upsert operation for a single item |
+| updateItem               | The base update operation for a single item |
+| getItem                  | The base operation for retrieving a single item  |
+| getItems                 | The base operation for retrieving a collection of items |
+| deleteItem               | The base delete operation for a single item |
 | addAssociatedItem        | Add an item association to a main resource |
 | hasAssociatedItem        | Returns the requested associated item, if it is associated, otherwise returns a 404 |
 | removeAssociatedItem     | Removes an associated item from a main resource |
@@ -43,8 +43,8 @@ powerful persisted data action logic.
 
 ### Upcoming actions
 
-| Action                   | Description |
-| ------------------------ | ----------- |
+| Action                   | Description                                                     |
+| ------------------------ | --------------------------------------------------------------- |
 | getAssociatedItems       | Retrieves a collection of associated items from a main resource |
 | snapshotItem             | An advanced create operation for "snapshotting" a single item (with associations) |
 
@@ -55,15 +55,17 @@ All available properties
 
 ### Spec
 
-| Option              | Description | Actions Supported | Required? |
-| ------------------- | ----------- | ----------------  | --------- |
-| modelName           |             | (all)             |  Yes      |
-| fields              |             | (all)             |  Yes (* except getItems) |
-| fields.lookupField  |             | (all)             |  Yes for upsertItem, updateItem |
-| fields.defaultValue |             | createItem        |  No       |
-| colsToReturn        |             | getItem, getItems |  No       |
-| defaultOrderBy      |             | getItems          |  No       |
-| auth                |             | (all)             |  No       |
+| Option              | Description | Actions Supported               | Required? |
+| ------------------- | ----------- | ------------------------------  | --------- |
+| modelName           |             | (all)                           |  Yes      |
+| fields              |             | (all)                           |  Yes (* except getItems) |
+| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
+| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
+| columnsToReturn     |             | getItem, getItems               |  No       |
+| defaultOrderBy      |             | getItems                        |  No       |
+| forceRelations      |             | getItem, getItems               |  No       |
+| forceLoadDirect     |             | getItem, getItems               |  No       |
+| auth                |             | (all)                           |  No       |
 
 ### Input
 
@@ -450,6 +452,28 @@ input: {
 ## To Do
 
 * Consistently reference "relations" as "associations".
+
+* Support fields.defaultValue for getItem, getItems, et al.
+
+* Support auto-injected / overrides for input options (on method config)
+  e.g. Enforce => input.loadDirect: ['roles:key'] on all requests. (spec.forceLoadDirect, spec.forceAssociations)
+  e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action).
+
+* Support "fields.locked:true" option, for permitting a field declaration on a spec, that is
+  exposed for automatic handling (i.e. does not accept user-provided input).
+  -or-
+  Support as: { fields.autoValue: '% now %' } => which locks, plus declares the auto-generated value.
+
+* Implement advanced "fields.defaultValue" option, that supports auto-transforms and other
+  useful dynamic mutations.
+  e.g. { fields.defaultValue: '% camelcase(title) %' } => which will set the default value
+       to the camelcase of the provided "title" field.
+  e.g. { fields.defaultValue: '% now %' } => which will set a Date field value to the current date/time.
+
+* Support AND/OR logic for fields.lookupField (for allowing aggregate field lookups)
+  e.g. lookup with (app_id AND key), but utilize "required:true" to specify if the
+       conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"
+       i.e. "lookup:true" (implied AND), "lookupOr:true" (uses OR like current implementation).
 
 * Hook input field validation framework into action logic.
 

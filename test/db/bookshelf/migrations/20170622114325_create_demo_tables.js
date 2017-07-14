@@ -3,9 +3,9 @@ exports.up = function up(knex, Promise) {
   return Promise.all([
     knex.schema.createTableIfNotExists('users', (table) => {
       table.increments();
-      table.integer('external_id').nullable();
-      table.string('email').nullable().unique();
       table.string('username').notNullable().unique();
+      table.string('external_id').nullable();
+      table.string('email').nullable().unique();
       table.string('display_name').nullable();
       table.string('avatar_url').nullable();
       table.dateTime('last_login_at').nullable();

@@ -84,7 +84,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'external_id', type: 'Number', requiredOr: true },
+          { name: 'external_id', type: 'String', requiredOr: true },
         ],
       };
       const input01 = {
@@ -522,7 +522,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockSession = {
         is_logged_in: true,
         id: 4,
-        external_id: 304,
+        external_id: '304',
         username: 'the_manic_edge',
         roles: [],
         profile_ids: [1, 2, 3],
@@ -574,14 +574,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
         modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'external_id', type: 'Number', requiredOr: true },
+          { name: 'external_id', type: 'String', requiredOr: true },
           { name: 'username', type: 'String' },
           { name: 'email', type: 'String' },
         ],
       };
       const inputUser = {
         fields: {
-          external_id: 301,
+          external_id: '301',
         },
       };
 
@@ -631,7 +631,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockSession = {
         is_logged_in: true,
         user_id: 4,
-        external_id: 304,
+        external_id: '304',
         username: 'the_manic_edge',
         roles: ['moderator', 'admin'],
         profile_id: [1, 2, 3],
@@ -1335,7 +1335,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockSession = {
         is_logged_in: true,
         id: 4,
-        external_id: 304,
+        external_id: '304',
         username: 'the_manic_edge',
         roles: [],
         profile_ids: [1, 2, 3],

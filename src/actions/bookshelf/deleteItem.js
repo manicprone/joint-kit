@@ -102,6 +102,9 @@ function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputF
     });
   } // end-if (inputFields && specFields)
 
+  // Debug executing logic...
+  if (debug) console.log(`[JOINT] [action:deleteItem] EXECUTING => DELETE ${modelName} WHERE`, whereOpts);
+
   // Delete item...
   return bookshelf.model(modelName).where(whereOpts).destroy(actionOpts)
     .then((data) => {

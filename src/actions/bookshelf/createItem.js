@@ -74,6 +74,9 @@ function performCreateItem(bookshelf, spec = {}, input = {}) {
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
 
+    // Debug executing logic...
+    if (debug) console.log(`[JOINT] [action:createItem] EXECUTING => CREATE ${modelName} WITH`, rowData);
+
     // Create row...
     return model.forge(rowData).save(null, actionOpts)
       .then((data) => {
