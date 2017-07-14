@@ -12,9 +12,10 @@ module.exports = {
       spec: {
         fields: [
           { name: 'app_id', type: 'String', required: true, lookupField: true },
+          // { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'data', type: 'JSON', required: true },
-          { name: 'version', type: 'String' },
-          { name: 'key', type: 'String' },
+          { name: 'key', type: 'String', required: true },
+          // { name: 'key', type: 'String', defaultValue: 'default', lookup: true },
         ],
       },
     },
@@ -24,8 +25,8 @@ module.exports = {
       spec: {
         fields: [
           { name: 'app_id', type: 'String', required: true },
-          { name: 'version', type: 'String' },
-          { name: 'key', type: 'String' },
+          { name: 'key', type: 'String', required: true },
+          // { name: 'key', type: 'String', defaultValue: 'default' },
         ],
       },
     },

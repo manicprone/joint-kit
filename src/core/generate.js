@@ -1,5 +1,6 @@
 import objectUtils from '../utils/object-utils';
 import JointError from '../errors/JointError';
+import ACTION from '../actions/action-constants';
 
 const namespace = 'JOINT';
 const debug_registerModels = false;
@@ -52,6 +53,10 @@ export function registerModels(joint, log = true) {
 
 // -----------------------------------------------------------------------------
 // Register methods from method-config...
+//
+// TODO: Support auto-injected / overrides for input options (on method config) !!!
+//       e.g. Enforce => input.loadDirect: ['roles:key'] on all requests
+//       e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action)
 // -----------------------------------------------------------------------------
 export function registerMethods(joint, log = true) {
   const methodConfig = joint.methodConfig;
@@ -82,6 +87,7 @@ export function registerMethods(joint, log = true) {
           const methodName = methodDef.name;
           const jointAction = methodDef.action;
           const methodSpec = methodDef.spec;
+          methodSpec[ACTION.SPEC_MODEL_NAME] = modelNameForResource;
 
           if (debug_registerMethods) {
             console.log(`[${namespace}] ============================================ [DEBUG]`);

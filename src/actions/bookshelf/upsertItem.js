@@ -62,10 +62,15 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name;
         const isLookupField = objectUtils.get(fieldSpec, 'lookupField', false);
+        const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
         const hasInput = objectUtils.has(inputFields, fieldName);
 
-        if (hasInput && !isLookupField) {
-          upsertData[fieldName] = inputFields[fieldName];
+        if ((hasInput || hasDefault) && !isLookupField) {
+          const fieldValue = (hasInput)
+              ? inputFields[fieldName]
+              : fieldSpec.defaultValue;
+
+          upsertData[fieldName] = fieldValue;
         }
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
@@ -73,15 +78,17 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
     // Look for item...
     return model.where(lookupFieldData).fetch(actionOpts)
       .then((resource) => {
-        // TODO: Load ownerCreds field from looked-up resource !!!
-
         // Respect auth...
         if (authBundle) {
-          const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
+          const combinedFields = Object.assign({}, resource.attributes, inputFields);
+          const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
           if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
             return reject(StatusErrors.generateNotAuthorizedError());
           }
         } // end-if (authBundle)
+
+        // Debug executing logic...
+        if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => UPDATE ${modelName} WITH`, upsertData);
 
         // ------------------------
         // Perform update action...
@@ -104,6 +111,9 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
               return reject(StatusErrors.generateNotAuthorizedError());
             }
           } // end-if (authBundle)
+
+          // Debug executing logic...
+          if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => CREATE ${modelName} WITH`, upsertData);
 
           // ------------------------
           // Perform create action...

@@ -84,6 +84,9 @@ function performUpdateItem(bookshelf, spec = {}, input = {}) {
           }); // end-specFields.forEach
         } // end-if (inputFields && specFields)
 
+        // Debug executing logic...
+        if (debug) console.log(`[JOINT] [action:updateItem] EXECUTING => UPDATE ${modelName} WITH`, updates);
+
         // Update item...
         return resource.save(updates, actionOpts)
           .then((data) => {
