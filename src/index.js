@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Joint
+// Joint Lib
 // -----------------------------------------------------------------------------
 import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
