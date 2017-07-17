@@ -1,6 +1,6 @@
 # Joint Lib
 
-> Good data, all rolled-up.
+> Part of the Joint Stack
 
 
 
