@@ -1,6 +1,6 @@
 {
   "name": "joint-lib",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A convenience library, for rapidly implementing persisted data action logic | Part of the Joint Stack",
   "author": "|M|",
   "license": "MIT",
