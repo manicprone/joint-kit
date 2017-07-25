@@ -1,7 +1,7 @@
 # Joint Lib
 
-> Part of the Joint Stack
-
+> A convenience layer on top of Bookshelf/knex, for rapidly implementing
+persisted data action logic.
 
 
 ```
@@ -23,6 +23,7 @@
    [Persistence/DB] Postgres, Bookshelf/knex
 
 ```
+> Part of the Joint Stack
 
 
 ## Install

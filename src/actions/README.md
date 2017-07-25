@@ -1,8 +1,5 @@
 # Joint Actions / Data Operation Notation
 
-> A convenience layer on top of Bookshelf/knex, for rapidly implementing
-powerful persisted data action logic.
-
 
 ## Features
 
@@ -18,7 +15,6 @@ powerful persisted data action logic.
 | field input validation         |   |
 | data "snapshot" capabilities   |   |
 | flexible workflow support      |   |
-| built-in transaction support   |   |  
 
 
 ## Template Actions

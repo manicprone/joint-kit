@@ -1,10 +1,10 @@
 {
   "name": "joint-lib",
   "version": "0.0.0",
-  "description": "Good data, all rolled-up",
+  "description": "A convenience library, for rapidly implementing persisted data action logic | Part of the Joint Stack",
   "author": "|M|",
   "license": "MIT",
-  "main": "index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:manicprone/joint-lib.git"
