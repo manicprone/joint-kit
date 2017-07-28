@@ -2,14 +2,16 @@
   "name": "joint-lib",
   "version": "0.0.1",
   "description": "A convenience library, for rapidly implementing persisted data action logic | Part of the Joint Stack",
-  "author": "|M|",
+  "author": "|M| <manicprone@gmail.com>",
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "joint.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:manicprone/joint-lib.git"
   },
   "scripts": {
+    "build": "babel src --out-dir dist",
+    "prepublish": "npm run build",
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "test": "mocha --require babel-register test/**/*.spec.js",
     "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
