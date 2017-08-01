@@ -4,10 +4,11 @@
 import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
 import * as JointGenerate from './core/generate';
+import * as ActionsBookshelf from './actions/bookshelf';
 
 const defaultService = 'bookshelf';
 
-module.exports = class Joint {
+export default class Joint {
   constructor(options = {}) {
     // Load options...
     this.serviceKey = objectUtils.get(options, 'serviceKey', defaultService);
@@ -23,12 +24,21 @@ module.exports = class Joint {
 
     // Load actions...
     let actions = null;
-    try {
-      actions = require(`./actions/${this.serviceKey}`); // eslint-disable-line global-require, import/no-dynamic-require
-    } catch (err) {
+    switch (this.serviceKey) {
+      case 'bookshelf': {
+        actions = ActionsBookshelf;
+      }
+    }
+    if (!actions) {
       const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
       throw new JointError({ message });
     }
+    // try {
+    //   actions = require(`./actions/${this.serviceKey}`); // eslint-disable-line global-require, import/no-dynamic-require
+    // } catch (err) {
+    //   const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
+    //   throw new JointError({ message });
+    // }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
         this[actionName] = function (spec, input) { return actions[actionName](this.service, spec, input); }; // eslint-disable-line func-names
@@ -69,4 +79,4 @@ module.exports = class Joint {
 
     return info;
   } // END - info
-};
+}
