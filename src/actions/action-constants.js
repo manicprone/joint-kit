@@ -2,7 +2,7 @@
 // Constants for the Join action layer
 // -----------------------------------
 
-const constants = {
+export default {
   // ------------------------------- Association Options
   // Main Resource Wrapper
   RESOURCE_MAIN: 'main',
@@ -58,5 +58,3 @@ const constants = {
   // Authorization
   INPUT_AUTH_BUNDLE: 'authBundle',
 };
-
-module.exports = constants;

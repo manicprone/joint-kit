@@ -1,6 +1,6 @@
 import lodashString from 'lodash/string';
 
-module.exports = {
+export default {
   toCamelCase: lodashString.camelCase,
   toSnakeCase: lodashString.snakeCase,
 };

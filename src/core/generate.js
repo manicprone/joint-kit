@@ -1,6 +1,7 @@
 import objectUtils from '../utils/object-utils';
 import JointError from '../errors/JointError';
 import ACTION from '../actions/action-constants';
+import registerModelBookshelf from './bookshelf/registerModel';
 
 const namespace = 'JOINT';
 const debug_registerModels = false;
@@ -27,12 +28,21 @@ export function registerModels(joint, log = true) {
 
   // Load the registerModel function for the service implementation...
   let registerModel = null;
-  try {
-    registerModel = require(`./${serviceKey}/registerModel`).default; // eslint-disable-line global-require, import/no-dynamic-require
-  } catch (err) {
+  switch (serviceKey) {
+    case 'bookshelf': {
+      registerModel = registerModelBookshelf;
+    }
+  }
+  if (!registerModel) {
     const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
     throw new JointError({ message });
   }
+  // try {
+  //   registerModel = require(`./${serviceKey}/registerModel`).default; // eslint-disable-line global-require, import/no-dynamic-require
+  // } catch (err) {
+  //   const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
+  //   throw new JointError({ message });
+  // }
 
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
