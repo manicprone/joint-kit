@@ -12,6 +12,7 @@ chai.use(chaiHelpers);
 const expect = chai.expect;
 
 let joint = null;
+let jointJsonApi = null;
 
 // ------------------------
 // BOOKSHELF ACTIONS (base)
@@ -23,6 +24,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
       service: bookshelf,
     });
     joint.generate({ modelConfig, log: false });
+
+    jointJsonApi = new Joint({
+      serviceKey: 'bookshelf',
+      service: bookshelf,
+      payloadFormat: 'json-api',
+    });
+    jointJsonApi.generate({ modelConfig, log: false });
   });
 
   // ---------------------------------
@@ -866,6 +874,75 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
 
       return Promise.all([withBoth]);
+    });
+
+    it('should return in JSON API format when output="json-api"', () => {
+      const modelName = 'Project';
+      const itemID = 2;
+
+      const specProject = {
+        modelName,
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+      const inputProject = {
+        fields: { id: itemID },
+        relations: ['profile'],
+        loadDirect: ['codingLanguageTags:key', 'user:username'],
+      };
+
+      const globalLevel = jointJsonApi.getItem(specProject, inputProject)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+              id: itemID,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['java', 'jsp', 'javascript']);
+
+          // Relationships...
+          expect(payload.data).to.have.property('relationships');
+          expect(payload.data.relationships).to.have.keys('profile');
+
+          // Included...
+          expect(payload).to.have.property('included');
+          expect(payload.included[0]).to.contain({ type: 'Profile' });
+        });
+
+      const methodLevel = joint.getItem(specProject, inputProject, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+              id: itemID,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.have.property('coding_language_tags')
+            .that.has.members(['java', 'jsp', 'javascript']);
+
+          // Relationships...
+          expect(payload.data).to.have.property('relationships');
+          expect(payload.data.relationships).to.have.keys('profile');
+
+          // Included...
+          expect(payload).to.have.property('included');
+          expect(payload.included[0]).to.contain({ type: 'Profile' });
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
     });
   }); // END - getItem
 

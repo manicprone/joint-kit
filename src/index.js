@@ -13,6 +13,7 @@ export default class Joint {
     // Load options...
     this.serviceKey = objectUtils.get(options, 'serviceKey', defaultService);
     this.service = objectUtils.get(options, 'service', null);
+    this.payloadFormat = objectUtils.get(options, 'payloadFormat', 'native');
 
     // Exit if a service is not loaded...
     if (!this.service) {
@@ -41,10 +42,14 @@ export default class Joint {
     // }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
-        this[actionName] = function (spec, input) { return actions[actionName](this.service, spec, input); }; // eslint-disable-line func-names
+        this[actionName] = function (spec, input, ouput = `${this.payloadFormat}`) { return actions[actionName](this.service, spec, input, ouput); }; // eslint-disable-line func-names
       });
     }
   } // END - constructor
+
+  setPayloadFormat(format) {
+    this.payloadFormat = format;
+  }
 
   generate(options) {
     // Parse options...
@@ -75,6 +80,7 @@ export default class Joint {
       },
       models: modelNames,
       methods: this.method,
+      payloadFormat: this.payloadFormat,
     };
 
     return info;
