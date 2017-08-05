@@ -27,7 +27,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     jointJsonApi = new Joint({
       serviceKey: 'bookshelf',
       service: bookshelf,
-      payloadFormat: 'json-api',
+      output: 'json-api',
     });
     jointJsonApi.generate({ modelConfig, log: false });
   });

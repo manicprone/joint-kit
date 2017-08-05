@@ -13,7 +13,7 @@ export default class Joint {
     // Load options...
     this.serviceKey = objectUtils.get(options, 'serviceKey', defaultService);
     this.service = objectUtils.get(options, 'service', null);
-    this.payloadFormat = objectUtils.get(options, 'payloadFormat', 'native');
+    this.output = objectUtils.get(options, 'output', 'native');
 
     // Exit if a service is not loaded...
     if (!this.service) {
@@ -34,21 +34,15 @@ export default class Joint {
       const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
       throw new JointError({ message });
     }
-    // try {
-    //   actions = require(`./actions/${this.serviceKey}`); // eslint-disable-line global-require, import/no-dynamic-require
-    // } catch (err) {
-    //   const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
-    //   throw new JointError({ message });
-    // }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
-        this[actionName] = function (spec, input, ouput = `${this.payloadFormat}`) { return actions[actionName](this.service, spec, input, ouput); }; // eslint-disable-line func-names
+        this[actionName] = function (spec, input, ouput = `${this.output}`) { return actions[actionName](this.service, spec, input, ouput); }; // eslint-disable-line func-names
       });
     }
   } // END - constructor
 
-  setPayloadFormat(format) {
-    this.payloadFormat = format;
+  setOutput(format) {
+    this.output = format;
   }
 
   generate(options) {
@@ -80,7 +74,7 @@ export default class Joint {
       },
       models: modelNames,
       methods: this.method,
-      payloadFormat: this.payloadFormat,
+      output: this.output,
     };
 
     return info;
