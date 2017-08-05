@@ -3,13 +3,15 @@ import objectUtils from '../../utils/object-utils';
 import * as StatusErrors from '../../errors/status-errors';
 import ACTION from '../action-constants';
 import getItem from './getItem';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function hasAssociatedItem(bookshelf, spec = {}, input = {}) {
+export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
+    const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
     const assocName = spec[ACTION.ASSOCIATION_NAME];
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
@@ -45,7 +47,11 @@ export default function hasAssociatedItem(bookshelf, spec = {}, input = {}) {
       // If has association, return it...
       const idToCheck = assoc.id;
       if (objectUtils.includes(main.related(assocName).pluck('id'), idToCheck)) {
-        return resolve(assoc);
+        // Return data in requested format...
+        switch (output) {
+          case 'json-api': return resolve(toJsonApi(modelNameAssoc, assoc, bookshelf));
+          default: return resolve(assoc);
+        }
       }
 
       // Otherwise, reject with a 404...

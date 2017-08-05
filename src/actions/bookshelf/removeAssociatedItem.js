@@ -2,26 +2,28 @@ import Promise from 'bluebird';
 import * as StatusErrors from '../../errors/status-errors';
 import ACTION from '../action-constants';
 import getItem from './getItem';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function removeAssociatedItem(bookshelf, spec = {}, input = {}) {
+export default function removeAssociatedItem(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performRemoveAssociatedItem(bookshelf, spec, input);
+  if (trx) return performRemoveAssociatedItem(bookshelf, spec, input, output);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performRemoveAssociatedItem(bookshelf, spec, newInput);
+    return performRemoveAssociatedItem(bookshelf, spec, newInput, output);
   });
 }
 
-function performRemoveAssociatedItem(bookshelf, spec = {}, input = {}) {
+function performRemoveAssociatedItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
+    const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
     const assocName = spec[ACTION.ASSOCIATION_NAME];
     const inputMain = input[ACTION.RESOURCE_MAIN];
@@ -56,7 +58,11 @@ function performRemoveAssociatedItem(bookshelf, spec = {}, input = {}) {
     .then(([main, assoc]) => {
       return main.related(assocName).detach(assoc, { transacting: trx })
         .then(() => {
-          return resolve(main);
+          // Return data in requested format...
+          switch (output) {
+            case 'json-api': return resolve(toJsonApi(modelNameMain, main, bookshelf));
+            default: return resolve(main);
+          }
         });
     })
     .catch((error) => {
