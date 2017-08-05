@@ -39,12 +39,6 @@ export function registerModels(joint, log = true) {
     const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
     throw new JointError({ message });
   }
-  // try {
-  //   registerModel = require(`./${serviceKey}/registerModel`).default; // eslint-disable-line global-require, import/no-dynamic-require
-  // } catch (err) {
-  //   const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
-  //   throw new JointError({ message });
-  // }
 
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
