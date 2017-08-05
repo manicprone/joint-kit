@@ -4,24 +4,25 @@ import * as AuthHandler from '../../authorization/auth-handler';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function upsertItem(bookshelf, spec = {}, input = {}) {
+export default function upsertItem(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performUpsertItem(bookshelf, spec, input);
+  if (trx) return performUpsertItem(bookshelf, spec, input, output);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performUpsertItem(bookshelf, spec, newInput);
+    return performUpsertItem(bookshelf, spec, newInput, output);
   });
 }
 
-function performUpsertItem(bookshelf, spec = {}, input = {}) {
+function performUpsertItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
@@ -95,7 +96,11 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
         // ------------------------
         return resource.save(upsertData, actionOpts)
           .then((data) => {
-            return resolve(data);
+            // Return data in requested format...
+            switch (output) {
+              case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+              default: return resolve(data);
+            }
           })
           .catch((error) => {
             if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on update =>', error);
@@ -120,7 +125,11 @@ function performUpsertItem(bookshelf, spec = {}, input = {}) {
           // ------------------------
           return model.forge(lookupFieldData).save(upsertData, actionOpts)
             .then((data) => {
-              return resolve(data);
+              // Return data in requested format...
+              switch (output) {
+                case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+                default: return resolve(data);
+              }
             })
             .catch((createError) => {
               if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on create =>', createError);

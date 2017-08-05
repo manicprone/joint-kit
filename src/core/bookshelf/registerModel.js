@@ -80,7 +80,11 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
 
       // Add to bookshelf registry...
       registryEntry = bookshelf.model(modelName, modelObject);
-    }
+      if (!bookshelf.modelByTable) bookshelf.modelByTable = {};
+      if (!bookshelf.modelNameByTable) bookshelf.modelNameByTable = {};
+      bookshelf.modelByTable[tableName] = registryEntry;
+      bookshelf.modelNameByTable[tableName] = modelName;
+    } // end-if (tableName)
   } // end-if (bookshelf.Model)
 
   return registryEntry;

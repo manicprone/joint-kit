@@ -1,14 +1,14 @@
 import chai from 'chai';
 import Joint from '../../../src';
+// import JointDist from '../../../dist/lib';
 import modelConfig from '../../configs/models/model-config';
 import methodConfig from '../../configs/methods/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
-// import JointDist from '../../../dist/lib';
 
 const expect = chai.expect;
 
 // Values for expectation...
-const jointProps = ['serviceKey', 'service'];
+const jointProps = ['serviceKey', 'service', 'payloadFormat'];
 const actionsBookshelf = [
   'createItem',
   'upsertItem',

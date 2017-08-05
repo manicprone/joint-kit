@@ -15,9 +15,10 @@
 | field input validation         |   |
 | data "snapshot" capabilities   |   |
 | flexible workflow support      |   |
+| return data in native or JSON API Spec format |   |
 
 
-## Template Actions
+## Joint Library Actions
 
 ### Supported actions
 

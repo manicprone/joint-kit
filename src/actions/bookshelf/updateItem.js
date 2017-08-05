@@ -4,24 +4,25 @@ import * as AuthHandler from '../../authorization/auth-handler';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function updateItem(bookshelf, spec = {}, input = {}) {
+export default function updateItem(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performUpdateItem(bookshelf, spec, input);
+  if (trx) return performUpdateItem(bookshelf, spec, input, output);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performUpdateItem(bookshelf, spec, newInput);
+    return performUpdateItem(bookshelf, spec, newInput, output);
   });
 }
 
-function performUpdateItem(bookshelf, spec = {}, input = {}) {
+function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
@@ -90,7 +91,11 @@ function performUpdateItem(bookshelf, spec = {}, input = {}) {
         // Update item...
         return resource.save(updates, actionOpts)
           .then((data) => {
-            return resolve(data);
+            // Return data in requested format...
+            switch (output) {
+              case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+              default: return resolve(data);
+            }
           })
           .catch((error) => {
             if (debug) console.log('[JOINT] [action:updateItem] Action encountered an error =>', error);

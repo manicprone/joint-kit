@@ -19,6 +19,8 @@ export function registerModels(joint, log = true) {
 
   // Register models to base joint object...
   joint.model = {};
+  joint.modelByTable = {};
+  joint.modelNameByTable = {};
 
   if (log) {
     console.log('---------------------------');
@@ -53,6 +55,8 @@ export function registerModels(joint, log = true) {
 
       const modelObject = registerModel(service, modelDef, modelName, debug_registerModels);
       joint.model[modelName] = modelObject;
+      joint.modelByTable[modelDef.tableName] = modelObject;
+      joint.modelNameByTable[modelDef.tableName] = modelName;
     });
   } else if (log) {
     console.log('no models configured');

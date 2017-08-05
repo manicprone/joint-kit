@@ -3,12 +3,13 @@ import objectUtils from '../../utils/object-utils';
 import * as AuthHandler from '../../authorization/auth-handler';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
-import * as BookshelfUtils from './bookshelf-utils';
 import ACTION from '../action-constants';
+import * as BookshelfUtils from './bookshelf-utils';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function getItem(bookshelf, spec = {}, input = {}) {
+export default function getItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
@@ -102,7 +103,12 @@ export default function getItem(bookshelf, spec = {}, input = {}) {
 
         // Handle loadDirect requests...
         if (loadDirect.relations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.relations);
-        return resolve(data);
+
+        // Return data in requested format...
+        switch (output) {
+          case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+          default: return resolve(data);
+        }
       })
       .catch((error) => {
         // (404)
