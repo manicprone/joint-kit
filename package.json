@@ -13,7 +13,7 @@
     "build": "cross-env NODE_ENV=build rollup -c",
     "prepublish": "npm run build",
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
-    "test": "npm run build && cross-env NODE_ENV=test mocha --require babel-register test/**/*.spec.js",
+    "test": "cross-env NODE_ENV=test mocha --require babel-register test/**/*.spec.js",
     "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
     "knex": "babel-node ./node_modules/.bin/knex --knexfile ./test/db/bookshelf/knexfile.js",
     "migrate:make": "npm run knex migrate:make",

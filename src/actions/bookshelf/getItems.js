@@ -5,10 +5,11 @@ import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import * as BookshelfUtils from './bookshelf-utils';
 import ACTION from '../action-constants';
+import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function getItems(bookshelf, spec = {}, input = {}) {
+export default function getItems(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
@@ -123,7 +124,11 @@ export default function getItems(bookshelf, spec = {}, input = {}) {
             data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.relations));
           }
 
-          return resolve(data);
+          // Return data in requested format...
+          switch (output) {
+            case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+            default: return resolve(data);
+          }
         })
         .catch((error) => {
           if (debug) console.log('[JOINT] [action:getItems] Action encountered an error =>', error);
@@ -141,7 +146,11 @@ export default function getItems(bookshelf, spec = {}, input = {}) {
           data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.relations));
         }
 
-        return resolve(data);
+        // Return data in requested format...
+        switch (output) {
+          case 'json-api': return resolve(toJsonApi(modelName, data, bookshelf));
+          default: return resolve(data);
+        }
       })
       .catch((error) => {
         if (debug) console.log('[JOINT] [action:getItems] Action encountered an error =>', error);

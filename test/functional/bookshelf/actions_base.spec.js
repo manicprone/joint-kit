@@ -375,6 +375,61 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       return Promise.all([createUser, createProfile]);
     });
+
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const modelName = 'Project';
+      const projectName = 'The Storytold';
+
+      const specProject = {
+        modelName,
+        fields: [
+          { name: 'profile_id', type: 'Number', required: true },
+          { name: 'name', type: 'String', required: true },
+        ],
+      };
+      const inputProject = {
+        fields: {
+          profile_id: 2,
+          name: projectName,
+        },
+      };
+
+      const globalLevel = jointJsonApi.createItem(specProject, inputProject)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              name: projectName,
+            });
+        });
+
+      const methodLevel = joint.createItem(specProject, inputProject, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              name: projectName,
+            });
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
+    });
   }); // END - createItem
 
   // -------------------
@@ -452,6 +507,62 @@ describe('BASE ACTIONS [bookshelf]', () => {
           const dataJSON = JSON.parse(data.attributes.data);
           expect(dataJSON.c).to.equal('updated-string-value');
         });
+    });
+
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const modelName = 'AppSettings';
+      const appID = 'app-12345';
+      const settingsData = { a: true, b: false, c: 'another-string-value' };
+
+      const spec = {
+        modelName,
+        fields: [
+          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'data', type: 'JSON', required: true },
+        ],
+      };
+
+      const input = {
+        fields: { app_id: appID, data: settingsData },
+      };
+
+      const globalLevel = jointJsonApi.upsertItem(spec, input)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id: 1,
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              app_id: appID,
+            });
+        });
+
+      const methodLevel = joint.upsertItem(spec, input, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id: 1,
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              app_id: appID,
+            });
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
     });
   }); // END - upsertItem
 
@@ -565,6 +676,63 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       return expect(joint.updateItem(spec, input))
         .to.be.fulfilled;
+    });
+
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const modelName = 'Project';
+      const id = 2;
+      const name = 'The Third Name';
+
+      const spec = {
+        modelName,
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'name', type: 'String' },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+
+      const input = {
+        fields: { id, name },
+      };
+
+      const globalLevel = jointJsonApi.updateItem(spec, input)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id,
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              name,
+            });
+        });
+
+      const methodLevel = joint.updateItem(spec, input, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id,
+              type: modelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              name,
+            });
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
     });
   }); // END - updateItem
 
@@ -876,7 +1044,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withBoth]);
     });
 
-    it('should return in JSON API format when output="json-api"', () => {
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const modelName = 'Project';
       const itemID = 2;
 
@@ -1360,6 +1528,98 @@ describe('BASE ACTIONS [bookshelf]', () => {
         getProjectsInNameASC,
       ]);
     });
+
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const modelName = 'Project';
+      const profileID = 11;
+
+      const spec = {
+        modelName,
+        fields: [
+          { name: 'profile_id', type: 'Number' },
+        ],
+        defaultOrderBy: '-updated_at',
+      };
+
+      const input = {
+        fields: { profile_id: profileID },
+        paginate: { skip: 0, limit: 3 },
+        relations: ['profile'],
+        loadDirect: ['user:username'],
+      };
+
+      const globalLevel = jointJsonApi.getItems(spec, input)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data')
+            .that.is.an('array').that.has.lengthOf(3);
+
+          // Included...
+          expect(payload).to.have.property('included');
+          expect(payload.included[0]).to.contain({ type: 'Profile' });
+
+          // Meta....
+          expect(payload).to.have.property('meta');
+          expect(payload.meta)
+            .to.contain({
+              total_items: 10,
+              skip: 0,
+              limit: 3,
+            });
+
+          // First Item....
+          const firstItem = payload.data[0];
+          expect(firstItem)
+            .to.contain({
+              type: modelName,
+              id: 5,
+            });
+          expect(firstItem).to.have.property('attributes');
+          expect(firstItem.attributes)
+            .to.contain({
+              user: 'jerrysmith',
+            });
+          expect(firstItem).to.have.property('relationships');
+          expect(firstItem.relationships).to.have.keys('profile');
+        });
+
+      const methodLevel = joint.getItems(spec, input, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data')
+            .that.is.an('array').that.has.lengthOf(3);
+
+          // Included...
+          expect(payload).to.have.property('included');
+          expect(payload.included[0]).to.contain({ type: 'Profile' });
+
+          // Meta....
+          expect(payload).to.have.property('meta');
+          expect(payload.meta)
+            .to.contain({
+              total_items: 10,
+              skip: 0,
+              limit: 3,
+            });
+
+          // First Item....
+          const firstItem = payload.data[0];
+          expect(firstItem)
+            .to.contain({
+              type: modelName,
+              id: 5,
+            });
+          expect(firstItem).to.have.property('attributes');
+          expect(firstItem.attributes)
+            .to.contain({
+              user: 'jerrysmith',
+            });
+          expect(firstItem).to.have.property('relationships');
+          expect(firstItem.relationships).to.have.keys('profile');
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
+    });
   }); // END - getItems
 
   // -------------------
@@ -1442,6 +1702,49 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       return expect(joint.deleteItem(spec, input))
         .to.be.fulfilled;
+    });
+
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const modelName = 'Profile';
+
+      const spec = {
+        modelName,
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+
+      const globalLevel = jointJsonApi.deleteItem(spec, { fields: { id: 2 } })
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+              id: null,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes')
+            .that.is.empty;
+        });
+
+      const methodLevel = joint.deleteItem(spec, { fields: { id: 3 } }, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              type: modelName,
+              id: null,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes')
+            .that.is.empty;
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
     });
   }); // END - deleteItem
 

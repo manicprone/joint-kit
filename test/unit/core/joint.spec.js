@@ -1,6 +1,6 @@
 import chai from 'chai';
 import Joint from '../../../src';
-import JointDist from '../../../dist/lib';
+// import JointDist from '../../../dist/lib';
 import modelConfig from '../../configs/models/model-config';
 import methodConfig from '../../configs/methods/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
@@ -54,16 +54,16 @@ describe('JOINT', () => {
       expect(joint.serviceKey).to.equal('bookshelf');
     });
 
-    it('should be bundled correctly for shared use', () => {
-      const joint = new JointDist({
-        serviceKey: 'bookshelf',
-        service: bookshelf,
-      });
-      const keys = jointProps.concat(actionsBookshelf);
-
-      expect(joint).to.have.keys(keys);
-      expect(joint.serviceKey).to.equal('bookshelf');
-    });
+    // it('should be bundled correctly for shared use', () => {
+    //   const joint = new JointDist({
+    //     serviceKey: 'bookshelf',
+    //     service: bookshelf,
+    //   });
+    //   const keys = jointProps.concat(actionsBookshelf);
+    //
+    //   expect(joint).to.have.keys(keys);
+    //   expect(joint.serviceKey).to.equal('bookshelf');
+    // });
   });
 
   // ---------------------------------
