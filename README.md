@@ -1,12 +1,11 @@
 # Joint Lib
-
-A Node server library for rapidly implementing persisted data action logic.
-
 > Part of the Joint Stack
 
 
+A Node server library for rapidly implementing persisted data action logic.
+
 The Joint Library sits on top of your persistence layer (e.g. ORM), exposing
-ready-to-use action logic, that is abstracted to support your most common data
+ready-to-use action logic that is abstracted to support your most common data
 CRUD and relational operations.
 
 By simply defining the functionality of your actions using a straight-forward
@@ -79,12 +78,14 @@ See the [Action Guide][link-action-guide-bookshelf] for details on using each ac
 
 To use the Joint Actions, you communicate with a JSON syntax called Data Operation Notation.
 
-Each action has two parts: the "spec" and the "input".
+Each action has two parts: the `spec` and the `input`.
 
-The "spec" defines the functionality of the action. That is: the schema to which it is attached,
-the joint action it performs, the fields it accepts, who it authorizes to perform the action, etc.
+The `spec` defines the functionality of the action (the schema to which it is attached,
+the joint action it performs, the fields it accepts, who it authorizes to perform the action, etc).
 
-The "input" supplies the data for an individual action request.
+The `input` supplies the data for an individual action request.
+
+[TBC]
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
 
@@ -96,6 +97,8 @@ for your data schema.
 
 To implement custom methods, you can write your own JavaScript functions by directly accessing
 the `joint.<action>` set, or you can dynamically generate them by providing a "method config".
+
+[TBC]
 
 See the [Action Guide][link-action-guide-bookshelf] for more details.
 
