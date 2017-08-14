@@ -8,9 +8,10 @@ module.exports = {
     'AppRegistry',
     'AppContent',
     'AppSettings',
-    'User',
+    'UserInfo',
     'Role',
     'UserRole',
+    'User',
     'CodingLanguageTag',
     'ProjectCodingLanguageTag',
     'Profile',
@@ -47,6 +48,25 @@ module.exports = {
     // A user model, for managing authorization, identity, and permissions
     User: {
       tableName: 'users',
+      timestamps: {
+        created: 'created_at',
+        updated: 'updated_at',
+      },
+      associations: {
+        info: {
+          type: 'toOne',
+          path: 'id => UserInfo.user_id',
+        },
+        roles: {
+          type: 'toMany',
+          path: 'id => UserRole.user_id => UserRole.role_id => Role.id',
+        },
+      },
+    },
+
+    // Extra info supplementing the identity of a user
+    UserInfo: {
+      tableName: 'user_info',
       timestamps: {
         created: 'created_at',
         updated: 'updated_at',
