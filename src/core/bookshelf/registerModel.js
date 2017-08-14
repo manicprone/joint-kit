@@ -28,6 +28,8 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
 
           // Parse path string...
           const info = CoreUtils.parseAssociationPath(assocPath);
+          if (debug) console.log('[JOINT] [registerModel] parsed association path:', info);
+
           if (info) {
             // -----------------------------
             // Handle "toOne" association...
