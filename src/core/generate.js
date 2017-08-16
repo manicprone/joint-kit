@@ -2,6 +2,7 @@ import objectUtils from '../utils/object-utils';
 import JointError from '../errors/JointError';
 import ACTION from '../actions/action-constants';
 import registerModelBookshelf from './bookshelf/registerModel';
+import buildRouterExpress from './express/buildRouter';
 
 const namespace = 'JOINT';
 const debug_registerModels = false;
@@ -23,9 +24,9 @@ export function registerModels(joint, log = true) {
   joint.modelNameByTable = {};
 
   if (log) {
-    console.log('---------------------------');
+    console.log('----------------------------------------------------');
     console.log('Registering resource models');
-    console.log('---------------------------');
+    console.log('----------------------------------------------------');
   }
 
   // Load the registerModel function for the service implementation...
@@ -36,7 +37,7 @@ export function registerModels(joint, log = true) {
     }
   }
   if (!registerModel) {
-    const message = `[JOINT] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
+    const message = `[${namespace}] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
     throw new JointError({ message });
   }
 
@@ -70,8 +71,9 @@ export function registerMethods(joint, log = true) {
   const methodConfig = joint.methodConfig;
   const resources = methodConfig.resources;
 
-  // Register methods within "joint.method" object...
+  // Register methods to base joint object...
   joint.method = {};
+  joint.specByMethod = {};
 
   if (resources && Array.isArray(resources) && resources.length > 0) {
     resources.forEach((resourceConfig) => {
@@ -82,6 +84,7 @@ export function registerMethods(joint, log = true) {
 
       // Register resource...
       joint.method[modelNameForResource] = {};
+      joint.specByMethod[modelNameForResource] = {};
 
       if (log) {
         console.log('----------------------------------------------------');
@@ -103,7 +106,10 @@ export function registerMethods(joint, log = true) {
             console.log('=============================================================');
           }
 
-          // Add method to registry...
+          // Add method spec to registry (for lookup convenience)...
+          joint.specByMethod[modelNameForResource][methodName] = methodSpec;
+
+          // Generate method logic and add to registry...
           const methodLogic = generateMethod(joint, jointAction, methodSpec);
           if (methodLogic) {
             joint.method[modelNameForResource][methodName] = methodLogic;
@@ -126,3 +132,46 @@ function generateMethod(joint, action, spec) {
 
   return function (input) { return joint[action](spec, input); }; // eslint-disable-line func-names
 } // END - generateMethod
+
+// -----------------------------------------------------------------------------
+// Build router from route-config...
+// -----------------------------------------------------------------------------
+export function buildRouter(joint, log = true) {
+  const routeConfig = joint.routeConfig;
+  const serverKey = joint.serverKey;
+  const server = joint.server;
+  const routeDefs = routeConfig.routes;
+
+  if (log) {
+    console.log('----------------------------------------------------');
+    console.log(`Building API router (${serverKey})`);
+    console.log('----------------------------------------------------');
+  }
+
+  // Exit if a server instance is not loaded or is not recognized/supported...
+  if (!server) {
+    const message = `[${namespace}] ERROR - A server must be configured to generate a Joint router.`;
+    throw new JointError({ message });
+  }
+  if (!serverKey) {
+    const message = `[${namespace}] ERROR - Could not generate a router. The provided server is either not recognized or not supported by Joint.`;
+    throw new JointError({ message });
+  }
+
+  // Load the buildRouter function for the server implementation...
+  let performBuildRouter = null;
+  switch (serverKey) {
+    case 'express': {
+      performBuildRouter = buildRouterExpress;
+    }
+  }
+
+  // Build the router, and add to the joint instance...
+  if (routeDefs && Array.isArray(routeDefs) && routeDefs.length > 0) {
+    joint.router = performBuildRouter(joint, routeDefs, log);
+  } else if (log) {
+    console.log('no routes configured');
+  }
+
+  if (log) console.log('');
+} // END - registerModels

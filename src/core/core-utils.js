@@ -1,4 +1,34 @@
 // -----------------------------------------------------------------------------
+// Inspects the provided service and attempts to determine the correct
+// serviceKey. If a service instance is not provided, or is not recognized, the
+// function returns null.
+// -----------------------------------------------------------------------------
+export function determineServiceKeyFromService(service) {
+  let serviceKey = null;
+
+  if (service) {
+    if (service.knex && typeof service.model === 'function') serviceKey = 'bookshelf';
+  }
+
+  return serviceKey;
+}
+
+// -----------------------------------------------------------------------------
+// Inspects the provided server and attempts to determine the correct
+// serverKey. If a server instance is not provided, or is not recognized, the
+// function returns null.
+// -----------------------------------------------------------------------------
+export function determineServerKeyFromServer(server) {
+  let serverKey = null;
+
+  if (server) {
+    if (server) serverKey = 'express';
+  }
+
+  return serverKey;
+}
+
+// -----------------------------------------------------------------------------
 // Parses the provided path string for an associated resource,
 // into a descriptive object for processing.
 // -----------------------------------------------------------------------------

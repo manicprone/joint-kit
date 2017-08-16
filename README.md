@@ -1,16 +1,22 @@
 # Joint Lib
 > Part of the Joint Stack
 
+A Node server library for rapidly implementing persisted data logic and
+publishing RESTful endpoints.
 
-A Node server library for rapidly implementing persisted data action logic.
+Not opinionated. Super flexible. Use it with existing code or use it to
+generate an entire custom method library and client API from scratch, in minutes.
 
 The Joint Library sits on top of your persistence layer (e.g. ORM), exposing
-ready-to-use action logic that is abstracted to support your most common data
-CRUD and relational operations.
+ready-to-use action logic that is abstracted to support your most common CRUD
+and relational data operations. Use the abstract actions to quickly write your
+concrete data methods.
 
-By simply defining the functionality of your actions using a straight-forward
-JSON syntax, you can implement an entire data method library for your application
-in minutes.
+Take it further, and automatically generate custom methods for your application
+using a straight-forward JSON syntax. No programming logic required.
+
+If you need to serve your custom methods as a client API, automatically generate
+RESTful endpoints using the JSON syntax, as well.
 
 
 ## Table of Contents
@@ -21,6 +27,7 @@ in minutes.
 * [Joint Actions][section-joint-actions]
 * [Data Operation Notation][section-data-operation-notation]
 * [Generating Custom Methods][section-generating-custom-methods]
+* [Generating a RESTful API][section-generating-a-restful-api]
 * [The Joint Stack][section-the-joint-stack]
 * [License][section-license]
 
@@ -38,6 +45,17 @@ The Joint Library currently supports:
 | Service                              | Persistence Options          |
 | ------------------------------------ | ---------------------------- |
 | [Bookshelf][link-bookshelf-site]     | Postgres, MySQL, SQLite3     |
+
+
+To generate a RESTful API on top of your custom methods, you need:
+
+* a supported server framework (e.g. Express)
+
+The Joint Library currently supports:
+
+| Server                          |
+| ------------------------------- |
+| [Express][link-express-site]    |
 
 
 ## Install
@@ -103,32 +121,24 @@ the `joint.<action>` set, or you can dynamically generate them by providing a "m
 See the [Action Guide][link-action-guide-bookshelf] for more details.
 
 
+## Generating a RESTful API
+
+This feature is only available for dynamically-generated custom methods.
+
+To dynamically generate RESTful endpoints for your custom methods, you must
+provide a "route config".
+
+[TBC]
+
+
 ## The Joint Stack
 
+[TBC]
 
-```
-
-   JointServer                                   -  route-config.js
-   [HTTP API] Express
-
-                      |
-                      |
-. __________________________________________ .
-|                                            |
-|  JointLib                                  |   -  method-config.js
-|  [SDK] Bookshelf/knex, DON                 |   -  model-config.js
-|                                            |                       
-. __________________________________________ .
-
-                      |
-                      |
-   JointEngine                                   -  db-config.js
-   [Persistence] Postgres, Bookshelf/knex
-
-```
 
 ## License
 
+[TBC]
 
 
 [section-prerequisites]: #prerequisites
@@ -137,8 +147,11 @@ See the [Action Guide][link-action-guide-bookshelf] for more details.
 [section-joint-actions]: #joint-actions
 [section-data-operation-notation]: #data-operation-notation
 [section-generating-custom-methods]: #generating-custom-methods
+[section-generating-a-restful-api]: #generating-a-restful-api
 [section-the-joint-stack]: #the-joint-stack
 [section-license]: #license
 
 [link-bookshelf-site]: http://bookshelfjs.org
 [link-action-guide-bookshelf]: https://github.com/manicprone/joint-lib/blob/master/src/actions/README.md
+
+[link-express-site]: http://expressjs.com

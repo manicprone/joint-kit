@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import * as AuthHandler from '../../../src/authorization/auth-handler';
 import Joint from '../../../src';
-import modelConfig from '../../configs/models/model-config';
+import modelConfig from '../../configs/model-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -20,13 +20,11 @@ let jointJsonApi = null;
 describe('BASE ACTIONS [bookshelf]', () => {
   before(() => {
     joint = new Joint({
-      serviceKey: 'bookshelf',
       service: bookshelf,
     });
     joint.generate({ modelConfig, log: false });
 
     jointJsonApi = new Joint({
-      serviceKey: 'bookshelf',
       service: bookshelf,
       output: 'json-api',
     });

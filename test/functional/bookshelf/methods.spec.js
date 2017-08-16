@@ -1,8 +1,8 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import Joint from '../../../src';
-import modelConfig from '../../configs/models/model-config';
-import methodConfig from '../../configs/methods/method-config';
+import modelConfig from '../../configs/model-config';
+import methodConfig from '../../configs/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -16,7 +16,6 @@ let joint = null;
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   before(() => {
     joint = new Joint({
-      serviceKey: 'bookshelf',
       service: bookshelf,
     });
     joint.generate({ modelConfig, methodConfig, log: false });
