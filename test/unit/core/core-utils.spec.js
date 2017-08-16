@@ -1,4 +1,5 @@
 import chai from 'chai';
+import bookshelf from '../../db/bookshelf/bookshelf';
 import * as CoreUtils from '../../../src/core/core-utils';
 
 const expect = chai.expect;
@@ -7,6 +8,32 @@ const expect = chai.expect;
 // CORE (core-utils)
 // -----------------
 describe('CORE [core-utils]', () => {
+  // ---------------------------------------
+  // Testing: determineServiceKeyFromService
+  // ---------------------------------------
+  describe('determineServiceKeyFromService', () => {
+    it('should return null when a service is not provided', () => {
+      const service = null;
+      expect(CoreUtils.determineServiceKeyFromService(service)).to.be.null;
+    });
+
+    it('should return null when an unrecognized service is provided', () => {
+      const service = {
+        version: '0.0.0',
+        data: [],
+        fauxLogic: () => {
+          return null;
+        },
+      };
+      expect(CoreUtils.determineServiceKeyFromService(service)).to.be.null;
+    });
+
+    it('should return "bookshelf" when the bookshelf service is provided', () => {
+      const service = bookshelf;
+      expect(CoreUtils.determineServiceKeyFromService(service)).to.equal('bookshelf');
+    });
+  });
+
   // ------------------------------
   // Testing: parseAssociationPath
   // ------------------------------
