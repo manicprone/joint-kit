@@ -1,11 +1,11 @@
 # Joint Lib
 > Part of the Joint Stack
 
-A Node server library for rapidly implementing persisted data logic and
-publishing RESTful endpoints.
+A Node server library for rapidly implementing data logic and generating RESTful
+endpoints.
 
 Not opinionated. Super flexible. Use it with existing code or use it to
-generate an entire custom method library and client API from scratch, in minutes.
+generate an entire custom method library and client API from scratch.
 
 The Joint Library sits on top of your persistence layer (e.g. ORM), exposing
 ready-to-use action logic that is abstracted to support your most common CRUD
@@ -16,7 +16,7 @@ Take it further, and automatically generate custom methods for your application
 using a straight-forward JSON syntax. No programming logic required.
 
 If you need to serve your custom methods as a client API, automatically generate
-RESTful endpoints using the JSON syntax, as well.
+RESTful endpoints using the JSON syntax.
 
 
 ## Table of Contents
