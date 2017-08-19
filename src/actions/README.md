@@ -448,29 +448,33 @@ input: {
 
 ## To Do
 
-* Consistently reference "relations" as "associations".
+* Change `relations` => `associations` (Update `spec` and `input`).
 
-* Support fields.defaultValue for getItem, getItems, et al.
+* Support `fields.defaultValue` for `getItem`, `getItems`, et al.
+
+* Support multiple fields on loadDirect
+  e.g. `input.loadDirect: ['profile:*']` -and- `input.loadDirect: ['profile']` => mount all fields.
+  e.g. `input.loadDirect: ['profile:name,description,rank']` => mount multiple specified fields.
 
 * Support auto-injected / overrides for input options (on method config)
-  e.g. Enforce => input.loadDirect: ['roles:key'] on all requests. (spec.forceLoadDirect, spec.forceAssociations)
+  e.g. Enforce => `input.loadDirect: ['roles:key']` on all requests. (`spec.forceLoadDirect`, `spec.forceAssociations`)
   e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action).
 
-* Support "fields.locked:true" option, for permitting a field declaration on a spec, that is
+* Support `fields.locked: true` option, for permitting a field declaration on a spec, that is
   exposed for automatic handling (i.e. does not accept user-provided input).
   -or-
-  Support as: { fields.autoValue: '% now %' } => which locks, plus declares the auto-generated value.
+  Support as: `{ fields.autoValue: '% now %' }` => which locks, plus declares the auto-generated value.
 
-* Implement advanced "fields.defaultValue" option, that supports auto-transforms and other
+* Implement advanced `fields.defaultValue` option, that supports auto-transforms and other
   useful dynamic mutations.
-  e.g. { fields.defaultValue: '% camelcase(title) %' } => which will set the default value
+  e.g. `{ fields.defaultValue: '% camelcase(title) %' }` => which will set the default value
        to the camelcase of the provided "title" field.
-  e.g. { fields.defaultValue: '% now %' } => which will set a Date field value to the current date/time.
+  e.g. `{ fields.defaultValue: '% now %' }` => which will set a Date field value to the current date/time.
 
-* Support AND/OR logic for fields.lookupField (for allowing aggregate field lookups)
-  e.g. lookup with (app_id AND key), but utilize "required:true" to specify if the
+* Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
+  e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the
        conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"
-       i.e. "lookup:true" (implied AND), "lookupOr:true" (uses OR like current implementation).
+       i.e. `lookup:true` (implied AND), `lookupOr:true` (uses `Or` like current implementation).
 
 * Hook input field validation framework into action logic.
 

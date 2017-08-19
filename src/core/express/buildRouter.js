@@ -78,6 +78,11 @@ function generateRouteLogic(joint, methodDef) {
         });
       }
 
+      // Support "with" field...
+      if (inputValues.with) {
+        input.relations = inputValues.with.split(',');
+      }
+
       if (debugRequest) console.log('[JOINT-ROUTER] input =>', input);
 
       jointMethod(input)
