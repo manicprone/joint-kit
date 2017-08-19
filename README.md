@@ -4,19 +4,19 @@
 A Node server library for rapidly implementing data logic and generating RESTful
 endpoints.
 
-Not opinionated. Super flexible. Use it with existing code or use it to
+Designed to be flexible. Mix it with existing code and/or use it to
 generate an entire custom method library and client API from scratch.
 
 The Joint Library sits on top of your persistence layer (e.g. ORM), exposing
-ready-to-use action logic that is abstracted to support your most common CRUD
-and relational data operations. Use the abstract actions to quickly write your
-concrete data methods.
+ready-to-use action logic that supports your most common CRUD and relational
+data operations. Leverage the generic actions to quickly write your
+application-specific data methods.
 
 Take it further, and automatically generate custom methods for your application
 using a straight-forward JSON syntax. No programming logic required.
 
-If you need to serve your custom methods as a client API, automatically generate
-RESTful endpoints using the JSON syntax.
+If you need to serve your custom methods as an HTTP API, use the JSON syntax
+to automatically generate RESTful endpoints for your Node server.
 
 
 ## Table of Contents
@@ -25,7 +25,7 @@ RESTful endpoints using the JSON syntax.
 * [Install][section-install]
 * [How to Use the Library][section-how-to-use]
 * [Joint Actions][section-joint-actions]
-* [Data Operation Notation][section-data-operation-notation]
+* [Data Op Notation][section-data-op-notation]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
 * [The Joint Stack][section-the-joint-stack]
@@ -46,6 +46,7 @@ The Joint Library currently supports:
 | ------------------------------------ | ---------------------------- |
 | [Bookshelf][link-bookshelf-site]     | Postgres, MySQL, SQLite3     |
 
+<br /><br />
 
 To generate a RESTful API on top of your custom methods, you need:
 
@@ -66,6 +67,26 @@ $ npm install joint-lib --save
 
 
 ## How to Use the Library
+
+You can use Joint as minimally or as thoroughly as you require.
+
+Let's start with the most minimal use cases.
+
+Let's say you have an existing application that connects to an existing database schema.
+It uses Bookshelf as its ORM service (The only service supported at this time).
+
+You have already defined your Models:
+```
+(show: (posts) post.js, (tags) tag.js)
+
+```
+
+<br />
+
+Next up, you want to implement the essential CRUD methods for these resources,
+so your application can start managing this data.
+
+[Move this to the detail guide. Just provide a quick view of common code usage.]
 
 [TBC]
 
@@ -92,9 +113,9 @@ The following abstract actions are immediately available once the library is ins
 See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
 
 
-## Data Operation Notation
+## Data Op Notation
 
-To use the Joint Actions, you communicate with a JSON syntax called Data Operation Notation.
+To use the Joint Actions, you communicate with a JSON syntax called Data Op Notation.
 
 Each action has two parts: the `spec` and the `input`.
 
@@ -145,7 +166,7 @@ provide a "route config".
 [section-install]: #install
 [section-how-to-use]: #how-to-use-the-library
 [section-joint-actions]: #joint-actions
-[section-data-operation-notation]: #data-operation-notation
+[section-data-op-notation]: #data-op-notation
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api
 [section-the-joint-stack]: #the-joint-stack

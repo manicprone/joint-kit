@@ -95,6 +95,30 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
             });
           });
       });
+
+      it('should return associations when the "with" field is used', () => {
+        const userID = 6;
+        const assocName = 'info';
+        const resourceURI = `/user/${userID}`;
+        const queryString = `with=${assocName}`;
+
+        return chai.request(apiURL).get(resourceURI).query(queryString)
+          .then((res) => {
+            const resBody = res.body;
+            const data = resBody.data;
+
+            expect(res).to.have.status(200);
+            expect(resBody).to.have.keys(['data', 'included']);
+            expect(data).to.contain({
+              type: 'User',
+              id: userID,
+            });
+            expect(data.attributes).to.contain({
+              username: 'ricksanchez',
+            });
+            expect(data.relationships).to.have.keys([assocName]);
+          });
+      });
     }); // END - GET /users
 
   }); // END - User
