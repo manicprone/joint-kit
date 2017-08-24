@@ -73,7 +73,7 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
           });
       });
 
-      it('should support paginated requests when the "skip" and "limit" fields are used', () => {
+      it('should support paginated requests when the "skip" and "limit" parameters are used', () => {
         const skip = 0;
         const limit = 3;
         const resourceURI = '/users';
@@ -127,7 +127,7 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
           });
       });
 
-      it('should return associations when the "with" field is used', () => {
+      it('should return associations when the "with" parameter is used', () => {
         const userID = 6;
         const assocName = 'info';
         const resourceURI = `/user/${userID}`;
@@ -148,6 +148,33 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
               username: 'ricksanchez',
             });
             expect(data.relationships).to.have.keys([assocName]);
+          });
+      });
+
+      it('should load association data directly to the base attributes when the "load" parameter is used', () => {
+        const userID = 4;
+        const assocName = 'info';
+        const assocField = 'professional_title';
+        const resourceURI = `/user/${userID}`;
+        const queryString = `load=${assocName}:${assocField}`;
+
+        return chai.request(apiURL).get(resourceURI).query(queryString)
+          .then((res) => {
+            const resBody = res.body;
+            const data = resBody.data;
+
+            expect(res).to.have.status(200);
+            expect(resBody).to.have.keys(['data']);
+
+            expect(data).to.contain({
+              type: 'User',
+              id: userID,
+            });
+
+            expect(data.attributes)
+              .to.contain({
+                info: 'EdgeCaser',
+              });
           });
       });
     }); // END - GET /user/:id
