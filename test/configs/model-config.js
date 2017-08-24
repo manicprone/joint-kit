@@ -61,6 +61,10 @@ module.exports = {
           type: 'toMany',
           path: 'id => UserRole.user_id => UserRole.role_id => Role.id',
         },
+        profiles: {
+          type: 'toMany',
+          path: 'id => Profile.user_id',
+        },
       },
     },
 
