@@ -949,8 +949,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it('should return relation data when the "input.relations" property is used', () => {
-      const relationName = 'profile';
-
+      const relationNameProfile = 'profile';
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -959,27 +958,48 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProjectWithRelation = {
         fields: { id: 1 },
-        relations: [relationName],
+        relations: [relationNameProfile],
       };
       const inputProjectWithoutRelation = {
         fields: { id: 1 },
       };
 
-      const withRelation = joint.getItem(specProject, inputProjectWithRelation)
+      const relationNameProfiles = 'profiles';
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      };
+      const inputUser = {
+        fields: { id: 4 },
+        relations: [relationNameProfiles],
+      };
+
+      const withRelation01 = joint.getItem(specProject, inputProjectWithRelation)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
-            .that.has.property(relationName);
+            .that.has.property(relationNameProfile);
         });
 
-      const withoutRelation = joint.getItem(specProject, inputProjectWithoutRelation)
+      const withoutRelation01 = joint.getItem(specProject, inputProjectWithoutRelation)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
             .that.is.empty;
         });
 
-      return Promise.all([withRelation, withoutRelation]);
+      const withRelation02 = joint.getItem(specUser, inputUser)
+        .then((data) => {
+          expect(data)
+            .to.have.property('relations')
+            .that.has.property(relationNameProfiles);
+
+          expect(data.relations[relationNameProfiles]).to.have.length(3);
+        });
+
+      return Promise.all([withRelation01, withoutRelation01, withRelation02]);
     });
 
     it('should load relation data directly to the base attributes when the "input.loadDirect" property is used', () => {
