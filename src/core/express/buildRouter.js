@@ -82,7 +82,7 @@ function generateRouteLogic(joint, methodDef) {
       if (inputValues.with) input.relations = inputValues.with.split(',');
 
       // Support "load" field...
-      if (inputValues.load) input.loadDirect = inputValues.with.split(',');
+      if (inputValues.load) input.loadDirect = inputValues.load.split(',');
 
       // Support "skip" and "limit" fields...
       if (objectUtils.has(inputValues, 'skip') || objectUtils.has(inputValues, 'limit')) {
