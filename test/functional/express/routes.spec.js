@@ -53,16 +53,47 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
           .then((res) => {
             const resBody = res.body;
             const data = resBody.data;
+            const meta = resBody.meta;
 
             expect(res).to.have.status(200);
             expect(resBody).to.have.keys(['data', 'meta']);
+
             expect(data).to.have.length(10);
+            expect(meta).to.have.keys(['total_items']);
+            expect(meta).to.contain({
+              total_items: 10,
+            });
 
             const firstItem = data[0];
             expect(firstItem).to.have.property('attributes');
             expect(firstItem).to.contain({
               type: 'User',
               id: 2,
+            });
+          });
+      });
+
+      it('should support paginated requests when the "skip" and "limit" fields are used', () => {
+        const skip = 0;
+        const limit = 3;
+        const resourceURI = '/users';
+        const queryString = `skip=${skip}&limit=${limit}`;
+
+        return chai.request(apiURL).get(resourceURI).query(queryString)
+          .then((res) => {
+            const resBody = res.body;
+            const data = resBody.data;
+            const meta = resBody.meta;
+
+            expect(res).to.have.status(200);
+            expect(resBody).to.have.keys(['data', 'meta']);
+
+            expect(data).to.have.length(limit);
+            expect(meta).to.have.keys(['total_items', 'skip', 'limit']);
+            expect(meta).to.contain({
+              total_items: 10,
+              skip,
+              limit,
             });
           });
       });
@@ -119,7 +150,7 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(data.relationships).to.have.keys([assocName]);
           });
       });
-    }); // END - GET /users
+    }); // END - GET /user/:id
 
   }); // END - User
 });

@@ -79,8 +79,16 @@ function generateRouteLogic(joint, methodDef) {
       }
 
       // Support "with" field...
-      if (inputValues.with) {
-        input.relations = inputValues.with.split(',');
+      if (inputValues.with) input.relations = inputValues.with.split(',');
+
+      // Support "load" field...
+      if (inputValues.load) input.loadDirect = inputValues.with.split(',');
+
+      // Support "skip" and "limit" fields...
+      if (objectUtils.has(inputValues, 'skip') || objectUtils.has(inputValues, 'limit')) {
+        input.paginate = {};
+        if (objectUtils.has(inputValues, 'limit')) input.paginate.skip = inputValues.skip;
+        if (objectUtils.has(inputValues, 'limit')) input.paginate.limit = inputValues.limit;
       }
 
       if (debugRequest) console.log('[JOINT-ROUTER] input =>', input);

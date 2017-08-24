@@ -62,6 +62,8 @@ function buildCollectionPackage(type, data, relationHash, service) {
   if (data.pagination) {
     const paginationInfo = buildPaginationInfo(data.pagination);
     collectionPackage.meta = Object.assign(collectionPackage.meta, paginationInfo);
+  } else {
+    collectionPackage.meta = Object.assign(collectionPackage.meta, { total_items: data.length });
   }
 
   // Build filter info...
