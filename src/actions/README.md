@@ -30,12 +30,12 @@
 | getItem                  | The base operation for retrieving a single item  |
 | getItems                 | The base operation for retrieving a collection of items |
 | deleteItem               | The base delete operation for a single item |
-| addAssociatedItem        | Add an item association to a main resource |
+| addAssociatedItems       | Add one to many item associations to a main resource |
 | hasAssociatedItem        | Returns the requested associated item, if it is associated, otherwise returns a 404 |
 | removeAssociatedItem     | Removes an associated item from a main resource |
 | removeAllAssociatedItems | Removes all item instances of an association from a main resource |
 
-> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItem, removeAssociatedItem, removeAllAssociatedItems
+> The following actions always run on a transaction: create, upsertItem, updateItem, deleteItem, addAssociatedItems, removeAssociatedItem, removeAllAssociatedItems
 
 
 ### Upcoming actions
@@ -82,7 +82,35 @@ All available properties
 
 ### createItem
 
-(provide example)
+##### _spec_
+
+```
+spec: {
+  modelName: 'User',
+  fields: [
+    { name: 'username', type: 'String', required: true },
+    { name: 'external_id', type: 'String' },
+    { name: 'email', type: 'String' },
+    { name: 'display_name', type: 'String' },
+    { name: 'avatar_url', type: 'String' },
+    { name: 'is_verified', type: 'Boolean', defaultValue: false },
+  ],
+}
+```
+
+##### _input_
+
+```
+input: {
+  fields: {
+    username: 'segmented',
+    external_id: '100333',
+    email: 'segmented@fluxmail.org',
+    display_name: 'Segmented',
+    avatar_url: 'https://the-deep/profile/100333/avatar.png',
+  },
+}
+```
 
 
 ### upsertItem
@@ -227,7 +255,7 @@ input: {
 ```
 
 
-### addAssociatedItem
+### addAssociatedItems
 
 ##### _spec_
 
@@ -254,7 +282,7 @@ spec: {
 }
 ```
 
-##### _input_
+##### _input_ (single resource)
 
 ```
 input: {
@@ -267,6 +295,25 @@ input: {
   association: {
     fields: {
       key: 'tag-001',
+    },
+  },
+  trx: trx | null,
+}
+```
+
+##### _input_ (multiple resources)
+
+```
+input: {
+  main: {
+    fields: {
+      id: 1,
+    },
+    authBundle: {...},
+  },
+  association: {
+    fields: {
+      key: ['tag-002', 'tag-003', 'tag-005'],
     },
   },
   trx: trx | null,

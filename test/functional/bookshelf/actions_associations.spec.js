@@ -513,7 +513,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should associate a resource when the spec is satisfied', () => {
-      const mainID = 2;
       const associationName = 'codingLanguageTags';
 
       const spec = {
@@ -533,10 +532,11 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         associationName,
       };
-      const input = {
+
+      const inputSingle = {
         main: {
           fields: {
-            id: mainID,
+            id: 2,
           },
         },
         association: {
@@ -546,10 +546,23 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.addAssociatedItem(spec, input)
+      const inputMultiple = {
+        main: {
+          fields: {
+            id: 5,
+          },
+        },
+        association: {
+          fields: {
+            id: [1, 2, 9, 10], // java, jsp, xslt, html
+          },
+        },
+      };
+
+      const addSingleAssoc = joint.addAssociatedItem(spec, inputSingle)
         .then((data) => {
           expect(data.attributes).to.contain({
-            id: mainID,
+            id: 2,
           });
 
           const associatedTags = data.relations[associationName];
@@ -559,6 +572,23 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(associatedTags.models[2].attributes.key).to.equal('javascript');
           expect(associatedTags.models[3].attributes.key).to.equal('html');
         });
+
+      const addMultipleAssoc = joint.addAssociatedItem(spec, inputMultiple)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id: 5,
+          });
+
+          const associatedTags = data.relations[associationName];
+          expect(associatedTags.models).to.have.length(5);
+          expect(associatedTags.models[0].attributes.key).to.equal('python');
+          expect(associatedTags.models[1].attributes.key).to.equal('java');
+          expect(associatedTags.models[2].attributes.key).to.equal('jsp');
+          expect(associatedTags.models[3].attributes.key).to.equal('xslt');
+          expect(associatedTags.models[4].attributes.key).to.equal('html');
+        });
+
+      return Promise.all([addSingleAssoc, addMultipleAssoc]);
     });
 
     it('should ensure a duplicate association is not created, if the association already exists', () => {

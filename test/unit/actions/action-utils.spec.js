@@ -374,6 +374,7 @@ describe('ACTION-UTILS', () => {
     it('should cast all provided fieldData values to the data type specified in the spec', () => {
       const fieldSpec = [
         { name: 'user_id', type: 'Number' },
+        { name: 'item_id', type: 'Number' },
         { name: 'title', type: 'String' },
         { name: 'is_live', type: 'Boolean' },
         { name: 'is_insane', type: 'Boolean' },
@@ -385,6 +386,7 @@ describe('ACTION-UTILS', () => {
 
       const fieldData = {
         user_id: '1',
+        item_id: ['2', '3', '5', '8'],
         title: 123,
         is_live: 'true',
         is_insane: 'TRUE',
@@ -399,6 +401,7 @@ describe('ACTION-UTILS', () => {
 
       expect(preparedFieldData).to.deep.equal({
         user_id: 1,
+        item_id: [2, 3, 5, 8],
         title: '123',
         is_live: true,
         is_insane: true,

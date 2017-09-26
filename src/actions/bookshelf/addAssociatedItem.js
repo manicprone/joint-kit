@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import * as StatusErrors from '../../errors/status-errors';
 import ACTION from '../action-constants';
 import getItem from './getItem';
+import getItems from './getItems';
 import toJsonApi from './serializers/json-api';
 
 const debug = false;
@@ -25,6 +26,7 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
+    const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
     const assocName = spec[ACTION.ASSOCIATION_NAME];
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
@@ -52,11 +54,16 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
     // Lookup resources...
     return Promise.all([
       getItem(bookshelf, specMain, inputMain),
-      getItem(bookshelf, specAssoc, inputAssoc),
+      getItems(bookshelf, specAssoc, inputAssoc),
     ])
-    // Add association to main...
     .then(([main, assoc]) => {
-      return main.related(assocName).attach(assoc, { transacting: trx })
+      // Reject with 404 if none of the requested associations were found...
+      if (assoc.length === 0) {
+        return reject(StatusErrors.generateResourceNotFoundError(modelNameAssoc));
+      }
+
+      // Otherwise, attach associations to main...
+      return main.related(assocName).attach(assoc.models, { transacting: trx })
         .then(() => {
           // Return data in requested format...
           switch (output) {
