@@ -23,7 +23,7 @@ to automatically generate RESTful endpoints for your Node server.
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
-* [Example Usage][section-example-usage]
+* [Conceptual Usage][section-conceptual-usage]
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [Generating Models][section-generating-models]
@@ -43,9 +43,9 @@ To use the Joint Library, you need:
 
 The Joint Library currently supports:
 
-| Service                              | Persistence Options          |
-| ------------------------------------ | ---------------------------- |
-| [Bookshelf][link-bookshelf-site]     | Postgres, MySQL, SQLite3     |
+| Service                              | Required Plugins                              | Persistence Options          |
+| ------------------------------------ | --------------------------------------------- | ---------------------------- |
+| [Bookshelf][link-bookshelf-site]     | [registry][link-bookshelf-plugin-registry], [pagination][link-bookshelf-plugin-pagination] | Postgres, MySQL, SQLite3     |
 
 
 <br />
@@ -69,23 +69,25 @@ $ npm install joint-lib --save
 ```
 
 
-## Example Usage
+## Conceptual Usage
+
+Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational logic.
+
+Given you have established a `bookshelf.js` configuration file (which hooks to your database) and you have registered a set of Models upon which to operate...
+
+The conceptual idea of the library goes like this:
 
 index.js
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf';
 
-// Fire up a joint, leveraging your Bookshelf configuration...
+// Fire up a joint, specifying your Bookshelf configuration:
 const joint = new Joint({
   service: bookshelf,
 });
 
-// Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational logic...
-
-// The "spec" defines the functionality of your operation:
-// modelName - maps to the registered Model
-// fields    - defines all fields allowed for this operation
+// The "spec" defines the functionality of your operation, and the fields permitted:
 const spec = {
   modelName: 'BlogProfile',
   fields: [
@@ -107,7 +109,7 @@ const input = {
   },
 };
 
-// Leverage the appropriate Joint Action to implement your operation:
+// Leverage the appropriate Joint Action to handle the operation:
 joint.createItem(spec, input)
   .then((payload) => { ... })
   .catch((error) => { ... });
@@ -119,7 +121,6 @@ joint.createItem(spec, input)
 ```javascript
 import bookshelf from '../services/bookshelf';
 
-// Declare model...
 const BlogProfile = bookshelf.Model.extend({
   tableName: 'blog_profiles',
   idAttribute: 'id',
@@ -132,7 +133,7 @@ const BlogProfile = bookshelf.Model.extend({
   },
 });
 
-// Add model to Bookshelf registry...
+// Model added to Bookshelf registry...
 bookshelf.model('BlogProfile', BlogProfile),
 ```
 
@@ -146,7 +147,7 @@ const knex = require('knex')({ ... });
 // Initialize bookshelf...
 const bookshelf = require('bookshelf')(knex);
 
-// Enable plugins...
+// Enable required plugins...
 bookshelf.plugin('registry');
 bookshelf.plugin('pagination');
 
@@ -155,7 +156,12 @@ export default bookshelf;
 
 <br />
 
-The idea is, you can rapidly implement a custom method library (manually) via this architecture:
+### In Practice
+
+The idea is, you can rapidly implement a custom method library (manually) by wrapping custom functions around
+the Joint Actions, with a defined `spec`:
+
+**For Example:**
 
 /methods/blog-profile.js
 ```javascript
@@ -233,6 +239,8 @@ And, the beauty of the manual capability, is that you can leverage the core logi
 (which typically represents the majority of the programming), while maintaining the flexibility to write
 your customized logic alongside:
 
+**For Example:**
+
 ```javascript
 
 export function createProfile(input) {
@@ -303,18 +311,19 @@ joint.<action>(spec = {}, input = {}, output = 'native')
 
 The following abstract actions are immediately available once the library is installed:
 
-| Action                   | Description                                                           |
-| ------------------------ | --------------------------------------------------------------------- |
-| createItem               | Create operation for a single item                                    |
-| upsertItem               | Upsert operation for a single item                                    |
-| updateItem               | Update operation for a single item                                    |
-| getItem                  | Read operation for retrieving a single item                           |
-| getItems                 | Read operation for retrieving a collection of items                   |
-| deleteItem               | Delete operation for a single item                                    |
-| addAssociatedItems       | Operation for associating one to many items to a main resource        |
-| hasAssociatedItem        | Operation for checking the existence of an association                |
-| removeAssociatedItem     | Operation for disassociating an item from a main resource             |
-| removeAllAssociatedItems | Operation for disassociating all items of a type from a main resource |
+| Action                   | Description                                                               |
+| ------------------------ | ------------------------------------------------------------------------- |
+| createItem               | Create operation for a single item                                        |
+| upsertItem               | Upsert operation for a single item                                        |
+| updateItem               | Update operation for a single item                                        |
+| getItem                  | Read operation for retrieving a single item                               |
+| getItems                 | Read operation for retrieving a collection of items                       |
+| deleteItems              | Delete operation for one to many items                                    |
+| addAssociatedItems       | Operation for associating one to many items to a main resource            |
+| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
+| getAssociatedItems       | Operation for retrieving all associations of a type from a main resource  |
+| removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
+| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
@@ -336,6 +345,7 @@ generated natively by the service (currently, i.e. Bookshelf).
 
 However, Joint supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making
 it ready-to-use for RESTful data transport.
+
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
 
@@ -392,7 +402,7 @@ provide a "route config".
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
-[section-example-usage]: #example-usage
+[section-conceptual-usage]: #conceptual-usage
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-generating-models]: #generating-models
@@ -402,6 +412,8 @@ provide a "route config".
 [section-license]: #license
 
 [link-bookshelf-site]: http://bookshelfjs.org
+[link-bookshelf-plugin-registry]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Model-Registry
+[link-bookshelf-plugin-pagination]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Pagination
 [link-action-guide-bookshelf]: https://github.com/manicprone/joint-lib/blob/master/src/actions/README.md
 
 [link-express-site]: http://expressjs.com
