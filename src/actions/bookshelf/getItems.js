@@ -3,8 +3,8 @@ import objectUtils from '../../utils/object-utils';
 import * as AuthHandler from '../../authorization/auth-handler';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
-import * as BookshelfUtils from './bookshelf-utils';
 import ACTION from '../action-constants';
+import * as BookshelfUtils from './bookshelf-utils';
 import toJsonApi from './serializers/json-api';
 
 const debug = false;
@@ -84,40 +84,38 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
     }
     if (relations) actionOpts.withRelated = relations;
 
-    // Build where clause...
-    const whereOpts = {};
-    if (inputFields && specFields) {
-      specFields.forEach((fieldSpec) => {
-        const fieldName = fieldSpec.name;
-        const hasInput = objectUtils.has(inputFields, fieldName);
-
-        if (hasInput) {
-          whereOpts[fieldName] = inputFields[fieldName];
-        }
-      }); // end-specFields.forEach
-    } // end-if (inputFields && specFields)
-
-    // Set orderBy options...
-    let orderByQuery = {};
-    const defaultOrderBy = objectUtils.get(spec, ACTION.SPEC_DEFAULT_ORDER_BY, null);
-    const requestedOrderBy = objectUtils.get(input, ACTION.INPUT_ORDER_BY, null);
-    const orderByOpts = requestedOrderBy || defaultOrderBy;
-    if (orderByOpts) {
-      const orderBy = BookshelfUtils.buildOrderBy(orderByOpts);
-      /* eslint-disable array-callback-return */
-      orderByQuery = (queryBuilder) => {
-        orderBy.map((orderOpt) => {
-          queryBuilder.orderBy(orderOpt.col, orderOpt.order);
+    // Prepare query...
+    const queryOpts = (queryBuilder) => {
+      // Build where clause...
+      if (inputFields && specFields) {
+        specFields.forEach((fieldSpec) => {
+          const fieldName = fieldSpec.name;
+          const hasInput = objectUtils.has(inputFields, fieldName);
+          if (hasInput) {
+            const inputValue = inputFields[fieldName];
+            if (Array.isArray(inputValue)) queryBuilder.where(fieldName, 'IN', inputValue);
+            else queryBuilder.where(fieldName, '=', inputValue);
+          }
         });
-      };
-      /* eslint-enable array-callback-return */
-    }
+      } // end-if (inputFields && specFields)
 
-    // -----------------------------
+      // Set orderBy options...
+      const defaultOrderBy = objectUtils.get(spec, ACTION.SPEC_DEFAULT_ORDER_BY, null);
+      const requestedOrderBy = objectUtils.get(input, ACTION.INPUT_ORDER_BY, null);
+      const orderByOpts = requestedOrderBy || defaultOrderBy;
+      if (orderByOpts) {
+        const orderBy = BookshelfUtils.buildOrderBy(orderByOpts);
+        orderBy.map((orderOpt) => {
+          return queryBuilder.orderBy(orderOpt.col, orderOpt.order);
+        });
+      }
+    };
+
+    // ----------------------------
     // Perform paginated request...
-    // -----------------------------
+    // ----------------------------
     if (input.paginate) {
-      return model.where(whereOpts).query(orderByQuery).fetchPage(actionOpts)
+      return model.query(queryOpts).fetchPage(actionOpts)
         .then((data) => {
           // Handle loadDirect requests...
           if (loadDirect.relations) {
@@ -139,7 +137,7 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
     // ------------------------------
     // Otherwise, return all items...
     // ------------------------------
-    return model.where(whereOpts).query(orderByQuery).fetchAll(actionOpts)
+    return model.query(queryOpts).fetchAll(actionOpts)
       .then((data) => {
         // Handle loadDirect requests...
         if (loadDirect.relations) {

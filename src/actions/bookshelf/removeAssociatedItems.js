@@ -2,29 +2,31 @@ import Promise from 'bluebird';
 import * as StatusErrors from '../../errors/status-errors';
 import ACTION from '../action-constants';
 import getItem from './getItem';
+import getItems from './getItems';
 import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function addAssociatedItem(bookshelf, spec = {}, input = {}, output) {
+export default function removeAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performAddAssociatedItem(bookshelf, spec, input, output);
+  if (trx) return performRemoveAssociatedItems(bookshelf, spec, input, output);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performAddAssociatedItem(bookshelf, spec, newInput, output);
+    return performRemoveAssociatedItems(bookshelf, spec, newInput, output);
   });
 }
 
-function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
+function performRemoveAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
+    const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
     const assocName = spec[ACTION.ASSOCIATION_NAME];
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
@@ -38,7 +40,7 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
     if (!inputAssoc) missingProps.push(`input.${ACTION.RESOURCE_ASSOCIATION}`);
     if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
-      if (debug) console.log(`[JOINT] [action:addAssociatedItem] Required properties missing: "${missingProps.join('", "')}"`);
+      if (debug) console.log(`[JOINT] [action:removeAssociatedItems] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
@@ -52,11 +54,16 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
     // Lookup resources...
     return Promise.all([
       getItem(bookshelf, specMain, inputMain),
-      getItem(bookshelf, specAssoc, inputAssoc),
+      getItems(bookshelf, specAssoc, inputAssoc),
     ])
-    // Add association to main...
     .then(([main, assoc]) => {
-      return main.related(assocName).attach(assoc, { transacting: trx })
+      // Reject with 404 if none of the requested associations were found...
+      if (assoc.length === 0) {
+        return reject(StatusErrors.generateResourceNotFoundError(modelNameAssoc));
+      }
+
+      // Otherwise, remove associations from main...
+      return main.related(assocName).detach(assoc.models, { transacting: trx })
         .then(() => {
           // Return data in requested format...
           switch (output) {
@@ -69,4 +76,4 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
       return reject(error);
     });
   });
-} // END - performAddAssociatedItem
+} // END - performRemoveAssociatedItems

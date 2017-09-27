@@ -59,6 +59,15 @@ const seeds = [
     project_id: 4,
     coding_language_tag_id: 4, // coffee-script
   },
+
+  // -------------------------------------
+  // E - Project 001, profile: 11, user: 8
+  // -------------------------------------
+  {
+    id: 10,
+    project_id: 5,
+    coding_language_tag_id: 6, // python
+  },
 ];
 
 exports.seed = function seed(knex, Promise) {

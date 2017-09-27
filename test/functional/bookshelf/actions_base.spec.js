@@ -1154,6 +1154,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const specProfile = {
         modelName: 'Profile',
         fields: [
+          { name: 'id', type: 'Number' },
           { name: 'user_id', type: 'Number' },
           { name: 'is_live', type: 'Boolean' },
         ],
@@ -1168,6 +1169,11 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const inputNotLiveProfiles = {
         fields: {
           is_live: false,
+        },
+      };
+      const inputExplicitSetOfProfiles = {
+        fields: {
+          id: [1, 2, 4, 5, 6],
         },
       };
 
@@ -1191,7 +1197,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.models).to.have.length(4);
         });
 
-      return Promise.all([getUsers, getAllProfiles, getLiveProfiles, getNotLiveProfiles]);
+      const getExplicitSetOfProfiles = joint.getItems(specProfile, inputExplicitSetOfProfiles)
+        .then((data) => {
+          expect(data.models).to.have.length(5);
+        });
+
+      return Promise.all([getUsers, getAllProfiles, getLiveProfiles, getNotLiveProfiles, getExplicitSetOfProfiles]);
     });
 
     it('should only return the column data that is permitted by the spec', () => {

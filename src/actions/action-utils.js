@@ -230,6 +230,10 @@ export function prepareFieldData(fieldSpec = [], fieldData = {}) {
 // (per the configured spec field "type")
 // -----------------------------------------------------------------------------
 export function castValue(value, dataType) {
+  if (Array.isArray(value)) {
+    return value.map(element => castValue(element, dataType));
+  }
+
   switch (dataType) {
     case 'Number': return Number(value);
     case 'Boolean': return (isNaN(value)) ? (value.toLowerCase() == 'true') : Boolean(value); // eslint-disable-line eqeqeq

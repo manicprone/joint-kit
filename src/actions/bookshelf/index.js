@@ -11,7 +11,7 @@ export { default as deleteItem } from './deleteItem';
 // ----------------------
 // Association actions...
 // ----------------------
-export { default as addAssociatedItem } from './addAssociatedItem';
+export { default as addAssociatedItems } from './addAssociatedItems';
 export { default as hasAssociatedItem } from './hasAssociatedItem';
-export { default as removeAssociatedItem } from './removeAssociatedItem';
+export { default as removeAssociatedItems } from './removeAssociatedItems';
 export { default as removeAllAssociatedItems } from './removeAllAssociatedItems';
