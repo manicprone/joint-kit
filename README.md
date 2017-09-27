@@ -7,17 +7,17 @@ endpoints.
 Designed to be flexible. Mix it with existing code and/or use it to
 generate an entire custom method library and client API from scratch.
 
-Provides: DB Model configuration, CRUD and relational data logic, Authorization,
-Data transformation, Payload serialization, HTTP router generation (for RESTful endpoints), and more.
+Provides: DB model configuration, CRUD and relational data logic, authorization & field validation,
+data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
 
 ## Table of Contents
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
-* [The Concept][section-the-concept]
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
+* [The Joint Concept][section-the-joint-concept]
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
@@ -61,9 +61,92 @@ $ npm install joint-lib --save
 ```
 
 
-## The Concept
+## Joint Actions
 
-Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational data logic.
+All Joint actions return Promises, and have the same method signature:
+
+```javascript
+joint.<action>(spec = {}, input = {}, output = 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+
+The following abstract actions are immediately available once the library is installed:
+
+| Action                   | Description                                                               |
+| ------------------------ | ------------------------------------------------------------------------- |
+| createItem               | Create operation for a single item                                        |
+| upsertItem               | Upsert operation for a single item                                        |
+| updateItem               | Update operation for a single item                                        |
+| getItem                  | Read operation for retrieving a single item                               |
+| getItems                 | Read operation for retrieving a collection of items                       |
+| deleteItems              | Delete operation for one to many items                                    |
+| addAssociatedItems       | Operation for associating one to many items to a main resource            |
+| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
+| getAssociatedItems       | Operation for retrieving all associations of a type from a main resource  |
+| removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
+| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
+
+
+See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
+
+
+## The JSON Syntax
+
+To use the Joint Actions, you communicate with a JSON syntax.
+
+Each action has two required parts: the `spec` and the `input`.
+
++ The `spec` defines the functionality of the action.
+
++ The `input` supplies the data for an individual action request.
+
+<br />
+
+Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
+By default, the output is set to `'native'`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf).
+
+However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format,
+making it ready-to-use for RESTful data transport.
+
+**output = 'native' (default)**
+```javascript
+const joint = new Joint({
+  service: bookshelf,
+});
+
+joint.getItem().then((payload) => { ... });
+```
+
+payload:
+```
+<show example payload>
+```
+
+**output = 'json-api'**
+```javascript
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api',
+});
+
+joint.getItem().then((payload) => { ... });
+```
+
+payload:
+```
+<show example payload>
+```
+
+<br />
+
+See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
+
+
+## The Joint Concept
+
+Out-of-the-box, you can use any of the [Joint Actions][section-joint-actions] to handle common CRUD and relational data logic.
 
 Given you have established a `bookshelf.js` configuration file (which hooks to your database) and you have registered a set of Models upon which to operate...
 
@@ -83,8 +166,8 @@ const spec = {
   modelName: 'BlogProfile',
   fields: [
     { name: 'user_id', type: 'Number', required: true },
-    { name: 'slug', type: 'String', required: true },
     { name: 'title', type: 'String', required: true },
+    { name: 'slug', type: 'String', required: true },
     { name: 'tagline', type: 'String' },
     { name: 'is_live', type: 'Boolean', defaultValue: false },
   ],
@@ -126,7 +209,9 @@ const BlogProfile = bookshelf.Model.extend({
   },
 });
 
-// Model added to Bookshelf registry...
+... other models
+
+// Model added to Bookshelf registry:
 bookshelf.model('BlogProfile', BlogProfile),
 ```
 
@@ -146,8 +231,6 @@ bookshelf.plugin('pagination');
 
 export default bookshelf;
 ```
-
-<br />
 
 ### In Practice
 
@@ -344,7 +427,9 @@ export default {
 };
 ```
 
+<br />
 Then, use the Joint `generate` function to dynamically generate your custom method library:
+<br />
 
 ```javascript
 import Joint from 'joint-lib';
@@ -355,7 +440,7 @@ const joint = new Joint({
   service: bookshelf,
 });
 
-// Dynamically generate the defined methods...
+// Dynamically generate the defined methods:
 joint.generate({ methodConfig });
 
 // You can now utilize the methods using the syntax:
@@ -405,9 +490,11 @@ export default {
 };
 ```
 
+<br />
 Similarly, use the Joint `generate` function to dynamically generate your models.
 Any manually defined models on your bookshelf config will be merged into the Joint
 instance along with those defined in the model-config. So, you can use both approaches as you see fit:
+<br />
 
 ```javascript
 import Joint from 'joint-lib';
@@ -432,88 +519,9 @@ console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
 
-## Joint Actions
-
-All Joint actions return Promises, and have the same method signature:
-
-```javascript
-joint.<action>(spec = {}, input = {}, output = 'native')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-
-The following abstract actions are immediately available once the library is installed:
-
-| Action                   | Description                                                               |
-| ------------------------ | ------------------------------------------------------------------------- |
-| createItem               | Create operation for a single item                                        |
-| upsertItem               | Upsert operation for a single item                                        |
-| updateItem               | Update operation for a single item                                        |
-| getItem                  | Read operation for retrieving a single item                               |
-| getItems                 | Read operation for retrieving a collection of items                       |
-| deleteItems              | Delete operation for one to many items                                    |
-| addAssociatedItems       | Operation for associating one to many items to a main resource            |
-| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
-| getAssociatedItems       | Operation for retrieving all associations of a type from a main resource  |
-| removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
-| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
-
-
-See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
-
-
-## The JSON Syntax
-
-To use the Joint Actions, you communicate with a JSON syntax.
-
-Each action has two required parts: the `spec` and the `input`.
-
-+ The `spec` defines the functionality of the action.
-
-+ The `input` supplies the data for an individual action request.
-
-<br />
-
-Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
-By default, the output is set to `'native'`, which effectively returns the queried data in the format
-generated natively by the service (currently, i.e. Bookshelf).
-
-However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format,
-making it ready-to-use for RESTful data transport.
-
-**output = 'native' (default)**
-```
-const joint = new Joint({
-  service: bookshelf,
-});
-```
-
-example payload:
-```
-<show example payload>
-```
-
-**output = 'json-api'**
-```javascript
-const joint = new Joint({
-  service: bookshelf,
-  output: 'json-api',
-});
-```
-
-example payload:
-```
-<show example payload>
-```
-
-<br />
-
-See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
-
-
 ## Generating Models
 
-Dynamic model generation is also supported using the library's JSON syntax.
+Dynamic model generation is supported using the library's JSON syntax.
 
 You can write the model definitions yourself (and make them as complex as you want),
 or you can dynamically generate them by providing a "model config". Or, you can do both.
@@ -535,18 +543,15 @@ the `joint.<action>` set, or you can dynamically generate them by providing a "m
 
 [TBC]
 
-[Show code for `method-config.js` & application code using `joint.method.<model>.<method>`]
-
-
 See the [Action Guide][link-action-guide-bookshelf] for more details.
 
 
 ## Generating a RESTful API
 
-This feature is only available for dynamically-generated custom methods.
+Dynamic router generation is supported using the library's JSON syntax (and with a supported server framework).
+You can dynamically generate RESTful endpoints for your custom methods by providing a "route config".
 
-To dynamically generate RESTful endpoints for your custom methods, you must
-provide a "route config".
+NOTE: This feature is only available for dynamically-generated custom methods (via method config).
 
 [TBC]
 
@@ -563,9 +568,9 @@ provide a "route config".
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
-[section-the-concept]: #the-concept
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
+[section-the-joint-concept]: #the-joint-concept
 [section-generating-models]: #generating-models
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api
