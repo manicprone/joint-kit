@@ -8,13 +8,11 @@
 | required field handling        | Supports required field declaration, with built-in validation and error handling. |
 | resource relationship handling | Supports complex relationship management and automatic data transformations. |
 | returned column data aliasing  | Allows for custom aliasing of returned column data sets. |
-| paginated data sets            | Built-in support for the "fetchPage" pagination feature. |
+| paginated data sets            | Built-in support for the "fetchPage" pagination feature |
 | filtered data sets             | Support for "filtered" queries with automatically-generated filter metadata. |
 | user-level authorization handling  |   |
 | application-level authorization handling |   |
 | field input validation         |   |
-| data "snapshot" capabilities   |   |
-| flexible workflow support      |   |
 | return data in native or JSON API Spec format |   |
 
 

@@ -7,23 +7,15 @@ endpoints.
 Designed to be flexible. Mix it with existing code and/or use it to
 generate an entire custom method library and client API from scratch.
 
-The Joint Library sits on top of your persistence layer (e.g. your ORM),
-exposing ready-to-use action logic that supports your most common CRUD and
-relational data operations. Leverage the generic actions to quickly write your
-application-specific data methods.
-
-Take it further, and automatically generate custom methods for your application
-using a straight-forward JSON syntax. No programming logic required.
-
-If you need to serve your custom methods as an HTTP API, use the JSON syntax
-to automatically generate RESTful endpoints for your Node server.
+Provides: DB Model configuration, CRUD and relational data logic, Authorization,
+Data transformation, Payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
 
 ## Table of Contents
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
-* [Conceptual Usage][section-conceptual-usage]
+* [The Concept][section-the-concept]
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [Generating Models][section-generating-models]
@@ -69,15 +61,14 @@ $ npm install joint-lib --save
 ```
 
 
-## Conceptual Usage
+## The Concept
 
-Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational logic.
+Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational data logic.
 
 Given you have established a `bookshelf.js` configuration file (which hooks to your database) and you have registered a set of Models upon which to operate...
 
 The conceptual idea of the library goes like this:
 
-index.js
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf';
@@ -111,7 +102,7 @@ const input = {
 
 // Leverage the appropriate Joint Action to handle the operation:
 joint.createItem(spec, input)
-  .then((payload) => { ... })
+  .then((result) => { ... })
   .catch((error) => { ... });
 ```
 
@@ -123,13 +114,15 @@ import bookshelf from '../services/bookshelf';
 
 const BlogProfile = bookshelf.Model.extend({
   tableName: 'blog_profiles',
-  idAttribute: 'id',
   hasTimestamps: ['created_at', 'updated_at'],
   user() {
     return this.belongsTo('User', 'user_id');
   },
   posts() {
     return this.hasMany('BlogPost', 'profile_id');
+  },
+  tags() {
+    return this.hasMany('Tag').through('ProfileTag', 'id', 'profile_id', 'tag_id');
   },
 });
 
@@ -161,11 +154,12 @@ export default bookshelf;
 The idea is, you can rapidly implement a custom method library (manually) by wrapping custom functions around
 the Joint Actions, with a defined `spec`:
 
+<br />
+
 **For Example:**
 
 /methods/blog-profile.js
 ```javascript
-
 export function createProfile(input) {
   const spec = {
     modelName: 'BlogProfile',
@@ -235,14 +229,15 @@ export function deleteProfile(input) {
 
 <br />
 
-And, the beauty of the manual capability, is that you can leverage the core logic behind each action
+And, the beauty of the manual capability is that you can leverage the core logic behind each action
 (which typically represents the majority of the programming), while maintaining the flexibility to write
 your customized logic alongside:
+
+<br />
 
 **For Example:**
 
 ```javascript
-
 export function createProfile(input) {
   const spec = {
     modelName: 'BlogProfile',
@@ -293,11 +288,149 @@ export function getProfile(input) {
       Object.assign(item, { ... });
 
       // Apply third-party service logic before return...
-      return doOtherLogic(item);
+      return doOtherAsyncLogic(item);
     });
 }
-
 ```
+
+<br />
+
+But, if you don't require any supplemental logic for an operation, bypass the manual rolling of the method
+entirely and generate the methods automatically from a JSON-based config file.
+
+<br />
+
+**For Example:**
+
+method-config.js
+```javascript
+export default {
+  resources: [
+    {
+      modelName: 'BlogProfile',
+      methods: [
+        {
+          name: 'createBlogProfile',
+          action: 'createItem',
+          spec: {
+            fields: [
+              { name: 'user_id', type: 'Number', required: true },
+              { name: 'slug', type: 'String', required: true },
+              { name: 'title', type: 'String' },
+              { name: 'tagline', type: 'String' },
+              { name: 'is_live', type: 'Boolean', defaultValue: false },
+            ],
+          },
+        },
+        {
+          name: 'getBlogProfiles',
+          action: 'getItems',
+          spec: {
+            fields: [
+              { name: 'id', type: 'Number', requiredOr: true },
+              { name: 'slug', type: 'String', requiredOr: true },
+            ],
+          },
+        },
+
+        ... other methods
+
+      ],
+    },
+
+    ... other resources (models)
+
+  ],
+};
+```
+
+Then, use the Joint `generate` function to dynamically generate your custom method library:
+
+```javascript
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf';
+import methodConfig from './method-config';
+
+const joint = new Joint({
+  service: bookshelf,
+});
+
+// Dynamically generate the defined methods...
+joint.generate({ methodConfig });
+
+// You can now utilize the methods using the syntax:
+joint.method.BlogProfile.createBlogProfile(input)
+  .then((result) => { ... })
+  .catch((error) => { ... });
+```
+
+<br />
+
+Joint also supports a JSON syntax for defining your Models, so you don't need to manually define or register
+the model hook via Bookshelf. The syntax supports an arrow notation for defining associations (relations),
+making it easier to wield than the Bookshelf polymorphic method approach.
+
+<br />
+
+**For Example:**
+
+model-config.js
+```javascript
+
+export default {
+  models: {
+    // Define and register a Model named: "BlogProfile"...
+    BlogProfile: {
+      tableName: 'blog_profiles',
+      timestamps: { created: 'created_at', updated: 'updated_at' },
+      associations: {
+        user: {
+          type: 'toOne',
+          path: 'user_id => User.id', // one-to-one
+        },
+        posts: {
+          type: 'toMany',
+          path: 'id => BlogPost.profile_id', // one-to-many
+        },
+        tags: {
+          type: 'toMany',
+          path: 'id => ProfileTag.profile_id => ProfileTag.tag_id => Tag.id', // many-to-many
+        },
+      },
+    },
+
+    ... other models
+
+  },
+};
+```
+
+Similarly, use the Joint `generate` function to dynamically generate your models.
+Any manually defined models on your bookshelf config will be merged into the Joint
+instance along with those defined in the model-config. So, you can use both approaches as you see fit:
+
+```javascript
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf';
+import modelConfig from './model-config';
+import methodConfig from './method-config';
+
+const joint = new Joint({
+  service: bookshelf,
+});
+
+// Dynamically generate the defined models and methods...
+joint.generate({ modelConfig, methodConfig });
+
+// You can access all models using the syntax joint.model.<modelName>:
+if (joint.model.BlogProfile) console.log('BlogProfile exists !!!');
+
+// Convenience mappings are also generated, allowing lookup of model object or name via the table name:
+const BlogProfile = joint.modelByTable['blog_profiles'];
+const modelName = joint.modelNameByTable['blog_profiles'];
+console.log(`The model name for table "blog_profiles" is: ${modelName}`);
+```
+
 
 ## Joint Actions
 
@@ -339,13 +472,41 @@ Each action has two required parts: the `spec` and the `input`.
 
 + The `input` supplies the data for an individual action request.
 
+<br />
+
 Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
-By default, the `output` is set to `'native'`, which effectively returns the queried data in the format
+By default, the output is set to `'native'`, which effectively returns the queried data in the format
 generated natively by the service (currently, i.e. Bookshelf).
 
-However, Joint supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making
-it ready-to-use for RESTful data transport.
+However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format,
+making it ready-to-use for RESTful data transport.
 
+**output = 'native' (default)**
+```
+const joint = new Joint({
+  service: bookshelf,
+});
+```
+
+example payload:
+```
+<show example payload>
+```
+
+**output = 'json-api'**
+```javascript
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api',
+});
+```
+
+example payload:
+```
+<show example payload>
+```
+
+<br />
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
 
@@ -402,7 +563,7 @@ provide a "route config".
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
-[section-conceptual-usage]: #conceptual-usage
+[section-the-concept]: #the-concept
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-generating-models]: #generating-models
