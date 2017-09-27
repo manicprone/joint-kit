@@ -7,21 +7,21 @@ import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function addAssociatedItem(bookshelf, spec = {}, input = {}, output) {
+export default function addAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
-  if (trx) return performAddAssociatedItem(bookshelf, spec, input, output);
+  if (trx) return performAddAssociatedItems(bookshelf, spec, input, output);
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input);
     newInput[ACTION.INPUT_TRANSACTING] = newTrx;
-    return performAddAssociatedItem(bookshelf, spec, newInput, output);
+    return performAddAssociatedItems(bookshelf, spec, newInput, output);
   });
 }
 
-function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
+function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
@@ -40,7 +40,7 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
     if (!inputAssoc) missingProps.push(`input.${ACTION.RESOURCE_ASSOCIATION}`);
     if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
-      if (debug) console.log(`[JOINT] [action:addAssociatedItem] Required properties missing: "${missingProps.join('", "')}"`);
+      if (debug) console.log(`[JOINT] [action:addAssociatedItems] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
@@ -76,4 +76,4 @@ function performAddAssociatedItem(bookshelf, spec = {}, input = {}, output) {
       return reject(error);
     });
   });
-} // END - performAddAssociatedItem
+} // END - performAddAssociatedItems

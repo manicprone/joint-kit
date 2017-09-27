@@ -23,7 +23,7 @@ to automatically generate RESTful endpoints for your Node server.
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
-* [How to Use the Library][section-how-to-use]
+* [Example Usage][section-example-usage]
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [Generating Models][section-generating-models]
@@ -69,53 +69,252 @@ $ npm install joint-lib --save
 ```
 
 
-## How to Use the Library
+## Example Usage
 
-[Rename this section: Example Usage]
+index.js
+```javascript
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf';
 
-[Move "How to Use the Library" to the detail guide. Just provide a quick view of common code usage here]
+// Fire up a joint, leveraging your Bookshelf configuration...
+const joint = new Joint({
+  service: bookshelf,
+});
 
+// Out-of-the-box, you can use any of the Joint Actions to handle common CRUD and relational logic...
 
-You can use Joint as minimally or as thoroughly as you require.
+// The "spec" defines the functionality of your operation:
+// modelName - maps to the registered Model
+// fields    - defines all fields allowed for this operation
+const spec = {
+  modelName: 'BlogProfile',
+  fields: [
+    { name: 'user_id', type: 'Number', required: true },
+    { name: 'slug', type: 'String', required: true },
+    { name: 'title', type: 'String', required: true },
+    { name: 'tagline', type: 'String' },
+    { name: 'is_live', type: 'Boolean', defaultValue: false },
+  ],
+};
 
-Let's start with the most minimal use cases.
+// The "input" supplies the data for an individual operation request:
+const input = {
+  fields: {
+    user_id: 3,
+    title: 'Functional Fanatic',
+    slug: 'functional-fanatic',
+    tagline: 'I don\'t have habits, I have algorithms.',
+  },
+};
 
-Let's say you have an existing application that connects to an existing database schema.
-It uses Bookshelf as its ORM service (The only service supported at this time).
-
-You have already defined your Models:
-```
-posts, tags
-
+// Leverage the appropriate Joint Action to implement your operation:
+joint.createItem(spec, input)
+  .then((payload) => { ... })
+  .catch((error) => { ... });
 ```
 
 <br />
 
-Next up, you want to implement the essential CRUD methods for these resources,
-so your application can start managing this data.
+/resources/models.js
+```javascript
+import bookshelf from '../services/bookshelf';
 
-[TBC]
+// Declare model...
+const BlogProfile = bookshelf.Model.extend({
+  tableName: 'blog_profiles',
+  idAttribute: 'id',
+  hasTimestamps: ['created_at', 'updated_at'],
+  user() {
+    return this.belongsTo('User', 'user_id');
+  },
+  posts() {
+    return this.hasMany('BlogPost', 'profile_id');
+  },
+});
 
+// Add model to Bookshelf registry...
+bookshelf.model('BlogProfile', BlogProfile),
+```
+
+<br />
+
+/services/bookshelf.js
+```javascript
+// Configure knex...
+const knex = require('knex')({ ... });
+
+// Initialize bookshelf...
+const bookshelf = require('bookshelf')(knex);
+
+// Enable plugins...
+bookshelf.plugin('registry');
+bookshelf.plugin('pagination');
+
+export default bookshelf;
+```
+
+<br />
+
+The idea is, you can rapidly implement a custom method library (manually) via this architecture:
+
+/methods/blog-profile.js
+```javascript
+
+export function createProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'user_id', type: 'Number', required: true },
+      { name: 'slug', type: 'String', required: true },
+      { name: 'title', type: 'String', required: true },
+      { name: 'tagline', type: 'String' },
+      { name: 'is_live', type: 'Boolean', defaultValue: false },
+    ],
+  };
+
+  return joint.createItem(spec, input);
+}
+
+export function updateProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'id', type: 'Number', required: true, lookupField: true },
+      { name: 'slug', type: 'String' },
+      { name: 'title', type: 'String' },
+      { name: 'tagline', type: 'String' },
+      { name: 'is_live', type: 'Boolean'},
+    ],
+  };
+
+  return joint.updateItem(spec, input);
+}
+
+export function getProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+  };
+
+  return joint.getItem(spec, input);
+}
+
+export function getProfiles(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'user_id', type: 'Number' },
+      { name: 'is_live', type: 'Boolean'},
+    ],
+  };
+
+  return joint.getItems(spec, input);
+}
+
+export function deleteProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+  };
+
+  return joint.deleteItem(spec, input);
+}
+```
+
+<br />
+
+And, the beauty of the manual capability, is that you can leverage the core logic behind each action
+(which typically represents the majority of the programming), while maintaining the flexibility to write
+your customized logic alongside:
+
+```javascript
+
+export function createProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'user_id', type: 'Number', required: true },
+      { name: 'slug', type: 'String', required: true },
+      { name: 'title', type: 'String' },
+      { name: 'tagline', type: 'String' },
+      { name: 'is_live', type: 'Boolean', defaultValue: false },
+    ],
+  };
+
+  // Generate default title, if none provided...
+  const defaultInput = { title: `New Profile ${Date()}` };
+  const inputForCreate = Object.assign(defaultInput, input);
+
+  return joint.createItem(spec, inputForCreate);
+}
+
+export function getLiveProfiles(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'user_id', type: 'Number' },
+      { name: 'is_live', type: 'Boolean'},
+    ],
+  };
+
+  // Force only "live" profiles to be returned...
+  Object.assign(input, { is_live: true });
+
+  return joint.getItems(spec, input);
+}
+
+export function getProfile(input) {
+  const spec = {
+    modelName: 'BlogProfile',
+    fields: [
+      { name: 'id', type: 'Number', requiredOr: true },
+      { name: 'slug', type: 'String', requiredOr: true },
+    ],
+  };
+
+  // Apply "other" logic to the queried data...
+  return joint.getItem(spec, input)
+    .then((item) => {
+      // Mutate the data before return...
+      Object.assign(item, { ... });
+
+      // Apply third-party service logic before return...
+      return doOtherLogic(item);
+    });
+}
+
+```
 
 ## Joint Actions
 
-All Joint actions return Promises.
+All Joint actions return Promises, and have the same method signature:
+
+```javascript
+joint.<action>(spec = {}, input = {}, output = 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
 
 The following abstract actions are immediately available once the library is installed:
 
-
-| Action                   | Description                                                  | Usage
-| ------------------------ | ------------------------------------------------------------ | ------------------------------------ |
-| createItem               | A create operation for a single item                         | ``` joint.createItem(spec, input) ``` |
-| upsertItem               | An upsert operation for a single item                        | ``` joint.upsertItem(spec, input) ``` |
-| updateItem               | An update operation for a single item                        | ``` joint.updateItem(spec, input) ``` |
-| getItem                  | A read operation for retrieving a single item                | ``` joint.getItem(spec, input) ```    |
-| getItems                 | A read operation for retrieving a collection of items        | ``` joint.getItems(spec, input) ```   |
-| deleteItem               | A delete operation for a single item                         | ``` joint.deleteItem(spec, input) ``` |
-| addAssociatedItem        | An operation for associating an item to a main resource      | ``` joint.addAssociatedItem(spec, input) ``` |
-| hasAssociatedItem        | An operation for checking the existence of an association    | ``` joint.hasAssociatedItem(spec, input) ``` |
-| removeAssociatedItem     | An operation for disassociating an item from a main resource | ``` joint.removeAssociatedItem(spec, input) ``` |
-| removeAllAssociatedItems | An operation for disassociating all items of a type from a main resource | ``` joint.removeAllAssociatedItems(spec, input) ``` |
+| Action                   | Description                                                           |
+| ------------------------ | --------------------------------------------------------------------- |
+| createItem               | Create operation for a single item                                    |
+| upsertItem               | Upsert operation for a single item                                    |
+| updateItem               | Update operation for a single item                                    |
+| getItem                  | Read operation for retrieving a single item                           |
+| getItems                 | Read operation for retrieving a collection of items                   |
+| deleteItem               | Delete operation for a single item                                    |
+| addAssociatedItems       | Operation for associating one to many items to a main resource        |
+| hasAssociatedItem        | Operation for checking the existence of an association                |
+| removeAssociatedItem     | Operation for disassociating an item from a main resource             |
+| removeAllAssociatedItems | Operation for disassociating all items of a type from a main resource |
 
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
@@ -125,14 +324,18 @@ See the [Action Guide][link-action-guide-bookshelf] for details on using each ac
 
 To use the Joint Actions, you communicate with a JSON syntax.
 
-Each action has two parts: the `spec` and the `input`.
+Each action has two required parts: the `spec` and the `input`.
 
-The `spec` defines the functionality of the action (the schema to which it is attached,
-the joint action it performs, the fields it accepts, who it authorizes to perform the action, etc).
++ The `spec` defines the functionality of the action.
 
-The `input` supplies the data for an individual action request.
++ The `input` supplies the data for an individual action request.
 
-[TBC]
+Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
+By default, the `output` is set to `'native'`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf).
+
+However, Joint supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making
+it ready-to-use for RESTful data transport.
 
 See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
 
@@ -184,12 +387,12 @@ provide a "route config".
 
 ## License
 
-[TBC]
+[TBD]
 
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
-[section-how-to-use]: #how-to-use-the-library
+[section-example-usage]: #example-usage
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-generating-models]: #generating-models

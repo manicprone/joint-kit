@@ -18,7 +18,7 @@ const actionsBookshelf = [
   'getItem',
   'getItems',
   'deleteItem',
-  'addAssociatedItem',
+  'addAssociatedItems',
   'hasAssociatedItem',
   'removeAssociatedItem',
   'removeAllAssociatedItems',
