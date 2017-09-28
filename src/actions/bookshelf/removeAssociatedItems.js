@@ -27,7 +27,7 @@ function performRemoveAssociatedItems(bookshelf, spec = {}, input = {}, output) 
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
     const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
-    const assocName = spec[ACTION.ASSOCIATION_NAME];
+    const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
     const trx = input[ACTION.INPUT_TRANSACTING];
@@ -36,9 +36,9 @@ function performRemoveAssociatedItems(bookshelf, spec = {}, input = {}, output) 
     const missingProps = [];
     if (!specMain) missingProps.push(`spec.${ACTION.RESOURCE_MAIN}`);
     if (!specAssoc) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}`);
+    if (!assocName) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}.${ACTION.SPEC_ASSOCIATION_NAME}`);
     if (!inputMain) missingProps.push(`input.${ACTION.RESOURCE_MAIN}`);
     if (!inputAssoc) missingProps.push(`input.${ACTION.RESOURCE_ASSOCIATION}`);
-    if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
       if (debug) console.log(`[JOINT] [action:removeAssociatedItems] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
@@ -59,7 +59,7 @@ function performRemoveAssociatedItems(bookshelf, spec = {}, input = {}, output) 
     .then(([main, assoc]) => {
       // Reject with 404 if none of the requested associations were found...
       if (assoc.length === 0) {
-        return reject(StatusErrors.generateResourceNotFoundError(modelNameAssoc));
+        return reject(StatusErrors.generateAssociationDoesNotExistError(modelNameAssoc));
       }
 
       // Otherwise, remove associations from main...

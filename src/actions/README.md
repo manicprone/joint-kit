@@ -270,13 +270,13 @@ spec: {
     },
   },
   association: {
+    name: 'tags',
     modelName: 'Tag',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'key', type: 'String', requiredOr: true },
     ],
   },
-  associationName: 'tags',
 }
 ```
 
@@ -336,13 +336,13 @@ spec: {
     },
   },
   association: {
+    name: 'tags',
     modelName: 'Tag',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'key', type: 'String', requiredOr: true },
     ],
   },
-  associationName: 'tags',
 }
 ```
 
@@ -383,10 +383,10 @@ spec: {
     },
   },
   association: {
+    name: 'tags',
     modelName: 'Tag',
     defaultOrderBy: 'title',
   },
-  associationName: 'tags',
 }
 ```
 
@@ -426,13 +426,13 @@ spec: {
     },
   },
   association: {
+    name: 'tags',
     modelName: 'Tag',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'key', type: 'String', requiredOr: true },
     ],
   },
-  associationName: 'tags',
 }
 ```
 
@@ -472,7 +472,9 @@ spec: {
       ownerCreds: ['profile_id'],
     },
   },
-  associationName: 'tags',
+  association: {
+    name: 'tags',
+  },
 }
 ```
 
@@ -492,6 +494,8 @@ input: {
 
 
 ## To Do
+
+* Support model-config without a `modelsEnabled` property (just optional).
 
 * Change `relations` => `associations` (Update `spec` and `input`).
 
@@ -533,3 +537,15 @@ input: {
   their authorization and configure the API functionality (e.g. setting the resource properties
   that are currently managed in the /config/api-config.js, as well as generating an
   "authorizedApp" credential and saving it to the API for auth capabilities, etc).
+
+
+## README To Do
+
+* Abstract "The Concept" away from the service implementation (i.e. Bookshelf).
+  Just show the "index.js" code snippet, with a comment referencing the "bookshelf configuration"
+  and then another code snippet showing the output of the example joint.action... maybe show two action examples ???
+
+* Break out "In Practice" into its own section, and call it "The Joint Lib in Practice" (e.g.)
+
+* MAYBE: Add an overview section just after "in practice" that describes the concept of the configs / generate
+  function.

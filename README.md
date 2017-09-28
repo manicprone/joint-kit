@@ -11,6 +11,11 @@ Provides: DB model configuration, CRUD and relational data logic, authorization 
 data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
 
+## WIP
+
+Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
+
+
 ## Table of Contents
 
 * [Prerequisites][section-prerequisites]
@@ -83,7 +88,7 @@ The following abstract actions are immediately available once the library is ins
 | deleteItems              | Delete operation for one to many items                                    |
 | addAssociatedItems       | Operation for associating one to many items to a main resource            |
 | hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
-| getAssociatedItems       | Operation for retrieving all associations of a type from a main resource  |
+| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
 | removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
 | removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
