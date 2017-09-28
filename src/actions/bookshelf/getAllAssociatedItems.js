@@ -23,16 +23,17 @@ export default function getAllAssociatedItems(bookshelf, spec = {}, input = {}, 
 function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
-    const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
-    const assocName = spec[ACTION.ASSOCIATION_NAME];
+    const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
+    const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const trx = input[ACTION.INPUT_TRANSACTING];
 
     // Reject when required properties are not provided...
     const missingProps = [];
     if (!specMain) missingProps.push(`spec.${ACTION.RESOURCE_MAIN}`);
+    if (!specAssoc) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}`);
+    if (!assocName) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}.${ACTION.SPEC_ASSOCIATION_NAME}`);
     if (!inputMain) missingProps.push(`input.${ACTION.RESOURCE_MAIN}`);
-    if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
       if (debug) console.log(`[JOINT] [action:getAllAssociatedItems] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
@@ -43,25 +44,23 @@ function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) 
 
     // Return existing associations of this type...
     inputMain[ACTION.INPUT_RELATIONS] = [assocName];
+    const modelNameAssoc = assocName; // TODO: Lookup assoc modelName from modelDef !!!
 
     // Lookup main resource...
     return getItem(bookshelf, specMain, inputMain)
       .then((main) => {
         // Access all items of the requested association...
-        const assocs = main.related(assocName);
-
-        // TODO: Remove "spec.associationName", instead just require
-        // the spec.association always exist, and lookup the assocName from the spec.association.modelName !!!
+        const assoc = main.related(assocName);
 
         // Reject with 404 if instances of the requested association were not found...
-        // if (assoc.length === 0) {
-        //   return reject(StatusErrors.generateResourceNotFoundError(modelNameAssoc));
-        // }
+        if (assoc.length === 0) {
+          return reject(StatusErrors.generateAssociationDoesNotExistError(modelNameAssoc));
+        }
 
         // Otherwise, return data in requested format...
         switch (output) {
-          case 'json-api': return resolve(toJsonApi(modelNameMain, assocs, bookshelf));
-          default: return resolve(assocs);
+          case 'json-api': return resolve(toJsonApi(modelNameAssoc, assoc, bookshelf));
+          default: return resolve(assoc);
         }
       })
       .catch((error) => {

@@ -24,15 +24,17 @@ function performRemoveAllAssociatedItems(bookshelf, spec = {}, input = {}, outpu
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
-    const assocName = spec[ACTION.ASSOCIATION_NAME];
+    const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
+    const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const trx = input[ACTION.INPUT_TRANSACTING];
 
     // Reject when required properties are not provided...
     const missingProps = [];
     if (!specMain) missingProps.push(`spec.${ACTION.RESOURCE_MAIN}`);
+    if (!specAssoc) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}`);
+    if (!assocName) missingProps.push(`spec.${ACTION.RESOURCE_ASSOCIATION}.${ACTION.SPEC_ASSOCIATION_NAME}`);
     if (!inputMain) missingProps.push(`input.${ACTION.RESOURCE_MAIN}`);
-    if (!assocName) missingProps.push(`spec.${ACTION.ASSOCIATION_NAME}`);
     if (missingProps.length > 0) {
       if (debug) console.log(`[JOINT] [action:removeAllAssociatedItems] Required properties missing: "${missingProps.join('", "')}"`);
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));

@@ -11,6 +11,11 @@ Provides: DB model configuration, CRUD and relational data logic, authorization 
 data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
 
+## WIP
+
+Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
+
+
 ## Table of Contents
 
 * [Prerequisites][section-prerequisites]

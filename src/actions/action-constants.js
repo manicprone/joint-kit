@@ -10,12 +10,10 @@ export default {
   // Association Resource Wrapper
   RESOURCE_ASSOCIATION: 'association',
 
-  // Association Name
-  ASSOCIATION_NAME: 'associationName',
-
   // ------------------------------- Spec Options
-  // Resource
+  // Resources
   SPEC_MODEL_NAME: 'modelName',
+  SPEC_ASSOCIATION_NAME: 'name',
 
   // Field Definitions
   SPEC_FIELDS: 'fields',
@@ -30,7 +28,6 @@ export default {
   SPEC_AUTH: 'auth',
   SPEC_AUTH_OWNER_CREDS: 'ownerCreds',
 
-
   // ------------------------------- Input Options
   // Field Input
   INPUT_FIELDS: 'fields',
@@ -41,8 +38,8 @@ export default {
   // Sort Order
   INPUT_ORDER_BY: 'orderBy',
 
-  // Relations
-  INPUT_RELATIONS: 'relations',
+  // Associations
+  INPUT_RELATIONS: 'relations', // TODO: Change to => INPUT_ASSOCIATIONS: 'associations' !!!
   INPUT_LOAD_DIRECT: 'loadDirect',
 
   // Pagination
