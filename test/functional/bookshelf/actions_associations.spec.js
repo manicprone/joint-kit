@@ -33,7 +33,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------
   // Testing: standard error scenarios
   // ---------------------------------
-  describe('standard error scenarios (addAssociatedItems, hasAssociatedItem, removeAssociatedItems, removeAllAssociatedItems)', () => {
+  describe('standard error scenarios (addAssociatedItems, hasAssociatedItem, getAllAssociatedItems, removeAssociatedItems, removeAllAssociatedItems)', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should return an error (400) when the spec and input cannot be parsed for association actions', () => {
@@ -891,6 +891,153 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       return Promise.all([globalLevel, methodLevel]);
     });
   }); // END - hasAssociatedItem
+
+  // ------------------------------
+  // Testing: getAllAssociatedItems
+  // ------------------------------
+  // TODO: Add passing test for auth / owner creds !!!
+  describe('getAllAssociatedItems', () => {
+    before(() => resetDB(['tags', 'projects']));
+
+    // TODO: Remove "spec.associationName", instead just require
+    // the spec.association always exist, and lookup the assocName from the spec.association.modelName !!!
+
+    it.skip('should return an error (404) when no instances of the requested association exist', () => {
+      const mainID = 1;
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+      };
+
+      return expect(joint.getAllAssociatedItems(spec, input))
+        .to.eventually.be.rejectedWithJointStatusError(404);
+    });
+
+    it('should return all instances of the associated resource, when the association exists', () => {
+      const mainID = 2;
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+      };
+
+      return joint.getAllAssociatedItems(spec, input)
+        .then((data) => {
+          expect(data.relatedData.parentId).to.equal(mainID);
+          expect(data.models).to.have.length(3);
+          expect(data.models[0].attributes.key).to.equal('java');
+          expect(data.models[1].attributes.key).to.equal('jsp');
+          expect(data.models[2].attributes.key).to.equal('javascript');
+        });
+    });
+
+    // TODO: Complete updates to the association spec handling, and complete this test !!!
+
+    it.skip('should return in JSON API shape when payload format is set to "json-api"', () => {
+      const mainModelName = 'Project';
+      const mainID = 2;
+      const assocModelName = 'CodingLanguageTag';
+      const assocID = 1; // java
+      const associationName = 'codingLanguageTags';
+
+      const spec = {
+        main: {
+          modelName: mainModelName,
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true },
+          ],
+        },
+        association: {
+          modelName: 'CodingLanguageTag',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'key', type: 'String', requiredOr: true },
+          ],
+        },
+        associationName,
+      };
+      const input = {
+        main: {
+          fields: {
+            id: mainID,
+          },
+        },
+        association: {
+          fields: {
+            id: assocID,
+          },
+        },
+      };
+
+      const globalLevel = jointJsonApi.getAllAssociatedItems(spec, input)
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id: assocID,
+              type: assocModelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              key: 'java',
+            });
+        });
+
+      const methodLevel = joint.getAllAssociatedItems(spec, input, 'json-api')
+        .then((payload) => {
+          // Top Level...
+          expect(payload).to.have.property('data');
+          expect(payload.data)
+            .to.contain({
+              id: assocID,
+              type: assocModelName,
+            });
+
+          // Base Attributes...
+          expect(payload.data).to.have.property('attributes');
+          expect(payload.data.attributes)
+            .to.contain({
+              key: 'java',
+            });
+        });
+
+      return Promise.all([globalLevel, methodLevel]);
+    });
+  }); // END - getAllAssociatedItems
 
   // ------------------------------
   // Testing: removeAssociatedItems
