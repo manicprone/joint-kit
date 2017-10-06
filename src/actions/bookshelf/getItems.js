@@ -69,20 +69,21 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
       actionOpts.limit = limit;
     }
 
-    // Include relations (relations and loadDirect will be combined into a distinct set)...
-    let relations = null;
+    // Include associations (associations and loadDirect will be combined into a distinct set)...
+    let associations = null;
     const loadDirect = ActionUtils.parseLoadDirect(input.loadDirect);
-    if (input.relations && Array.isArray(input.relations)) relations = input.relations.slice();
-    if (loadDirect.relations && loadDirect.relations.length > 0) {
-      if (relations) {
-        loadDirect.relations.forEach((relationName) => {
-          if (!objectUtils.includes(relations, relationName)) relations.push(relationName);
+    const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS];
+    if (inputAssocs && Array.isArray(inputAssocs)) associations = inputAssocs.slice();
+    if (loadDirect.associations && loadDirect.associations.length > 0) {
+      if (associations) {
+        loadDirect.associations.forEach((assocName) => {
+          if (!objectUtils.includes(associations, assocName)) associations.push(assocName);
         });
       } else {
-        relations = loadDirect.relations;
+        associations = loadDirect.associations;
       }
     }
-    if (relations) actionOpts.withRelated = relations;
+    if (associations) actionOpts.withRelated = associations;
 
     // Prepare query...
     const queryOpts = (queryBuilder) => {
@@ -118,8 +119,8 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
       return model.query(queryOpts).fetchPage(actionOpts)
         .then((data) => {
           // Handle loadDirect requests...
-          if (loadDirect.relations) {
-            data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.relations));
+          if (loadDirect.associations) {
+            data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.associations));
           }
 
           // Return data in requested format...
@@ -140,8 +141,8 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
     return model.query(queryOpts).fetchAll(actionOpts)
       .then((data) => {
         // Handle loadDirect requests...
-        if (loadDirect.relations) {
-          data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.relations));
+        if (loadDirect.associations) {
+          data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.associations));
         }
 
         // Return data in requested format...

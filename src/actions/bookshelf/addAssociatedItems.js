@@ -57,7 +57,7 @@ function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
     inputAssoc[ACTION.INPUT_TRANSACTING] = trx;
 
     // Include existing associations of this type (for return)...
-    inputMain[ACTION.INPUT_RELATIONS] = [assocName];
+    inputMain[ACTION.INPUT_ASSOCIATIONS] = [assocName];
 
     // Lookup resources...
     return Promise.all([

@@ -23,6 +23,8 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [The Joint Concept][section-the-joint-concept]
+* [Joint Lib in Practice][section-joint-lib-in-practice]
+* [Joint Lib API][section-joint-lib-api]
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
@@ -237,7 +239,8 @@ bookshelf.plugin('pagination');
 export default bookshelf;
 ```
 
-### In Practice
+
+## Joint Lib in Practice
 
 The idea is, you can rapidly implement a custom method library (manually) by wrapping custom functions around
 the Joint Actions, with a defined `spec`:
@@ -524,6 +527,44 @@ console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
 
+## Joint Lib API
+
+[TBC]
+
+### Action API
+
+All available properties
+
+### Spec
+
+| Option              | Description | Actions Supported               | Required? |
+| ------------------- | ----------- | ------------------------------  | --------- |
+| modelName           |             | (all)                           |  Yes      |
+| fields              |             | (all)                           |  Yes (* except getItems) |
+| fields.required     |             | (all)                           |  No       |
+| fields.requiredOr   |             | (all)                           |  No       |
+| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
+| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
+| columnsToReturn     |             | getItem, getItems               |  No       |
+| defaultOrderBy      |             | getItems                        |  No       |
+| forceAssociations   |             | getItem, getItems               |  No       |
+| forceLoadDirect     |             | getItem, getItems               |  No       |
+| auth                |             | (all)                           |  No       |
+
+### Input
+
+| Option         | Description | Actions Supported | Required? |
+| -------------- | ----------- | ----------------  | --------- |
+| fields         |             | (all)             |  Yes (* except getItems) |
+| columnSet      |             | getItem, getItems |  No       |
+| associations   |             | getItem, getItems |  No       |
+| loadDirect     |             | getItem, getItems |  No       |
+| orderBy        |             | getItems          |  No       |
+| paginate       |             | getItems          |  No       |
+| trx            |             | (all)             |  No       |
+| authBundle     |             | (all)             |  No       |
+
+
 ## Generating Models
 
 Dynamic model generation is supported using the library's JSON syntax.
@@ -576,6 +617,8 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-the-joint-concept]: #the-joint-concept
+[section-joint-lib-in-practice]: #joint-lib-in-practice
+[section-joint-lib-api]: #joint-lib-api
 [section-generating-models]: #generating-models
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api

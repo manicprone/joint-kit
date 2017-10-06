@@ -53,7 +53,7 @@ function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) 
     inputMain[ACTION.INPUT_TRANSACTING] = trx;
 
     // Return existing associations of this type...
-    inputMain[ACTION.INPUT_RELATIONS] = [assocName];
+    inputMain[ACTION.INPUT_ASSOCIATIONS] = [assocName];
 
     // Lookup main resource...
     return getItem(bookshelf, specMain, inputMain)

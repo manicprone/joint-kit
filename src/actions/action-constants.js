@@ -39,7 +39,7 @@ export default {
   INPUT_ORDER_BY: 'orderBy',
 
   // Associations
-  INPUT_RELATIONS: 'relations', // TODO: Change to => INPUT_ASSOCIATIONS: 'associations' !!!
+  INPUT_ASSOCIATIONS: 'associations',
   INPUT_LOAD_DIRECT: 'loadDirect',
 
   // Pagination

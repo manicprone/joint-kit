@@ -262,26 +262,26 @@ describe('ACTION-UTILS', () => {
       expect(ActionUtils.parseLoadDirect()).to.be.an('object').and.to.be.empty;
     });
 
-    it('should ignore relation entries that do not specify a column mapping', () => {
+    it('should ignore association entries that do not specify a column mapping', () => {
       const data = ['roles', 'viewCount:count'];
 
       const parsed = ActionUtils.parseLoadDirect(data);
 
       expect(parsed).to.deep.equal({
-        relations: ['viewCount'],
+        associations: ['viewCount'],
         colMappings: {
           viewCount: 'count',
         },
       });
     });
 
-    it('should ensure duplicative relation entries are not returned (only returning the first occurrence)', () => {
+    it('should ensure duplicative association entries are not returned (only returning the first occurrence)', () => {
       const data = ['roles:key', 'viewCount:count', 'roles:label', 'roles:name'];
 
       const parsed = ActionUtils.parseLoadDirect(data);
 
       expect(parsed).to.deep.equal({
-        relations: ['roles', 'viewCount'],
+        associations: ['roles', 'viewCount'],
         colMappings: {
           roles: 'key',
           viewCount: 'count',
@@ -289,13 +289,13 @@ describe('ACTION-UTILS', () => {
       });
     });
 
-    it('should return the expected parsed relation information (relations, colMappings)', () => {
+    it('should return the expected parsed relation information (associations, colMappings)', () => {
       const data = ['roles:name', 'viewCount:count'];
 
       const parsed = ActionUtils.parseLoadDirect(data);
 
       expect(parsed).to.deep.equal({
-        relations: ['roles', 'viewCount'],
+        associations: ['roles', 'viewCount'],
         colMappings: {
           roles: 'name',
           viewCount: 'count',

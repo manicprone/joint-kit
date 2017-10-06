@@ -137,7 +137,7 @@ export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
 //
 // Returns:
 // {
-//   relations: ['roles', 'viewCount'],
+//   associations: ['roles', 'viewCount'],
 //   colMappings: {
 //     roles: 'name',
 //     viewCount: 'count',
@@ -148,15 +148,15 @@ export function parseLoadDirect(loadDirectData = []) {
   const loadDirect = {};
 
   if (Array.isArray(loadDirectData) && loadDirectData.length > 0) {
-    loadDirect.relations = [];
+    loadDirect.associations = [];
     loadDirect.colMappings = {};
 
     loadDirectData.forEach((relation) => {
       const relationOpts = relation.split(':');
       const relationName = relationOpts[0];
       const relationCol = (relationOpts.length > 1) ? relationOpts[relationOpts.length - 1] : null;
-      if (relationCol && !objectUtils.includes(loadDirect.relations, relationName)) {
-        loadDirect.relations.push(relationName);
+      if (relationCol && !objectUtils.includes(loadDirect.associations, relationName)) {
+        loadDirect.associations.push(relationName);
         loadDirect.colMappings[relationName] = relationCol;
       }
     });

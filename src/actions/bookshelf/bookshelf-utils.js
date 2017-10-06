@@ -39,9 +39,9 @@ export function buildOrderBy(fieldValue) {
 // NOTE: This function mutates the data provided. There is no return value.
 // -----------------------------------------------------------------------------
 export function loadRelationsToItemBase(itemData, loadDirect = {}, standardRelations = []) {
-  if (loadDirect.relations) {
+  if (loadDirect.associations) {
     // Loop through all loadDirect requests, moving the specified col value to the item's base attributes...
-    loadDirect.relations.forEach((relationName) => {
+    loadDirect.associations.forEach((relationName) => {
       const colName = loadDirect.colMappings[relationName];
       const relationData = (itemData.relations[relationName]) ? itemData.relations[relationName] : null;
       let loadDirectValue = null;
@@ -69,5 +69,5 @@ export function loadRelationsToItemBase(itemData, loadDirect = {}, standardRelat
         delete itemData.relations[relationName]; // eslint-disable-line no-param-reassign
       }
     });
-  } // end-if (loadDirect.relations)
+  } // end-if (loadDirect.associations)
 }

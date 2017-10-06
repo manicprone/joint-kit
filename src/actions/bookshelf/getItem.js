@@ -53,20 +53,21 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
       }
     } // end-if (returnColsDef)
 
-    // Include relations (relations and loadDirect will be combined into a distinct set)...
-    let relations = null;
+    // Include associations (associations and loadDirect will be combined into a distinct set)...
+    let associations = null;
     const loadDirect = ActionUtils.parseLoadDirect(input.loadDirect);
-    if (input.relations && Array.isArray(input.relations)) relations = input.relations.slice();
-    if (loadDirect.relations && loadDirect.relations.length > 0) {
-      if (relations) {
-        loadDirect.relations.forEach((relationName) => {
-          if (!objectUtils.includes(relations, relationName)) relations.push(relationName);
+    const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS];
+    if (inputAssocs && Array.isArray(inputAssocs)) associations = inputAssocs.slice();
+    if (loadDirect.associations && loadDirect.associations.length > 0) {
+      if (associations) {
+        loadDirect.associations.forEach((assocName) => {
+          if (!objectUtils.includes(associations, assocName)) associations.push(assocName);
         });
       } else {
-        relations = loadDirect.relations;
+        associations = loadDirect.associations;
       }
     }
-    if (relations) actionOpts.withRelated = relations;
+    if (associations) actionOpts.withRelated = associations;
 
     // Build where clause...
     const whereOpts = {};
@@ -102,7 +103,7 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
         } // end-if (authBundle)
 
         // Handle loadDirect requests...
-        if (loadDirect.relations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.relations);
+        if (loadDirect.associations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.associations);
 
         // Return data in requested format...
         switch (output) {
