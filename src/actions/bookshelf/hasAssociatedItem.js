@@ -45,7 +45,7 @@ export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, outp
     }
 
     // Return existing associations of this type...
-    inputMain[ACTION.INPUT_RELATIONS] = [assocName];
+    inputMain[ACTION.INPUT_ASSOCIATIONS] = [assocName];
 
     // Lookup resources...
     return Promise.all([

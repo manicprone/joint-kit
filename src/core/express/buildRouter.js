@@ -79,7 +79,7 @@ function generateRouteLogic(joint, methodDef) {
       }
 
       // Support "with" field...
-      if (inputValues.with) input.relations = inputValues.with.split(',');
+      if (inputValues.with) input.associations = inputValues.with.split(',');
 
       // Support "load" field...
       if (inputValues.load) input.loadDirect = inputValues.load.split(',');

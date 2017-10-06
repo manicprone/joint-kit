@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import ACTION from '../../../src/actions/action-constants';
 import * as AuthHandler from '../../../src/authorization/auth-handler';
 import Joint from '../../../src';
 import modelConfig from '../../configs/model-config';
@@ -948,8 +949,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    it('should return relation data when the "input.relations" property is used', () => {
-      const relationNameProfile = 'profile';
+    it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
+      const associationNameProfile = 'profile';
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -958,13 +959,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProjectWithRelation = {
         fields: { id: 1 },
-        relations: [relationNameProfile],
+        associations: [associationNameProfile],
       };
       const inputProjectWithoutRelation = {
         fields: { id: 1 },
       };
 
-      const relationNameProfiles = 'profiles';
+      const associationNameProfiles = 'profiles';
       const specUser = {
         modelName: 'User',
         fields: [
@@ -973,14 +974,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputUser = {
         fields: { id: 4 },
-        relations: [relationNameProfiles],
+        associations: [associationNameProfiles],
       };
 
       const withRelation01 = joint.getItem(specProject, inputProjectWithRelation)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
-            .that.has.property(relationNameProfile);
+            .that.has.property(associationNameProfile);
         });
 
       const withoutRelation01 = joint.getItem(specProject, inputProjectWithoutRelation)
@@ -994,15 +995,15 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .then((data) => {
           expect(data)
             .to.have.property('relations')
-            .that.has.property(relationNameProfiles);
+            .that.has.property(associationNameProfiles);
 
-          expect(data.relations[relationNameProfiles]).to.have.length(3);
+          expect(data.relations[associationNameProfiles]).to.have.length(3);
         });
 
       return Promise.all([withRelation01, withoutRelation01, withRelation02]);
     });
 
-    it('should load relation data directly to the base attributes when the "input.loadDirect" property is used', () => {
+    it('should load association data directly to the base attributes when the "input.loadDirect" property is used', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1034,7 +1035,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withLoadDirect]);
     });
 
-    it('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
+    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.loadDirect" properties`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1043,7 +1044,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProject = {
         fields: { id: 2 },
-        relations: ['profile'],
+        associations: ['profile'],
         loadDirect: ['codingLanguageTags:key', 'user:username'],
       };
 
@@ -1074,7 +1075,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProject = {
         fields: { id: itemID },
-        relations: ['profile'],
+        associations: ['profile'],
         loadDirect: ['codingLanguageTags:key', 'user:username'],
       };
 
@@ -1290,7 +1291,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    it('should return relation data when the "input.relations" property is used', () => {
+    it(`should return relation data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1300,7 +1301,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProjectWithRelation = {
         fields: { profile_id: 2 },
-        relations: ['profile'],
+        associations: ['profile'],
       };
       const inputProjectWithoutRelation = {
         fields: { profile_id: 2 },
@@ -1329,7 +1330,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withRelation, withoutRelation]);
     });
 
-    it('should load relation data directly to the base attributes when the "input.relations" property is used', () => {
+    it('should load relation data directly to the base attributes when the "input.loadDirect" property is used', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1362,7 +1363,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withLoadDirect]);
     });
 
-    it('should support the combined usage of "input.relations" and "input.loadDirect" properties', () => {
+    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.loadDirect" properties`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1373,7 +1374,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const inputProject = {
         fields: { profile_id: 2 },
-        relations: ['profile'],
+        associations: ['profile'],
         loadDirect: ['user:username', 'codingLanguageTags:key'],
       };
 
@@ -1573,7 +1574,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const input = {
         fields: { profile_id: profileID },
         paginate: { skip: 0, limit: 3 },
-        relations: ['profile'],
+        associations: ['profile'],
         loadDirect: ['user:username'],
       };
 
