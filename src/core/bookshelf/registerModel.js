@@ -31,6 +31,11 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
           if (debug) console.log('[JOINT] [registerModel] parsed association path:', info);
 
           if (info) {
+            // Add lookup of association modelName to bookshelf...
+            if (!bookshelf.modelNameForAssoc) bookshelf.modelNameForAssoc = {};
+            if (!bookshelf.modelNameForAssoc[modelName]) bookshelf.modelNameForAssoc[modelName] = {};
+            bookshelf.modelNameForAssoc[modelName][assocName] = info.targetModelName;
+
             // -----------------------------
             // Handle "toOne" association...
             // -----------------------------
