@@ -23,6 +23,7 @@ export default function getAllAssociatedItems(bookshelf, spec = {}, input = {}, 
 function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
+    const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
     const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
@@ -39,12 +40,20 @@ function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) 
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
+    // Lookup model name of association, add to spec if not provided...
+    let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME];
+    if (!modelNameAssoc) {
+      modelNameAssoc = (bookshelf.modelNameForAssoc[modelNameMain])
+          ? bookshelf.modelNameForAssoc[modelNameMain][assocName]
+          : null;
+      specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc;
+    }
+
     // Load trx to main resource...
     inputMain[ACTION.INPUT_TRANSACTING] = trx;
 
     // Return existing associations of this type...
     inputMain[ACTION.INPUT_RELATIONS] = [assocName];
-    const modelNameAssoc = assocName; // TODO: Lookup assoc modelName from modelDef !!!
 
     // Lookup main resource...
     return getItem(bookshelf, specMain, inputMain)
@@ -54,7 +63,7 @@ function performGetAllAssociatedItems(bookshelf, spec = {}, input = {}, output) 
 
         // Reject with 404 if instances of the requested association were not found...
         if (assoc.length === 0) {
-          return reject(StatusErrors.generateAssociationDoesNotExistError(modelNameAssoc));
+          return reject(StatusErrors.generateAssociatedItemsDoNotExistError(modelNameAssoc));
         }
 
         // Otherwise, return data in requested format...

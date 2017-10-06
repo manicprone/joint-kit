@@ -47,7 +47,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: 'codingLanguageTags',
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -64,7 +63,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: 'codingLanguageTags',
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -81,7 +79,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         noAssoc: {
           name: 'codingLanguageTags',
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -98,7 +95,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           noAssociationName: 'codingLanguageTags',
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -230,10 +226,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    // TODO: Change this to test "when the specified main model and association type do not exist" !!!
-    //       (Whenever the modelName is removed from the assoc rqt)
-
-    it('should return an error (400) when the specified main or associated models do not exist', () => {
+    it('should return an error (400) when the specified main model or association type do not exist', () => {
       const specNoMain = {
         main: {
           modelName: 'AlienProject',
@@ -244,7 +237,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: 'codingLanguageTags',
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -260,8 +252,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
-          modelName: 'AlienTag',
+          name: 'alienTags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -585,7 +576,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: associationName,
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -665,7 +655,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: associationName,
-          modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -714,7 +703,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
         association: {
           name: associationName,
-          modelName: assocModelName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },

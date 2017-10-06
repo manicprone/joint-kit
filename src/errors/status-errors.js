@@ -67,10 +67,17 @@ export function generateResourceNotFoundError(resourceName = '') {
   });
 }
 
-export function generateAssociationDoesNotExistError(resourceName = '') {
+export function generateAssociatedItemDoesNotExistError(resourceName = '') {
   return new JointStatusError({
     status: 404,
-    message: `The requested "${resourceName}" association does not exist.`,
+    message: `The requested "${resourceName}" does exist for the requested resource.`,
+  });
+}
+
+export function generateAssociatedItemsDoNotExistError(resourceName = '') {
+  return new JointStatusError({
+    status: 404,
+    message: `No instances of "${resourceName}" exist for the requested resource.`,
   });
 }
 

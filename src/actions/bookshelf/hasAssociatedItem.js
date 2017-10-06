@@ -10,8 +10,8 @@ const debug = false;
 export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, output) {
   return new Promise((resolve, reject) => {
     const specMain = spec[ACTION.RESOURCE_MAIN];
+    const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
-    const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
     const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
@@ -29,6 +29,15 @@ export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, outp
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
+    // Lookup model name of association, add to spec if not provided...
+    let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME];
+    if (!modelNameAssoc) {
+      modelNameAssoc = (bookshelf.modelNameForAssoc[modelNameMain])
+          ? bookshelf.modelNameForAssoc[modelNameMain][assocName]
+          : null;
+      specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc;
+    }
+
     // Load trx to both resources...
     if (trx) {
       inputMain[ACTION.INPUT_TRANSACTING] = trx;
@@ -44,7 +53,7 @@ export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, outp
       getItem(bookshelf, specAssoc, inputAssoc),
     ])
     .then(([main, assoc]) => {
-      // If has association, return it...
+      // If has associated item, return it...
       const idToCheck = assoc.id;
       if (objectUtils.includes(main.related(assocName).pluck('id'), idToCheck)) {
         // Return data in requested format...
@@ -55,7 +64,7 @@ export default function hasAssociatedItem(bookshelf, spec = {}, input = {}, outp
       }
 
       // Otherwise, reject with a 404...
-      return reject(StatusErrors.generateAssociationDoesNotExistError(modelNameAssoc));
+      return reject(StatusErrors.generateAssociatedItemDoesNotExistError(modelNameAssoc));
     })
     .catch((error) => {
       return reject(error);

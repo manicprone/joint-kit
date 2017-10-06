@@ -26,7 +26,6 @@ function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
     const specMain = spec[ACTION.RESOURCE_MAIN];
     const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null;
     const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION];
-    const modelNameAssoc = (specAssoc) ? specAssoc[ACTION.SPEC_MODEL_NAME] : null;
     const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null;
     const inputMain = input[ACTION.RESOURCE_MAIN];
     const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION];
@@ -44,6 +43,15 @@ function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
       return reject(StatusErrors.generateInvalidAssociationPropertiesError(missingProps));
     }
 
+    // Lookup model name of association, add to spec if not provided...
+    let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME];
+    if (!modelNameAssoc) {
+      modelNameAssoc = (bookshelf.modelNameForAssoc[modelNameMain])
+          ? bookshelf.modelNameForAssoc[modelNameMain][assocName]
+          : null;
+      specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc;
+    }
+
     // Load trx to both resources...
     inputMain[ACTION.INPUT_TRANSACTING] = trx;
     inputAssoc[ACTION.INPUT_TRANSACTING] = trx;
@@ -57,9 +65,9 @@ function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
       getItems(bookshelf, specAssoc, inputAssoc),
     ])
     .then(([main, assoc]) => {
-      // Reject with 404 if none of the requested associations were found...
+      // Reject with 404 if instances of the requested association were not found...
       if (assoc.length === 0) {
-        return reject(StatusErrors.generateAssociationDoesNotExistError(modelNameAssoc));
+        return reject(StatusErrors.generateAssociatedItemsDoNotExistError(modelNameAssoc));
       }
 
       // Otherwise, attach associations to main...
