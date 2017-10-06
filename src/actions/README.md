@@ -495,13 +495,18 @@ input: {
 
 ## To Do
 
-* Support model-config without a `modelsEnabled` property (just optional) ???
-
-* Support `fields.defaultValue` for `getItem`, `getItems`, et al.
-
 * Support multiple fields on loadDirect
   e.g. `input.loadDirect: ['profile:*']` -and- `input.loadDirect: ['profile']` => mount all fields.
   e.g. `input.loadDirect: ['profile:name,description,rank']` => mount multiple specified fields.
+
+* Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
+  e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the
+       conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"
+       i.e. `lookup:true` (implied AND), `lookupOr:true` (uses `Or` like current implementation).
+
+* Support model-config without a `modelsEnabled` property (just optional) ???
+
+* Support `fields.defaultValue` for `getItem`, `getItems`, et al.
 
 * Support auto-injected / overrides for input options (on method config)
   e.g. Enforce => `input.loadDirect: ['roles:key']` on all requests. (`spec.forceLoadDirect`, `spec.forceAssociations`)
@@ -517,11 +522,6 @@ input: {
   e.g. `{ fields.defaultValue: '% camelcase(title) %' }` => which will set the default value
        to the camelcase of the provided "title" field.
   e.g. `{ fields.defaultValue: '% now %' }` => which will set a Date field value to the current date/time.
-
-* Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
-  e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the
-       conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"
-       i.e. `lookup:true` (implied AND), `lookupOr:true` (uses `Or` like current implementation).
 
 * Hook input field validation framework into action logic.
 
