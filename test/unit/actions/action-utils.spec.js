@@ -290,15 +290,17 @@ describe('ACTION-UTILS', () => {
     });
 
     it('should return the expected parsed relation information (associations, colMappings)', () => {
-      const data = ['roles:name', 'viewCount:count'];
+      const data = ['roles:name', 'viewCount:count', 'profile:{name,is_default}', 'user:*'];
 
       const parsed = ActionUtils.parseLoadDirect(data);
 
       expect(parsed).to.deep.equal({
-        associations: ['roles', 'viewCount'],
+        associations: ['roles', 'viewCount', 'profile', 'user'],
         colMappings: {
           roles: 'name',
           viewCount: 'count',
+          profile: ['name', 'is_default'],
+          user: '*',
         },
       });
     });

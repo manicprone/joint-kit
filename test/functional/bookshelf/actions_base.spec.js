@@ -1003,7 +1003,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withRelation01, withoutRelation01, withRelation02]);
     });
 
-    it('should load association data directly to the base attributes when the "input.loadDirect" property is used', () => {
+    it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1035,7 +1035,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withLoadDirect]);
     });
 
-    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.loadDirect" properties`, () => {
+    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1044,7 +1044,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProject = {
         fields: { id: 2 },
-        associations: ['profile'],
+        associations: ['profile', 'codingLanguageTags'],
         loadDirect: ['codingLanguageTags:key', 'user:username'],
       };
 
@@ -1057,7 +1057,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.attributes)
             .to.contain({ user: 'the_manic_edge' });
 
-          expect(data.relations).to.have.keys('profile');
+          expect(data.relations).to.have.keys(['codingLanguageTags', 'profile']);
+          expect(data.relations).to.not.have.keys(['user']);
         });
 
       return Promise.all([withBoth]);

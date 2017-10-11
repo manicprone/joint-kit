@@ -55,7 +55,7 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
 
     // Include associations (associations and loadDirect will be combined into a distinct set)...
     let associations = null;
-    const loadDirect = ActionUtils.parseLoadDirect(input.loadDirect);
+    const loadDirect = ActionUtils.parseLoadDirect(input[ACTION.INPUT_LOAD_DIRECT]);
     const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS];
     if (inputAssocs && Array.isArray(inputAssocs)) associations = inputAssocs.slice();
     if (loadDirect.associations && loadDirect.associations.length > 0) {
