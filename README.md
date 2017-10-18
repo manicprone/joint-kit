@@ -120,16 +120,17 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
     <pre>
       {
         cid: 'c1',
-        _knex: null,
+        &#95;knex: null,
         id: 1,
         attributes: {
           id: 1,
           user_id: 333,
-          title: 'Functional Fanatic',
           slug: 'functional-fanatic',
+          title: 'Functional Fanatic',
           tagline: 'I don\'t have habits, I have algorithms.',
+          is_live: false,
         },
-        _previousAttributes: { ... },
+        &#95;previousAttributes: { ... },
         changed: {},
         relations: {
           user: {
@@ -144,7 +145,7 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
               ],
               is_sane: false,
             },
-            _previousAttributes: { ... },
+            &#95;previousAttributes: { ... },
             changed: {},
             relations: {},
             relatedData: { ... },
@@ -157,13 +158,14 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
     <pre>
       {
         data: {
-          type: 'Profile',
+          type: 'BlogProfile',
           id: 1,
           attributes: {
             user_id: 333,
-            title: 'Functional Fanatic',
             slug: 'functional-fanatic',
+            title: 'Functional Fanatic',
             tagline: 'I don\'t have habits, I have algorithms.',
+            is_live: false,
           },
           relationships: {
             user: {
@@ -206,9 +208,9 @@ The conceptual idea of the library goes like this:
 
 ```javascript
 import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
 
-// Fire up a joint, specifying your Bookshelf configuration:
+// Fire up a joint, providing the service:
 const joint = new Joint({
   service: bookshelf,
 });
@@ -218,8 +220,8 @@ const spec = {
   modelName: 'BlogProfile',
   fields: [
     { name: 'user_id', type: 'Number', required: true },
-    { name: 'title', type: 'String', required: true },
     { name: 'slug', type: 'String', required: true },
+    { name: 'title', type: 'String', required: true },
     { name: 'tagline', type: 'String' },
     { name: 'is_live', type: 'Boolean', defaultValue: false },
   ],
@@ -228,9 +230,9 @@ const spec = {
 // The "input" supplies the data for an individual operation request:
 const input = {
   fields: {
-    user_id: 3,
-    title: 'Functional Fanatic',
+    user_id: 333,
     slug: 'functional-fanatic',
+    title: 'Functional Fanatic',
     tagline: 'I don\'t have habits, I have algorithms.',
   },
 };
@@ -245,11 +247,13 @@ joint.createItem(spec, input)
 ## Joint in Practice
 
 The idea is, you can rapidly hand-roll a custom method library by wrapping custom functions around
-the provided Joint Actions, with a defined `spec`:
+the provided Joint Actions, with your defined `spec`:
 
 <br />
 
 **For Example:**
+
+A typical CRUD set of methods for a "BlogProfile" resource:
 
 /methods/blog-profile.js
 ```javascript
@@ -322,7 +326,7 @@ export function deleteProfile(input) {
 
 <br />
 
-And, the beauty of the hand-rolled capability is that you can leverage the core logic behind each action
+The beauty of the hand-rolled capability is that you can leverage the core logic behind each action
 (which typically represents the majority of the programming), while maintaining the flexibility to write
 your own logic alongside:
 
@@ -395,6 +399,8 @@ entirely and generate the methods automatically from a JSON-based config file.
 
 **For Example:**
 
+Following the syntax for [generating methods][section-generating-custom-methods], you can create a "method config":
+
 method-config.js
 ```javascript
 export default {
@@ -459,10 +465,55 @@ joint.method.BlogProfile.createBlogProfile(input)
   .catch((error) => { ... });
 ```
 
-<br />
 
-Joint also supports a JSON syntax for defining your Models, so you don't need to manually define or register
-the model hook via Bookshelf. The syntax supports an arrow notation for defining associations (relations),
+## Joint Action API
+
+[TBC]
+
+### Spec
+
+| Option              | Description | Actions Supported               | Required? |
+| ------------------- | ----------- | ------------------------------  | --------- |
+| modelName           |             | (all)                           |  Yes      |
+| fields              |             | (all)                           |  Yes (* except getItems) |
+| fields.required     |             | (all)                           |  No       |
+| fields.requiredOr   |             | (all)                           |  No       |
+| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
+| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
+| columnsToReturn     |             | getItem, getItems               |  No       |
+| defaultOrderBy      |             | getItems                        |  No       |
+| forceAssociations   |             | getItem, getItems               |  No       |
+| forceLoadDirect     |             | getItem, getItems               |  No       |
+| auth                |             | (all)                           |  No       |
+
+### Input
+
+| Option         | Description | Actions Supported | Required? |
+| -------------- | ----------- | ----------------  | --------- |
+| fields         |             | (all)             |  Yes (* except getItems) |
+| columnSet      |             | getItem, getItems |  No       |
+| associations   |             | getItem, getItems |  No       |
+| loadDirect     |             | getItem, getItems |  No       |
+| orderBy        |             | getItems          |  No       |
+| paginate       |             | getItems          |  No       |
+| trx            |             | (all)             |  No       |
+| authBundle     |             | (all)             |  No       |
+
+
+## Generating Models
+
+Keeping in the spirit of flexibility, you can continue defining the model definitions using
+your service implementation, or you can dynamically generate them by providing a "model config".
+Or, you can do both.
+
+Joint supports a JSON syntax for defining your Models, so you don't need to manually define or register
+the model hook using the service directly (i.e. Bookshelf).
+
+Any existing models registered to your service instance will be mixed-in with those
+generated by Joint. The `methodConfig` and `routeConfig` definitions can therefore
+operate on models registered by either means.
+
+The `modelConfig` syntax supports an arrow notation for defining associations (relations),
 making it easier to wield than the Bookshelf polymorphic method approach.
 
 <br />
@@ -501,23 +552,22 @@ export default {
 ```
 
 <br />
-Similarly, use the Joint `generate` function to dynamically generate your models.
+Use the Joint `generate` function to dynamically generate your models, once your `modelConfig` is ready.
 Any manually defined models on your bookshelf config will be merged into the Joint
-instance along with those defined in the model-config. So, you can use both approaches as you see fit:
+instance along with those defined in the modelConfig. So, you can use both approaches as you see fit:
 <br />
 
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf';
 import modelConfig from './model-config';
-import methodConfig from './method-config';
 
 const joint = new Joint({
   service: bookshelf,
 });
 
-// Dynamically generate the defined models and methods...
-joint.generate({ modelConfig, methodConfig });
+// Dynamically generate the defined models...
+joint.generate({ modelConfig });
 
 // You can access all models using the syntax joint.model.<modelName>:
 if (joint.model.BlogProfile) console.log('BlogProfile exists !!!');
@@ -529,60 +579,11 @@ console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
 
-## Joint Action API
-
-[TBC]
-
-### Spec
-
-| Option              | Description | Actions Supported               | Required? |
-| ------------------- | ----------- | ------------------------------  | --------- |
-| modelName           |             | (all)                           |  Yes      |
-| fields              |             | (all)                           |  Yes (* except getItems) |
-| fields.required     |             | (all)                           |  No       |
-| fields.requiredOr   |             | (all)                           |  No       |
-| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
-| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
-| columnsToReturn     |             | getItem, getItems               |  No       |
-| defaultOrderBy      |             | getItems                        |  No       |
-| forceAssociations   |             | getItem, getItems               |  No       |
-| forceLoadDirect     |             | getItem, getItems               |  No       |
-| auth                |             | (all)                           |  No       |
-
-### Input
-
-| Option         | Description | Actions Supported | Required? |
-| -------------- | ----------- | ----------------  | --------- |
-| fields         |             | (all)             |  Yes (* except getItems) |
-| columnSet      |             | getItem, getItems |  No       |
-| associations   |             | getItem, getItems |  No       |
-| loadDirect     |             | getItem, getItems |  No       |
-| orderBy        |             | getItems          |  No       |
-| paginate       |             | getItems          |  No       |
-| trx            |             | (all)             |  No       |
-| authBundle     |             | (all)             |  No       |
-
-
-## Generating Models
-
-Dynamic model generation is supported using the library's JSON syntax.
-
-You can write the model definitions yourself (and make them as complex as you want),
-or you can dynamically generate them by providing a "model config". Or, you can do both.
-
-Any existing models registered to your service instance will be mixed-in with those
-generated by Joint. The `method-config` and `route-config` definitions can therefore
-operate on models registered by either means.
-
-[TBC]
-
-
 ## Generating Custom Methods
 
-Using the provided Joint Actions, you can rapidly implement custom methods
-for your specific data schema.
+Using the provided Joint Actions, you can rapidly implement custom methods for your specific data schema.
 
-To implement custom methods, you can write your own JavaScript functions by directly accessing
+To implement custom methods, you can either write your own JavaScript functions by directly accessing
 the `joint.<action>` set, or you can dynamically generate them by providing a "method config".
 
 [TBC]
