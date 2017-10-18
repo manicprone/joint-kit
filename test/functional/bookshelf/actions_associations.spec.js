@@ -981,9 +981,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         });
     });
 
-    // TODO: Obtain the assocModelName from the assoc name !!!
-
-    it.skip('should return in JSON API shape when payload format is set to "json-api"', () => {
+    it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const mainModelName = 'Project';
       const mainID = 2;
       const assocModelName = 'CodingLanguageTag';

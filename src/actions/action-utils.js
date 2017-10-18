@@ -128,36 +128,42 @@ export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
 }
 
 // -----------------------------------------------------------------------------
-//
+// Looks at the provided loadDirect spec defintion, and parses out the info
+// needed to perform the loadDirect action on resource association data.
 // -----------------------------------------------------------------------------
 // e.g.
 //
 // Provided:
-// ['roles:name', 'viewCount:count']
+// ['viewCount:count', profile:{name,is_default}, 'user:*']
 //
 // Returns:
 // {
-//   associations: ['roles', 'viewCount'],
+//   associations: ['viewCount', 'profile', 'user'],
 //   colMappings: {
-//     roles: 'name',
 //     viewCount: 'count',
+//     profile: ['name', 'is_default'],
+//     user: '*',
 //   },
 // }
 // -----------------------------------------------------------------------------
-export function parseLoadDirect(loadDirectData = []) {
+export function parseLoadDirect(loadDirectSpec = []) {
   const loadDirect = {};
 
-  if (Array.isArray(loadDirectData) && loadDirectData.length > 0) {
+  if (Array.isArray(loadDirectSpec) && loadDirectSpec.length > 0) {
     loadDirect.associations = [];
     loadDirect.colMappings = {};
 
-    loadDirectData.forEach((relation) => {
-      const relationOpts = relation.split(':');
-      const relationName = relationOpts[0];
-      const relationCol = (relationOpts.length > 1) ? relationOpts[relationOpts.length - 1] : null;
-      if (relationCol && !objectUtils.includes(loadDirect.associations, relationName)) {
-        loadDirect.associations.push(relationName);
-        loadDirect.colMappings[relationName] = relationCol;
+    loadDirectSpec.forEach((assoc) => {
+      const assocOpts = assoc.split(':');
+      const assocName = assocOpts[0];
+      const assocColDef = (assocOpts.length > 1) ? assocOpts[assocOpts.length - 1].trim() : null;
+
+      if (assocColDef && !objectUtils.includes(loadDirect.associations, assocName)) {
+        const multiColPattern = /^{(.+)}/;
+        const match = multiColPattern.exec(assocColDef);
+        const assocCols = (match && match.length > 1) ? match[1].split(',') : assocColDef;
+        loadDirect.associations.push(assocName);
+        loadDirect.colMappings[assocName] = assocCols;
       }
     });
   }

@@ -44,38 +44,6 @@
 | snapshotItem             | An advanced create operation for "snapshotting" a single item (with associations) |
 
 
-## Spec/Input Options
-
-All available properties
-
-### Spec
-
-| Option              | Description | Actions Supported               | Required? |
-| ------------------- | ----------- | ------------------------------  | --------- |
-| modelName           |             | (all)                           |  Yes      |
-| fields              |             | (all)                           |  Yes (* except getItems) |
-| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
-| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
-| columnsToReturn     |             | getItem, getItems               |  No       |
-| defaultOrderBy      |             | getItems                        |  No       |
-| forceRelations      |             | getItem, getItems               |  No       |
-| forceLoadDirect     |             | getItem, getItems               |  No       |
-| auth                |             | (all)                           |  No       |
-
-### Input
-
-| Option         | Description | Actions Supported | Required? |
-| -------------- | ----------- | ----------------  | --------- |
-| fields         |             | (all)             |  Yes (* except getItems) |
-| columnSet      |             | getItem, getItems |  No       |
-| relations      |             | getItem, getItems |  No       |
-| loadDirect     |             | getItem, getItems |  No       |
-| orderBy        |             | getItems          |  No       |
-| paginate       |             | getItems          |  No       |
-| trx            |             | (all)             |  No       |
-| authBundle     |             | (all)             |  No       |
-
-
 ## Action Examples
 
 ### createItem
@@ -494,10 +462,6 @@ input: {
 
 
 ## To Do
-
-* Support multiple fields on loadDirect
-  e.g. `input.loadDirect: ['profile:*']` -and- `input.loadDirect: ['profile']` => mount all fields.
-  e.g. `input.loadDirect: ['profile:name,description,rank']` => mount multiple specified fields.
 
 * Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
   e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the

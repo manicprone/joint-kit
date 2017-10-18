@@ -38,35 +38,66 @@ export function buildOrderBy(fieldValue) {
 // -----------------------------------------------------------------------------
 // NOTE: This function mutates the data provided. There is no return value.
 // -----------------------------------------------------------------------------
-export function loadRelationsToItemBase(itemData, loadDirect = {}, standardRelations = []) {
+export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelations = []) {
   if (loadDirect.associations) {
-    // Loop through all loadDirect requests, moving the specified col value to the item's base attributes...
+    // Loop through all loadDirect requests, moving the specified column data to the item's base attributes...
     loadDirect.associations.forEach((relationName) => {
-      const colName = loadDirect.colMappings[relationName];
+      const colNames = loadDirect.colMappings[relationName];
       const relationData = (itemData.relations[relationName]) ? itemData.relations[relationName] : null;
-      let loadDirectValue = null;
+      let loadDirectData = null;
 
-      // Handle collection (many relation)...
-      if (relationData && relationData.models) {
-        loadDirectValue = [];
-        relationData.models.forEach((modelData) => {
-          if (objectUtils.has(modelData.attributes, colName)) loadDirectValue.push(modelData.attributes[colName]);
-        });
-      // Handle item (1-1 relation)...
-      } else if (relationData && objectUtils.has(relationData.attributes, colName)) {
-        loadDirectValue = relationData.attributes[colName];
-      }
-      if (debug_loadDirect) console.log(`[JOINT] [bookshelf-utils:loadRelationsToItemBase] load direct: ${relationName}:${colName} => ${loadDirectValue}`);
+      if (relationData) {
+        // Handle collection (many relation)...
+        if (relationData.models) {
+          loadDirectData = [];
+          relationData.models.forEach((modelData) => {
+            // Multiple, explicit fields...
+            if (Array.isArray(colNames)) {
+              const colDataSet = {};
+              colNames.forEach((colName) => {
+                colDataSet[colName] = modelData.attributes[colName];
+              });
+              loadDirectData.push(colDataSet);
+            // Wildcard fields...
+            } else if (colNames === '*') {
+              loadDirectData.push(modelData.attributes);
+            // Single field...
+            } else {
+              loadDirectData.push(modelData.attributes[colNames]);
+            }
+          });
+
+        // Handle item (1-1 relation)...
+        } else {
+          /* eslint-disable no-lonely-if */
+          // Multiple, explicit fields...
+          if (Array.isArray(colNames)) {
+            loadDirectData = {};
+            colNames.forEach((colName) => {
+              loadDirectData[colName] = relationData.attributes[colName];
+            });
+          // Wildcard fields...
+          } else if (colNames === '*') {
+            loadDirectData = relationData.attributes;
+          // Single field...
+          } else {
+            loadDirectData = relationData.attributes[colNames];
+          }
+          /* eslint-enable no-lonely-if */
+        }
+      } // end-if (relationData)
+
+      if (debug_loadDirect) console.log(`[JOINT] [bookshelf-utils:loadRelationsToItemBase] load direct: ${relationName}:${colNames} => ${loadDirectData}`);
 
       // Copy the column value to a base attribute (using the relation name as the property name)...
-      if (loadDirectValue) {
+      if (loadDirectData) {
         const attrName = stringUtils.toSnakeCase(relationName);
-        itemData.attributes[attrName] = loadDirectValue; // eslint-disable-line no-param-reassign
+        itemData.attributes[attrName] = loadDirectData;
       }
 
       // If not included in the standard relations, remove the relation data from the item...
-      if (!objectUtils.includes(standardRelations, relationName)) {
-        delete itemData.relations[relationName]; // eslint-disable-line no-param-reassign
+      if (!objectUtils.includes(keepAsRelations, relationName)) {
+        delete itemData.relations[relationName];
       }
     });
   } // end-if (loadDirect.associations)
