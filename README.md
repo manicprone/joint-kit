@@ -23,8 +23,8 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [The Joint Concept][section-the-joint-concept]
-* [Joint Lib in Practice][section-joint-lib-in-practice]
-* [Joint Lib API][section-joint-lib-api]
+* [Joint in Practice][section-joint-in-practice]
+* [Joint Action API][section-joint-action-api]
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
@@ -118,37 +118,52 @@ However, Joint also supports the value `'json-api'`, which transforms the data i
 making it ready-to-use for RESTful data transport.
 
 **output = 'native' (default)**
-```javascript
-const joint = new Joint({
-  service: bookshelf,
-});
 
-joint.getItem().then((payload) => { ... });
-```
+<table>
+<th>Action</th>
+<th>Payload</th>
+<tr>
+  <td>
+  ```javascript
+  const joint = new Joint({
+    service: bookshelf,
+  });
 
-payload:
-```
-<show example payload>
-```
+  joint.getItem().then((payload) => { ... });
+  ```
+  </td>
+  <td>
+  ```
+  <show example payload>
+  ```
+  </td>
+</tr>
+</table>
+
 
 **output = 'json-api'**
-```javascript
-const joint = new Joint({
-  service: bookshelf,
-  output: 'json-api',
-});
 
-joint.getItem().then((payload) => { ... });
-```
+<table>
+<th>Action</th>
+<th>Payload</th>
+<tr>
+  <td>
+  ```javascript
+  const joint = new Joint({
+    service: bookshelf,
+    output: 'json-api',
+  });
 
-payload:
-```
-<show example payload>
-```
-
-<br />
-
-See the [Action Guide][link-action-guide-bookshelf] for details on using the notation.
+  joint.getItem().then((payload) => { ... });
+  ```
+  </td>
+  <td>
+  ```
+  <show example payload>
+  ```
+  </td>
+</tr>
+</table>
 
 
 ## The Joint Concept
@@ -196,54 +211,11 @@ joint.createItem(spec, input)
   .catch((error) => { ... });
 ```
 
-<br />
 
-/resources/models.js
-```javascript
-import bookshelf from '../services/bookshelf';
+## Joint in Practice
 
-const BlogProfile = bookshelf.Model.extend({
-  tableName: 'blog_profiles',
-  hasTimestamps: ['created_at', 'updated_at'],
-  user() {
-    return this.belongsTo('User', 'user_id');
-  },
-  posts() {
-    return this.hasMany('BlogPost', 'profile_id');
-  },
-  tags() {
-    return this.hasMany('Tag').through('ProfileTag', 'id', 'profile_id', 'tag_id');
-  },
-});
-
-... other models
-
-// Model added to Bookshelf registry:
-bookshelf.model('BlogProfile', BlogProfile),
-```
-
-<br />
-
-/services/bookshelf.js
-```javascript
-// Configure knex...
-const knex = require('knex')({ ... });
-
-// Initialize bookshelf...
-const bookshelf = require('bookshelf')(knex);
-
-// Enable required plugins...
-bookshelf.plugin('registry');
-bookshelf.plugin('pagination');
-
-export default bookshelf;
-```
-
-
-## Joint Lib in Practice
-
-The idea is, you can rapidly implement a custom method library (manually) by wrapping custom functions around
-the Joint Actions, with a defined `spec`:
+The idea is, you can rapidly hand-roll a custom method library by wrapping custom functions around
+the provided Joint Actions, with a defined `spec`:
 
 <br />
 
@@ -320,9 +292,9 @@ export function deleteProfile(input) {
 
 <br />
 
-And, the beauty of the manual capability is that you can leverage the core logic behind each action
+And, the beauty of the hand-rolled capability is that you can leverage the core logic behind each action
 (which typically represents the majority of the programming), while maintaining the flexibility to write
-your customized logic alongside:
+your own logic alongside:
 
 <br />
 
@@ -386,7 +358,7 @@ export function getProfile(input) {
 
 <br />
 
-But, if you don't require any supplemental logic for an operation, bypass the manual rolling of the method
+But, if you don't require any supplemental logic for an operation, bypass the hand-rolling of the method
 entirely and generate the methods automatically from a JSON-based config file.
 
 <br />
@@ -527,11 +499,9 @@ console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
 
-## Joint Lib API
+## Joint Action API
 
 [TBC]
-
-### Action API
 
 All available properties
 
@@ -617,8 +587,8 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-the-joint-concept]: #the-joint-concept
-[section-joint-lib-in-practice]: #joint-lib-in-practice
-[section-joint-lib-api]: #joint-lib-api
+[section-joint-in-practice]: #joint-in-practice
+[section-joint-action-api]: #joint-action-api
 [section-generating-models]: #generating-models
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api
