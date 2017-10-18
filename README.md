@@ -9,11 +9,13 @@ generate an entire custom method library and client API from scratch.
 Provides: DB model configuration, CRUD and relational data logic, authorization & field validation,
 data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
+<br />
 
 ## WIP
 
 Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
 
+<br />
 
 ## Table of Contents
 
@@ -30,6 +32,7 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [The Joint Stack][section-the-joint-stack]
 * [License][section-license]
 
+<br />
 
 ## Prerequisites
 
@@ -48,7 +51,6 @@ The Joint Library currently supports:
 
 <br />
 
-
 To generate a RESTful API on top of your custom methods, you need:
 
 * a supported server framework (e.g. Express)
@@ -59,6 +61,7 @@ The Joint Library currently supports:
 | ------------------------------- |
 | [Express][link-express-site]    |
 
+<br />
 
 ## Install
 
@@ -66,6 +69,7 @@ The Joint Library currently supports:
 $ npm install joint-lib --save
 ```
 
+<br />
 
 ## Joint Actions
 
@@ -93,6 +97,7 @@ The following abstract actions are immediately available once the library is ins
 | removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
 | removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
+<br />
 
 ## The JSON Syntax
 
@@ -196,7 +201,6 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
 </tr>
 </table>
 
-
 ### Collection Payload
 
 <table>
@@ -214,6 +218,7 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
 </tr>
 </table>
 
+<br />
 
 ## The Joint Concept
 
@@ -265,11 +270,12 @@ joint.createItem(spec, input)
 Naturally, this is not a realistic way one would utilize the Joint Lib in an application.
 Rather, only the "specs" for each operation would be defined in your application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
 
+<br />
 
 ## Joint in Practice
 
 The idea is, you can rapidly hand-roll a custom method library by wrapping custom functions around
-the provided Joint Actions, with your defined `spec`:
+the provided Joint Actions (with your defined `spec`), and expose those functions to your application.
 
 <br />
 
@@ -414,7 +420,7 @@ export function getProfile(input) {
 
 <br />
 
-But, if you don't require any supplemental logic for an operation, bypass the hand-rolling of the method
+But, if you don't require any supplemental logic for an operation, you can bypass the hand-rolling of the method
 entirely and generate the methods automatically from a JSON-based config file.
 
 <br />
@@ -472,7 +478,7 @@ Then, use the Joint `generate` function to dynamically generate your custom meth
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf';
-import methodConfig from './method-config';
+import methodConfig from './method-config'; // your defined method logic
 
 const joint = new Joint({
   service: bookshelf,
@@ -487,6 +493,7 @@ joint.method.BlogProfile.createBlogProfile(input)
   .catch((error) => { ... });
 ```
 
+<br />
 
 ## Joint Action API
 
@@ -521,6 +528,7 @@ joint.method.BlogProfile.createBlogProfile(input)
 | trx            |             | (all)             |  No       |
 | authBundle     |             | (all)             |  No       |
 
+<br />
 
 ## Generating Models
 
@@ -600,6 +608,7 @@ const modelName = joint.modelNameByTable['blog_profiles'];
 console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
+<br />
 
 ## Generating Custom Methods
 
@@ -610,6 +619,7 @@ the `joint.<action>` set, or you can dynamically generate them by providing a "m
 
 [TBC]
 
+<br />
 
 ## Generating a RESTful API
 
@@ -620,11 +630,13 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 
 [TBC]
 
+<br />
 
 ## The Joint Stack
 
 [TBC]
 
+<br />
 
 ## License
 
