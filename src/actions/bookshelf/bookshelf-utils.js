@@ -38,7 +38,7 @@ export function buildOrderBy(fieldValue) {
 // -----------------------------------------------------------------------------
 // NOTE: This function mutates the data provided. There is no return value.
 // -----------------------------------------------------------------------------
-export function loadRelationsToItemBase(itemData, loadDirect = {}, standardRelations = []) {
+export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelations = []) {
   if (loadDirect.associations) {
     // Loop through all loadDirect requests, moving the specified column data to the item's base attributes...
     loadDirect.associations.forEach((relationName) => {
@@ -96,7 +96,7 @@ export function loadRelationsToItemBase(itemData, loadDirect = {}, standardRelat
       }
 
       // If not included in the standard relations, remove the relation data from the item...
-      if (!objectUtils.includes(standardRelations, relationName)) {
+      if (!objectUtils.includes(keepAsRelations, relationName)) {
         delete itemData.relations[relationName];
       }
     });

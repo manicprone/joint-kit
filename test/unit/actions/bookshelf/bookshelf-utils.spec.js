@@ -264,9 +264,32 @@ describe('BOOKSHELF-UTILS', function () {
         });
     });
 
-    // TODO: Add test for this !!!
-    // it('should delete the original relation data, if not explicitly included', function () {
-    //
-    // });
+    it('should delete the original relation data, if not explicitly included', function () {
+      const keepAsRelations = ['softwareTags', 'profile'];
+      const loadDirect = {
+        associations: ['techConceptTags', 'codingLanguageTags', 'softwareTags', 'user', 'profile', 'team'],
+        colMappings: {
+          techConceptTags: 'key', // toMany relation, single col
+          codingLanguageTags: ['label', 'key'], // toMany relation, multiple explicit cols
+          softwareTags: '*', // toMany relation, wildcard (all) cols
+          user: 'username', // toOne relation, single col
+          profile: ['title', 'tagline', 'is_live'], // toOne relation, multiple explicit cols
+          team: '*', // toOne relation, wildcard (all) cols
+        },
+      };
+
+      BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, keepAsRelations);
+
+      // Hoisted attributes...
+      expect(itemData.attributes).to.have.property('tech_concept_tags');
+      expect(itemData.attributes).to.have.property('coding_language_tags');
+      expect(itemData.attributes).to.have.property('software_tags');
+      expect(itemData.attributes).to.have.property('user');
+      expect(itemData.attributes).to.have.property('profile');
+      expect(itemData.attributes).to.have.property('team');
+
+      // Bookshelf relation data...
+      expect(itemData.relations).to.have.keys(keepAsRelations);
+    });
   }); // END - loadRelationsToItemBase
 });

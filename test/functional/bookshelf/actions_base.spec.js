@@ -809,7 +809,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         external_id: '304',
         username: 'the_manic_edge',
         roles: ['moderator', 'admin'],
-        profile_id: [1, 2, 3],
+        profile_ids: [1, 2, 3],
       };
       const mockRequest = {
         method: 'GET',
@@ -825,7 +825,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', required: true },
         ],
         auth: {
-          ownerCreds: ['profile_id'],
+          ownerCreds: ['profile_id => profile_ids'],
         },
       };
       const input = {
@@ -878,7 +878,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([getAllColsFromBase, getAllColsFromEmptyArray, getSpecifiedCols]);
     });
 
-    it('should support the "columnSet" syntax, permitting various sets of returned column data', () => {
+    it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
       const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
 
       const specBase = {
@@ -959,7 +959,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProjectWithRelation = {
         fields: { id: 1 },
-        associations: [associationNameProfile],
+        associations: [associationNameProfile], // One-to-One
       };
       const inputProjectWithoutRelation = {
         fields: { id: 1 },
@@ -974,7 +974,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputUser = {
         fields: { id: 4 },
-        associations: [associationNameProfiles],
+        associations: [associationNameProfiles], // One-to-Many
       };
 
       const withRelation01 = joint.getItem(specProject, inputProjectWithRelation)
@@ -1012,14 +1012,21 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const inputProject = {
         fields: { id: 2 },
-        loadDirect: ['profile:title', 'user:username', 'codingLanguageTags:key'],
+        loadDirect: ['profile:{user_id,title,is_live}', 'user:username', 'codingLanguageTags:key'],
       };
 
       const withLoadDirect = joint.getItem(specProject, inputProject)
         .then((data) => {
           expect(data.attributes)
+            .to.have.property('profile')
             .to.contain({
-              profile: 'Heavy Synapse',
+              user_id: 4,
+              title: 'Heavy Synapse',
+              is_live: 0,
+            });
+
+          expect(data.attributes)
+            .to.contain({
               user: 'the_manic_edge',
             });
 
@@ -1233,7 +1240,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([getAllColsFromBase, getSpecifiedCols]);
     });
 
-    it('should support the "columnSet" syntax, permitting various sets of returned column data', () => {
+    it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
       const allAvailableCols = ['id', 'external_id', 'email', 'username', 'display_name', 'avatar_url', 'last_login_at', 'created_at', 'updated_at'];
 
       const specBase = {
@@ -1331,7 +1338,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withRelation, withoutRelation]);
     });
 
-    it('should load relation data directly to the base attributes when the "input.loadDirect" property is used', () => {
+    it(`should load relation data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
@@ -1364,7 +1371,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withLoadDirect]);
     });
 
-    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.loadDirect" properties`, () => {
+    it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
