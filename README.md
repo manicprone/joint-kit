@@ -1,5 +1,4 @@
 # Joint Lib
-> Part of the Joint Stack
 
 A Node server library for rapidly implementing data logic and generating RESTful
 endpoints.
