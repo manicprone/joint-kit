@@ -111,6 +111,8 @@ Each action also supports an optional `output` parameter, which specifies the fo
 By default, the output is set to `'native'`, which effectively returns the queried data in the format
 generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
 
+### Item Payload
+
 <table>
 <th>output = 'native'</th>
 <th>output = 'json-api'</th>
@@ -142,7 +144,6 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
                 gitlab: 'https://gitlab.com/manicprone',
                 github: 'https://github.com/manicprone',
               ],
-              is_sane: false,
             },
             &#95;previousAttributes: { ... },
             changed: {},
@@ -186,11 +187,28 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
                 gitlab: 'https://gitlab.com/manicprone',
                 github: 'https://github.com/manicprone',
               ],
-              is_sane: false,
             },
           },
         ],
       }
+    </pre>
+  </td>
+</tr>
+</table>
+
+
+### Collection Payload
+
+<table>
+<th>output = 'native'</th>
+<th>output = 'json-api'</th>
+<tr>
+  <td>
+    <pre>
+    </pre>
+  </td>
+  <td>
+    <pre>
     </pre>
   </td>
 </tr>
@@ -241,6 +259,11 @@ joint.createItem(spec, input)
   .then((result) => { ... })
   .catch((error) => { ... });
 ```
+
+<br />
+
+Naturally, this is not a realistic way one would utilize the Joint Lib in an application.
+Rather, only the "specs" for each operation would be defined in your application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
 
 
 ## Joint in Practice
@@ -327,7 +350,7 @@ export function deleteProfile(input) {
 
 The beauty of the hand-rolled capability is that you can leverage the core logic behind each action
 (which typically represents the majority of the programming), while maintaining the flexibility to write
-your own logic alongside:
+your own logic alongside it:
 
 <br />
 
