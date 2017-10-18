@@ -114,43 +114,20 @@ generated natively by the service (currently, i.e. Bookshelf).
 However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format,
 making it ready-to-use for RESTful data transport.
 
-**output = 'native' (default)**
-```javascript
-const joint = new Joint({
-  service: bookshelf,
-});
-```
-
 <table>
-<th>Action</th>
-<th>Payload</th>
 <tr>
   <td>
-    <pre>joint.getItem().then((payload) => { ... });</pre>
+    <pre>output = 'native'</pre> (default)
   </td>
+  <td>
+    <pre>output = 'json-api'</pre>
+  </td>
+</tr>
+<tr>
   <td>
     <pre>
       <show example payload>
     </pre>
-  </td>
-</tr>
-</table>
-
-
-**output = 'json-api'**
-```javascript
-const joint = new Joint({
-  service: bookshelf,
-  output: 'json-api',
-});
-```
-
-<table>
-<th>Action</th>
-<th>Payload</th>
-<tr>
-  <td>
-    <pre>joint.getItem().then((payload) => { ... });</pre>
   </td>
   <td>
     <pre>
