@@ -108,11 +108,9 @@ Each action has two required parts: the `spec` and the `input`.
 <br />
 
 Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
-By default, the output is set to `'native'`, which effectively returns the queried data in the format
-generated natively by the service (currently, i.e. Bookshelf).
 
-However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format,
-making it ready-to-use for RESTful data transport.
+By default, the output is set to `'native'`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
 
 <table>
 <tr>
@@ -126,12 +124,78 @@ making it ready-to-use for RESTful data transport.
 <tr>
   <td>
     <pre>
-      <show example payload>
+      {
+        cid: 'c1',
+        _knex: null,
+        id: 1,
+        attributes: {
+          id: 1,
+          user_id: 333,
+          title: 'Functional Fanatic',
+          slug: 'functional-fanatic',
+          tagline: 'I don\'t have habits, I have algorithms.',
+        },
+        _previousAttributes: { ... },
+        changed: {},
+        relations: {
+          user: {
+            cid: 'c2',
+            id: 333,
+            attributes: {
+              display_name: '|M|',
+              username: 'manicprone',
+              sites: [
+                gitlab: 'https://gitlab.com/manicprone',
+                github: 'https://github.com/manicprone',
+              ],
+              is_sane: false,
+            },
+            _previousAttributes: { ... },
+            changed: {},
+            relations: {},
+            relatedData: { ... },
+          },
+        },
+      }
     </pre>
   </td>
   <td>
     <pre>
-      <show example payload>
+      {
+        data: {
+          type: 'Profile',
+          id: 1,
+          attributes: {
+            user_id: 333,
+            title: 'Functional Fanatic',
+            slug: 'functional-fanatic',
+            tagline: 'I don\'t have habits, I have algorithms.',
+          },
+          relationships: {
+            user: {
+              data: {
+                type: 'User',
+                id: 333,
+              },
+            },
+          },
+        },
+        included: [
+          {
+            type: 'User',
+            id: 333,
+            attributes: {
+              display_name: '|M|',
+              username: 'manicprone',
+              sites: [
+                gitlab: 'https://gitlab.com/manicprone',
+                github: 'https://github.com/manicprone',
+              ],
+              is_sane: false,
+            },
+          },
+        ],
+      }
     </pre>
   </td>
 </tr>
