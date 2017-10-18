@@ -113,14 +113,8 @@ By default, the output is set to `'native'`, which effectively returns the queri
 generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
 
 <table>
-<tr>
-  <td>
-    <pre>output = 'native'</pre> (default)
-  </td>
-  <td>
-    <pre>output = 'json-api'</pre>
-  </td>
-</tr>
+<th>output = 'native'</pre> (default)</th>
+<th>output = 'json-api'</th>
 <tr>
   <td>
     <pre>
