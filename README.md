@@ -95,9 +95,6 @@ The following abstract actions are immediately available once the library is ins
 | removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
 
-See the [Action Guide][link-action-guide-bookshelf] for details on using each action.
-
-
 ## The JSON Syntax
 
 To use the Joint Actions, you communicate with a JSON syntax.
@@ -124,18 +121,18 @@ making it ready-to-use for RESTful data transport.
 <th>Payload</th>
 <tr>
   <td>
-  ```javascript
-  const joint = new Joint({
-    service: bookshelf,
-  });
+    <pre>
+    const joint = new Joint({
+      service: bookshelf,
+    });
 
-  joint.getItem().then((payload) => { ... });
-  ```
+    joint.getItem().then((payload) => { ... });
+    </pre>
   </td>
   <td>
-  ```
-  <show example payload>
-  ```
+    <pre>
+      <show example payload>
+    </pre>
   </td>
 </tr>
 </table>
@@ -148,19 +145,19 @@ making it ready-to-use for RESTful data transport.
 <th>Payload</th>
 <tr>
   <td>
-  ```javascript
-  const joint = new Joint({
-    service: bookshelf,
-    output: 'json-api',
-  });
+    <pre>
+    const joint = new Joint({
+      service: bookshelf,
+      output: 'json-api',
+    });
 
-  joint.getItem().then((payload) => { ... });
-  ```
+    joint.getItem().then((payload) => { ... });
+    </pre>
   </td>
   <td>
-  ```
-  <show example payload>
-  ```
+    <pre>
+      <show example payload>
+    </pre>
   </td>
 </tr>
 </table>
@@ -503,8 +500,6 @@ console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 
 [TBC]
 
-All available properties
-
 ### Spec
 
 | Option              | Description | Actions Supported               | Required? |
@@ -559,8 +554,6 @@ the `joint.<action>` set, or you can dynamically generate them by providing a "m
 
 [TBC]
 
-See the [Action Guide][link-action-guide-bookshelf] for more details.
-
 
 ## Generating a RESTful API
 
@@ -598,6 +591,5 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 [link-bookshelf-site]: http://bookshelfjs.org
 [link-bookshelf-plugin-registry]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Model-Registry
 [link-bookshelf-plugin-pagination]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Pagination
-[link-action-guide-bookshelf]: https://github.com/manicprone/joint-lib/blob/master/src/actions/README.md
 
 [link-express-site]: http://expressjs.com
