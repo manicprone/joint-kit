@@ -115,19 +115,18 @@ However, Joint also supports the value `'json-api'`, which transforms the data i
 making it ready-to-use for RESTful data transport.
 
 **output = 'native' (default)**
+```javascript
+const joint = new Joint({
+  service: bookshelf,
+});
+```
 
 <table>
 <th>Action</th>
 <th>Payload</th>
 <tr>
   <td>
-    <pre>
-    const joint = new Joint({
-      service: bookshelf,
-    });
-
-    joint.getItem().then((payload) => { ... });
-    </pre>
+    <pre>joint.getItem().then((payload) => { ... });</pre>
   </td>
   <td>
     <pre>
@@ -139,20 +138,19 @@ making it ready-to-use for RESTful data transport.
 
 
 **output = 'json-api'**
+```javascript
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api',
+});
+```
 
 <table>
 <th>Action</th>
 <th>Payload</th>
 <tr>
   <td>
-    <pre>
-    const joint = new Joint({
-      service: bookshelf,
-      output: 'json-api',
-    });
-
-    joint.getItem().then((payload) => { ... });
-    </pre>
+    <pre>joint.getItem().then((payload) => { ... });</pre>
   </td>
   <td>
     <pre>
