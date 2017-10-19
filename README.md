@@ -167,16 +167,6 @@ module.exports = router;
 ```
 </details>
 
-
-<details>
-<summary>with Authorization rules:</summary>
-```javascript
-
-  <sample code>
-
-```
-</details>
-
 <br />
 
 ## Joint Actions
