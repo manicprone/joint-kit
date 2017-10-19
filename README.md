@@ -33,6 +33,7 @@ The majority of this README content will eventually be migrated into a user's gu
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
+* [Example Usage][section-example-usage]
 * [The Joint Stack][section-the-joint-stack]
 * [License][section-license]
 
@@ -527,101 +528,6 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
 
 <br />
 
-### Example Usage
-
-<details>
-<summary>Writing a custom Express Router:</summary>
-
-```javascript
-import express from 'express';
-import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf'; // your configured bookshelf service
-import modelConfig from './model-config';     // your defined models
-import methodConfig from './method-config';   // your defined method logic
-
-// Initialize a Joint using your service implementation:
-const joint = new Joint({
-  service: bookshelf,
-  output: 'json-api', // auto-serialize to JSON API Spec format
-});
-
-// Dynamically generate the defined models and methods:
-joint.generate({ modelConfig, methodConfig });
-
-// Expose your data logic via Express router:
-const router = express.Router();
-
-router.route('/user')
-  .post((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.body, req.query);
-
-    return joint.method.User.createUser(input)
-      .then(payload => handleDataResponse(payload, res, 201))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-router.route('/user/:id')
-  .get((req, res) => {
-    const input = {
-      fields: {
-        id: req.params.id,
-      },
-      loadDirect: ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'],
-      associations: ['friends'],
-    };
-
-    return joint.method.User.getUser(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  })
-  .post((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.body, req.query, { id: req.params.id });
-
-    return joint.method.User.updateUser(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  })
-  .delete((req, res) => {
-    const input = {
-      fields: {
-        id: req.params.id,
-      },
-    };
-
-    return joint.method.User.deleteUser(input)
-      .then(payload => handleDataResponse(payload, res, 204))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-router.route('/users')
-  .get((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.query);
-    input.loadDirect = ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'];
-    input.associations = ['friends'],
-
-    return joint.method.User.getUsers(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-function handleDataResponse(data, res, status = 200) {
-  res.status(status).json(data);
-}
-
-function handleErrorResponse(error, res) {
-  const status = error.status || 500;
-  res.status(status).json(error);
-}
-
-module.exports = router;
-```
-</details>
-
-<br />
-
 ## Joint Action API
 
 [TBC]
@@ -665,31 +571,31 @@ All supported options:
 
 Details for each option, with examples:
 
-##### modelName
+#### modelName
 
 [TBC]
 
-##### fields
+#### fields
 
 [TBC]
 
-##### columnsToReturn
+#### columnsToReturn
 
 [TBC]
 
-##### defaultOrderBy
+#### defaultOrderBy
 
 [TBC]
 
-##### forceAssociations
+#### forceAssociations
 
 [TBC]
 
-##### forceLoadDirect
+#### forceLoadDirect
 
 [TBC]
 
-##### auth
+#### auth
 
 [TBC]
 
@@ -699,35 +605,35 @@ Details for each option, with examples:
 
 Details for each option, with examples:
 
-##### fields
+#### fields
 
 [TBC]
 
-##### columnSet
+#### columnSet
 
 [TBC]
 
-##### associations
+#### associations
 
 [TBC]
 
-##### loadDirect
+#### loadDirect
 
 [TBC]
 
-##### orderBy
+#### orderBy
 
 [TBC]
 
-##### paginate
+#### paginate
 
 [TBC]
 
-##### trx
+#### trx
 
 [TBC]
 
-##### authBundle
+#### authBundle
 
 [TBC]
 
@@ -737,11 +643,11 @@ Details for each option, with examples:
 
 Details for each option, with examples:
 
-##### output = "native"
+#### output = "native"
 
 [TBC]
 
-##### output = "json-api"
+#### output = "json-api"
 
 [TBC]
 
@@ -867,6 +773,101 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 
 <br />
 
+## Example Usage
+
+<details>
+<summary>Writing a custom Express Router:</summary>
+
+```javascript
+import express from 'express';
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
+import modelConfig from './model-config';     // your defined models
+import methodConfig from './method-config';   // your defined method logic
+
+// Initialize a Joint using your service implementation:
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api', // auto-serialize to JSON API Spec format
+});
+
+// Dynamically generate the defined models and methods:
+joint.generate({ modelConfig, methodConfig });
+
+// Expose your data logic via Express router:
+const router = express.Router();
+
+router.route('/user')
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query);
+
+    return joint.method.User.createUser(input)
+      .then(payload => handleDataResponse(payload, res, 201))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/user/:id')
+  .get((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+      loadDirect: ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'],
+      associations: ['friends'],
+    };
+
+    return joint.method.User.getUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query, { id: req.params.id });
+
+    return joint.method.User.updateUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .delete((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+    };
+
+    return joint.method.User.deleteUser(input)
+      .then(payload => handleDataResponse(payload, res, 204))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/users')
+  .get((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.query);
+    input.loadDirect = ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'];
+    input.associations = ['friends'],
+
+    return joint.method.User.getUsers(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+function handleDataResponse(data, res, status = 200) {
+  res.status(status).json(data);
+}
+
+function handleErrorResponse(error, res) {
+  const status = error.status || 500;
+  res.status(status).json(error);
+}
+
+module.exports = router;
+```
+</details>
+
+<br />
+
 ## The Joint Stack
 
 [TBC]
@@ -887,6 +888,7 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 [section-generating-models]: #generating-models
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api
+[section-example-usage]: #example-usage
 [section-the-joint-stack]: #the-joint-stack
 [section-license]: #license
 
