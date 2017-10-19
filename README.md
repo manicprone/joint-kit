@@ -402,7 +402,7 @@ The following abstract actions are immediately available once the library is ins
 
 <br />
 
-### The JSON Syntax
+### The Joint Action Syntax
 
 To use the Joint Actions, you communicate with a JSON syntax (see the [Joint Action API][section-joint-action-api]).
 
@@ -658,6 +658,92 @@ All supported options:
 | paginate       |             | getItems          |  No       |
 | trx            |             | (all)             |  No       |
 | authBundle     |             | (all)             |  No       |
+
+<br />
+
+### Spec Options
+
+Details for each option, with examples:
+
+##### modelName
+
+[TBC]
+
+##### fields
+
+[TBC]
+
+##### columnsToReturn
+
+[TBC]
+
+##### defaultOrderBy
+
+[TBC]
+
+##### forceAssociations
+
+[TBC]
+
+##### forceLoadDirect
+
+[TBC]
+
+##### auth
+
+[TBC]
+
+<br />
+
+### Input Options
+
+Details for each option, with examples:
+
+##### fields
+
+[TBC]
+
+##### columnSet
+
+[TBC]
+
+##### associations
+
+[TBC]
+
+##### loadDirect
+
+[TBC]
+
+##### orderBy
+
+[TBC]
+
+##### paginate
+
+[TBC]
+
+##### trx
+
+[TBC]
+
+##### authBundle
+
+[TBC]
+
+<br />
+
+### Output Options
+
+Details for each option, with examples:
+
+##### output = "native"
+
+[TBC]
+
+##### output = "json-api"
+
+[TBC]
 
 <br />
 
