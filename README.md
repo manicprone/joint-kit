@@ -170,12 +170,12 @@ module.exports = router;
 
 <details>
 <summary>with Authorization rules:</summary>
-</details>
 ```javascript
 
   <sample code>
 
 ```
+</details>
 
 <br />
 
