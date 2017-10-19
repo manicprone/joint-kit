@@ -6,8 +6,13 @@ endpoints.
 Designed to be flexible. Mix it with existing code and/or use it to
 generate an entire custom method library and client API router from scratch.
 
-**Provides:** DB model configuration, CRUD and relational data logic, authorization & field validation,
-data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
+<br />
+
+> Provides: DB model configuration, CRUD and relational data logic, authorization & field validation,
+> data transformation, paginated & non-paginated datasets, rich error handling, payload serialization,
+> HTTP router generation (for RESTful endpoints), and more.
+
+<br />
 
 ## WIP
 
@@ -72,9 +77,18 @@ $ npm install joint-lib --save
 
 ## The Joint Concept
 
-Out-of-the-box, you can use any of the [Joint Actions][section-joint-actions] to handle common CRUD and relational data logic.
+The attitude of Joint is to be flexible, not opinionated... handling the "85%" of your application requirements, while allowing the developer to provide the "15%" of nuance, if needed.
 
-Given you have established a `bookshelf.js` configuration file (which hooks to your database) and you have registered a set of Models upon which to operate...
+Though, for a standard application or service, the Joint Library can theoretically provide a complete implementation of your data layer, without any extra programming.
+
+<span>---</span>
+
+The Joint Library provides a robust set of abstract data actions that hook
+directly to your persistence layer, handling the logic for common CRUD and relational data operations. The [Joint Actions][section-joint-actions] are configured to your data schema, and your desired functionality, using a simple JSON syntax.
+
+<span>---</span>
+
+Given you have established a `bookshelf.js` configuration file (which hooks to your database) and you have registered a set of models upon which to operate...
 
 The conceptual idea of the library goes like this:
 
@@ -82,14 +96,14 @@ The conceptual idea of the library goes like this:
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf'; // your configured bookshelf service
 
-// Fire up a joint, providing the service:
+// Fire up a joint, providing the service being used:
 const joint = new Joint({
   service: bookshelf,
 });
 
 // The "spec" defines the functionality of your operation, and the fields permitted:
 const spec = {
-  modelName: 'BlogProfile',
+  modelName: 'Profile',
   fields: [
     { name: 'user_id', type: 'Number', required: true },
     { name: 'slug', type: 'String', required: true },
@@ -117,27 +131,32 @@ joint.createItem(spec, input)
 
 <br />
 
-However, this is not a realistic way one would utilize the Joint Lib in an application.
-Rather, only the "specs" for each operation would be defined in your application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
+The Joint Action will automatically generate the appropriate errors, if the "input" does not satisfy the "spec" defined, otherwise it will perform the data operation and return the expected data result.
+
+<span>---</span>
+
+However, this example is only conceptual, and does not represent a realistic way one would utilize the Joint Library in an application.
+
+Rather, only the "specs" for each operation would be defined in the application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
 
 <br />
 
 ## Joint in Practice
 
-The idea is, you can rapidly hand-roll a custom method library by wrapping custom functions around
-the provided Joint Actions (with your defined `spec`), and expose those functions to your application.
+The idea of the Joint Library is, you can rapidly hand-roll a custom method library by wrapping custom functions around
+the provided [Joint Actions][section-joint-actions] (with your defined `spec`), and expose those functions to your application.
 
-<br />
+<span>---</span>
 
 **For Example:**
 
-A typical CRUD set of methods for a "BlogProfile" resource:
+(A typical CRUD set of methods for a "Profile" resource)
 
-/methods/blog-profile.js
+/methods/profile.js
 ```javascript
 export function createProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'user_id', type: 'Number', required: true },
       { name: 'slug', type: 'String', required: true },
@@ -152,7 +171,7 @@ export function createProfile(input) {
 
 export function updateProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'id', type: 'Number', required: true, lookupField: true },
       { name: 'slug', type: 'String' },
@@ -167,7 +186,7 @@ export function updateProfile(input) {
 
 export function getProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'slug', type: 'String', requiredOr: true },
@@ -179,7 +198,7 @@ export function getProfile(input) {
 
 export function getProfiles(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'user_id', type: 'Number' },
       { name: 'is_live', type: 'Boolean'},
@@ -191,7 +210,7 @@ export function getProfiles(input) {
 
 export function deleteProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'slug', type: 'String', requiredOr: true },
@@ -208,14 +227,15 @@ The beauty of the hand-rolled capability is that you can leverage the core logic
 (which typically represents the majority of the programming), while maintaining the flexibility to write
 your own logic alongside it:
 
-<br />
+<span>---</span>
 
 **For Example:**
 
+/methods/profile.js
 ```javascript
 export function createProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'user_id', type: 'Number', required: true },
       { name: 'slug', type: 'String', required: true },
@@ -234,7 +254,7 @@ export function createProfile(input) {
 
 export function getLiveProfiles(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'user_id', type: 'Number' },
       { name: 'is_live', type: 'Boolean'},
@@ -249,7 +269,7 @@ export function getLiveProfiles(input) {
 
 export function getProfile(input) {
   const spec = {
-    modelName: 'BlogProfile',
+    modelName: 'Profile',
     fields: [
       { name: 'id', type: 'Number', requiredOr: true },
       { name: 'slug', type: 'String', requiredOr: true },
@@ -271,23 +291,23 @@ export function getProfile(input) {
 <br />
 
 But, if you don't require any supplemental logic for an operation, you can bypass the hand-rolling of the method
-entirely and generate the methods automatically from a JSON-based config file.
+entirely and generate the methods automatically from a JSON-based descriptor.
 
-<br />
+<span>---</span>
 
 **For Example:**
 
-Following the syntax for [generating methods][section-generating-custom-methods], you can create a "method config":
+Following the syntax for [generating methods][section-generating-custom-methods], you can create a "method config", which defines your method library:
 
-method-config.js
+/method-config.js
 ```javascript
 export default {
   resources: [
     {
-      modelName: 'BlogProfile',
+      modelName: 'Profile',
       methods: [
         {
-          name: 'createBlogProfile',
+          name: 'createProfile',
           action: 'createItem',
           spec: {
             fields: [
@@ -300,7 +320,7 @@ export default {
           },
         },
         {
-          name: 'getBlogProfiles',
+          name: 'getProfiles',
           action: 'getItems',
           spec: {
             fields: [
@@ -315,7 +335,7 @@ export default {
       ],
     },
 
-    ... other resources (models)
+    ... other resources
 
   ],
 };
@@ -323,9 +343,7 @@ export default {
 
 <br />
 
-Then, use the Joint `generate` function to dynamically generate your custom method library:
-
-<br />
+Then, use the Joint `generate` function to dynamically generate the method library:
 
 ```javascript
 import Joint from 'joint-lib';
@@ -340,7 +358,7 @@ const joint = new Joint({
 joint.generate({ methodConfig });
 
 // You can now utilize the methods using the syntax:
-joint.method.BlogProfile.createBlogProfile(input)
+joint.method.Profile.createProfile(input)
   .then((result) => { ... })
   .catch((error) => { ... });
 ```
@@ -349,15 +367,22 @@ joint.method.BlogProfile.createBlogProfile(input)
 
 ## Joint Actions
 
-[TBC]
+The Joint Action set is the backbone of the Joint Library.
 
-All Joint actions return Promises, and have the same method signature:
+The library provides a robust set of abstract data actions that hook
+directly to your persistence layer, handling the logic for common CRUD and relational data operations. The actions are configured to your data schema, and your desired functionality, using a simple JSON syntax.
+
+<span>---</span>
+
+All Joint Actions return Promises, and have the same method signature:
 
 ```javascript
 joint.<action>(spec = {}, input = {}, output = 'native')
   .then((payload) => { ... })
   .catch((error) => { ... });
 ```
+
+<br />
 
 The following abstract actions are immediately available once the library is installed:
 
@@ -375,9 +400,11 @@ The following abstract actions are immediately available once the library is ins
 | removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
 | removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
+<br />
+
 ### The JSON Syntax
 
-To use the Joint Actions, you communicate with a JSON syntax.
+To use the Joint Actions, you communicate with a JSON syntax (see the [Joint Action API][section-joint-action-api]).
 
 Each action has two required parts: the `spec` and the `input`.
 
@@ -385,14 +412,16 @@ Each action has two required parts: the `spec` and the `input`.
 
 + The `input` supplies the data for an individual action request.
 
-<br />
+<span>---</span>
 
 Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
 
-By default, the output is set to `native`, which effectively returns the queried data in the format
-generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `json-api`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
+By default, the output is set to `"native"`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `"json-api"`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
 
-#### Item Payload
+<span>---</span>
+
+##### Item Payload Example
 
 <table>
 <th>output = 'native'</th>
@@ -439,7 +468,7 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
     <pre>
       {
         data: {
-          type: 'BlogProfile',
+          type: 'Profile',
           id: 1,
           attributes: {
             user_id: 333,
@@ -477,7 +506,9 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
 </tr>
 </table>
 
-#### Collection Payload
+<br />
+
+##### Collection Payload Example
 
 <table>
 <th>output = 'native'</th>
@@ -494,7 +525,9 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
 </tr>
 </table>
 
-## Example Usage
+<br />
+
+### Example Usage
 
 <details>
 <summary>Writing a custom Express Router:</summary>
@@ -593,6 +626,8 @@ module.exports = router;
 
 [TBC]
 
+All supported options:
+
 ### Spec
 
 | Option              | Description | Actions Supported               | Required? |
@@ -608,6 +643,8 @@ module.exports = router;
 | forceAssociations   |             | getItem, getItems               |  No       |
 | forceLoadDirect     |             | getItem, getItems               |  No       |
 | auth                |             | (all)                           |  No       |
+
+<br />
 
 ### Input
 
@@ -626,11 +663,13 @@ module.exports = router;
 
 ## Generating Models
 
-Keeping in the spirit of flexibility, you can continue defining the model definitions using
+Maintaining the spirit of flexibility, you can continue defining the model definitions using
 your service implementation, or you can dynamically generate them by providing a "model config".
 Or, you can do both.
 
-Joint supports a JSON syntax for defining your Models, so you don't need to manually define or register
+<span>---</span>
+
+The Joint Library supports a JSON syntax for defining your Models, so you don't need to manually define or register
 the model hook using the service directly (i.e. Bookshelf).
 
 Any existing models registered to your service instance will be mixed-in with those
@@ -640,17 +679,17 @@ operate on models registered by either means.
 The `modelConfig` syntax supports an arrow notation for defining associations (relations),
 making it easier to wield than the Bookshelf polymorphic method approach.
 
-<br />
+<span>---</span>
 
 **For Example:**
 
-model-config.js
+/model-config.js
 ```javascript
 
 export default {
   models: {
-    // Define and register a Model named: "BlogProfile"...
-    BlogProfile: {
+    // Define and register a Model named: "Profile"...
+    Profile: {
       tableName: 'blog_profiles',
       timestamps: { created: 'created_at', updated: 'updated_at' },
       associations: {
@@ -676,10 +715,8 @@ export default {
 ```
 
 <br />
-Use the Joint `generate` function to dynamically generate your models, once your `modelConfig` is ready.
-Any manually defined models on your bookshelf config will be merged into the Joint
-instance along with those defined in the modelConfig. So, you can use both approaches as you see fit:
-<br />
+
+Then, use the Joint `generate` function to dynamically generate your models:
 
 ```javascript
 import Joint from 'joint-lib';
@@ -694,13 +731,19 @@ const joint = new Joint({
 joint.generate({ modelConfig });
 
 // You can access all models using the syntax joint.model.<modelName>:
-if (joint.model.BlogProfile) console.log('BlogProfile exists !!!');
+if (joint.model.Profile) console.log('The Profile model exists !!!');
 
 // Convenience mappings are also generated, allowing lookup of model object or name via the table name:
-const BlogProfile = joint.modelByTable['blog_profiles'];
+const Profile = joint.modelByTable['blog_profiles'];
 const modelName = joint.modelNameByTable['blog_profiles'];
 console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
+
+<br />
+
+### The Model Config Syntax
+
+[TBC]
 
 <br />
 
@@ -715,12 +758,24 @@ the `joint.<action>` set, or you can dynamically generate them by providing a "m
 
 <br />
 
+### The Method Config Syntax
+
+[TBC]
+
+<br />
+
 ## Generating a RESTful API
 
 Dynamic router generation is supported using the library's JSON syntax (and with a supported server framework).
 You can dynamically generate RESTful endpoints for your custom methods by providing a "route config".
 
 NOTE: This feature is only available for dynamically-generated custom methods (via method config).
+
+[TBC]
+
+<br />
+
+### The Route Config Syntax
 
 [TBC]
 
