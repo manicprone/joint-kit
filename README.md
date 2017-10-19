@@ -4,9 +4,9 @@ A Node server library for rapidly implementing data logic and generating RESTful
 endpoints.
 
 Designed to be flexible. Mix it with existing code and/or use it to
-generate an entire custom method library and client API from scratch.
+generate an entire custom method library and client API router from scratch.
 
-Provides: DB model configuration, CRUD and relational data logic, authorization & field validation,
+**Provides:** DB model configuration, CRUD and relational data logic, authorization & field validation,
 data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
 <br />
@@ -15,12 +15,15 @@ data transformation, paginated & non-paginated datasets, rich error handling, pa
 
 Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
 
+The majority of this README content will eventually be migrated into a user's guide format.
+
 <br />
 
 ## Table of Contents
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
+* [Example Usage][section-example-usage]
 * [Joint Actions][section-joint-actions]
 * [The JSON Syntax][section-the-json-syntax]
 * [The Joint Concept][section-the-joint-concept]
@@ -51,7 +54,7 @@ The Joint Library currently supports:
 
 <br />
 
-To generate a RESTful API on top of your custom methods, you need:
+If you wish to generate an API router on top of your custom methods, you need:
 
 * a supported server framework (e.g. Express)
 
@@ -67,6 +70,111 @@ The Joint Library currently supports:
 
 ``` sh
 $ npm install joint-lib --save
+```
+
+<br />
+
+## Example Usage
+
+<details>
+<summary>Writing a custom Express Router:</summary>
+
+```javascript
+import express from 'express';
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
+import modelConfig from './model-config';     // your defined models
+import methodConfig from './method-config';   // your defined method logic
+
+// Initialize a Joint using your service implementation:
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api', // auto-serialize to JSON API Spec format
+});
+
+// Dynamically generate the defined models and methods:
+joint.generate({ modelConfig, methodConfig });
+
+// Expose your data logic via Express router:
+const router = express.Router();
+
+router.route('/user')
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query);
+
+    return joint.method.User.createUser(input)
+      .then(payload => handleDataResponse(payload, res, 201))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/user/:id')
+  .get((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+      loadDirect: ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'],
+      associations: ['friends'],
+    };
+
+    return joint.method.User.getUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query, { id: req.params.id });
+
+    return joint.method.User.updateUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .delete((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+    };
+
+    return joint.method.User.deleteUser(input)
+      .then(payload => handleDataResponse(payload, res, 204))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/users')
+  .get((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.query);
+    input.loadDirect = ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'];
+    input.associations = ['friends'],
+
+    return joint.method.User.getUsers(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+function handleDataResponse(data, res, status = 200) {
+  res.status(status).json(data);
+}
+
+function handleErrorResponse(error, res) {
+  const status = error.status || 500;
+  res.status(status).json(error);
+}
+
+module.exports = router;
+```
+</details>
+
+
+<details>
+<summary>with Authorization rules:</summary>
+</details>
+```javascript
+
+  <sample code>
+
 ```
 
 <br />
@@ -113,8 +221,8 @@ Each action has two required parts: the `spec` and the `input`.
 
 Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
 
-By default, the output is set to `'native'`, which effectively returns the queried data in the format
-generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `'json-api'`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
+By default, the output is set to `native`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `json-api`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
 
 ### Item Payload
 
@@ -146,8 +254,8 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
               display_name: '|M|',
               username: 'manicprone',
               sites: [
-                gitlab: 'https://gitlab.com/manicprone',
-                github: 'https://github.com/manicprone',
+                { gitlab: 'https://gitlab.com/manicprone' },
+                { github: 'https://github.com/manicprone' },
               ],
             },
             &#95;previousAttributes: { ... },
@@ -189,8 +297,8 @@ generated natively by the service (currently, i.e. Bookshelf). However, Joint al
               display_name: '|M|',
               username: 'manicprone',
               sites: [
-                gitlab: 'https://gitlab.com/manicprone',
-                github: 'https://github.com/manicprone',
+                { gitlab: 'https://gitlab.com/manicprone' },
+                { github: 'https://github.com/manicprone' },
               ],
             },
           },
@@ -590,13 +698,13 @@ instance along with those defined in the modelConfig. So, you can use both appro
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf';
-import modelConfig from './model-config';
+import modelConfig from './model-config'; // your defined models
 
 const joint = new Joint({
   service: bookshelf,
 });
 
-// Dynamically generate the defined models...
+// Dynamically generate the defined models:
 joint.generate({ modelConfig });
 
 // You can access all models using the syntax joint.model.<modelName>:
@@ -645,6 +753,7 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
+[section-example-usage]: #joint-example-usage
 [section-joint-actions]: #joint-actions
 [section-the-json-syntax]: #the-json-syntax
 [section-the-joint-concept]: #the-joint-concept
