@@ -9,8 +9,6 @@ generate an entire custom method library and client API router from scratch.
 **Provides:** DB model configuration, CRUD and relational data logic, authorization & field validation,
 data transformation, paginated & non-paginated datasets, rich error handling, payload serialization, HTTP router generation (for RESTful endpoints), and more.
 
-<br />
-
 ## WIP
 
 Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
@@ -23,11 +21,9 @@ The majority of this README content will eventually be migrated into a user's gu
 
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
-* [Example Usage][section-example-usage]
-* [Joint Actions][section-joint-actions]
-* [The JSON Syntax][section-the-json-syntax]
 * [The Joint Concept][section-the-joint-concept]
 * [Joint in Practice][section-joint-in-practice]
+* [Joint Actions][section-joint-actions]
 * [Joint Action API][section-joint-action-api]
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
@@ -71,250 +67,6 @@ The Joint Library currently supports:
 ``` sh
 $ npm install joint-lib --save
 ```
-
-<br />
-
-## Example Usage
-
-<details>
-<summary>Writing a custom Express Router:</summary>
-
-```javascript
-import express from 'express';
-import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf'; // your configured bookshelf service
-import modelConfig from './model-config';     // your defined models
-import methodConfig from './method-config';   // your defined method logic
-
-// Initialize a Joint using your service implementation:
-const joint = new Joint({
-  service: bookshelf,
-  output: 'json-api', // auto-serialize to JSON API Spec format
-});
-
-// Dynamically generate the defined models and methods:
-joint.generate({ modelConfig, methodConfig });
-
-// Expose your data logic via Express router:
-const router = express.Router();
-
-router.route('/user')
-  .post((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.body, req.query);
-
-    return joint.method.User.createUser(input)
-      .then(payload => handleDataResponse(payload, res, 201))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-router.route('/user/:id')
-  .get((req, res) => {
-    const input = {
-      fields: {
-        id: req.params.id,
-      },
-      loadDirect: ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'],
-      associations: ['friends'],
-    };
-
-    return joint.method.User.getUser(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  })
-  .post((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.body, req.query, { id: req.params.id });
-
-    return joint.method.User.updateUser(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  })
-  .delete((req, res) => {
-    const input = {
-      fields: {
-        id: req.params.id,
-      },
-    };
-
-    return joint.method.User.deleteUser(input)
-      .then(payload => handleDataResponse(payload, res, 204))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-router.route('/users')
-  .get((req, res) => {
-    const input = {};
-    input.fields = Object.assign({}, req.query);
-    input.loadDirect = ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'];
-    input.associations = ['friends'],
-
-    return joint.method.User.getUsers(input)
-      .then(payload => handleDataResponse(payload, res, 200))
-      .catch(error => handleErrorResponse(error, res));
-  });
-
-function handleDataResponse(data, res, status = 200) {
-  res.status(status).json(data);
-}
-
-function handleErrorResponse(error, res) {
-  const status = error.status || 500;
-  res.status(status).json(error);
-}
-
-module.exports = router;
-```
-</details>
-
-<br />
-
-## Joint Actions
-
-All Joint actions return Promises, and have the same method signature:
-
-```javascript
-joint.<action>(spec = {}, input = {}, output = 'native')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-
-The following abstract actions are immediately available once the library is installed:
-
-| Action                   | Description                                                               |
-| ------------------------ | ------------------------------------------------------------------------- |
-| createItem               | Create operation for a single item                                        |
-| upsertItem               | Upsert operation for a single item                                        |
-| updateItem               | Update operation for a single item                                        |
-| getItem                  | Read operation for retrieving a single item                               |
-| getItems                 | Read operation for retrieving a collection of items                       |
-| deleteItems              | Delete operation for one to many items                                    |
-| addAssociatedItems       | Operation for associating one to many items to a main resource            |
-| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
-| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
-| removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
-| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
-
-<br />
-
-## The JSON Syntax
-
-To use the Joint Actions, you communicate with a JSON syntax.
-
-Each action has two required parts: the `spec` and the `input`.
-
-+ The `spec` defines the functionality of the action.
-
-+ The `input` supplies the data for an individual action request.
-
-<br />
-
-Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
-
-By default, the output is set to `native`, which effectively returns the queried data in the format
-generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `json-api`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
-
-### Item Payload
-
-<table>
-<th>output = 'native'</th>
-<th>output = 'json-api'</th>
-<tr>
-  <td>
-    <pre>
-      {
-        cid: 'c1',
-        &#95;knex: null,
-        id: 1,
-        attributes: {
-          id: 1,
-          user_id: 333,
-          slug: 'functional-fanatic',
-          title: 'Functional Fanatic',
-          tagline: 'I don\'t have habits, I have algorithms.',
-          is_live: false,
-        },
-        &#95;previousAttributes: { ... },
-        changed: {},
-        relations: {
-          user: {
-            cid: 'c2',
-            id: 333,
-            attributes: {
-              display_name: '|M|',
-              username: 'manicprone',
-              sites: [
-                { gitlab: 'https://gitlab.com/manicprone' },
-                { github: 'https://github.com/manicprone' },
-              ],
-            },
-            &#95;previousAttributes: { ... },
-            changed: {},
-            relations: {},
-            relatedData: { ... },
-          },
-        },
-      }
-    </pre>
-  </td>
-  <td>
-    <pre>
-      {
-        data: {
-          type: 'BlogProfile',
-          id: 1,
-          attributes: {
-            user_id: 333,
-            slug: 'functional-fanatic',
-            title: 'Functional Fanatic',
-            tagline: 'I don\'t have habits, I have algorithms.',
-            is_live: false,
-          },
-          relationships: {
-            user: {
-              data: {
-                type: 'User',
-                id: 333,
-              },
-            },
-          },
-        },
-        included: [
-          {
-            type: 'User',
-            id: 333,
-            attributes: {
-              display_name: '|M|',
-              username: 'manicprone',
-              sites: [
-                { gitlab: 'https://gitlab.com/manicprone' },
-                { github: 'https://github.com/manicprone' },
-              ],
-            },
-          },
-        ],
-      }
-    </pre>
-  </td>
-</tr>
-</table>
-
-### Collection Payload
-
-<table>
-<th>output = 'native'</th>
-<th>output = 'json-api'</th>
-<tr>
-  <td>
-    <pre>
-    </pre>
-  </td>
-  <td>
-    <pre>
-    </pre>
-  </td>
-</tr>
-</table>
 
 <br />
 
@@ -365,7 +117,7 @@ joint.createItem(spec, input)
 
 <br />
 
-Naturally, this is not a realistic way one would utilize the Joint Lib in an application.
+However, this is not a realistic way one would utilize the Joint Lib in an application.
 Rather, only the "specs" for each operation would be defined in your application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
 
 <br />
@@ -570,7 +322,9 @@ export default {
 ```
 
 <br />
+
 Then, use the Joint `generate` function to dynamically generate your custom method library:
+
 <br />
 
 ```javascript
@@ -590,6 +344,248 @@ joint.method.BlogProfile.createBlogProfile(input)
   .then((result) => { ... })
   .catch((error) => { ... });
 ```
+
+<br />
+
+## Joint Actions
+
+[TBC]
+
+All Joint actions return Promises, and have the same method signature:
+
+```javascript
+joint.<action>(spec = {}, input = {}, output = 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+
+The following abstract actions are immediately available once the library is installed:
+
+| Action                   | Description                                                               |
+| ------------------------ | ------------------------------------------------------------------------- |
+| createItem               | Create operation for a single item                                        |
+| upsertItem               | Upsert operation for a single item                                        |
+| updateItem               | Update operation for a single item                                        |
+| getItem                  | Read operation for retrieving a single item                               |
+| getItems                 | Read operation for retrieving a collection of items                       |
+| deleteItems              | Delete operation for one to many items                                    |
+| addAssociatedItems       | Operation for associating one to many items to a main resource            |
+| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
+| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
+| removeAssociatedItems    | Operation for disassociating one to many items from a main resource       |
+| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
+
+### The JSON Syntax
+
+To use the Joint Actions, you communicate with a JSON syntax.
+
+Each action has two required parts: the `spec` and the `input`.
+
++ The `spec` defines the functionality of the action.
+
++ The `input` supplies the data for an individual action request.
+
+<br />
+
+Each action also supports an optional `output` parameter, which specifies the format of the returned payload.
+
+By default, the output is set to `native`, which effectively returns the queried data in the format
+generated natively by the service (currently, i.e. Bookshelf). However, Joint also supports the value `json-api`, which transforms the data into a JSON API Spec-like format, making it ready-to-use for RESTful data transport.
+
+#### Item Payload
+
+<table>
+<th>output = 'native'</th>
+<th>output = 'json-api'</th>
+<tr>
+  <td>
+    <pre>
+      {
+        cid: 'c1',
+        &#95;knex: null,
+        id: 1,
+        attributes: {
+          id: 1,
+          user_id: 333,
+          slug: 'functional-fanatic',
+          title: 'Functional Fanatic',
+          tagline: 'I don\'t have habits, I have algorithms.',
+          is_live: false,
+        },
+        &#95;previousAttributes: { ... },
+        changed: {},
+        relations: {
+          user: {
+            cid: 'c2',
+            id: 333,
+            attributes: {
+              display_name: '|M|',
+              username: 'manicprone',
+              sites: [
+                { gitlab: 'https://gitlab.com/manicprone' },
+                { github: 'https://github.com/manicprone' },
+              ],
+            },
+            &#95;previousAttributes: { ... },
+            changed: {},
+            relations: {},
+            relatedData: { ... },
+          },
+        },
+      }
+    </pre>
+  </td>
+  <td>
+    <pre>
+      {
+        data: {
+          type: 'BlogProfile',
+          id: 1,
+          attributes: {
+            user_id: 333,
+            slug: 'functional-fanatic',
+            title: 'Functional Fanatic',
+            tagline: 'I don\'t have habits, I have algorithms.',
+            is_live: false,
+          },
+          relationships: {
+            user: {
+              data: {
+                type: 'User',
+                id: 333,
+              },
+            },
+          },
+        },
+        included: [
+          {
+            type: 'User',
+            id: 333,
+            attributes: {
+              display_name: '|M|',
+              username: 'manicprone',
+              sites: [
+                { gitlab: 'https://gitlab.com/manicprone' },
+                { github: 'https://github.com/manicprone' },
+              ],
+            },
+          },
+        ],
+      }
+    </pre>
+  </td>
+</tr>
+</table>
+
+#### Collection Payload
+
+<table>
+<th>output = 'native'</th>
+<th>output = 'json-api'</th>
+<tr>
+  <td>
+    <pre>
+    </pre>
+  </td>
+  <td>
+    <pre>
+    </pre>
+  </td>
+</tr>
+</table>
+
+## Example Usage
+
+<details>
+<summary>Writing a custom Express Router:</summary>
+
+```javascript
+import express from 'express';
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
+import modelConfig from './model-config';     // your defined models
+import methodConfig from './method-config';   // your defined method logic
+
+// Initialize a Joint using your service implementation:
+const joint = new Joint({
+  service: bookshelf,
+  output: 'json-api', // auto-serialize to JSON API Spec format
+});
+
+// Dynamically generate the defined models and methods:
+joint.generate({ modelConfig, methodConfig });
+
+// Expose your data logic via Express router:
+const router = express.Router();
+
+router.route('/user')
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query);
+
+    return joint.method.User.createUser(input)
+      .then(payload => handleDataResponse(payload, res, 201))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/user/:id')
+  .get((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+      loadDirect: ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'],
+      associations: ['friends'],
+    };
+
+    return joint.method.User.getUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .post((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.body, req.query, { id: req.params.id });
+
+    return joint.method.User.updateUser(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  })
+  .delete((req, res) => {
+    const input = {
+      fields: {
+        id: req.params.id,
+      },
+    };
+
+    return joint.method.User.deleteUser(input)
+      .then(payload => handleDataResponse(payload, res, 204))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+router.route('/users')
+  .get((req, res) => {
+    const input = {};
+    input.fields = Object.assign({}, req.query);
+    input.loadDirect = ['profile:{title,tagline,avatar_url,is_live}', 'roles:name'];
+    input.associations = ['friends'],
+
+    return joint.method.User.getUsers(input)
+      .then(payload => handleDataResponse(payload, res, 200))
+      .catch(error => handleErrorResponse(error, res));
+  });
+
+function handleDataResponse(data, res, status = 200) {
+  res.status(status).json(data);
+}
+
+function handleErrorResponse(error, res) {
+  const status = error.status || 500;
+  res.status(status).json(error);
+}
+
+module.exports = router;
+```
+</details>
 
 <br />
 
@@ -743,11 +739,9 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
-[section-example-usage]: #joint-example-usage
-[section-joint-actions]: #joint-actions
-[section-the-json-syntax]: #the-json-syntax
 [section-the-joint-concept]: #the-joint-concept
 [section-joint-in-practice]: #joint-in-practice
+[section-joint-actions]: #joint-actions
 [section-joint-action-api]: #joint-action-api
 [section-generating-models]: #generating-models
 [section-generating-custom-methods]: #generating-custom-methods
