@@ -95,7 +95,7 @@ $ npm install joint-lib --save
 
 The Joint Library is an instantiable Class. Its instances are "_Joints_".
 
-Joints connect to your persistence solution (to provide a data transactions layer), and your server framework (to serve as an HTTP API).
+Joints connect to your persistence solution (to provide a data transactions layer), and your server framework (to serve an HTTP API).
 
 <span>---</span>
 
@@ -165,8 +165,8 @@ Rather, only the "specs" for each operation would be defined in the application 
 
 ## Joint in Practice
 
-The idea of the Joint Library is, you can rapidly hand-roll a custom method library by wrapping custom functions around
-the abstract [Joint Actions][section-joint-actions] ( with your defined `spec` ), and expose those functions to your application.
+In practice, with your Joint instance, you can rapidly hand-roll a custom method library by wrapping custom functions around
+the abstract [Joint Actions][section-joint-actions]. You provide the custom `spec` (which defines the method implementation) and expose those functions to your application.
 
 **For Example:**
 
@@ -246,7 +246,7 @@ export function deleteProfile(input) {
 
 <span>---</span>
 
-The beauty of the hand-rolled capability is that you can leverage the core logic behind each action
+The beauty of the hand-rolling capability is that you can leverage the core logic behind each action
 (which typically represents the majority of the programming), while maintaining the flexibility to write
 your own logic alongside it.
 
@@ -319,8 +319,6 @@ But, if you don't require any supplemental logic for an operation, you can bypas
 entirely and generate the methods automatically from a JSON-based descriptor.
 
 Following the syntax for [generating methods][section-generating-custom-methods], you can create a "method config", which defines your method library. Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the method logic onto your Joint instance.
-
-<span>---</span>
 
 **For Example:**
 
@@ -397,9 +395,9 @@ export default {
 ```
 </details>
 
-<br />
+<span>---</span>
 
-Now, you can use the Joint `generate` function to generate the method library for you:
+With a "method config", you can use the Joint `generate` function to generate the method library for you:
 
 ```javascript
 import Joint from 'joint-lib';
@@ -600,7 +598,7 @@ Details for each option, with examples:
 
 The `output` value configures the format of the returned payload.
 
-NOTE: This setting can be globally configured on the Joint Library instance itself ( see the [Joint Instance API][section-joint-instance-api] ).
+**NOTE:** This setting can be configured globally on the Joint instance itself ( see the [Joint Instance API][section-joint-instance-api] ).
 
 <span>---</span>
 
@@ -637,10 +635,10 @@ joint.getItem(spec, input, 'native')
 <details>
 <summary>Item payload ( Bookshelf )</summary>
 
-```
+```javascript
 {
   cid: 'c1',
-  &#95;knex: null,
+  _knex: null,
   id: 1,
   attributes: {
     id: 1,
@@ -650,7 +648,7 @@ joint.getItem(spec, input, 'native')
     tagline: 'I don\'t have habits, I have algorithms.',
     is_live: false,
   },
-  &#95;previousAttributes: { ... },
+  _previousAttributes: { ... },
   changed: {},
   relations: {
     user: {
@@ -664,7 +662,7 @@ joint.getItem(spec, input, 'native')
           { github: 'https://github.com/manicprone' },
         ],
       },
-      &#95;previousAttributes: { ... },
+      _previousAttributes: { ... },
       changed: {},
       relations: {},
       relatedData: { ... },
@@ -824,9 +822,31 @@ joint.getItems(spec, input, 'json-api')
 
 ## Joint Constructor
 
-The Joint Library is an instantiable Class. It's instances are "_Joints_". The `joint-lib` package is exposed this way, so that multiple Joint instances can be utilized within an application.
+The Joint Library is an instantiable Class. It's instances are "_Joints_".
 
+The `joint-lib` package is exposed this way, so that multiple Joint instances can be utilized within an application.
 
+**Example Joint Instantiation:**
+
+```javascript
+import express from 'express';
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
+
+const joint = new Joint({
+  service: bookshelf,
+  server: express,
+  output: 'json-api',
+});
+```
+
+### Constructor Options
+
+| Name      | Description |
+| --------- | ----------- |
+| service   | The configured service instance for your persistence solution. |
+| server    | The server instance for your HTTP router handling. ( *optional ) |
+| output    | The format of the returned data payloads. ( defaults to `'native'` ) |
 
 <br />
 
@@ -906,11 +926,11 @@ Or, you can do both.
 The Joint Library supports a JSON syntax for defining your Models, so you don't need to manually define or register
 the model hook using the service directly (i.e. Bookshelf).
 
-Any existing models registered to your service instance will be mixed-in with those
-generated by Joint. The `methodConfig` and `routeConfig` definitions can therefore
-operate on models registered by either means.
+Any existing Models registered to your service instance will be mixed-in with those
+generated by Joint. The "method config" and "route config" descriptors can therefore
+operate on Models registered by either means.
 
-The `modelConfig` syntax supports an arrow notation for defining associations (relations),
+The "model config" syntax supports an arrow notation for defining associations (relations),
 making it easier to wield than the Bookshelf polymorphic method approach.
 
 <span>---</span>
