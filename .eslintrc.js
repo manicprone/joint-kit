@@ -15,5 +15,6 @@ module.exports = {
     'padded-blocks': 'off',
     'camelcase': 'off',
     'no-param-reassign': 'off',
+    'func-names': 'off',
   },
 };

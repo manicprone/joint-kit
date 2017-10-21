@@ -5,6 +5,7 @@ import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
 import * as CoreUtils from './core/core-utils';
 import * as JointGenerate from './core/generate';
+import * as Auth from './authorization/auth-handler';
 import * as ActionsBookshelf from './actions/bookshelf';
 
 export default class Joint {
@@ -26,6 +27,11 @@ export default class Joint {
       throw new JointError({ message });
     }
 
+    // ------------------------------
+    // Load authorization features...
+    // ------------------------------
+    this.buildAuthBundle = function (req, rules) { return Auth.buildAuthBundle(this, req, rules); };
+
     // TODO: Load existing models from service to this.model !!!
 
     // -------------------------------------
@@ -44,7 +50,7 @@ export default class Joint {
     }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
-        this[actionName] = function (spec, input, ouput = `${this.output}`) { return actions[actionName](this.service, spec, input, ouput); }; // eslint-disable-line func-names
+        this[actionName] = function (spec, input, ouput = `${this.output}`) { return actions[actionName](this.service, spec, input, ouput); };
       });
     }
   } // END - constructor

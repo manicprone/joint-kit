@@ -24,7 +24,7 @@ describe('AUTH-HANDLER', () => {
 
       const rules = {};
 
-      expect(AuthHandler.buildAuthBundle(mockRequest, rules))
+      expect(AuthHandler.buildAuthBundle({}, mockRequest, rules))
         .to.deep.equal({
           request_method: 'POST',
           request_uri: '/api/blog/post/7/workflow/unpublish',

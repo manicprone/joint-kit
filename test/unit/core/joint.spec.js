@@ -10,7 +10,14 @@ import bookshelf from '../../db/bookshelf/bookshelf';
 const expect = chai.expect;
 
 // Values for expectation...
-const jointProps = ['service', 'serviceKey', 'server', 'serverKey', 'output'];
+const jointProps = [
+  'service',
+  'serviceKey',
+  'server',
+  'serverKey',
+  'output',
+  'buildAuthBundle',
+];
 const actionsBookshelf = [
   'createItem',
   'upsertItem',

@@ -1,14 +1,13 @@
-# Joint Lib
+# Joint Kit
 
-A Node server library & dev kit for rapidly implementing data layers and generating RESTful
-endpoints.
+A Node server library & development kit for rapidly implementing data layers and RESTful endpoints.
 
-Designed to be flexible. Mix it with existing code -or- use it to
-generate an entire custom method library and client API router from scratch.
+Designed to be flexible. Mix it with existing code -_or_- use it to
+generate an entire custom method library and client API from scratch.
 
 <br />
 
-> DB model configuration, robust CRUD and relational data logic, authorization & field validation,
+> DB model configuration, robust CRUD and relational data logic, resource-level & user-level authorization, field validation,
 > data transformation, paginated & non-paginated datasets, rich error handling, payload serialization,
 > HTTP router generation (for RESTful endpoints), and more.
 
@@ -27,27 +26,34 @@ The majority of this README content will eventually be migrated into a user's gu
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [The Joint Concept][section-the-joint-concept]
 * [Joint in Practice][section-joint-in-practice]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [Joint Actions][section-joint-actions]
 * [Joint Action API][section-joint-action-api]
 * [Joint Action Errors][section-joint-action-errors]
+* [Joint Action Authorization][section-joint-action-authorization]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [Joint Constructor][section-joint-constructor]
 * [Joint Instance API][section-joint-instance-api]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [Examples][section-examples]
 
+<span style="color:#c9c9c9;margin-left:30px;">---------</span>
 
 * [The Joint Stack][section-the-joint-stack]
 * [License][section-license]
@@ -56,13 +62,13 @@ The majority of this README content will eventually be migrated into a user's gu
 
 ## Prerequisites
 
-To use the Joint Library, you need:
+To use the Joint Kit, you need:
 
-* a supported persistence solution (e.g. Postgres)
-* a configured data schema (e.g. database and tables)
-* a supported service interface / ORM (e.g. Bookshelf)
+* a supported persistence solution (_e.g. Postgres_)
+* a configured data schema (_e.g. database/tables_)
+* a supported service interface / ORM
 
-The Joint Library currently supports:
+The Joint Kit currently supports:
 
 | Service                              | Required Plugins                              | Persistence Options          |
 | ------------------------------------ | --------------------------------------------- | ---------------------------- |
@@ -71,15 +77,15 @@ The Joint Library currently supports:
 
 <br />
 
-If you wish to generate an API router on top of your custom methods, you need:
+If you wish to generate a RESTful API on top of your custom methods, you need:
 
 * a supported server framework (e.g. Express)
 
-The Joint Library currently supports:
+The Joint Kit currently supports:
 
-| Server                          |
-| ------------------------------- |
-| [Express][link-express-site]    |
+| Server                          | Required Middleware                        |
+| ------------------------------- | ------------------------------------------ |
+| [Express][link-express-site]    | body-parser, cookie-parser |
 
 <br />
 
@@ -93,22 +99,45 @@ $ npm install joint-lib --save
 
 ## The Joint Concept
 
-The Joint Library is an instantiable Class. Its instances are "_Joints_".
+The _Joint Kit_ module is an instantiable Class. Its instances are "_Joints_".
 
-Joints connect to your persistence solution (to provide a data transactions layer), and your server framework (to serve an HTTP API).
+A Joint instance connects to:
+
+* a persistence service &nbsp;&#10132;&nbsp; to implement a customized data operations layer
+
+* a server framework &nbsp;&#10132;&nbsp; to implement a customized HTTP API layer
+
+**Joint Instantiation:**
+
+```javascript
+import express from 'express';
+import Joint from 'joint-lib';
+import bookshelf from './services/bookshelf'; // your configured bookshelf service
+
+const joint = new Joint({
+  service: bookshelf,
+  server: express,
+  output: 'json-api',
+});
+```
 
 <span>---</span>
 
-The attitude of Joint is to be flexible, not restrictive... handling the "85%" of your application requirements, while allowing the developer to provide the "15%" of nuance, if needed.
+A Joint instance provides:
 
-Though, for a standard application or service, the Joint Library can theoretically provide a complete implementation of your data layer, without any extra programming.
+* [Joint Actions][section-joint-actions] &nbsp;-&nbsp; A set of abstract data functions for hand-rolling backend data architecture (e.g. CRUD and relational operations).
+
+
+
+* [Joint Instance API][section-joint-instance-api] &nbsp;-&nbsp; A development kit for advanced features and dynamically generating custom method libraries and RESTful endpoints from config files.
 
 <span>---</span>
 
-The Joint Library provides a robust set of abstract data actions that hook
-directly to your persistence layer, handling the logic for common CRUD and relational data operations. The [Joint Actions][section-joint-actions] are configured to your data schema, and your desired functionality, using a simple JSON syntax.
+To implement data solutions with Joint, you primarily use a config-like JSON syntax, requiring very little programming.
 
 <span>---</span>
+
+**The Concept, in Code:**
 
 Given you have configured the service instance for your persistence solution, and you have a set of models upon which to operate...
 
@@ -153,13 +182,13 @@ joint.createItem(spec, input)
 
 <br />
 
-The Joint Action will automatically generate the appropriate [Joint Errors][section-joint-action-errors], if the `input` does not satisfy the `spec` defined, otherwise it will perform the data operation and return the expected data result.
+The [Joint Action][section-joint-actions] will automatically generate the appropriate [Joint Errors][section-joint-action-errors], if the `input` does not satisfy the `spec` defined, otherwise it will perform the data operation and return the expected data result.
 
 <span>---</span>
 
 However, this example is only conceptual, and does not represent a realistic way one would utilize the Joint Library in an application.
 
-Rather, only the "specs" for each operation would be defined in the application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
+Rather, the "specs" for each operation would be defined in the application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
 
 <br />
 
@@ -173,6 +202,7 @@ the abstract [Joint Actions][section-joint-actions]. You provide the custom `spe
 <details>
 <summary>A typical CRUD set of methods for a "Profile" resource</summary>
 
+<br />
 /methods/profile.js
 
 ```javascript
@@ -255,7 +285,9 @@ your own logic alongside it.
 <details>
 <summary>Mixing your own code with the "Profile" methods</summary>
 
+<br />
 /methods/profile.js
+
 ```javascript
 export function createProfile(input) {
   const spec = {
@@ -325,7 +357,9 @@ Following the syntax for [generating methods][section-generating-custom-methods]
 <details>
 <summary>Defining the "Profile" methods with a "method config"</summary>
 
+<br />
 /method-config.js
+
 ```javascript
 export default {
   resources: [
@@ -820,6 +854,12 @@ joint.getItems(spec, input, 'json-api')
 
 <br />
 
+## Joint Action Authorization
+
+[TBC]
+
+<br />
+
 ## Joint Constructor
 
 The Joint Library is an instantiable Class. It's instances are "_Joints_".
@@ -852,7 +892,7 @@ const joint = new Joint({
 
 ## Joint Instance API
 
-When a valid Joint has been instantiated, the following properties/objects and functions are available on the instance:
+When a valid Joint has been instantiated, the following properties and functions are available on the instance:
 
 ### Properties
 
@@ -880,14 +920,19 @@ When a valid Joint has been instantiated, the following properties/objects and f
 
 <br />
 
-### Registries/Lookups
+### Convenience Functions
 
-| Name                                 | Description |
+| Function                   | Description |
+| -------------------------- | ----------- |
+| info( )                    |             |
+
+<br />
+
+### Generated Models
+
+| Syntax                               | Description |
 | ------------------------------------ | ----------- |
-| model.&lt;_modelName_&gt;            | Accesses the registered Model object with name &lt;_modelName_&gt;. |
-| modelByTable.&lt;_tableName_&gt;     | Accesses the registered Model object by its &lt;_tableName_&gt;. |
-| modelNameByTable.&lt;_tableName_&gt; | Accesses the registered Model name by its &lt;_tableName_&gt;. |
-| specByMethod.&lt;_modelName_&gt;.&lt;_methodName_&gt; | Accesses the configured `spec` definition for a generated method by its &lt;_modelName_&gt;.&lt;_methodName_&gt; syntax.   |
+| model.&lt;_modelName_&gt; | Exposes the registered Model object with name &lt;_modelName_&gt;. <br /> Any existing Models registered to the service instance will be mixed-in with those generated by Joint. |
 
 <br />
 
@@ -907,42 +952,42 @@ When a valid Joint has been instantiated, the following properties/objects and f
 
 <br />
 
-### Convenience Functions
+### Registries/Lookups
 
-| Function                   | Description |
-| -------------------------- | ----------- |
-| info( )                    |             |
+| Name                                 | Description |
+| ------------------------------------ | ----------- |
+| model.&lt;_modelName_&gt;            | Accesses the registered Model object with name &lt;_modelName_&gt;. |
+| modelByTable.&lt;_tableName_&gt;     | Accesses the registered Model object by its &lt;_tableName_&gt;. |
+| modelNameByTable.&lt;_tableName_&gt; | Accesses the registered Model name by its &lt;_tableName_&gt;. |
+| specByMethod.&lt;_modelName_&gt;.&lt;_methodName_&gt; | Accesses the configured `spec` definition for a generated method by its &lt;_modelName_&gt;.&lt;_methodName_&gt; syntax.   |
 
 <br />
 
 ## Generating Models
 
-Maintaining the spirit of flexibility, you can continue defining the model definitions using
-your service implementation, or you can dynamically generate them by providing a "model config".
-Or, you can do both.
+You can continue to define models using your service implementation, or you can dynamically generate them with Joint. Both approaches are supported simultaneously. Any existing models registered to your service instance will be mixed-in with those generated by Joint.
 
 <span>---</span>
 
-The Joint Library supports a JSON syntax for defining your Models, so you don't need to manually define or register
-the model hook using the service directly (i.e. Bookshelf).
+To dynamically generate models with the Joint Library, you must provide a "model config".
 
-Any existing Models registered to your service instance will be mixed-in with those
-generated by Joint. The "method config" and "route config" descriptors can therefore
-operate on Models registered by either means.
-
-The "model config" syntax supports an arrow notation for defining associations (relations),
-making it easier to wield than the Bookshelf polymorphic method approach.
+The "model config" syntax supports an arrow notation for defining associations (relations), making it easier to wield than the Bookshelf polymorphic method approach.
 
 <span>---</span>
 
 **For Example:**
 
+<details>
+<summary>Defining the "Profile" model with a "model config"</summary>
+
+<br />
 /model-config.js
+
 ```javascript
 
 export default {
   models: {
-    // Define and register a Model named: "Profile"...
+    // Define and register a model named: "Profile"...
     Profile: {
       tableName: 'blog_profiles',
       timestamps: { created: 'created_at', updated: 'updated_at' },
@@ -967,6 +1012,7 @@ export default {
   },
 };
 ```
+</details>
 
 <br />
 
@@ -1143,12 +1189,14 @@ module.exports = router;
 
 [section-prerequisites]: #prerequisites
 [section-install]: #install
+
 [section-the-joint-concept]: #the-joint-concept
 [section-joint-in-practice]: #joint-in-practice
 
 [section-joint-actions]: #joint-actions
 [section-joint-action-api]: #joint-action-api
 [section-joint-action-errors]: #joint-action-errors
+[section-joint-action-authorization]: #joint-action-authorization
 [section-joint-constructor]: #joint-constructor
 [section-joint-instance-api]: #joint-instance-api
 

@@ -130,7 +130,7 @@ export function registerMethods(joint, log = true) {
 function generateMethod(joint, action, spec) {
   if (!objectUtils.has(joint, action)) return null;
 
-  return function (input) { return joint[action](spec, input); }; // eslint-disable-line func-names
+  return function (input) { return joint[action](spec, input); };
 } // END - generateMethod
 
 // -----------------------------------------------------------------------------

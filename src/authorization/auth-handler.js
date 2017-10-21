@@ -76,7 +76,7 @@ const debugCheck = false;
 // to be aware of the contents returned with the "authBundle" package. The
 // "isAllowed" logic will follow the orders specified by the "rules".
 // -----------------------------------------------------------------------------
-export function buildAuthBundle(request, rules = {}) {
+export function buildAuthBundle(joint, request, rules = {}) {
   const bundle = {};
 
   if (debugPrep) console.log('[JOINT] [AUTH-HANDLER] Preparing auth bundle...');
