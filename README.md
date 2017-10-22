@@ -26,34 +26,34 @@ The majority of this README content will eventually be migrated into a user's gu
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [The Joint Concept][section-the-joint-concept]
 * [Joint in Practice][section-joint-in-practice]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [Joint Actions][section-joint-actions]
-* [Joint Action API][section-joint-action-api]
+* [Joint Action Syntax][section-joint-action-syntax]
 * [Joint Action Errors][section-joint-action-errors]
 * [Joint Action Authorization][section-joint-action-authorization]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [Joint Constructor][section-joint-constructor]
 * [Joint Instance API][section-joint-instance-api]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [Generating Models][section-generating-models]
 * [Generating Custom Methods][section-generating-custom-methods]
 * [Generating a RESTful API][section-generating-a-restful-api]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [Examples][section-examples]
 
-<span style="color:#c9c9c9;margin-left:30px;">---------</span>
+<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
 * [The Joint Stack][section-the-joint-stack]
 * [License][section-license]
@@ -65,7 +65,7 @@ The majority of this README content will eventually be migrated into a user's gu
 To use the Joint Kit, you need:
 
 * a supported persistence solution (_e.g. Postgres_)
-* a configured data schema (_e.g. database/tables_)
+* a configured data schema (_e.g. database & tables_)
 * a supported service interface / ORM
 
 The Joint Kit currently supports:
@@ -74,12 +74,11 @@ The Joint Kit currently supports:
 | ------------------------------------ | --------------------------------------------- | ---------------------------- |
 | [Bookshelf][link-bookshelf-site]     | [registry][link-bookshelf-plugin-registry], [pagination][link-bookshelf-plugin-pagination] | Postgres, MySQL, SQLite3     |
 
-
 <br />
 
-If you wish to generate a RESTful API on top of your custom methods, you need:
+If you wish to generate RESTful API endpoints, you need:
 
-* a supported server framework (e.g. Express)
+* a supported server framework
 
 The Joint Kit currently supports:
 
@@ -99,7 +98,7 @@ $ npm install joint-lib --save
 
 ## The Joint Concept
 
-The _Joint Kit_ module is an instantiable Class. Its instances are "_Joints_".
+The Joint Kit module is an instantiable Class. Its instances are "_Joints_".
 
 A Joint instance connects to:
 
@@ -123,31 +122,31 @@ const joint = new Joint({
 
 <span>---</span>
 
-A Joint instance provides:
+Joint Kit solutions are primarily implemented using a config-like JSON syntax, so development is simple and quick.
 
-* [Joint Actions][section-joint-actions] &nbsp;-&nbsp; A set of abstract data functions for hand-rolling backend data architecture (e.g. CRUD and relational operations).
+To implement data solutions, the Joint instance provides:
+
+* [Joint Actions][section-joint-actions]: &nbsp; A library of abstract data functions for hand-rolling backend data architecture (e.g. CRUD and relational operations).
 
 
 
-* [Joint Instance API][section-joint-instance-api] &nbsp;-&nbsp; A development kit for advanced features and dynamically generating custom method libraries and RESTful endpoints from config files.
-
-<span>---</span>
-
-To implement data solutions with Joint, you primarily use a config-like JSON syntax, requiring very little programming.
+* [Joint Instance API][section-joint-instance-api]: &nbsp; A development kit for dynamically generating custom method libraries & RESTful endpoints from config files, and other features.
 
 <span>---</span>
+
+[TBC: Disperse the content of "The Concept, in Code". Provide a better approach to presenting the coding concepts. ]
 
 **The Concept, in Code:**
 
 Given you have configured the service instance for your persistence solution, and you have a set of models upon which to operate...
 
-The conceptual idea of the library goes like this:
+The conceptual idea of a Joint goes like this:
 
 ```javascript
 import Joint from 'joint-lib';
 import bookshelf from './services/bookshelf'; // your configured bookshelf service
 
-// Fire up a joint, providing the service being used:
+// Instantiate a Joint, providing the service to use:
 const joint = new Joint({
   service: bookshelf,
 });
@@ -194,10 +193,24 @@ Rather, the "specs" for each operation would be defined in the application code 
 
 ## Joint in Practice
 
-In practice, with your Joint instance, you can rapidly hand-roll a custom method library by wrapping custom functions around
-the abstract [Joint Actions][section-joint-actions]. You provide the custom `spec` (which defines the method implementation) and expose those functions to your application.
+With a Joint instance, you can quickly hand-roll a robust method library by wrapping custom functions around its abstract [Joint Actions][section-joint-actions].
 
-**For Example:**
+### Hand-rolling a Method
+
+
+1) Export a named function that accepts the [Joint Action][section-joint-actions]  `input` as a parameter.
+
+
+2) Select the [Joint Action][section-joint-actions] to use for the base logic.
+
+
+3) Define the method implementation by providing a customized `spec`, following the [Joint Action Syntax][section-joint-action-syntax].
+
+
+4) Return the Joint Action call, passing it the `spec` and `input`.
+
+
+**Example:**
 
 <details>
 <summary>A typical CRUD set of methods for a "Profile" resource</summary>
@@ -277,13 +290,12 @@ export function deleteProfile(input) {
 <span>---</span>
 
 The beauty of the hand-rolling capability is that you can leverage the core logic behind each action
-(which typically represents the majority of the programming), while maintaining the flexibility to write
-your own logic alongside it.
+(which typically represents the majority of the programming), while maintaining the flexibility to write your own logic alongside it.
 
-**For Example:**
+**Example:**
 
 <details>
-<summary>Mixing your own code with the "Profile" methods</summary>
+<summary>Mixing other code with the "Profile" methods</summary>
 
 <br />
 /methods/profile.js
@@ -347,12 +359,15 @@ export function getProfile(input) {
 
 <span>---</span>
 
-But, if you don't require any supplemental logic for an operation, you can bypass the hand-rolling of the method
-entirely and generate the methods automatically from a JSON-based descriptor.
+But, if you don't require any supplemental logic for an operation, you can bypass the hand-rolling of the method entirely and generate the methods dynamically from a JSON-based descriptor.
 
-Following the syntax for [generating methods][section-generating-custom-methods], you can create a "method config", which defines your method library. Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the method logic onto your Joint instance.
+### Dynamically Generating Methods
 
-**For Example:**
+Following the guidelines for [generating methods][section-generating-custom-methods], you can create a "method config", which defines a method library using a JSON-based descriptor.
+
+Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the method logic onto your Joint instance.
+
+**Example:**
 
 <details>
 <summary>Defining the "Profile" methods with a "method config"</summary>
@@ -461,10 +476,10 @@ etc...
 
 ## Joint Actions
 
-The Joint Action set is the backbone of the Joint Library.
+The Joint Action library is the backbone of the Joint solution.
 
 The library provides a robust set of abstract data actions that hook
-directly to your persistence layer, handling the logic for common CRUD and relational data operations. The actions are configured to your data schema, and your desired functionality, using a simple JSON syntax ( see the  [Joint Action API][section-joint-action-api] ).
+directly to your persistence layer, handling the logic for common CRUD and relational data operations. The actions are configured to your data schema, and your desired functionality, using a simple JSON syntax ( see the  [Joint Action Syntax][section-joint-action-syntax] ).
 
 <span>---</span>
 
@@ -486,7 +501,7 @@ The following abstract actions are immediately available once the library is ins
 
 <br />
 
-## Joint Action API
+## Joint Action Syntax
 
 To use the Joint Actions, you communicate with a JSON syntax.
 
@@ -1194,7 +1209,7 @@ module.exports = router;
 [section-joint-in-practice]: #joint-in-practice
 
 [section-joint-actions]: #joint-actions
-[section-joint-action-api]: #joint-action-api
+[section-joint-action-syntax]: #joint-action-syntax
 [section-joint-action-errors]: #joint-action-errors
 [section-joint-action-authorization]: #joint-action-authorization
 [section-joint-constructor]: #joint-constructor
