@@ -2,7 +2,7 @@
 // Default Joint Settings
 // -----------------------------------------------------------------------------
 
-module.exports = {
+export default {
 
   // Authorization settings...
   auth: {
