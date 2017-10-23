@@ -38,7 +38,6 @@ function addRoute(joint, router, uri, httpMethod, methodDef, log) {
   } // end-switch
 }
 
-/* eslint-disable func-names */
 function generateRouteLogic(joint, methodDef) {
   const methodParts = (methodDef.method) ? methodDef.method.split('.') : null;
 
@@ -103,7 +102,6 @@ function generateRouteLogic(joint, methodDef) {
     res.end();
   };
 }
-/* eslint-enable func-names */
 
 function handleDataResponse(data, res, status = 200) {
   res.status(status).json(data);

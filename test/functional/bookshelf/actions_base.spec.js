@@ -1,7 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import ACTION from '../../../src/actions/action-constants';
-import * as AuthHandler from '../../../src/authorization/auth-handler';
 import Joint from '../../../src';
 import modelConfig from '../../configs/model-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
@@ -648,10 +647,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'POST',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = AuthHandler.buildAuthBundle(mockRequest, authRules);
+      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
         modelName: 'Project',
@@ -814,10 +813,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'GET',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = AuthHandler.buildAuthBundle(mockRequest, authRules);
+      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
         modelName: 'Project',
@@ -1718,10 +1717,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'DELETE',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = AuthHandler.buildAuthBundle(mockRequest, authRules);
+      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
         modelName: 'Project',

@@ -18,7 +18,6 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
 
       // Define associations...
       const assocHooks = {};
-      /* eslint-disable func-names */
       if (associations) {
         Object.keys(associations).forEach((assocName) => {
           const assocDef = associations[assocName];
@@ -82,7 +81,6 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
           } // end-if (info)
         }); // END - associations.forEach
       } // end-if (associations)
-      /* eslint-enable func-names */
 
       // Define model...
       const modelObject = bookshelf.Model.extend({
