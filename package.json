@@ -1,13 +1,13 @@
 {
-  "name": "joint-lib",
+  "name": "joint-kit",
   "version": "0.0.14",
-  "description": "A Node server library & dev kit for rapidly implementing data layers and RESTful endpoints | Part of the Joint Stack",
+  "description": "A Node server library & development kit for rapidly implementing data layers and RESTful endpoints | Part of the Joint Stack",
   "author": "|M| <manicprone@gmail.com>",
   "license": "MIT",
   "main": "joint.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:manicprone/joint-lib.git"
+    "url": "git@github.com:manicprone/joint-kit.git"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=build rollup -c",
