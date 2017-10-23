@@ -91,7 +91,7 @@ The Joint Kit currently supports:
 ## Install
 
 ``` sh
-$ npm install joint-lib --save
+$ npm install joint-kit --save
 ```
 
 <br />
