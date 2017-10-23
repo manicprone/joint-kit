@@ -16,6 +16,7 @@ const jointProps = [
   'server',
   'serverKey',
   'output',
+  'settings',
   'buildAuthBundle',
 ];
 const actionsBookshelf = [
@@ -32,9 +33,6 @@ const actionsBookshelf = [
   'removeAllAssociatedItems',
 ];
 
-// -------------
-// LIBRARY Joint
-// -------------
 describe('JOINT', () => {
   // ------------------------------
   // Testing: general instantiation
@@ -65,7 +63,7 @@ describe('JOINT', () => {
     //   expect(joint).to.have.keys(keys);
     //   expect(joint.serviceKey).to.equal('bookshelf');
     // });
-  });
+  }); // END - constructor
 
   // --------------------------------------------
   // Testing: service implementation => bookshelf
@@ -102,7 +100,7 @@ describe('JOINT', () => {
 
       expect(info.methods).to.not.be.empty;
     });
-  });
+  }); // END - service:bookshelf
 
   // -----------------------------------------
   // Testing: server implementation => express
@@ -130,5 +128,5 @@ describe('JOINT', () => {
 
       expect(info.api).to.equal(true);
     });
-  });
+  }); // END - server:express
 });

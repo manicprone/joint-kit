@@ -4,10 +4,7 @@ import * as CoreUtils from '../../../src/core/core-utils';
 
 const expect = chai.expect;
 
-// -----------------
-// CORE (core-utils)
-// -----------------
-describe('CORE [core-utils]', () => {
+describe('CORE-UTILS', () => {
   // ---------------------------------------
   // Testing: determineServiceKeyFromService
   // ---------------------------------------

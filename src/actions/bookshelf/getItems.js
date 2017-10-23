@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as AuthHandler from '../../authorization/auth-handler';
+import * as AuthUtils from '../../authorization/auth-utils';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
@@ -36,7 +36,7 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
     // Respect auth...
     if (authBundle) {
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields);
-      if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
+      if (!AuthUtils.isAllowed(authBundle, ownerCreds)) {
         return reject(StatusErrors.generateNotAuthorizedError());
       }
     } // end-if (authBundle)

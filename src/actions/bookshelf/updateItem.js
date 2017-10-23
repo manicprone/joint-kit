@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as AuthHandler from '../../authorization/auth-handler';
+import * as AuthUtils from '../../authorization/auth-utils';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
@@ -62,7 +62,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
         if (authBundle) {
           const combinedFields = Object.assign({}, resource.attributes, inputFields);
           const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
-          if (!AuthHandler.isAllowed(authBundle, ownerCreds)) {
+          if (!AuthUtils.isAllowed(authBundle, ownerCreds)) {
             return reject(StatusErrors.generateNotAuthorizedError());
           }
         } // end-if (authBundle)

@@ -463,6 +463,8 @@ input: {
 
 ## To Do
 
+* Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()`.
+
 * Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
   e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the
        conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"

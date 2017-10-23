@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as AuthHandler from '../../authorization/auth-handler';
+import * as AuthUtils from '../../authorization/auth-utils';
 import * as StatusErrors from '../../errors/status-errors';
 import * as ActionUtils from '../action-utils';
 import ACTION from '../action-constants';
@@ -81,7 +81,7 @@ function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputF
   // Respect auth...
   if (authBundle) {
     const ownerCredsData = ownerCreds || ActionUtils.parseOwnerCreds(specAuth, inputFields);
-    if (!AuthHandler.isAllowed(authBundle, ownerCredsData)) {
+    if (!AuthUtils.isAllowed(authBundle, ownerCredsData)) {
       return Promise.reject(StatusErrors.generateNotAuthorizedError());
     }
   } // end-if (authBundle)

@@ -1,11 +1,9 @@
-// -----------------------------------------------------------------------------
-// Joint Lib
-// -----------------------------------------------------------------------------
 import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
+import defaultSettings from './core/settings';
 import * as CoreUtils from './core/core-utils';
 import * as JointGenerate from './core/generate';
-import * as Auth from './authorization/auth-handler';
+import * as AuthUtils from './authorization/auth-utils';
 import * as ActionsBookshelf from './actions/bookshelf';
 
 export default class Joint {
@@ -16,6 +14,7 @@ export default class Joint {
     this.server = objectUtils.get(options, 'server', null);
     this.serverKey = CoreUtils.determineServerKeyFromServer(this.server);
     this.output = objectUtils.get(options, 'output', 'native');
+    this.settings = (options.settings) ? Object.assign(defaultSettings, options.settings) : defaultSettings;
 
     // Exit if a service is not loaded or is not recognized/supported...
     if (!this.service) {
@@ -27,10 +26,10 @@ export default class Joint {
       throw new JointError({ message });
     }
 
-    // ------------------------------
-    // Load authorization features...
-    // ------------------------------
-    this.buildAuthBundle = function (req, rules) { return Auth.buildAuthBundle(this, req, rules); };
+    // --------------------------------
+    // Load buildAuthBundle function...
+    // --------------------------------
+    this.buildAuthBundle = function (req, rules) { return AuthUtils.buildAuthBundle(this.settings, req, rules); };
 
     // TODO: Load existing models from service to this.model !!!
 
@@ -62,6 +61,10 @@ export default class Joint {
   setServer(server) {
     this.server = server;
     this.serverKey = CoreUtils.determineServerKeyFromServer(this.server);
+  }
+
+  updateSettings(settings) {
+    Object.assign(this.settings, settings);
   }
 
   generate(options) {
@@ -103,6 +106,7 @@ export default class Joint {
       service: this.serviceKey,
       server: this.serverKey,
       output: this.output,
+      settings: this.settings,
       api: isApiEnabled,
       models: modelNames,
       methods: this.method,

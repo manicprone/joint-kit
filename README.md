@@ -51,7 +51,7 @@ The majority of this README content will eventually be migrated into a user's gu
 
 <dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
-* [Examples][section-examples]
+* [Example Solutions][section-example-solutions]
 
 <dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
 
@@ -98,15 +98,17 @@ $ npm install joint-lib --save
 
 ## The Joint Concept
 
-The Joint Kit module is an instantiable Class. Its instances are "_Joints_".
+To implement solutions with the Joint Kit, you create _Joints_.
 
-A Joint instance connects to:
+A Joint connects to:
 
 * a persistence service &nbsp;&#10132;&nbsp; to implement a customized data operations layer
 
 * a server framework &nbsp;&#10132;&nbsp; to implement a customized HTTP API layer
 
-**Joint Instantiation:**
+### Joint Instantiation
+
+The Joint Kit module is simply an instantiable Class; its instances are the Joints.
 
 ```javascript
 import express from 'express';
@@ -122,7 +124,11 @@ const joint = new Joint({
 
 <span>---</span>
 
-Joint Kit solutions are primarily implemented using a config-like JSON syntax, so development is simple and quick.
+At its core, a Joint instance provides a set of abstract functions that handle the logic for common CRUD and relational data operations.
+
+[TBC: work from here]
+
+Joint solutions are primarily implemented using a config-like JSON syntax, so development is simple and quick.
 
 To implement data solutions, the Joint instance provides:
 
@@ -130,7 +136,7 @@ To implement data solutions, the Joint instance provides:
 
 
 
-* [Joint Instance API][section-joint-instance-api]: &nbsp; A development kit for dynamically generating custom method libraries & RESTful endpoints from config files, and other features.
+* [Joint Instance API][section-joint-instance-api]: &nbsp; A development kit for dynamically generating method libraries & RESTful endpoints from config files, as well as other features.
 
 <span>---</span>
 
@@ -365,7 +371,7 @@ But, if you don't require any supplemental logic for an operation, you can bypas
 
 Following the guidelines for [generating methods][section-generating-custom-methods], you can create a "method config", which defines a method library using a JSON-based descriptor.
 
-Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the method logic onto your Joint instance.
+Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the methods onto your Joint instance.
 
 **Example:**
 
@@ -444,9 +450,8 @@ export default {
 ```
 </details>
 
-<span>---</span>
-
-With a "method config", you can use the Joint `generate` function to generate the method library for you:
+<details>
+<summary>Executing Joint.generate on the "method config"</summary>
 
 ```javascript
 import Joint from 'joint-lib';
@@ -471,6 +476,7 @@ joint.method.Profile.getProfiles(input)
 
 etc...
 ```
+</details>
 
 <br />
 
@@ -877,9 +883,9 @@ joint.getItems(spec, input, 'json-api')
 
 ## Joint Constructor
 
-The Joint Library is an instantiable Class. It's instances are "_Joints_".
+The Joint Kit module is an instantiable Class. Its instances are _Joints_.
 
-The `joint-lib` package is exposed this way, so that multiple Joint instances can be utilized within an application.
+Multiple Joint instances can be utilized within a single application.
 
 **Example Joint Instantiation:**
 
@@ -899,15 +905,16 @@ const joint = new Joint({
 
 | Name      | Description |
 | --------- | ----------- |
-| service   | The configured service instance for your persistence solution. |
-| server    | The server instance for your HTTP router handling. ( *optional ) |
+| service   | The configured service instance for your persistence solution.       |
+| server    | The server instance for your HTTP router handling. ( _optional_ )    |
 | output    | The format of the returned data payloads. ( defaults to `'native'` ) |
+| settings  | The configurable settings available for a Joint instance. |
 
 <br />
 
 ## Joint Instance API
 
-When a valid Joint has been instantiated, the following properties and functions are available on the instance:
+When a Joint has been instantiated, the following properties and functions are available on the instance:
 
 ### Properties
 
@@ -916,8 +923,9 @@ When a valid Joint has been instantiated, the following properties and functions
 | service      | The underlying service implementation (for persistence) provided at instantiation. |
 | serviceKey   | A string value identifying the persistence service being used. |
 | server       | The underlying server implementation, if configured.           |
-| serverKey    | A string value identifying the server being used. <br /> `null` if not configured  |
-| output       | The string value for the globally configured output format. <br /> `'native'` by default           |
+| serverKey    | A string value identifying the server being used. <br /> `null` if not configured.  |
+| output       | The string value for the globally configured output format. <br /> `'native'` by default.           |
+| settings  | The active settings of the instance. |
 | modelConfig  | The active "model config" descriptor, if provided with the `generate` function. |
 | methodConfig | The active "method config" descriptor, if provided with the `generate` function.    |
 | routeConfig  | The active "route config" descriptor, if provided with the `generate` function.    |
@@ -926,35 +934,36 @@ When a valid Joint has been instantiated, the following properties and functions
 
 ### Operational Functions
 
-| Function                   | Description |
-| -------------------------- | ----------- |
+| Function   | Description |
+| ------------------------------------ | ----------- |
 | generate(&nbsp;options&nbsp;)        | Executes the dynamic generation of models, methods, and routes, per the config descriptors provided.  |
-| setOutput(&nbsp;output&nbsp;)        | Allows configuration of the output format, post-instantiation.            |
 | setServer(&nbsp;server&nbsp;)        | Allows configuration of the server implementation, post-instantiation. |
-| &lt;_action_&gt;(&nbsp;spec, input, output&nbsp;) | The action logic provided by the Joint Library. This is the backbone of the solution. See [Joint Actions][section-joint-actions] for the full list and usage details. |
+| setOutput(&nbsp;output&nbsp;)        | Allows configuration of the output format, post-instantiation. |
+| updateSettings(&nbsp;settings&nbsp;)    | Allows modification of the Joint settings, post-instantiation. |
+| &lt;_action_&gt;(&nbsp;spec, input, output&nbsp;) | The action logic provided by the Joint instance. This is the backbone of the solution. See [Joint Actions][section-joint-actions] for the full list and usage details. |
 
 <br />
 
 ### Convenience Functions
 
-| Function                   | Description |
-| -------------------------- | ----------- |
-| info( )                    |             |
+| Function      | Description |
+| ------------- | ----------- |
+| info( )       |             |
 
 <br />
 
 ### Generated Models
 
-| Syntax                               | Description |
-| ------------------------------------ | ----------- |
-| model.&lt;_modelName_&gt; | Exposes the registered Model object with name &lt;_modelName_&gt;. <br /> Any existing Models registered to the service instance will be mixed-in with those generated by Joint. |
+| Syntax        | Description |
+| ------------- | ----------- |
+| model.&lt;_modelName_&gt; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | The registered Model object with name &lt;_modelName_&gt;. <br /> Any existing Models registered to the service instance will be mixed-in with those generated by Joint. |
 
 <br />
 
 ### Generated Methods
 
-| Syntax                               | Description |
-| ------------------------------------ | ----------- |
+| Syntax        | Description |
+| ------------- | ----------- |
 | method.&lt;_modelName_&gt;.&lt;_methodName_&gt;(&nbsp;input&nbsp;) |      |
 
 <br />
@@ -963,7 +972,7 @@ When a valid Joint has been instantiated, the following properties and functions
 
 | Syntax        | Description |
 | ------------- | ----------- |
-| router        |      |
+| router        |             |
 
 <br />
 
@@ -1096,7 +1105,7 @@ NOTE: This feature is only available for dynamically-generated custom methods (v
 
 <br />
 
-## Examples
+## Example Solutions
 
 <details>
 <summary>Writing a custom Express Router:</summary>
@@ -1219,7 +1228,7 @@ module.exports = router;
 [section-generating-custom-methods]: #generating-custom-methods
 [section-generating-a-restful-api]: #generating-a-restful-api
 
-[section-examples]: #examples
+[section-example-solutions]: #example-solutions
 
 [section-the-joint-stack]: #the-joint-stack
 [section-license]: #license

@@ -1,15 +1,12 @@
 import chai from 'chai';
-import * as AuthHandler from '../../../src/authorization/auth-handler';
+import * as AuthUtils from '../../../src/authorization/auth-utils';
 
 const expect = chai.expect;
 
-// --------------------
-// LIBRARY auth-handler
-// --------------------
-describe('AUTH-HANDLER', () => {
-  // ------------------------
+describe('AUTH-UTILS', () => {
+  // -----------------------
   // Testing: buildAuthBundle
-  // ------------------------
+  // -----------------------
   describe('buildAuthBundle', () => {
     it('should return the expected authBundle package', () => {
       const mockSessionInfo = {};
@@ -18,13 +15,13 @@ describe('AUTH-HANDLER', () => {
         method: 'POST',
         originalUrl: '/api/blog/post/7/workflow/unpublish',
         session: {
-          jointUser: mockSessionInfo,
+          joint_user: mockSessionInfo,
         },
       };
 
       const rules = {};
 
-      expect(AuthHandler.buildAuthBundle({}, mockRequest, rules))
+      expect(AuthUtils.buildAuthBundle({}, mockRequest, rules))
         .to.deep.equal({
           request_method: 'POST',
           request_uri: '/api/blog/post/7/workflow/unpublish',
@@ -55,7 +52,7 @@ describe('AUTH-HANDLER', () => {
       const ownerToCheck = 'me';
       const ownerCreds = { profile_name: 5 };
 
-      const result = AuthHandler.isAllowedOwner(ownerToCheck, ownerCreds, mockSessionInfo);
+      const result = AuthUtils.isAllowedOwner(ownerToCheck, ownerCreds, mockSessionInfo);
       expect(result).to.equal(false);
     });
 
@@ -76,8 +73,8 @@ describe('AUTH-HANDLER', () => {
       const ownerCredsFromArray = { profile_id: 5 };
       const ownerCredsFromAtomic = { external_id: 10000 };
 
-      const resultFromArray = AuthHandler.isAllowedOwner(ownerToCheck, ownerCredsFromArray, mockSessionInfo);
-      const resultFromAtomic = AuthHandler.isAllowedOwner(ownerToCheck, ownerCredsFromAtomic, mockSessionInfo);
+      const resultFromArray = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromArray, mockSessionInfo);
+      const resultFromAtomic = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromAtomic, mockSessionInfo);
 
       expect(resultFromArray).to.equal(true);
       expect(resultFromAtomic).to.equal(true);

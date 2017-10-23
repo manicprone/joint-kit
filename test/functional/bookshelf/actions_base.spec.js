@@ -647,7 +647,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'POST',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
       const authBundle = joint.buildAuthBundle(mockRequest, authRules);
@@ -813,7 +813,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'GET',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
       const authBundle = joint.buildAuthBundle(mockRequest, authRules);
@@ -1717,7 +1717,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const mockRequest = {
         method: 'DELETE',
         originalUrl: '/api/project/4',
-        session: { jointUser: mockSession },
+        session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
       const authBundle = joint.buildAuthBundle(mockRequest, authRules);

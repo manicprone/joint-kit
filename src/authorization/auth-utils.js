@@ -1,20 +1,18 @@
 import objectUtils from '../utils/object-utils';
 // import { authorizedApps as authorizedAppConfig } from '../config/server-config';
 
+// TODO: Add CSRF check to rules & logic !!!
 // TODO: Fix the "owner / delegateRole" protection logic !!!
 // TODO: Add support for "rolesAll" !!!
-// TODO: Add CSRF check to rules & logic !!!
-// TODO: Define the session property names in the api-config
-//       (i.e. jointUser, originalUrl, roles, etc) !!!
 
 const debugPrep = false;
 const debugCheck = false;
 
 // -----------------------------------------------------------------------------
-// Generates an authBundle in order to perform authorization on an API request.
+// Generates an authBundle to handle authorization on a Joint Action request.
 // -----------------------------------------------------------------------------
 // (1) Use this function to generate an "authBundle" that describes the
-//     authorization rules for an API action.
+//     authorization rules for a Joint Action request.
 //
 // (2) Then, use the "isAllowed" function to determine if the user request
 //     is authorized (against the generated "authBundle" and the user input).
@@ -47,7 +45,7 @@ const debugCheck = false;
 //
 // authorizedApps: <Array> => Restricts the usage of the request to authorized
 //                            apps. The value is an array of app idendifiers
-//                            that have registered with the API. The request
+//                            that have registered with the system. The request
 //                            must contain the proprietary header and secret
 //                            that was shared with the app during registration
 //                            to be granted authorization.
@@ -76,29 +74,30 @@ const debugCheck = false;
 // to be aware of the contents returned with the "authBundle" package. The
 // "isAllowed" logic will follow the orders specified by the "rules".
 // -----------------------------------------------------------------------------
-export function buildAuthBundle(joint, request, rules = {}) {
+export function buildAuthBundle(settings, request, rules = {}) {
   const bundle = {};
 
-  if (debugPrep) console.log('[JOINT] [AUTH-HANDLER] Preparing auth bundle...');
+  if (debugPrep) console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle...');
 
   // Build bundle...
   bundle.request_method = objectUtils.get(request, 'method', null);
-  bundle.request_uri = objectUtils.get(request, 'originalUrl', '');
+  bundle.request_uri = objectUtils.get(request, 'originalUrl', ''); // TODO: Look at server implementation to determine this !!!
   bundle.request_headers = objectUtils.get(request, 'headers', null);
   bundle.rules = rules;
 
   // Load authenticated info from the session...
-  bundle.user = objectUtils.get(request, 'session.jointUser', null);
+  const sessionNameForUser = objectUtils.get(settings, 'auth.sessionNameForUser', null);
+  bundle.user = objectUtils.get(request, `session.${sessionNameForUser}`, {});
 
   if (debugPrep) {
     if (bundle.user) {
-      console.log('Authed session info (jointUser):');
+      console.log(`Authed session info (${sessionNameForUser}):`);
       console.log(bundle.user);
     }
     console.log('Request headers:');
     console.log(bundle.request_headers);
 
-    console.log('[JOINT] [AUTH-HANDLER] authBundle =>');
+    console.log('[JOINT] [AUTH-UTILS] authBundle =>');
     console.log(bundle);
     console.log('-------------------------------------------\n');
   }
@@ -126,7 +125,7 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
   const sessionUser = authBundle.user;
 
   if (debugCheck) {
-    console.log(`[JOINT] [AUTH-HANDLER] Checking if request is allowed on: ${authBundle.request_method} ${authBundle.request_uri}`);
+    console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authBundle.request_method} ${authBundle.request_uri}`);
     console.log('------------------- ownerCreds');
     console.log(ownerCreds);
     console.log('------------------- authRules');
@@ -263,7 +262,7 @@ export function isAllowedRole(roleToCheck, sessionUser) {
 //   return result;
 // }
 
-function isDeniedByAny(denyWhenAnyToCheck, sessionUser) {
+export function isDeniedByAny(denyWhenAnyToCheck, sessionUser) {
   let result = false;
 
   if (debugCheck) {
