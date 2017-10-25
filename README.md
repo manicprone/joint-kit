@@ -5,6 +5,7 @@ A Node server library & development kit for rapidly implementing data layers and
 Designed to be flexible. Mix it with existing code -_or_- use it to
 generate an entire server-side method library and isomorphic HTTP API.
 
+<br />
 
 > DB model configuration, robust CRUD and relational data logic, resource-level & user-level authorization, field validation,
 > data transformation, paginated & non-paginated datasets, rich error handling, payload serialization,
@@ -252,8 +253,8 @@ export function deleteProfile(input) {
 </details>
 <br />
 <span>-OR-</span>
-<br />
 
+<br />
 You can dynamically generate them from a JSON descriptor:
 
 <details>
