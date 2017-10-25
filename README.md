@@ -3,7 +3,7 @@
 A Node server library & development kit for rapidly implementing data layers and RESTful endpoints.
 
 Designed to be flexible. Mix it with existing code -_or_- use it to
-generate an entire custom method library and client API from scratch.
+generate an entire server-side method library and isomorphic HTTP API.
 
 <br />
 
@@ -17,45 +17,36 @@ generate an entire custom method library and client API from scratch.
 
 Not ready for public use until version 0.1.0 - Syntax and logic are in frequent flux.
 
-The majority of this README content will eventually be migrated into a user's guide format.
-
 <br />
 
 ## Table of Contents
 
+### Installation
 * [Prerequisites][section-prerequisites]
 * [Install][section-install]
 
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
-
+### Overview
 * [The Joint Concept][section-the-joint-concept]
-* [Joint in Practice][section-joint-in-practice]
 
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
-
+### API
+* [Joint Constructor][section-joint-constructor]
+* [Joint Instance][section-joint-instance]
 * [Joint Actions][section-joint-actions]
-* [Joint Action Syntax][section-joint-action-syntax]
 * [Joint Action Errors][section-joint-action-errors]
 * [Joint Action Authorization][section-joint-action-authorization]
+* [Model Config Syntax][section-model-config-syntax]
+* [Method Config Syntax][section-method-config-syntax]
+* [Route Config Syntax][section-route-config-syntax]
 
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
+### Guide
+* [Defining Data Models][section-defining-data-models]
+* [Building a Method Library][section-building-a-method-library]
+* [Building a RESTful API][section-building-a-restful-api]
 
-* [Joint Constructor][section-joint-constructor]
-* [Joint Instance API][section-joint-instance-api]
-
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
-
-* [Generating Models][section-generating-models]
-* [Generating Custom Methods][section-generating-custom-methods]
-* [Generating a RESTful API][section-generating-a-restful-api]
-
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
-
+### Examples
 * [Example Solutions][section-example-solutions]
 
-<dl><dd style="color:#c9c9c9;">&#8213;</dd></dl>
-
-* [The Joint Stack][section-the-joint-stack]
+### License
 * [License][section-license]
 
 <br />
@@ -102,124 +93,92 @@ To implement solutions with the Joint Kit, you create _Joints_.
 
 A Joint connects to:
 
-* a persistence service &nbsp;&#10132;&nbsp; to implement a customized data operations layer
+* your persistence service &nbsp;&#10132;&nbsp; to implement a data method layer
 
-* a server framework &nbsp;&#10132;&nbsp; to implement a customized HTTP API layer
+* your server framework &nbsp;&#10132;&nbsp; to implement an HTTP API layer
 
-### Joint Instantiation
+The Joint Kit provides a set of data actions that are abstracted to handle common data operations for your resources. Actions are implemented using a config-like JSON syntax, making development simple and quick.
 
-The Joint Kit module is simply an instantiable Class; its instances are the Joints.
+Leverage the built-in features to satisfy 100% of your required functionality, or use them as a base to augment with your own specialized logic.
+
+### Create a Joint
 
 ```javascript
 import express from 'express';
-import Joint from 'joint-lib';
+import Joint from 'joint-kit';
 import bookshelf from './services/bookshelf'; // your configured bookshelf service
 
 const joint = new Joint({
   service: bookshelf,
   server: express,
-  output: 'json-api',
 });
 ```
 
 <span>---</span>
 
-At its core, a Joint instance provides a set of abstract functions that handle the logic for common CRUD and relational data operations.
+### Define Data Models
 
-[TBC: work from here]
-
-Joint solutions are primarily implemented using a config-like JSON syntax, so development is simple and quick.
-
-To implement data solutions, the Joint instance provides:
-
-* [Joint Actions][section-joint-actions]: &nbsp; A library of abstract data functions for hand-rolling backend data architecture (e.g. CRUD and relational operations).
-
-
-
-* [Joint Instance API][section-joint-instance-api]: &nbsp; A development kit for dynamically generating method libraries & RESTful endpoints from config files, as well as other features.
-
-<span>---</span>
-
-[TBC: Disperse the content of "The Concept, in Code". Provide a better approach to presenting the coding concepts. ]
-
-**The Concept, in Code:**
-
-Given you have configured the service instance for your persistence solution, and you have a set of models upon which to operate...
-
-The conceptual idea of a Joint goes like this:
-
-```javascript
-import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf'; // your configured bookshelf service
-
-// Instantiate a Joint, providing the service to use:
-const joint = new Joint({
-  service: bookshelf,
-});
-
-// The "spec" defines the functionality of your operation, and the fields permitted:
-const spec = {
-  modelName: 'Profile',
-  fields: [
-    { name: 'user_id', type: 'Number', required: true },
-    { name: 'slug', type: 'String', required: true },
-    { name: 'title', type: 'String', required: true },
-    { name: 'tagline', type: 'String' },
-    { name: 'is_live', type: 'Boolean', defaultValue: false },
-  ],
-};
-
-// The "input" supplies the data for an individual operation request:
-const input = {
-  fields: {
-    user_id: 333,
-    slug: 'functional-fanatic',
-    title: 'Functional Fanatic',
-    tagline: 'I don\'t have habits, I have algorithms.',
-  },
-};
-
-// Leverage the appropriate Joint Action to handle the operation:
-joint.createItem(spec, input)
-  .then((result) => { ... })
-  .catch((error) => { ... });
-```
-
-<br />
-
-The [Joint Action][section-joint-actions] will automatically generate the appropriate [Joint Errors][section-joint-action-errors], if the `input` does not satisfy the `spec` defined, otherwise it will perform the data operation and return the expected data result.
-
-<span>---</span>
-
-However, this example is only conceptual, and does not represent a realistic way one would utilize the Joint Library in an application.
-
-Rather, the "specs" for each operation would be defined in the application code (thus creating a method library), and the "inputs" would be generated on-the-fly by the users of the application.
-
-<br />
-
-## Joint in Practice
-
-With a Joint instance, you can quickly hand-roll a robust method library by wrapping custom functions around its abstract [Joint Actions][section-joint-actions].
-
-### Hand-rolling a Method
-
-
-1) Export a named function that accepts the [Joint Action][section-joint-actions]  `input` as a parameter.
-
-
-2) Select the [Joint Action][section-joint-actions] to use for the base logic.
-
-
-3) Define the method implementation by providing a customized `spec`, following the [Joint Action Syntax][section-joint-action-syntax].
-
-
-4) Return the Joint Action call, passing it the `spec` and `input`.
-
-
-**Example:**
+You can continue configuring data models with your service natively, or you can dynamically generate them with Joint using a JSON descriptor:
 
 <details>
-<summary>A typical CRUD set of methods for a "Profile" resource</summary>
+<summary>Defining models with a Joint descriptor</summary>
+
+<br />
+/model-config.js
+
+```javascript
+export default {
+  models: {
+    // Define and register a model named: "Profile"...
+    Profile: {
+      tableName: 'blog_profiles',
+      timestamps: { created: 'created_at', updated: 'updated_at' },
+      associations: {
+        user: {
+          type: 'toOne',
+          path: 'user_id => User.id', // one-to-one
+        },
+        posts: {
+          type: 'toMany',
+          path: 'id => BlogPost.profile_id', // one-to-many
+        },
+        tags: {
+          type: 'toMany',
+          path: 'id => ProfileTag.profile_id => ProfileTag.tag_id => Tag.id', // many-to-many
+        },
+      },
+    },
+
+    ... other models
+
+  },
+};
+```
+</details>
+<br />
+
+Use the `generate` function to dynamically generate your models:
+
+```javascript
+import modelConfig from './model-config'; // your defined models
+
+// Dynamically generate the defined models:
+joint.generate({ modelConfig });
+
+// You can access all models using the syntax joint.model.<modelName>:
+if (joint.model.Profile) console.log('The Profile model exists !!!');
+```
+
+<span>---</span>
+
+### Create a Method Library
+
+From the provided set of abstract data actions ([Joint Actions][section-joint-actions]), you can quickly implement a customized method library.
+
+You can hand-roll the methods yourself:
+
+<details>
+<summary>Hand-rolling a CRUD set of methods</summary>
 
 <br />
 /methods/profile.js
@@ -293,90 +252,15 @@ export function deleteProfile(input) {
 ```
 </details>
 
-<span>---</span>
-
-The beauty of the hand-rolling capability is that you can leverage the core logic behind each action
-(which typically represents the majority of the programming), while maintaining the flexibility to write your own logic alongside it.
-
-**Example:**
-
-<details>
-<summary>Mixing other code with the "Profile" methods</summary>
-
 <br />
-/methods/profile.js
+<span>-OR-</span>
+<br /><br />
 
-```javascript
-export function createProfile(input) {
-  const spec = {
-    modelName: 'Profile',
-    fields: [
-      { name: 'user_id', type: 'Number', required: true },
-      { name: 'slug', type: 'String', required: true },
-      { name: 'title', type: 'String' },
-      { name: 'tagline', type: 'String' },
-      { name: 'is_live', type: 'Boolean', defaultValue: false },
-    ],
-  };
 
-  // Generate default title, if none provided...
-  const defaultInput = { title: `New Profile ${Date()}` };
-  const inputForCreate = Object.assign(defaultInput, input);
-
-  return joint.createItem(spec, inputForCreate);
-}
-
-export function getLiveProfiles(input) {
-  const spec = {
-    modelName: 'Profile',
-    fields: [
-      { name: 'user_id', type: 'Number' },
-      { name: 'is_live', type: 'Boolean' },
-    ],
-  };
-
-  // Force only "live" profiles to be returned...
-  Object.assign(input, { is_live: true });
-
-  return joint.getItems(spec, input);
-}
-
-export function getProfile(input) {
-  const spec = {
-    modelName: 'Profile',
-    fields: [
-      { name: 'id', type: 'Number', requiredOr: true },
-      { name: 'slug', type: 'String', requiredOr: true },
-    ],
-  };
-
-  // Apply "other" logic to the queried data...
-  return joint.getItem(spec, input)
-    .then((item) => {
-      // Mutate the data before return...
-      Object.assign(item, { ... });
-
-      // Apply third-party service logic before return...
-      return doOtherAsyncLogic(item);
-    });
-}
-```
-</details>
-
-<span>---</span>
-
-But, if you don't require any supplemental logic for an operation, you can bypass the hand-rolling of the method entirely and generate the methods dynamically from a JSON-based descriptor.
-
-### Dynamically Generating Methods
-
-Following the guidelines for [generating methods][section-generating-custom-methods], you can create a "method config", which defines a method library using a JSON-based descriptor.
-
-Executing the Joint `generate` function on the descriptor will dynamically build the method library for you, and load the methods onto your Joint instance.
-
-**Example:**
+You can dynamically generate them from a JSON descriptor:
 
 <details>
-<summary>Defining the "Profile" methods with a "method config"</summary>
+<summary>Defining methods with a Joint descriptor</summary>
 
 <br />
 /method-config.js
@@ -449,18 +333,12 @@ export default {
 };
 ```
 </details>
+<br />
 
-<details>
-<summary>Executing Joint.generate on the "method config"</summary>
+Use the `generate` function to dynamically generate your methods:
 
 ```javascript
-import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf';
 import methodConfig from './method-config'; // your defined method logic
-
-const joint = new Joint({
-  service: bookshelf,
-});
 
 // Dynamically generate the defined methods:
 joint.generate({ methodConfig });
@@ -476,408 +354,18 @@ joint.method.Profile.getProfiles(input)
 
 etc...
 ```
-</details>
-
-<br />
-
-## Joint Actions
-
-The Joint Action library is the backbone of the Joint solution.
-
-The library provides a robust set of abstract data actions that hook
-directly to your persistence layer, handling the logic for common CRUD and relational data operations. The actions are configured to your data schema, and your desired functionality, using a simple JSON syntax ( see the  [Joint Action Syntax][section-joint-action-syntax] ).
 
 <span>---</span>
 
-The following abstract actions are immediately available once the library is installed:
+### Create RESTful Endpoints
 
-| Action                   | Description                                                               |
-| ------------------------ | ------------------------------------------------------------------------- |
-| createItem               | Create operation for a single item                                        |
-| upsertItem               | Upsert operation for a single item                                        |
-| updateItem               | Update operation for a single item                                        |
-| getItem                  | Read operation for retrieving a single item                               |
-| getItems                 | Read operation for retrieving a collection of items                       |
-| deleteItems              | Delete operation for one to many items                                    |
-| addAssociatedItems       | Operation for associating one to many items of a type to a main resource            |
-| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
-| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
-| removeAssociatedItems    | Operation for disassociating one to many items of a type from a main resource       |
-| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
+On top of your Joint methods, you can easily expose a RESTful API layer.
 
-<br />
+You can hand-roll the router logic yourself:
 
-## Joint Action Syntax
+<span>-OR-</span>
 
-To use the Joint Actions, you communicate with a JSON syntax.
-
-All Joint Actions return Promises, and have the same method signature:
-
-```javascript
-joint.<action>(spec = {}, input = {}, output = 'native')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-
-<span>---</span>
-
-Each action has two required parts: the `spec` and the `input`.
-
-+ The `spec` defines the functionality of the action.
-
-+ The `input` supplies the data for an individual action request.
-
-Each action also supports the optional parameter: `output`.
-
-* The `output` specifies the format of the returned payload.
-
-<span>---</span>
-
-All available options:
-
-### Spec
-
-| Option              | Description | Actions Supported               | Required? |
-| ------------------- | ----------- | ------------------------------  | --------- |
-| modelName           |             | (all)                           |  Yes      |
-| fields              |             | (all)                           |  Yes (* except getItems) |
-| fields.required     |             | (all)                           |  No       |
-| fields.requiredOr   |             | (all)                           |  No       |
-| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
-| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
-| columnsToReturn     |             | getItem, getItems               |  No       |
-| defaultOrderBy      |             | getItems                        |  No       |
-| forceAssociations   |             | getItem, getItems               |  No       |
-| forceLoadDirect     |             | getItem, getItems               |  No       |
-| auth                |             | (all)                           |  No       |
-
-<br />
-
-### Input
-
-| Option         | Description | Actions Supported | Required? |
-| -------------- | ----------- | ----------------  | --------- |
-| fields         |             | (all)             |  Yes (* except getItems) |
-| columnSet      |             | getItem, getItems |  No       |
-| associations   |             | getItem, getItems |  No       |
-| loadDirect     |             | getItem, getItems |  No       |
-| orderBy        |             | getItems          |  No       |
-| paginate       |             | getItems          |  No       |
-| trx            |             | (all)             |  No       |
-| authBundle     |             | (all)             |  No       |
-
-<br />
-
-### Output <span style="font-size:75%;color:#525252;margin-left:10px">(supported by all actions)</span>
-
-| Value                     | Description |
-| ------------------------- | ----------- |  
-| `'native'`     | Returns the queried data in the format generated natively by the service. This is the default setting. |   
-| `'json-api'`   | Transforms the data into a [JSON API Spec][link-json-api-spec]-like format, making the data suitable for HTTP transport. |
-
-<br />
-
-### Spec Options
-
-Details for each option, with examples:
-
-#### modelName
-
-[TBC]
-
-#### fields
-
-[TBC]
-
-#### columnsToReturn
-
-[TBC]
-
-#### defaultOrderBy
-
-[TBC]
-
-#### forceAssociations
-
-[TBC]
-
-#### forceLoadDirect
-
-[TBC]
-
-#### auth
-
-[TBC]
-
-<br />
-
-### Input Options
-
-Details for each option, with examples:
-
-#### fields
-
-[TBC]
-
-#### columnSet
-
-[TBC]
-
-#### associations
-
-[TBC]
-
-#### loadDirect
-
-[TBC]
-
-#### orderBy
-
-[TBC]
-
-#### paginate
-
-[TBC]
-
-#### trx
-
-[TBC]
-
-#### authBundle
-
-[TBC]
-
-<br />
-
-### Output Values
-
-The `output` value configures the format of the returned payload.
-
-**NOTE:** This setting can be configured globally on the Joint instance itself ( see the [Joint Instance API][section-joint-instance-api] ).
-
-<span>---</span>
-
-#### output = 'native' <span style="font-weight:normal;margin-left:10px">(default)</span>
-
-By default, the output is set to `'native'`, which effectively returns the queried data in the format generated natively by the service you are using.
-
-**Item Example:**
-
-<details>
-<summary>Joint.getItem</summary>
-
-```javascript
-const spec = {
-  modelName: 'Profile',
-  fields: [
-    { name: 'id', type: 'Number', required: true },
-  ],
-};
-
-const input = {
-  fields: { id: 1 },
-  associations: ['user'],
-};
-
-joint.getItem(spec, input, 'native')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-</details>
-
-**Returns:**
-
-<details>
-<summary>Item payload ( Bookshelf )</summary>
-
-```javascript
-{
-  cid: 'c1',
-  _knex: null,
-  id: 1,
-  attributes: {
-    id: 1,
-    user_id: 333,
-    slug: 'functional-fanatic',
-    title: 'Functional Fanatic',
-    tagline: 'I don\'t have habits, I have algorithms.',
-    is_live: false,
-  },
-  _previousAttributes: { ... },
-  changed: {},
-  relations: {
-    user: {
-      cid: 'c2',
-      id: 333,
-      attributes: {
-        display_name: '|M|',
-        username: 'manicprone',
-        sites: [
-          { gitlab: 'https://gitlab.com/manicprone' },
-          { github: 'https://github.com/manicprone' },
-        ],
-      },
-      _previousAttributes: { ... },
-      changed: {},
-      relations: {},
-      relatedData: { ... },
-    },
-  },
-}
-```
-</details>
-
-<br />
-
-**Collection Example:**
-
-<details>
-<summary>Joint.getItems</summary>
-
-```javascript
-const spec = {
-  modelName: 'Profile',
-};
-
-const input = {
-  associations: ['user'],
-  paginate: { skip: 0, limit: 3 },
-};
-
-joint.getItems(spec, input, 'native')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-</details>
-
-**Returns:**
-
-<details>
-<summary>Collection payload ( Bookshelf )</summary>
-
-```
-
-```
-</details>
-
-<span>---</span>
-
-#### output = 'json-api'
-
-When the output is set to `'json-api'`, the returned payload is transformed into a [JSON API Spec][link-json-api-spec]-like format, making it suitable for HTTP data transport.
-
-**Item Example:**
-
-<details>
-<summary>Joint.getItem</summary>
-
-```javascript
-const spec = {
-  modelName: 'Profile',
-  fields: [
-    { name: 'id', type: 'Number', required: true },
-  ],
-};
-
-const input = {
-  fields: { id: 1 },
-  associations: ['user'],
-};
-
-joint.getItem(spec, input, 'json-api')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-</details>
-
-**Returns:**
-
-<details>
-<summary>Item payload</summary>
-
-```
-{
-  data: {
-    type: 'Profile',
-    id: 1,
-    attributes: {
-      user_id: 333,
-      slug: 'functional-fanatic',
-      title: 'Functional Fanatic',
-      tagline: 'I don\'t have habits, I have algorithms.',
-      is_live: false,
-    },
-    relationships: {
-      user: {
-        data: {
-          type: 'User',
-          id: 333,
-        },
-      },
-    },
-  },
-  included: [
-    {
-      type: 'User',
-      id: 333,
-      attributes: {
-        display_name: '|M|',
-        username: 'manicprone',
-        sites: [
-          { gitlab: 'https://gitlab.com/manicprone' },
-          { github: 'https://github.com/manicprone' },
-        ],
-      },
-    },
-  ],
-}
-```
-</details>
-
-<br />
-
-**Collection Example:**
-
-<details>
-<summary>Joint.getItems</summary>
-
-```javascript
-const spec = {
-  modelName: 'Profile',
-};
-
-const input = {
-  associations: ['user'],
-  paginate: { skip: 0, limit: 3 },
-};
-
-joint.getItems(spec, input, 'json-api')
-  .then((payload) => { ... })
-  .catch((error) => { ... });
-```
-</details>
-
-**Returns:**
-
-<details>
-<summary>Collection payload</summary>
-
-```
-
-```
-</details>
-
-<br />
-
-## Joint Action Errors
-
-[TBC]
-
-<br />
-
-## Joint Action Authorization
-
-[TBC]
+You can dynamically generate a router from a JSON descriptor:
 
 <br />
 
@@ -903,16 +391,16 @@ const joint = new Joint({
 
 ### Constructor Options
 
-| Name      | Description |
-| --------- | ----------- |
-| service   | The configured service instance for your persistence solution.       |
-| server    | The server instance for your HTTP router handling. ( _optional_ )    |
-| output    | The format of the returned data payloads. ( defaults to `'native'` ) |
-| settings  | The configurable settings available for a Joint instance. |
+| Name      | Description | Required? |
+| --------- | ----------- | --------- |
+| service   | The configured service instance for your persistence solution. | yes |
+| server    | The server instance for your HTTP router handling.  | no |
+| output    | The format of the returned data payloads. (defaults to `'native'`) | no |
+| settings  | The configurable settings available for a Joint instance.  | no |
 
 <br />
 
-## Joint Instance API
+## Joint Instance
 
 When a Joint has been instantiated, the following properties and functions are available on the instance:
 
@@ -987,119 +475,428 @@ When a Joint has been instantiated, the following properties and functions are a
 
 <br />
 
-## Generating Models
+## Joint Actions
 
-You can continue to define models using your service implementation, or you can dynamically generate them with Joint. Both approaches are supported simultaneously. Any existing models registered to your service instance will be mixed-in with those generated by Joint.
+The Joint Action set is the backbone of the Joint Kit solution.
+
+Each Joint instance provides a robust set of abstract data actions that hook
+directly to your persistence layer, handling the core logic for common data operations.
+
+The actions are implemented to your data schema and your specification, using a config-like JSON syntax.
+
+### Available Actions
+
+| Action                   | Description                                       |
+| ------------------------ | ------------------------------------------------- |
+| createItem               | Create operation for a single item                                        |
+| upsertItem               | Upsert operation for a single item                                        |
+| updateItem               | Update operation for a single item                                        |
+| getItem                  | Read operation for retrieving a single item                               |
+| getItems                 | Read operation for retrieving a collection of items                       |
+| deleteItems              | Delete operation for one to many items                                    |
+| addAssociatedItems       | Operation for associating one to many items of a type to a main resource            |
+| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
+| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
+| removeAssociatedItems    | Operation for disassociating one to many items of a type from a main resource       |
+| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
 
 <span>---</span>
 
-To dynamically generate models with the Joint Library, you must provide a "model config".
+### Joint Action Syntax
 
-The "model config" syntax supports an arrow notation for defining associations (relations), making it easier to wield than the Bookshelf polymorphic method approach.
-
-<span>---</span>
-
-**For Example:**
-
-<details>
-<summary>Defining the "Profile" model with a "model config"</summary>
-
-<br />
-/model-config.js
+All Joint Actions return Promises, and have the signature:
 
 ```javascript
+joint.<action>(spec = {}, input = {}, output = 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
 
-export default {
-  models: {
-    // Define and register a model named: "Profile"...
-    Profile: {
-      tableName: 'blog_profiles',
-      timestamps: { created: 'created_at', updated: 'updated_at' },
-      associations: {
-        user: {
-          type: 'toOne',
-          path: 'user_id => User.id', // one-to-one
-        },
-        posts: {
-          type: 'toMany',
-          path: 'id => BlogPost.profile_id', // one-to-many
-        },
-        tags: {
-          type: 'toMany',
-          path: 'id => ProfileTag.profile_id => ProfileTag.tag_id => Tag.id', // many-to-many
-        },
-      },
-    },
+<span>---</span>
 
-    ... other models
+Each action has two required parts: the `spec` and the `input`.
 
-  },
++ The `spec` defines the functionality of the action.
+
++ The `input` supplies the data for an individual action request.
+
+Each action also supports the optional parameter: `output`.
+
+* The `output` specifies the format of the returned payload.
+
+<span>---</span>
+
+### Spec Options
+
+| Option              | Description | Actions Supported               | Required? |
+| ------------------- | ----------- | ------------------------------  | --------- |
+| modelName           |             | (all)                           |  Yes      |
+| fields              |             | (all)                           |  Yes (* except getItems) |
+| fields.required     |             | (all)                           |  No       |
+| fields.requiredOr   |             | (all)                           |  No       |
+| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
+| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
+| columnsToReturn     |             | getItem, getItems               |  No       |
+| defaultOrderBy      |             | getItems                        |  No       |
+| forceAssociations   |             | getItem, getItems               |  No       |
+| forceLoadDirect     |             | getItem, getItems               |  No       |
+| auth                |             | (all)                           |  No       |
+
+<br />
+
+#### modelName
+
+[TBC]
+
+#### fields
+
+[TBC]
+
+#### columnsToReturn
+
+[TBC]
+
+#### defaultOrderBy
+
+[TBC]
+
+#### forceAssociations
+
+[TBC]
+
+#### forceLoadDirect
+
+[TBC]
+
+#### auth
+
+[TBC]
+
+<br />
+
+<span>---</span>
+
+### Input Options
+
+| Option         | Description | Actions Supported | Required? |
+| -------------- | ----------- | ----------------  | --------- |
+| fields         |             | (all)             |  Yes (* except getItems) |
+| columnSet      |             | getItem, getItems |  No       |
+| associations   |             | getItem, getItems |  No       |
+| loadDirect     |             | getItem, getItems |  No       |
+| orderBy        |             | getItems          |  No       |
+| paginate       |             | getItems          |  No       |
+| trx            |             | (all)             |  No       |
+| authBundle     |             | (all)             |  No       |
+
+<br />
+
+#### fields
+
+[TBC]
+
+#### columnSet
+
+[TBC]
+
+#### associations
+
+[TBC]
+
+#### loadDirect
+
+[TBC]
+
+#### orderBy
+
+[TBC]
+
+#### paginate
+
+[TBC]
+
+#### trx
+
+[TBC]
+
+#### authBundle
+
+[TBC]
+
+<br />
+
+<span>---</span>
+
+### Output Values
+
+The `output` value configures the format of the returned payload.
+
+**NOTE:** This setting can be configured globally on the Joint instance itself. (See the [Joint Instance API][section-joint-instance])
+
+| Value                     | Description |
+| ------------------------- | ----------- |  
+| `'native'`     | Returns the queried data in the format generated natively by the service. This is the default setting. |   
+| `'json-api'`   | Transforms the data into a [JSON API Spec][link-json-api-spec]-like format, making the data suitable for HTTP transport. |
+
+<span>---</span>
+
+#### output = 'native' <span style="font-weight:normal;margin-left:10px">(default)</span>
+
+By default, the output is set to `'native'`, which effectively returns the queried data in the format generated natively by the service you are using.
+
+**Item Example:**
+
+<details>
+<summary>Joint.getItem</summary>
+
+```javascript
+const spec = {
+  modelName: 'Profile',
+  fields: [
+    { name: 'id', type: 'Number', required: true },
+  ],
 };
+
+const input = {
+  fields: { id: 1 },
+  associations: ['user'],
+};
+
+joint.getItem(spec, input, 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+</details>
+<br />
+**Returns:**
+
+<details>
+<summary>Item payload ( Bookshelf )</summary>
+
+```javascript
+{
+  cid: 'c1',
+  _knex: null,
+  id: 1,
+  attributes: {
+    id: 1,
+    user_id: 333,
+    slug: 'functional-fanatic',
+    title: 'Functional Fanatic',
+    tagline: 'I don\'t have habits, I have algorithms.',
+    is_live: false,
+  },
+  _previousAttributes: { ... },
+  changed: {},
+  relations: {
+    user: {
+      cid: 'c2',
+      id: 333,
+      attributes: {
+        display_name: '|M|',
+        username: 'manicprone',
+        sites: [
+          { gitlab: 'https://gitlab.com/manicprone' },
+          { github: 'https://github.com/manicprone' },
+        ],
+      },
+      _previousAttributes: { ... },
+      changed: {},
+      relations: {},
+      relatedData: { ... },
+    },
+  },
+}
 ```
 </details>
 
 <br />
 
-Then, use the Joint `generate` function to dynamically generate your models:
+**Collection Example:**
+
+<details>
+<summary>Joint.getItems</summary>
 
 ```javascript
-import Joint from 'joint-lib';
-import bookshelf from './services/bookshelf';
-import modelConfig from './model-config'; // your defined models
+const spec = {
+  modelName: 'Profile',
+};
 
-const joint = new Joint({
-  service: bookshelf,
-});
+const input = {
+  associations: ['user'],
+  paginate: { skip: 0, limit: 3 },
+};
 
-// Dynamically generate the defined models:
-joint.generate({ modelConfig });
+joint.getItems(spec, input, 'native')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+</details>
+<br />
+**Returns:**
 
-// You can access all models using the syntax joint.model.<modelName>:
-if (joint.model.Profile) console.log('The Profile model exists !!!');
+<details>
+<summary>Collection payload ( Bookshelf )</summary>
 
-// Convenience mappings are also generated, allowing lookup of model object or name via the table name:
-const Profile = joint.modelByTable['blog_profiles'];
-const modelName = joint.modelNameByTable['blog_profiles'];
-console.log(`The model name for table "blog_profiles" is: ${modelName}`);
 ```
 
+```
+</details>
+
 <br />
 
-### The Model Config Syntax
+#### output = 'json-api'
+
+When the output is set to `'json-api'`, the returned payload is transformed into a [JSON API Spec][link-json-api-spec]-like format, making it suitable for HTTP data transport.
+
+**Item Example:**
+
+<details>
+<summary>Joint.getItem</summary>
+
+```javascript
+const spec = {
+  modelName: 'Profile',
+  fields: [
+    { name: 'id', type: 'Number', required: true },
+  ],
+};
+
+const input = {
+  fields: { id: 1 },
+  associations: ['user'],
+};
+
+joint.getItem(spec, input, 'json-api')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+</details>
+<br />
+**Returns:**
+
+<details>
+<summary>Item payload</summary>
+
+```
+{
+  data: {
+    type: 'Profile',
+    id: 1,
+    attributes: {
+      user_id: 333,
+      slug: 'functional-fanatic',
+      title: 'Functional Fanatic',
+      tagline: 'I don\'t have habits, I have algorithms.',
+      is_live: false,
+    },
+    relationships: {
+      user: {
+        data: {
+          type: 'User',
+          id: 333,
+        },
+      },
+    },
+  },
+  included: [
+    {
+      type: 'User',
+      id: 333,
+      attributes: {
+        display_name: '|M|',
+        username: 'manicprone',
+        sites: [
+          { gitlab: 'https://gitlab.com/manicprone' },
+          { github: 'https://github.com/manicprone' },
+        ],
+      },
+    },
+  ],
+}
+```
+</details>
+
+<br />
+
+**Collection Example:**
+
+<details>
+<summary>Joint.getItems</summary>
+
+```javascript
+const spec = {
+  modelName: 'Profile',
+};
+
+const input = {
+  associations: ['user'],
+  paginate: { skip: 0, limit: 3 },
+};
+
+joint.getItems(spec, input, 'json-api')
+  .then((payload) => { ... })
+  .catch((error) => { ... });
+```
+</details>
+<br />
+**Returns:**
+
+<details>
+<summary>Collection payload</summary>
+
+```
+
+```
+</details>
+
+<br />
+
+## Joint Action Errors
 
 [TBC]
 
 <br />
 
-## Generating Custom Methods
-
-Using the provided Joint Actions, you can rapidly implement custom methods for your specific data schema.
-
-To implement custom methods, you can either write your own JavaScript functions by directly accessing
-the `joint.<action>` set, or you can dynamically generate them by providing a "method config".
+## Joint Action Authorization
 
 [TBC]
 
 <br />
 
-### The Method Config Syntax
+## Model Config Syntax
 
 [TBC]
 
 <br />
 
-## Generating a RESTful API
-
-Dynamic router generation is supported using the library's JSON syntax (and with a supported server framework).
-You can dynamically generate RESTful endpoints for your custom methods by providing a "route config".
-
-NOTE: This feature is only available for dynamically-generated custom methods (via method config).
+## Method Config Syntax
 
 [TBC]
 
 <br />
 
-### The Route Config Syntax
+## Route Config Syntax
+
+[TBC]
+
+<br />
+
+## Defining Data Models
+
+[TBC]
+
+You can continue to define data models using your service implementation, or you can dynamically generate them with Joint. Both approaches are supported simultaneously. Any existing models registered to your service instance will be mixed-in with those generated by the Joint instance.
+
+<br />
+
+## Building a Method Library
+
+[TBC]
+
+<br />
+
+## Building a RESTful API
 
 [TBC]
 
@@ -1200,12 +997,6 @@ module.exports = router;
 
 <br />
 
-## The Joint Stack
-
-[TBC]
-
-<br />
-
 ## License
 
 [TBD]
@@ -1215,23 +1006,25 @@ module.exports = router;
 [section-install]: #install
 
 [section-the-joint-concept]: #the-joint-concept
-[section-joint-in-practice]: #joint-in-practice
 
+[section-joint-constructor]: #joint-constructor
+[section-joint-instance]: #joint-instance
 [section-joint-actions]: #joint-actions
-[section-joint-action-syntax]: #joint-action-syntax
 [section-joint-action-errors]: #joint-action-errors
 [section-joint-action-authorization]: #joint-action-authorization
-[section-joint-constructor]: #joint-constructor
-[section-joint-instance-api]: #joint-instance-api
 
-[section-generating-models]: #generating-models
-[section-generating-custom-methods]: #generating-custom-methods
-[section-generating-a-restful-api]: #generating-a-restful-api
+[section-model-config-syntax]: #model-config-syntax
+[section-method-config-syntax]: #method-config-syntax
+[section-route-config-syntax]: #route-config-syntax
+
+[section-defining-data-models]: #defining-data-models
+[section-building-a-method-library]: #building-a-method-library
+[section-building-a-restful-api]: #building-a-restful-api
 
 [section-example-solutions]: #example-solutions
 
-[section-the-joint-stack]: #the-joint-stack
 [section-license]: #license
+
 
 [link-bookshelf-site]: http://bookshelfjs.org
 [link-bookshelf-plugin-registry]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Model-Registry
