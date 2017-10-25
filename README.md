@@ -251,10 +251,12 @@ export function deleteProfile(input) {
 }
 ```
 </details>
-<br />
-<span>-OR-</span>
 
 <br />
+<span>-OR-</span>
+<br /><br />
+
+
 You can dynamically generate them from a JSON descriptor:
 
 <details>
