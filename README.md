@@ -34,12 +34,9 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [Joint Actions][section-joint-actions]
 * [Joint Action Errors][section-joint-action-errors]
 * [Joint Action Authorization][section-joint-action-authorization]
-
-
 * [Model Config Syntax][section-model-config-syntax]
 * [Method Config Syntax][section-method-config-syntax]
 * [Route Config Syntax][section-route-config-syntax]
-
 
 ### Guide
 * [Defining Data Models][section-defining-data-models]
@@ -332,8 +329,7 @@ export default {
 };
 ```
 </details>
-
-
+<br />
 Use the `generate` function to dynamically generate your methods:
 
 ```javascript
