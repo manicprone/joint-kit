@@ -40,6 +40,7 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [Method Config Syntax][section-method-config-syntax]
 * [Route Config Syntax][section-route-config-syntax]
 
+
 ### Guide
 * [Defining Data Models][section-defining-data-models]
 * [Building a Method Library][section-building-a-method-library]
@@ -129,7 +130,6 @@ You can continue configuring data models with your service natively, or you can 
 /model-config.js
 
 ```javascript
-
 export default {
   models: {
     // Define and register a model named: "Profile"...
@@ -158,7 +158,7 @@ export default {
 };
 ```
 </details>
-
+<br />
 Use the `generate` function to dynamically generate your models:
 
 ```javascript
@@ -253,7 +253,7 @@ export function deleteProfile(input) {
 }
 ```
 </details>
-
+<br />
 <span>-OR-</span>
 
 You can dynamically generate them from a JSON descriptor:
@@ -332,6 +332,7 @@ export default {
 };
 ```
 </details>
+
 
 Use the `generate` function to dynamically generate your methods:
 
@@ -665,7 +666,7 @@ joint.getItem(spec, input, 'native')
   .catch((error) => { ... });
 ```
 </details>
-
+<br />
 **Returns:**
 
 <details>
@@ -730,7 +731,7 @@ joint.getItems(spec, input, 'native')
   .catch((error) => { ... });
 ```
 </details>
-
+<br />
 **Returns:**
 
 <details>
@@ -770,7 +771,7 @@ joint.getItem(spec, input, 'json-api')
   .catch((error) => { ... });
 ```
 </details>
-
+<br />
 **Returns:**
 
 <details>
@@ -837,7 +838,7 @@ joint.getItems(spec, input, 'json-api')
   .catch((error) => { ... });
 ```
 </details>
-
+<br />
 **Returns:**
 
 <details>
