@@ -470,9 +470,9 @@ input: {
        conjunction is needed. Thus, the option can reflect the pattern of "required / requiredOr"
        i.e. `lookup:true` (implied AND), `lookupOr:true` (uses `Or` like current implementation).
 
-* Support model-config without a `modelsEnabled` property (just optional) ???
+* Support model-config without a `modelsEnabled` property (make it optional).
 
-* Support `fields.defaultValue` for `getItem`, `getItems`, et al.
+* Support `fields.defaultValue` for `getItem`, `getItems`, et al. (See app-content method config for use case)
 
 * Support auto-injected / overrides for input options (on method config)
   e.g. Enforce => `input.loadDirect: ['roles:key']` on all requests. (`spec.forceLoadDirect`, `spec.forceAssociations`)
@@ -501,13 +501,3 @@ input: {
   their authorization and configure the API functionality (e.g. setting the resource properties
   that are currently managed in the /config/api-config.js, as well as generating an
   "authorizedApp" credential and saving it to the API for auth capabilities, etc).
-
-
-## README To Do
-
-* Abstract "The Concept" away from the service implementation (i.e. Bookshelf).
-  Just show the "index.js" code snippet, with a comment referencing the "bookshelf configuration"
-  and then another code snippet showing the output of the example joint.action... maybe show two action examples ???
-
-* MAYBE: Add an overview section just after "in practice" that describes the concept of the configs / generate
-  function.

@@ -19,5 +19,7 @@ module.exports = {
     'prefer-arrow-callback': 'off',
     'func-names': 'off',
     'no-unused-expressions': 'off',
+    'no-new': 'off',
+    'brace-style': 'off',
   },
 };

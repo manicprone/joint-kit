@@ -38,11 +38,18 @@ describe('JOINT', () => {
   // Testing: general instantiation
   // ------------------------------
   describe('constructor (general)', () => {
-    it.skip('should throw an error when a service instance is not provided', () => {
-      expect(new Joint()).to.throw();
+    it('should throw an error when a service instance is not provided', () => {
+      try {
+        new Joint();
+      }
+      catch (error) {
+        expect(error).to.have.keys('name', 'module', 'message');
+        expect(error.name).to.equal('JointError');
+        expect(error.message).to.equal('A service must be configured to use Joint.');
+      }
     });
 
-    it.skip('should throw an error when an unrecognized or unsupported service is provided', () => {
+    it('should throw an error when an unrecognized or unsupported service is provided', () => {
       const fauxService = {
         version: '0.0.0',
         data: [],
@@ -51,7 +58,14 @@ describe('JOINT', () => {
         },
       };
 
-      expect(new Joint({ service: fauxService })).to.throw();
+      try {
+        new Joint({ service: fauxService });
+      }
+      catch (error) {
+        expect(error).to.have.keys('name', 'module', 'message');
+        expect(error.name).to.equal('JointError');
+        expect(error.message).to.equal('The provided service is either not recognized or not supported by Joint.');
+      }
     });
 
     // it('should be bundled correctly for shared use', () => {
