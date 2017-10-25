@@ -2,6 +2,8 @@ import chai from 'chai';
 import express from 'express';
 import Joint from '../../../src';
 // import JointDist from '../../../dist/lib';
+import modelConfigAppMgmt from '../../scenarios/app-mgmt/model-config';
+import modelConfigBlogApp from '../../scenarios/blog-app/model-config';
 import modelConfig from '../../configs/model-config';
 import methodConfig from '../../configs/method-config';
 import routeConfig from '../../configs/route-config';
@@ -94,14 +96,19 @@ describe('JOINT', () => {
     });
 
     it('should successfully register bookshelf models via model-config', () => {
-      const joint = new Joint({
+      const appMgmt = new Joint({
         service: bookshelf,
       });
-      joint.generate({ modelConfig, log: false });
+      appMgmt.generate({ modelConfig: modelConfigAppMgmt, log: false });
+      appMgmt.generate({ modelConfig: modelConfigAppMgmt, log: false }); // Run again to test redundant attempts !!!
 
-      const info = joint.info();
+      const blogApp = new Joint({
+        service: bookshelf,
+      });
+      blogApp.generate({ modelConfig: modelConfigBlogApp, log: false });
 
-      expect(info.models).to.have.length(11);
+      expect(appMgmt.info().models).to.have.length(3);
+      expect(blogApp.info().models).to.have.length(5);
     });
 
     it('should successfully register custom methods via method-config', () => {

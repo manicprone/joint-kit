@@ -201,6 +201,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       });
 
       // TODO: Complete support for AND/OR logic with "lookup" field option !!!
+
       // it('should retrieve the "default" package of data for a provided "app_id"', () => {
       //   const appID = 'trendy-boutique';
       //
