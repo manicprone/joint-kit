@@ -3,9 +3,9 @@ import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
 import express from 'express';
 import Joint from '../../../src';
-import modelConfig from '../../configs/model-config';
-import methodConfig from '../../configs/method-config';
-import routeConfig from '../../configs/route-config';
+import blogAppModels from '../../scenarios/blog-app/model-config';
+import blogAppMethods from '../../scenarios/blog-app/method-config';
+import blogAppRoutes from '../../scenarios/blog-app/route-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -18,20 +18,24 @@ const apiBasePath = '/api/express';
 const apiPort = 9999;
 const apiURL = `http://localhost:${apiPort}${apiBasePath}`;
 
-let joint = null;
+let blogApp = null;
 
 describe('CUSTOM ROUTER SIMULATION [express]', () => {
   before(() => {
-    joint = new Joint({
-      service: bookshelf,
-      server: express,
-      output: 'json-api',
+    // --------
+    // Blog App
+    // --------
+    blogApp = new Joint({ service: bookshelf, server: express, output: 'json-api' });
+    blogApp.generate({
+      modelConfig: blogAppModels,
+      methodConfig: blogAppMethods,
+      routeConfig: blogAppRoutes,
+      log: false,
     });
-    joint.generate({ modelConfig, methodConfig, routeConfig, log: false });
 
     // Run express server with configured router...
     const app = express();
-    app.use(apiBasePath, joint.router);
+    app.use(apiBasePath, blogApp.router);
     app.listen(apiPort);
   });
 

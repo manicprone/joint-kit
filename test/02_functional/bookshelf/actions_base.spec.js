@@ -39,7 +39,7 @@ const allColsUser = [
 // ------------------------
 // BOOKSHELF ACTIONS (base)
 // ------------------------
-describe.only('BASE ACTIONS [bookshelf]', () => {
+describe('BASE ACTIONS [bookshelf]', () => {
   before(() => {
     // --------
     // App Mgmt

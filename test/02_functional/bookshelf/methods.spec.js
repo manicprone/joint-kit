@@ -1,8 +1,10 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import Joint from '../../../src';
-import modelConfig from '../../configs/model-config';
-import methodConfig from '../../configs/method-config';
+import appMgmtModels from '../../scenarios/app-mgmt/model-config';
+import appMgmtMethods from '../../scenarios/app-mgmt/method-config';
+import blogAppModels from '../../scenarios/blog-app/model-config';
+import blogAppMethods from '../../scenarios/blog-app/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -11,14 +13,22 @@ chai.use(chaiAsPromised);
 chai.use(chaiHelpers);
 const expect = chai.expect;
 
-let joint = null;
+let appMgmt = null;
+let blogApp = null;
 
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   before(() => {
-    joint = new Joint({
-      service: bookshelf,
-    });
-    joint.generate({ modelConfig, methodConfig, log: false });
+    // --------
+    // App Mgmt
+    // --------
+    appMgmt = new Joint({ service: bookshelf });
+    appMgmt.generate({ modelConfig: appMgmtModels, methodConfig: appMgmtMethods, log: false });
+
+    // --------
+    // Blog App
+    // --------
+    blogApp = new Joint({ service: bookshelf });
+    blogApp.generate({ modelConfig: blogAppModels, methodConfig: blogAppMethods, log: false });
   });
 
   // ---------------------------------------------------------------------------
@@ -46,9 +56,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        const noAppID = expect(joint.method.AppContent.saveContent(inputNoAppID))
+        const noAppID = expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
           .to.eventually.be.rejectedWithJointStatusError(400);
-        const noData = expect(joint.method.AppContent.saveContent(inputNoData))
+        const noData = expect(appMgmt.method.AppContent.saveContent(inputNoData))
           .to.eventually.be.rejectedWithJointStatusError(400);
 
         return Promise.all([
@@ -74,9 +84,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       //     },
       //   };
       //
-      //   const noAppID = expect(joint.method.AppContent.saveContent(inputNoAppID))
+      //   const noAppID = expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
       //     .to.eventually.be.rejectedWithJointStatusError(400);
-      //   const noData = expect(joint.method.AppContent.saveContent(inputNoData))
+      //   const noData = expect(appMgmt.method.AppContent.saveContent(inputNoData))
       //     .to.eventually.be.rejectedWithJointStatusError(400);
       //
       //   return Promise.all([
@@ -103,7 +113,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       //     },
       //   };
       //
-      //   return joint.method.AppContent.saveContent(input)
+      //   return appMgmt.method.AppContent.saveContent(input)
       //     .then((data) => {
       //       expect(data.attributes.app_id).to.equal(appID);
       //       expect(data.attributes.key).to.equal('default');
@@ -135,7 +145,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.AppContent.saveContent(input)
+        return appMgmt.method.AppContent.saveContent(input)
           .then((data) => {
             expect(data.attributes.id).to.equal(1);
             expect(data.attributes.app_id).to.equal(appID);
@@ -167,7 +177,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.AppContent.saveContent(input)
+        return appMgmt.method.AppContent.saveContent(input)
           .then((data) => {
             expect(data.attributes.id).to.equal(1);
             expect(data.attributes.app_id).to.equal(appID);
@@ -192,7 +202,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        const noAppID = expect(joint.method.AppContent.getContent(input))
+        const noAppID = expect(appMgmt.method.AppContent.getContent(input))
           .to.eventually.be.rejectedWithJointStatusError(400);
 
         return Promise.all([
@@ -211,7 +221,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       //     },
       //   };
       //
-      //   return joint.method.AppContent.getContent(input)
+      //   return appMgmt.method.AppContent.getContent(input)
       //     .then((data) => {
       //       expect(data.attributes.app_id).to.equal(appID);
       //       expect(data.attributes.key).to.equal('default');
@@ -234,7 +244,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.AppContent.getContent(input)
+        return appMgmt.method.AppContent.getContent(input)
           .then((data) => {
             expect(data.attributes.app_id).to.equal(appID);
             expect(data.attributes.key).to.equal(key);
@@ -271,7 +281,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return expect(joint.method.User.createUser(input))
+        return expect(blogApp.method.User.createUser(input))
           .to.eventually.be.rejectedWithJointStatusError(400);
       });
 
@@ -284,7 +294,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.User.createUser(input)
+        return blogApp.method.User.createUser(input)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -311,7 +321,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.User.createUser(input)
+        return blogApp.method.User.createUser(input)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -342,7 +352,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return expect(joint.method.User.updateUser(input))
+        return expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejectedWithJointStatusError(400);
       });
 
@@ -357,7 +367,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return expect(joint.method.User.updateUser(input))
+        return expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejectedWithJointStatusError(404);
       });
 
@@ -372,7 +382,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.User.updateUser(input)
+        return blogApp.method.User.updateUser(input)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -405,7 +415,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return joint.method.User.updateUser(input)
+        return blogApp.method.User.updateUser(input)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -434,7 +444,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        return expect(joint.method.User.getUser(input))
+        return expect(blogApp.method.User.getUser(input))
           .to.eventually.be.rejectedWithJointStatusError(400);
       });
 
@@ -459,11 +469,11 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        const viaID = expect(joint.method.User.getUser(inputWithID))
+        const viaID = expect(blogApp.method.User.getUser(inputWithID))
           .to.eventually.be.rejectedWithJointStatusError(404);
-        const viaUsername = expect(joint.method.User.getUser(inputWithUsername))
+        const viaUsername = expect(blogApp.method.User.getUser(inputWithUsername))
           .to.eventually.be.rejectedWithJointStatusError(404);
-        const viaExternalID = expect(joint.method.User.getUser(inputWithExternalID))
+        const viaExternalID = expect(blogApp.method.User.getUser(inputWithExternalID))
           .to.eventually.be.rejectedWithJointStatusError(404);
 
         return Promise.all([
@@ -494,7 +504,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        const viaID = joint.method.User.getUser(inputWithID)
+        const viaID = blogApp.method.User.getUser(inputWithID)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -506,7 +516,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .and.to.not.have.property('email');
           });
 
-        const viaUsername = joint.method.User.getUser(inputWithUsername)
+        const viaUsername = blogApp.method.User.getUser(inputWithUsername)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')
@@ -518,7 +528,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .and.to.not.have.property('email');
           });
 
-        const viaExternalID = joint.method.User.getUser(inputWithExternalID)
+        const viaExternalID = blogApp.method.User.getUser(inputWithExternalID)
           .then((data) => {
             expect(data)
               .to.have.property('attributes')

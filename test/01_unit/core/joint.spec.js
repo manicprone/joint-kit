@@ -112,7 +112,7 @@ describe('JOINT', () => {
       blogApp.generate({ modelConfig: blogAppModels, log: false });
 
       expect(appMgmt.info().models).to.have.length(3);
-      expect(projectApp.info().models).to.have.length(8);
+      expect(projectApp.info().models).to.have.length(9);
       expect(blogApp.info().models).to.have.length(5);
     });
 

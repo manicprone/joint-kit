@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import Joint from '../../../src';
-import modelConfig from '../../configs/model-config';
+import projectAppModels from '../../scenarios/project-app/model-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -10,24 +10,22 @@ chai.use(chaiAsPromised);
 chai.use(chaiHelpers);
 const expect = chai.expect;
 
-let joint = null;
-let jointJsonApi = null;
+let projectApp = null;
+let projectAppJsonApi = null;
 
 // --------------------------------
 // BOOKSHELF ACTIONS (associations)
 // --------------------------------
 describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   before(() => {
-    joint = new Joint({
-      service: bookshelf,
-    });
-    joint.generate({ modelConfig, log: false });
+    // -----------
+    // Project App
+    // -----------
+    projectApp = new Joint({ service: bookshelf });
+    projectApp.generate({ modelConfig: projectAppModels, log: false });
 
-    jointJsonApi = new Joint({
-      service: bookshelf,
-      output: 'json-api',
-    });
-    jointJsonApi.generate({ modelConfig, log: false });
+    projectAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' });
+    projectAppJsonApi.generate({ modelConfig: projectAppModels, log: false });
   });
 
   // ---------------------------------
@@ -42,7 +40,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -58,7 +56,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -74,7 +72,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         noAssoc: {
@@ -90,7 +88,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -140,59 +138,59 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(joint.addAssociatedItems(specMissingMain, input))
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems02 = expect(joint.addAssociatedItems(specMissingAssoc, input))
+      const addAssociatedItems02 = expect(projectApp.addAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems03 = expect(joint.addAssociatedItems(specMissingAssocName, input))
+      const addAssociatedItems03 = expect(projectApp.addAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems04 = expect(joint.addAssociatedItems(spec, inputMissingMain))
+      const addAssociatedItems04 = expect(projectApp.addAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems05 = expect(joint.addAssociatedItems(spec, inputMissingAssoc))
+      const addAssociatedItems05 = expect(projectApp.addAssociatedItems(spec, inputMissingAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(joint.hasAssociatedItem(specMissingMain, input))
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(specMissingMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem02 = expect(joint.hasAssociatedItem(specMissingAssoc, input))
+      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(specMissingAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem03 = expect(joint.hasAssociatedItem(specMissingAssocName, input))
+      const hasAssociatedItem03 = expect(projectApp.hasAssociatedItem(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem04 = expect(joint.hasAssociatedItem(spec, inputMissingMain))
+      const hasAssociatedItem04 = expect(projectApp.hasAssociatedItem(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem05 = expect(joint.hasAssociatedItem(spec, inputMissingAssoc))
+      const hasAssociatedItem05 = expect(projectApp.hasAssociatedItem(spec, inputMissingAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(joint.getAllAssociatedItems(specMissingMain, input))
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const getAllAssociatedItems02 = expect(joint.getAllAssociatedItems(specMissingAssoc, input))
+      const getAllAssociatedItems02 = expect(projectApp.getAllAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const getAllAssociatedItems03 = expect(joint.getAllAssociatedItems(specMissingAssocName, input))
+      const getAllAssociatedItems03 = expect(projectApp.getAllAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const getAllAssociatedItems04 = expect(joint.getAllAssociatedItems(spec, inputMissingMain))
+      const getAllAssociatedItems04 = expect(projectApp.getAllAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(joint.removeAssociatedItems(specMissingMain, input))
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems02 = expect(joint.removeAssociatedItems(specMissingAssoc, input))
+      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems03 = expect(joint.removeAssociatedItems(specMissingAssocName, input))
+      const removeAssociatedItems03 = expect(projectApp.removeAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems04 = expect(joint.removeAssociatedItems(spec, inputMissingMain))
+      const removeAssociatedItems04 = expect(projectApp.removeAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems05 = expect(joint.removeAssociatedItems(spec, inputMissingAssoc))
+      const removeAssociatedItems05 = expect(projectApp.removeAssociatedItems(spec, inputMissingAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(specMissingMain, input))
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAllAssociatedItems02 = expect(joint.removeAllAssociatedItems(specMissingAssoc, input))
+      const removeAllAssociatedItems02 = expect(projectApp.removeAllAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAllAssociatedItems03 = expect(joint.removeAllAssociatedItems(specMissingAssocName, input))
+      const removeAllAssociatedItems03 = expect(projectApp.removeAllAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAllAssociatedItems04 = expect(joint.removeAllAssociatedItems(spec, inputMissingMain))
+      const removeAllAssociatedItems04 = expect(projectApp.removeAllAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
@@ -232,7 +230,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'AlienProject',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -248,7 +246,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -273,29 +271,29 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(joint.addAssociatedItems(specNoMain, input))
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(specNoMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems02 = expect(joint.addAssociatedItems(specNoAssoc, input))
+      const addAssociatedItems02 = expect(projectApp.addAssociatedItems(specNoAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(joint.hasAssociatedItem(specNoMain, input))
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(specNoMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem02 = expect(joint.hasAssociatedItem(specNoAssoc, input))
+      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(specNoAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(joint.getAllAssociatedItems(specNoMain, input))
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(specNoMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(joint.removeAssociatedItems(specNoMain, input))
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(specNoMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems02 = expect(joint.removeAssociatedItems(specNoAssoc, input))
+      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(specNoAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(specNoMain, input))
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(specNoMain, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
@@ -320,7 +318,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -358,31 +356,29 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(joint.addAssociatedItems(spec, inputNoMain))
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(404);
-      const addAssociatedItems02 = expect(joint.addAssociatedItems(spec, inputNoAssoc))
+      const addAssociatedItems02 = expect(projectApp.addAssociatedItems(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(joint.hasAssociatedItem(spec, inputNoMain))
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(404);
-      const hasAssociatedItem02 = expect(joint.hasAssociatedItem(spec, inputNoAssoc))
+      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(joint.getAllAssociatedItems(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(404);
-      const getAllAssociatedItems02 = expect(joint.getAllAssociatedItems(spec, inputNoAssoc))
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(joint.removeAssociatedItems(spec, inputNoMain))
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(404);
-      const removeAssociatedItems02 = expect(joint.removeAssociatedItems(spec, inputNoAssoc))
+      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, inputNoMain))
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       return Promise.all([
@@ -393,7 +389,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         hasAssociatedItem02,
 
         getAllAssociatedItems01,
-        getAllAssociatedItems02,
 
         removeAssociatedItems01,
         removeAssociatedItems02,
@@ -408,7 +403,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -446,29 +441,29 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(joint.addAssociatedItems(spec, inputNoMain))
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const addAssociatedItems02 = expect(joint.addAssociatedItems(spec, inputNoAssoc))
+      const addAssociatedItems02 = expect(projectApp.addAssociatedItems(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(joint.hasAssociatedItem(spec, inputNoMain))
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const hasAssociatedItem02 = expect(joint.hasAssociatedItem(spec, inputNoAssoc))
+      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(joint.getAllAssociatedItems(spec, inputNoMain))
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(joint.removeAssociatedItems(spec, inputNoMain))
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const removeAssociatedItems02 = expect(joint.removeAssociatedItems(spec, inputNoAssoc))
+      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(spec, inputNoAssoc))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, inputNoMain))
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
@@ -493,10 +488,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
           auth: {
-            ownerCreds: ['profile_id'],
+            ownerCreds: ['created_by'],
           },
         },
         association: {
@@ -523,34 +518,30 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(joint.addAssociatedItems(spec, input))
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(joint.hasAssociatedItem(spec, input))
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(joint.getAllAssociatedItems(spec, input))
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(joint.removeAssociatedItems(spec, input))
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(joint.removeAllAssociatedItems(spec, input))
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       return Promise.all([
         addAssociatedItems01,
-
         hasAssociatedItem01,
-
         getAllAssociatedItems01,
-
         removeAssociatedItems01,
-
         removeAllAssociatedItems01,
       ]);
     });
@@ -571,7 +562,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -586,7 +577,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const inputSingle = {
         main: {
           fields: {
-            id: 2,
+            id: 1,
           },
         },
         association: {
@@ -599,7 +590,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const inputMultiple = {
         main: {
           fields: {
-            id: 5,
+            id: 3,
           },
         },
         association: {
@@ -609,10 +600,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const addSingleAssoc = joint.addAssociatedItems(spec, inputSingle)
+      const addSingleAssoc = projectApp.addAssociatedItems(spec, inputSingle)
         .then((data) => {
           expect(data.attributes).to.contain({
-            id: 2,
+            id: 1,
           });
 
           const associatedTags = data.relations[associationName];
@@ -623,10 +614,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(associatedTags.models[3].attributes.key).to.equal('html');
         });
 
-      const addMultipleAssoc = joint.addAssociatedItems(spec, inputMultiple)
+      const addMultipleAssoc = projectApp.addAssociatedItems(spec, inputMultiple)
         .then((data) => {
           expect(data.attributes).to.contain({
-            id: 5,
+            id: 3,
           });
 
           const associatedTags = data.relations[associationName];
@@ -650,7 +641,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -674,7 +665,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.addAssociatedItems(spec, input)
+      return projectApp.addAssociatedItems(spec, input)
         .then((data) => {
           expect(data.attributes).to.contain({
             id: mainID,
@@ -698,7 +689,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: mainModelName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -722,7 +713,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const globalLevel = jointJsonApi.addAssociatedItems(spec, input)
+      const globalLevel = projectAppJsonApi.addAssociatedItems(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -747,7 +738,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.addAssociatedItems(spec, input, 'json-api')
+      const methodLevel = projectApp.addAssociatedItems(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -784,7 +775,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should return an error (404) when the requested association does not exist', () => {
-      const mainID = 2;
+      const mainID = 3;
       const associationName = 'codingLanguageTags';
 
       const spec = {
@@ -792,7 +783,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -817,7 +808,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return expect(joint.hasAssociatedItem(spec, input))
+      return expect(projectApp.hasAssociatedItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(404);
     });
 
@@ -831,7 +822,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -856,7 +847,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.hasAssociatedItem(spec, input)
+      return projectApp.hasAssociatedItem(spec, input)
         .then((data) => {
           expect(data.attributes.id).to.equal(assocID);
           expect(data.attributes.key).to.equal('java');
@@ -875,7 +866,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: mainModelName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -900,7 +891,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const globalLevel = jointJsonApi.hasAssociatedItem(spec, input)
+      const globalLevel = projectAppJsonApi.hasAssociatedItem(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -918,7 +909,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.hasAssociatedItem(spec, input, 'json-api')
+      const methodLevel = projectApp.hasAssociatedItem(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -948,7 +939,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should return all instances of the associated resource, when the association exists', () => {
-      const mainID = 2;
+      const mainID = 1;
       const associationName = 'codingLanguageTags';
 
       const spec = {
@@ -956,7 +947,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -971,7 +962,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.getAllAssociatedItems(spec, input)
+      return projectApp.getAllAssociatedItems(spec, input)
         .then((data) => {
           expect(data.relatedData.parentId).to.equal(mainID);
           expect(data.models).to.have.length(3);
@@ -983,7 +974,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const mainModelName = 'Project';
-      const mainID = 2;
+      const mainID = 1;
       const assocModelName = 'CodingLanguageTag';
       const associationName = 'codingLanguageTags';
 
@@ -992,7 +983,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: mainModelName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1007,7 +998,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const globalLevel = jointJsonApi.getAllAssociatedItems(spec, input)
+      const globalLevel = projectAppJsonApi.getAllAssociatedItems(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
@@ -1027,7 +1018,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.getAllAssociatedItems(spec, input, 'json-api')
+      const methodLevel = projectApp.getAllAssociatedItems(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
@@ -1066,7 +1057,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1082,7 +1073,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const inputSingle = {
         main: {
           fields: {
-            id: 2,
+            id: 1,
           },
         },
         association: {
@@ -1095,7 +1086,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const inputMultiple = {
         main: {
           fields: {
-            id: 3,
+            id: 2,
           },
         },
         association: {
@@ -1105,10 +1096,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const removeSingleAssoc = joint.removeAssociatedItems(spec, inputSingle)
+      const removeSingleAssoc = projectApp.removeAssociatedItems(spec, inputSingle)
         .then((data) => {
           expect(data.attributes).to.contain({
-            id: 2,
+            id: 1,
           });
 
           const associatedTags = data.relations[associationName];
@@ -1117,10 +1108,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(associatedTags.models[1].attributes.key).to.equal('javascript');
         });
 
-      const removeMultipleAssoc = joint.removeAssociatedItems(spec, inputMultiple)
+      const removeMultipleAssoc = projectApp.removeAssociatedItems(spec, inputMultiple)
         .then((data) => {
           expect(data.attributes).to.contain({
-            id: 3,
+            id: 2,
           });
 
           const associatedTags = data.relations[associationName];
@@ -1141,7 +1132,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1166,7 +1157,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.removeAssociatedItems(spec, input)
+      return projectApp.removeAssociatedItems(spec, input)
         .then((data) => {
           expect(data.attributes).to.contain({
             id: mainID,
@@ -1181,7 +1172,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const mainModelName = 'Project';
-      const mainID = 2;
+      const mainID = 1;
       const assocModelName = 'CodingLanguageTag';
       const assocID = 1; // java
       const associationName = 'codingLanguageTags';
@@ -1191,7 +1182,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: mainModelName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1216,7 +1207,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const globalLevel = jointJsonApi.removeAssociatedItems(spec, input)
+      const globalLevel = projectAppJsonApi.removeAssociatedItems(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1235,7 +1226,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(payload.included[0]).to.contain({ type: assocModelName });
         });
 
-      const methodLevel = joint.removeAssociatedItems(spec, input, 'json-api')
+      const methodLevel = projectApp.removeAssociatedItems(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1274,7 +1265,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1289,7 +1280,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.removeAllAssociatedItems(spec, input)
+      return projectApp.removeAllAssociatedItems(spec, input)
         .then((data) => {
           expect(data.attributes).to.contain({
             id: mainID,
@@ -1301,7 +1292,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     });
 
     it('should succeed and return the unaffected main resource, if the associations did not exist', () => {
-      const mainID = 1; // no tags
+      const mainID = 5; // no tags
       const associationName = 'codingLanguageTags';
 
       const spec = {
@@ -1309,7 +1300,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1324,7 +1315,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.removeAllAssociatedItems(spec, input)
+      return projectApp.removeAllAssociatedItems(spec, input)
         .then((data) => {
           expect(data.attributes).to.contain({
             id: mainID,
@@ -1345,7 +1336,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
           ],
         },
         association: {
@@ -1360,7 +1351,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       };
 
-      const globalLevel = jointJsonApi.removeAllAssociatedItems(spec, input)
+      const globalLevel = projectAppJsonApi.removeAllAssociatedItems(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1380,7 +1371,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           expect(payload).to.not.have.property('included');
         });
 
-      const methodLevel = joint.removeAllAssociatedItems(spec, input, 'json-api')
+      const methodLevel = projectApp.removeAllAssociatedItems(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
