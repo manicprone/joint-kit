@@ -2,11 +2,11 @@ import chai from 'chai';
 import express from 'express';
 import Joint from '../../../src';
 // import JointDist from '../../../dist/lib';
-import modelConfigAppMgmt from '../../scenarios/app-mgmt/model-config';
-import modelConfigBlogApp from '../../scenarios/blog-app/model-config';
-import modelConfig from '../../configs/model-config';
-import methodConfig from '../../configs/method-config';
-import routeConfig from '../../configs/route-config';
+import appMgmtModels from '../../scenarios/app-mgmt/model-config';
+import projectAppModels from '../../scenarios/project-app/model-config';
+import projectAppMethods from '../../scenarios/project-app/method-config';
+import projectAppRoutes from '../../scenarios/project-app/route-config';
+import blogAppModels from '../../scenarios/blog-app/model-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 
 const expect = chai.expect;
@@ -33,6 +33,13 @@ const actionsBookshelf = [
   'getAllAssociatedItems',
   'removeAssociatedItems',
   'removeAllAssociatedItems',
+];
+const methodsUser = [
+  'createUser',
+  'updateUser',
+  'getUser',
+  'getUsers',
+  'deleteUser',
 ];
 
 describe('JOINT', () => {
@@ -86,9 +93,7 @@ describe('JOINT', () => {
   // --------------------------------------------
   describe('service: bookshelf', () => {
     it('should load all implemented bookshelf actions', () => {
-      const joint = new Joint({
-        service: bookshelf,
-      });
+      const joint = new Joint({ service: bookshelf });
       const keys = jointProps.concat(actionsBookshelf);
 
       expect(joint).to.have.keys(keys);
@@ -96,30 +101,27 @@ describe('JOINT', () => {
     });
 
     it('should successfully register bookshelf models via model-config', () => {
-      const appMgmt = new Joint({
-        service: bookshelf,
-      });
-      appMgmt.generate({ modelConfig: modelConfigAppMgmt, log: false });
-      appMgmt.generate({ modelConfig: modelConfigAppMgmt, log: false }); // Run again to test redundant attempts !!!
+      const appMgmt = new Joint({ service: bookshelf });
+      appMgmt.generate({ modelConfig: appMgmtModels, log: false });
+      appMgmt.generate({ modelConfig: appMgmtModels, log: false }); // Run again to test redundant attempts !!!
 
-      const blogApp = new Joint({
-        service: bookshelf,
-      });
-      blogApp.generate({ modelConfig: modelConfigBlogApp, log: false });
+      const projectApp = new Joint({ service: bookshelf });
+      projectApp.generate({ modelConfig: projectAppModels, log: false });
+
+      const blogApp = new Joint({ service: bookshelf });
+      blogApp.generate({ modelConfig: blogAppModels, log: false });
 
       expect(appMgmt.info().models).to.have.length(3);
+      expect(projectApp.info().models).to.have.length(8);
       expect(blogApp.info().models).to.have.length(5);
     });
 
     it('should successfully register custom methods via method-config', () => {
-      const joint = new Joint({
-        service: bookshelf,
-      });
-      joint.generate({ methodConfig, log: false });
+      const projectApp = new Joint({ service: bookshelf });
+      projectApp.generate({ methodConfig: projectAppMethods, log: false });
 
-      const info = joint.info();
-
-      expect(info.methods).to.not.be.empty;
+      expect(projectApp.method).to.have.keys('User');
+      expect(projectApp.method.User).to.have.keys(methodsUser);
     });
   }); // END - service:bookshelf
 
@@ -139,15 +141,18 @@ describe('JOINT', () => {
     });
 
     it('should successfully build an express router via route-config', () => {
-      const joint = new Joint({
+      const projectApp = new Joint({
         service: bookshelf,
         server: express,
       });
-      joint.generate({ modelConfig, methodConfig, routeConfig, log: false });
+      projectApp.generate({
+        modelConfig: projectAppModels,
+        methodConfig: projectAppMethods,
+        routeConfig: projectAppRoutes,
+        log: false,
+      });
 
-      const info = joint.info();
-
-      expect(info.api).to.equal(true);
+      expect(projectApp.info().api).to.equal(true);
     });
   }); // END - server:express
 });

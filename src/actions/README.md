@@ -463,7 +463,10 @@ input: {
 
 ## To Do
 
-* Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()`.
+* Support multiple configs on single `generate` call.
+  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
+
+* Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
 
 * Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
   e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the

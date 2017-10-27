@@ -2,7 +2,9 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import ACTION from '../../../src/actions/action-constants';
 import Joint from '../../../src';
-import modelConfig from '../../configs/model-config';
+import appMgmtModels from '../../scenarios/app-mgmt/model-config';
+import projectAppModels from '../../scenarios/project-app/model-config';
+import blogAppModels from '../../scenarios/blog-app/model-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
@@ -11,31 +13,67 @@ chai.use(chaiAsPromised);
 chai.use(chaiHelpers);
 const expect = chai.expect;
 
-let joint = null;
-let jointJsonApi = null;
+let appMgmt = null;
+let appMgmtJsonApi = null;
+let projectApp = null;
+let projectAppJsonApi = null;
+let blogApp = null;
+let blogAppJsonApi = null;
+
+// Values for expectation...
+const allColsUser = [
+  'id',
+  'external_id',
+  'email',
+  'username',
+  'display_name',
+  'first_name',
+  'last_name',
+  'preferred_locale',
+  'avatar_url',
+  'last_login_at',
+  'created_at',
+  'updated_at',
+];
 
 // ------------------------
 // BOOKSHELF ACTIONS (base)
 // ------------------------
-describe('BASE ACTIONS [bookshelf]', () => {
+describe.only('BASE ACTIONS [bookshelf]', () => {
   before(() => {
-    joint = new Joint({
-      service: bookshelf,
-    });
-    joint.generate({ modelConfig, log: false });
+    // --------
+    // App Mgmt
+    // --------
+    appMgmt = new Joint({ service: bookshelf });
+    appMgmt.generate({ modelConfig: appMgmtModels, log: false });
 
-    jointJsonApi = new Joint({
-      service: bookshelf,
-      output: 'json-api',
-    });
-    jointJsonApi.generate({ modelConfig, log: false });
+    appMgmtJsonApi = new Joint({ service: bookshelf, output: 'json-api' });
+    appMgmtJsonApi.generate({ modelConfig: appMgmtModels, log: false });
+
+    // -----------
+    // Project App
+    // -----------
+    projectApp = new Joint({ service: bookshelf });
+    projectApp.generate({ modelConfig: projectAppModels, log: false });
+
+    projectAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' });
+    projectAppJsonApi.generate({ modelConfig: projectAppModels, log: false });
+
+    // --------
+    // Blog App
+    // --------
+    blogApp = new Joint({ service: bookshelf });
+    blogApp.generate({ modelConfig: blogAppModels, log: false });
+
+    blogAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' });
+    blogAppJsonApi.generate({ modelConfig: blogAppModels, log: false });
   });
 
   // ---------------------------------
   // Testing: standard error scenarios
   // ---------------------------------
   describe('standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem)', () => {
-    before(() => resetDB(['users', 'projects']));
+    before(() => resetDB(['users', 'profiles', 'projects']));
 
     it('should return an error (400) when the specified model does not exist', () => {
       const spec = {
@@ -52,27 +90,27 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
 
       // createItem
-      const createItemAction = expect(joint.createItem(spec, input))
+      const createItemAction = expect(projectApp.createItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // upsertItem
-      const upsertItemAction = expect(joint.upsertItem(spec, input))
+      const upsertItemAction = expect(projectApp.upsertItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // updateItem
-      const updateItemAction = expect(joint.updateItem(spec, input))
+      const updateItemAction = expect(projectApp.updateItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItem
-      const getItemAction = expect(joint.getItem(spec, input))
+      const getItemAction = expect(projectApp.getItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItems
-      const getItemsAction = expect(joint.getItems(spec, input))
+      const getItemsAction = expect(projectApp.getItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // deleteItem
-      const deleteItemAction = expect(joint.deleteItem(spec, input))
+      const deleteItemAction = expect(projectApp.deleteItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
@@ -117,39 +155,39 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
 
       // createItem
-      const createItem01 = expect(joint.createItem(spec01, input01))
+      const createItem01 = expect(projectApp.createItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const createItem02 = expect(joint.createItem(spec02, input02))
+      const createItem02 = expect(projectApp.createItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // upsertItem
-      const upsertItem01 = expect(joint.upsertItem(spec01, input01))
+      const upsertItem01 = expect(projectApp.upsertItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const upsertItem02 = expect(joint.upsertItem(spec02, input02))
+      const upsertItem02 = expect(projectApp.upsertItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // updateItem
-      const updateItem01 = expect(joint.updateItem(spec01, input01))
+      const updateItem01 = expect(projectApp.updateItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const updateItem02 = expect(joint.updateItem(spec02, input02))
+      const updateItem02 = expect(projectApp.updateItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItem
-      const getItem01 = expect(joint.getItem(spec01, input01))
+      const getItem01 = expect(projectApp.getItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const getItem02 = expect(joint.getItem(spec02, input02))
+      const getItem02 = expect(projectApp.getItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getItems
-      const getItems01 = expect(joint.getItems(spec01, input01))
+      const getItems01 = expect(projectApp.getItems(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const getItems02 = expect(joint.getItems(spec02, input02))
+      const getItems02 = expect(projectApp.getItems(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // deleteItem
-      const deleteItem01 = expect(joint.deleteItem(spec01, input01))
+      const deleteItem01 = expect(projectApp.deleteItem(spec01, input01))
         .to.eventually.be.rejectedWithJointStatusError(400);
-      const deleteItem02 = expect(joint.deleteItem(spec02, input02))
+      const deleteItem02 = expect(projectApp.deleteItem(spec02, input02))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
@@ -170,13 +208,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
     it('should return an error (403) when the authorization spec is not satisfied', () => {
       const spec = {
-        modelName: 'Project',
+        modelName: 'Profile',
         fields: [
-          { name: 'profile_id', type: 'Number' },
           { name: 'user_id', type: 'Number' },
         ],
         auth: {
-          ownerCreds: ['user_id', 'profile_id'],
+          ownerCreds: ['id => profile_ids', 'user_id'],
         },
       };
       const input = {
@@ -188,12 +225,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       // With lookup field (for update/upsert)...
       const specForUpdate = {
-        modelName: 'Project',
+        modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', required: true, lookupField: true },
         ],
         auth: {
-          ownerCreds: ['user_id', 'profile_id'],
+          ownerCreds: ['id => profile_ids', 'user_id'],
         },
       };
       const inputForUpdate = {
@@ -204,27 +241,27 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
 
       // createItem
-      const createItemAction = expect(joint.createItem(spec, input))
+      const createItemAction = expect(blogApp.createItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // upsertItem
-      const upsertItemAction = expect(joint.upsertItem(specForUpdate, inputForUpdate))
+      const upsertItemAction = expect(blogApp.upsertItem(specForUpdate, inputForUpdate))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // updateItem
-      const updateItemAction = expect(joint.updateItem(specForUpdate, inputForUpdate))
+      const updateItemAction = expect(blogApp.updateItem(specForUpdate, inputForUpdate))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // getItem
-      const getItemAction = expect(joint.getItem(spec, input))
+      const getItemAction = expect(blogApp.getItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // getItems
-      const getItemsAction = expect(joint.getItems(spec, input))
+      const getItemsAction = expect(blogApp.getItems(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       // deleteItem
-      const deleteItemAction = expect(joint.deleteItem(spec, input))
+      const deleteItemAction = expect(blogApp.deleteItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(403);
 
       return Promise.all([
@@ -239,17 +276,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
     it('should report on missing required fields in a semantic way', () => {
       const spec = {
-        modelName: 'Profile',
+        modelName: 'Project',
         fields: [
           { name: 'user_id', type: 'Number', required: true },
-          { name: 'status_id', type: 'Number', required: true },
+          { name: 'status_code', type: 'Number', required: true },
           { name: 'this_thing', type: 'String', requiredOr: true },
           { name: 'that_thing', type: 'String', requiredOr: true },
         ],
       };
       const missingOneRequired = {
         fields: {
-          status_id: 0,
+          status_code: 0,
           this_thing: 'reality',
         },
       };
@@ -262,46 +299,46 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const missingRequiredOrs = {
         fields: {
           user_id: 333,
-          status_id: 0,
+          status_code: 0,
         },
       };
       const missingOneRequiredAndRequiredOrs = {
         fields: {
-          status_id: 0,
+          status_code: 0,
         },
       };
       const missingTwoRequiredAndRequiredOrs = {
         fields: {},
       };
 
-      const testCase01 = joint.createItem(spec, missingOneRequired)
+      const testCase01 = projectApp.createItem(spec, missingOneRequired)
         .catch((error) => {
           expect(error.message)
             .to.equal('Missing required field: "user_id"');
         });
 
-      const testCase02 = joint.createItem(spec, missingTwoRequired)
+      const testCase02 = projectApp.createItem(spec, missingTwoRequired)
         .catch((error) => {
           expect(error.message)
-            .to.equal('Missing required fields: all of => ("user_id", "status_id")');
+            .to.equal('Missing required fields: all of => ("user_id", "status_code")');
         });
 
-      const testCase03 = joint.createItem(spec, missingRequiredOrs)
+      const testCase03 = projectApp.createItem(spec, missingRequiredOrs)
         .catch((error) => {
           expect(error.message)
             .to.equal('Missing required fields: at least one of => ("this_thing", "that_thing")');
         });
 
-      const testCase04 = joint.createItem(spec, missingOneRequiredAndRequiredOrs)
+      const testCase04 = projectApp.createItem(spec, missingOneRequiredAndRequiredOrs)
         .catch((error) => {
           expect(error.message)
             .to.equal('Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")');
         });
 
-      const testCase05 = joint.createItem(spec, missingTwoRequiredAndRequiredOrs)
+      const testCase05 = projectApp.createItem(spec, missingTwoRequiredAndRequiredOrs)
         .catch((error) => {
           expect(error.message)
-            .to.equal('Missing required fields: all of => ("user_id", "status_id") AND at least one of => ("this_thing", "that_thing")');
+            .to.equal('Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")');
         });
 
       return Promise.all([testCase01, testCase02, testCase03, testCase04, testCase05]);
@@ -315,9 +352,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     before(() => resetDB());
 
     it('should create a new row for the specified model when the spec is satisfied', () => {
-      // -------------------------
-      // model: User, table: users
-      // -------------------------
+      // ----
+      // User
+      // ----
       const specUser = {
         modelName: 'User',
         fields: [
@@ -331,9 +368,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      // -------------------------------
-      // model: Profile, table: profiles
-      // -------------------------------
+      // -------
+      // Profile
+      // -------
       const specProfile = {
         modelName: 'Profile',
         fields: [
@@ -349,7 +386,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      const createUser = joint.createItem(specUser, inputUser)
+      const createUser = blogApp.createItem(specUser, inputUser)
         .then((rowData) => {
           expect(rowData)
             .to.have.property('attributes')
@@ -359,7 +396,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             });
         });
 
-      const createProfile = joint.createItem(specProfile, inputProfile)
+      const createProfile = blogApp.createItem(specProfile, inputProfile)
         .then((rowData) => {
           expect(rowData)
             .to.have.property('attributes')
@@ -381,18 +418,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName,
         fields: [
-          { name: 'profile_id', type: 'Number', required: true },
           { name: 'name', type: 'String', required: true },
         ],
       };
       const inputProject = {
         fields: {
-          profile_id: 2,
           name: projectName,
         },
       };
 
-      const globalLevel = jointJsonApi.createItem(specProject, inputProject)
+      const globalLevel = projectAppJsonApi.createItem(specProject, inputProject)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -409,7 +444,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.createItem(specProject, inputProject, 'json-api')
+      const methodLevel = projectApp.createItem(specProject, inputProject, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -451,7 +486,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { data: settingsData },
       };
 
-      return expect(joint.upsertItem(spec, input))
+      return expect(appMgmt.upsertItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
     });
 
@@ -471,7 +506,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { app_id: appID, data: settingsData },
       };
 
-      return joint.upsertItem(spec, input)
+      return appMgmt.upsertItem(spec, input)
         .then((data) => {
           expect(data.attributes.id).to.equal(1);
           expect(data.attributes.app_id).to.equal(appID);
@@ -497,7 +532,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { app_id: appID, data: settingsData },
       };
 
-      return joint.upsertItem(spec, input)
+      return appMgmt.upsertItem(spec, input)
         .then((data) => {
           expect(data.attributes.id).to.equal(1);
           expect(data.attributes.app_id).to.equal(appID);
@@ -524,7 +559,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { app_id: appID, data: settingsData },
       };
 
-      const globalLevel = jointJsonApi.upsertItem(spec, input)
+      const globalLevel = appMgmtJsonApi.upsertItem(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -542,7 +577,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.upsertItem(spec, input, 'json-api')
+      const methodLevel = appMgmt.upsertItem(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -568,7 +603,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // Testing: updateItem
   // -------------------
   describe('updateItem', () => {
-    before(() => resetDB(['projects']));
+    before(() => resetDB(['profiles', 'projects']));
 
     it('should return an error (400) when the input does not provide a "lookupField"', () => {
       const spec = {
@@ -585,7 +620,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      return expect(joint.updateItem(spec, input))
+      return expect(projectApp.updateItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
     });
 
@@ -605,7 +640,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      return expect(joint.updateItem(spec, input))
+      return expect(projectApp.updateItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(404);
     });
 
@@ -626,7 +661,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { id, name },
       };
 
-      return joint.updateItem(spec, input)
+      return projectApp.updateItem(spec, input)
         .then((data) => {
           expect(data.attributes).to.contain({
             id,
@@ -646,33 +681,33 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const mockRequest = {
         method: 'POST',
-        originalUrl: '/api/project/4',
+        originalUrl: '/api/profile/1',
         session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
+      const authBundle = blogApp.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
-        modelName: 'Project',
+        modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', required: true, lookupField: true },
-          { name: 'name', type: 'String' },
-          { name: 'brief_description', type: 'String' },
+          { name: 'title', type: 'String' },
+          { name: 'tagline', type: 'String' },
         ],
         auth: {
-          ownerCreds: ['profile_id => profile_ids'],
+          ownerCreds: ['user_id => id'],
         },
       };
 
       const input = {
         fields: {
-          id: 4,
-          name: 'A New Title for a New Day',
+          id: 1,
+          title: 'A New Title for a New Day',
         },
         authBundle,
       };
 
-      return expect(joint.updateItem(spec, input))
+      return expect(blogApp.updateItem(spec, input))
         .to.be.fulfilled;
     });
 
@@ -694,7 +729,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { id, name },
       };
 
-      const globalLevel = jointJsonApi.updateItem(spec, input)
+      const globalLevel = projectAppJsonApi.updateItem(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -712,7 +747,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             });
         });
 
-      const methodLevel = joint.updateItem(spec, input, 'json-api')
+      const methodLevel = projectApp.updateItem(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -738,12 +773,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // Testing: getItem
   // ----------------
   describe('getItem', () => {
-    before(() => resetDB(['users', 'tags', 'profiles', 'projects']));
+    before(() => resetDB(['users', 'roles', 'profiles']));
 
     it('should return the row according to the provided spec and input', () => {
-      // ----
-      // User
-      // ----
       const specUser = {
         modelName: 'User',
         fields: [
@@ -759,23 +791,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      // -------
-      // Profile
-      // -------
-      const specProfile = {
-        modelName: 'Profile',
-        fields: [
-          { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'slug', type: 'String', requiredOr: true },
-        ],
-      };
-      const inputProfile = {
-        fields: {
-          id: 1,
-        },
-      };
-
-      const getUser = joint.getItem(specUser, inputUser)
+      const getUser = blogApp.getItem(specUser, inputUser)
         .then((data) => {
           expect(data)
             .to.have.property('attributes')
@@ -785,19 +801,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
             });
         });
 
-      const getProfile = joint.getItem(specProfile, inputProfile)
-        .then((data) => {
-          expect(data)
-            .to.have.property('attributes')
-            .that.contains({
-              id: inputProfile.fields.id,
-              user_id: 4,
-            });
-        });
-
       return Promise.all([
         getUser,
-        getProfile,
       ]);
     });
 
@@ -812,32 +817,32 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const mockRequest = {
         method: 'GET',
-        originalUrl: '/api/project/4',
+        originalUrl: '/api/profile/1',
         session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
+      const authBundle = blogApp.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
-        modelName: 'Project',
+        modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
         auth: {
-          ownerCreds: ['profile_id => profile_ids'],
+          ownerCreds: ['user_id'],
         },
       };
       const input = {
-        fields: { id: 4 },
+        fields: { id: 1 },
         authBundle,
       };
 
-      return expect(joint.getItem(spec, input))
+      return expect(blogApp.getItem(spec, input))
         .to.be.fulfilled;
     });
 
     it('should only return the column data that is permitted by the spec', () => {
-      const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
+      const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'avatar_url', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
 
       const specBase = {
         modelName: 'Profile',
@@ -859,17 +864,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      const getAllColsFromBase = joint.getItem(specBase, input)
+      const getAllColsFromBase = blogApp.getItem(specBase, input)
         .then((data) => {
           expect(data.attributes).to.have.keys(allAvailableCols);
         });
 
-      const getAllColsFromEmptyArray = joint.getItem(specColsEmptyArray, input)
+      const getAllColsFromEmptyArray = blogApp.getItem(specColsEmptyArray, input)
         .then((data) => {
           expect(data.attributes).to.have.keys(allAvailableCols);
         });
 
-      const getSpecifiedCols = joint.getItem(specColsSpecified, input)
+      const getSpecifiedCols = blogApp.getItem(specColsSpecified, input)
         .then((data) => {
           expect(data.attributes).to.have.keys(specColsSpecified.columnsToReturn);
         });
@@ -878,7 +883,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
-      const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
+      const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'avatar_url', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
 
       const specBase = {
         modelName: 'Profile',
@@ -914,27 +919,27 @@ describe('BASE ACTIONS [bookshelf]', () => {
         columnSet: 'list',
       };
 
-      const getAllColsWithBase = joint.getItem(specBase, inputWithListSet)
+      const getAllColsWithBase = blogApp.getItem(specBase, inputWithListSet)
         .then((data) => {
           expect(data.attributes).to.have.keys(allAvailableCols);
         });
 
-      const getDefaultSetImplicitly = joint.getItem(specColsWithDefault, inputWithUndefinedSet)
+      const getDefaultSetImplicitly = blogApp.getItem(specColsWithDefault, inputWithUndefinedSet)
         .then((data) => {
           expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
         });
 
-      const getAllColsWithUnknownSetAndNoDefault = joint.getItem(specColsWithoutDefault, inputWithUndefinedSet)
+      const getAllColsWithUnknownSetAndNoDefault = blogApp.getItem(specColsWithoutDefault, inputWithUndefinedSet)
         .then((data) => {
           expect(data.attributes).to.have.keys(allAvailableCols);
         });
 
-      const getDefaultSetExplicitly = joint.getItem(specColsWithDefault, inputWithDefaultSet)
+      const getDefaultSetExplicitly = blogApp.getItem(specColsWithDefault, inputWithDefaultSet)
         .then((data) => {
           expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
         });
 
-      const getListSet = joint.getItem(specColsWithDefault, inputWithListSet)
+      const getListSet = blogApp.getItem(specColsWithDefault, inputWithListSet)
         .then((data) => {
           expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.list);
         });
@@ -949,48 +954,35 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
-      const associationNameProfile = 'profile';
-      const specProject = {
-        modelName: 'Project',
-        fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
-      };
-      const inputProjectWithRelation = {
-        fields: { id: 1 },
-        associations: [associationNameProfile], // One-to-One
-      };
-      const inputProjectWithoutRelation = {
-        fields: { id: 1 },
-      };
-
+      const associationNameInfo = 'info';
       const associationNameProfiles = 'profiles';
-      const specUser = {
+
+      const spec = {
         modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputUser = {
+      const inputWithToOneAssoc = {
+        fields: { id: 4 },
+        associations: [associationNameInfo], // One-to-One
+      };
+      const inputWithToManyAssoc = {
         fields: { id: 4 },
         associations: [associationNameProfiles], // One-to-Many
       };
+      const inputWithoutAssoc = {
+        fields: { id: 1 },
+      };
 
-      const withRelation01 = joint.getItem(specProject, inputProjectWithRelation)
+      const withToOneAssoc = blogApp.getItem(spec, inputWithToOneAssoc)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
-            .that.has.property(associationNameProfile);
+            .that.has.property(associationNameInfo);
         });
 
-      const withoutRelation01 = joint.getItem(specProject, inputProjectWithoutRelation)
-        .then((data) => {
-          expect(data)
-            .to.have.property('relations')
-            .that.is.empty;
-        });
-
-      const withRelation02 = joint.getItem(specUser, inputUser)
+      const withToManyAssoc = blogApp.getItem(spec, inputWithToManyAssoc)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
@@ -999,39 +991,54 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.relations[associationNameProfiles]).to.have.length(3);
         });
 
-      return Promise.all([withRelation01, withoutRelation01, withRelation02]);
+      const withoutAssoc = blogApp.getItem(spec, inputWithoutAssoc)
+        .then((data) => {
+          expect(data)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([withToOneAssoc, withToManyAssoc, withoutAssoc]);
     });
 
     it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
-      const specProject = {
-        modelName: 'Project',
+      const spec = {
+        modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputProject = {
-        fields: { id: 2 },
-        loadDirect: ['profile:{user_id,title,is_live}', 'user:username', 'codingLanguageTags:key'],
+      const input = {
+        fields: { id: 4 },
+        loadDirect: ['info:*', 'roles:{name,display_name}', 'profiles:slug'],
       };
 
-      const withLoadDirect = joint.getItem(specProject, inputProject)
+      const withLoadDirect = blogApp.getItem(spec, input)
         .then((data) => {
           expect(data.attributes)
-            .to.have.property('profile')
+            .to.have.property('info')
             .to.contain({
+              id: 1,
               user_id: 4,
-              title: 'Heavy Synapse',
-              is_live: 0,
+              professional_title: 'EdgeCaser',
+              tagline: 'Catapult like impulse, infect like madness',
+              description: null,
+              created_at: null,
+              updated_at: null,
             });
 
           expect(data.attributes)
-            .to.contain({
-              user: 'the_manic_edge',
-            });
+            .to.have.property('roles')
+            .to.deep.equal([
+              { name: 'admin', display_name: 'Admin' },
+              { name: 'moderator', display_name: 'Moderator' },
+              { name: 'developer', display_name: 'Developer' },
+              { name: 'blogger', display_name: 'Blogger' },
+            ]);
 
           expect(data.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['java', 'jsp', 'javascript']);
+            .to.have.property('profiles')
+            .that.has.members(['functional-fanatic', 'heavy-synapse', 'a-life-organized']);
 
           expect(data)
             .to.have.property('relations')
@@ -1042,51 +1049,51 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
-      const specProject = {
-        modelName: 'Project',
+      const spec = {
+        modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputProject = {
-        fields: { id: 2 },
-        associations: ['profile', 'codingLanguageTags'],
-        loadDirect: ['codingLanguageTags:key', 'user:username'],
+      const input = {
+        fields: { id: 4 },
+        associations: ['roles', 'profiles'],
+        loadDirect: ['profiles:slug', 'info:professional_title'],
       };
 
-      const withBoth = joint.getItem(specProject, inputProject)
+      const withBoth = blogApp.getItem(spec, input)
         .then((data) => {
           expect(data.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['java', 'jsp', 'javascript']);
+            .to.have.property('profiles')
+            .that.has.members(['functional-fanatic', 'heavy-synapse', 'a-life-organized']);
 
           expect(data.attributes)
-            .to.contain({ user: 'the_manic_edge' });
+            .to.contain({ info: 'EdgeCaser' });
 
-          expect(data.relations).to.have.keys(['codingLanguageTags', 'profile']);
-          expect(data.relations).to.not.have.keys(['user']);
+          expect(data.relations).to.have.keys(['roles', 'profiles']);
+          expect(data.relations).to.not.have.keys(['info']);
         });
 
       return Promise.all([withBoth]);
     });
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const modelName = 'Project';
-      const itemID = 2;
+      const modelName = 'User';
+      const itemID = 6;
 
-      const specProject = {
+      const specUser = {
         modelName,
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputProject = {
+      const inputUser = {
         fields: { id: itemID },
-        associations: ['profile'],
-        loadDirect: ['codingLanguageTags:key', 'user:username'],
+        associations: ['profiles'],
+        loadDirect: ['roles:name'],
       };
 
-      const globalLevel = jointJsonApi.getItem(specProject, inputProject)
+      const globalLevel = blogAppJsonApi.getItem(specUser, inputUser)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1099,19 +1106,19 @@ describe('BASE ACTIONS [bookshelf]', () => {
           // Base Attributes...
           expect(payload.data).to.have.property('attributes');
           expect(payload.data.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['java', 'jsp', 'javascript']);
+            .to.have.property('roles')
+            .that.has.members(['transcendent', 'developer', 'blogger']);
 
           // Relationships...
           expect(payload.data).to.have.property('relationships');
-          expect(payload.data.relationships).to.have.keys('profile');
+          expect(payload.data.relationships).to.have.keys('profiles');
 
           // Included...
           expect(payload).to.have.property('included');
           expect(payload.included[0]).to.contain({ type: 'Profile' });
         });
 
-      const methodLevel = joint.getItem(specProject, inputProject, 'json-api')
+      const methodLevel = blogAppJsonApi.getItem(specUser, inputUser, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1124,12 +1131,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
           // Base Attributes...
           expect(payload.data).to.have.property('attributes');
           expect(payload.data.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['java', 'jsp', 'javascript']);
+            .to.have.property('roles')
+            .that.has.members(['transcendent', 'developer', 'blogger']);
 
           // Relationships...
           expect(payload.data).to.have.property('relationships');
-          expect(payload.data.relationships).to.have.keys('profile');
+          expect(payload.data.relationships).to.have.keys('profiles');
 
           // Included...
           expect(payload).to.have.property('included');
@@ -1144,7 +1151,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // Testing: getItems
   // -----------------
   describe('getItems', () => {
-    before(() => resetDB(['users', 'tags', 'profiles', 'projects']));
+    before(() => resetDB(['users', 'roles', 'profiles', 'projects']));
 
     it('should return all rows according to the provided spec and input', () => {
       // ----
@@ -1185,27 +1192,27 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      const getUsers = joint.getItems(specUser, inputUsers)
+      const getUsers = blogApp.getItems(specUser, inputUsers)
         .then((data) => {
           expect(data.models).to.have.length(10);
         });
 
-      const getAllProfiles = joint.getItems(specProfile, inputAllProfiles)
+      const getAllProfiles = blogApp.getItems(specProfile, inputAllProfiles)
         .then((data) => {
           expect(data.models).to.have.length(11);
         });
 
-      const getLiveProfiles = joint.getItems(specProfile, inputLiveProfiles)
+      const getLiveProfiles = blogApp.getItems(specProfile, inputLiveProfiles)
         .then((data) => {
           expect(data.models).to.have.length(7);
         });
 
-      const getNotLiveProfiles = joint.getItems(specProfile, inputNotLiveProfiles)
+      const getNotLiveProfiles = blogApp.getItems(specProfile, inputNotLiveProfiles)
         .then((data) => {
           expect(data.models).to.have.length(4);
         });
 
-      const getExplicitSetOfProfiles = joint.getItems(specProfile, inputExplicitSetOfProfiles)
+      const getExplicitSetOfProfiles = blogApp.getItems(specProfile, inputExplicitSetOfProfiles)
         .then((data) => {
           expect(data.models).to.have.length(5);
         });
@@ -1214,8 +1221,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it('should only return the column data that is permitted by the spec', () => {
-      const allAvailableCols = ['id', 'external_id', 'email', 'username', 'display_name', 'avatar_url', 'last_login_at', 'created_at', 'updated_at'];
-
       const specBase = {
         modelName: 'User',
         defaultOrderBy: '-created_at',
@@ -1226,12 +1231,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const input = {};
 
-      const getAllColsFromBase = joint.getItems(specBase, input)
+      const getAllColsFromBase = blogApp.getItems(specBase, input)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
+          expect(data.models[0].attributes).to.have.keys(allColsUser);
         });
 
-      const getSpecifiedCols = joint.getItems(specColsSpecified, input)
+      const getSpecifiedCols = blogApp.getItems(specColsSpecified, input)
         .then((data) => {
           expect(data.models[0].attributes).to.have.keys(specColsSpecified.columnsToReturn);
         });
@@ -1240,8 +1245,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
-      const allAvailableCols = ['id', 'external_id', 'email', 'username', 'display_name', 'avatar_url', 'last_login_at', 'created_at', 'updated_at'];
-
       const specBase = {
         modelName: 'User',
         defaultOrderBy: '-created_at',
@@ -1264,27 +1267,27 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const inputWithDefaultSet = { columnSet: 'default' };
       const inputWithListSet = { columnSet: 'list' };
 
-      const getAllColsWithBase = joint.getItems(specBase, inputWithListSet)
+      const getAllColsWithBase = blogApp.getItems(specBase, inputWithListSet)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
+          expect(data.models[0].attributes).to.have.keys(allColsUser);
         });
 
-      const getDefaultSetImplicitly = joint.getItems(specColsWithDefault, inputWithUndefinedSet)
-        .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
-        });
-
-      const getAllColsWithUnknownSetAndNoDefault = joint.getItems(specColsWithoutDefault, inputWithUndefinedSet)
-        .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(allAvailableCols);
-        });
-
-      const getDefaultSetExplicitly = joint.getItems(specColsWithDefault, inputWithDefaultSet)
+      const getDefaultSetImplicitly = blogApp.getItems(specColsWithDefault, inputWithUndefinedSet)
         .then((data) => {
           expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
         });
 
-      const getListSet = joint.getItems(specColsWithDefault, inputWithListSet)
+      const getAllColsWithUnknownSetAndNoDefault = blogApp.getItems(specColsWithoutDefault, inputWithUndefinedSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(allColsUser);
+        });
+
+      const getDefaultSetExplicitly = blogApp.getItems(specColsWithDefault, inputWithDefaultSet)
+        .then((data) => {
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+        });
+
+      const getListSet = blogApp.getItems(specColsWithDefault, inputWithListSet)
         .then((data) => {
           expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.list);
         });
@@ -1299,70 +1302,64 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should return relation data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
-      const specProject = {
-        modelName: 'Project',
-        fields: [
-          { name: 'profile_id', type: 'Number' },
-        ],
+      const spec = {
+        modelName: 'User',
         defaultOrderBy: '-updated_at',
       };
-      const inputProjectWithRelation = {
-        fields: { profile_id: 2 },
-        associations: ['profile'],
+      const inputWithAssoc = {
+        associations: ['info'],
       };
-      const inputProjectWithoutRelation = {
-        fields: { profile_id: 2 },
-      };
+      const inputWithoutAssoc = {};
 
-      const withRelation = joint.getItems(specProject, inputProjectWithRelation)
+      const withAssoc = blogApp.getItems(spec, inputWithAssoc)
         .then((data) => {
-          expect(data.models[0])
-            .to.have.property('relations')
-            .that.has.property('profile');
+          const fourthUser = data.models[3];
 
-          const firstProject = data.models[0];
-          const profileData = firstProject.relations.profile;
-          expect(profileData)
+          expect(fourthUser)
+            .to.have.property('relations')
+            .that.has.property('info');
+
+          const infoData = fourthUser.relations.info;
+          expect(infoData)
             .to.have.property('attributes')
-            .that.contains({ id: 2 });
+            .that.contains({
+              user_id: 4,
+              professional_title: 'EdgeCaser',
+            });
         });
 
-      const withoutRelation = joint.getItems(specProject, inputProjectWithoutRelation)
+      const withoutAssoc = blogApp.getItems(spec, inputWithoutAssoc)
         .then((data) => {
-          expect(data.models[0])
+          expect(data.models[3])
             .to.have.property('relations')
             .that.is.empty;
         });
 
-      return Promise.all([withRelation, withoutRelation]);
+      return Promise.all([withAssoc, withoutAssoc]);
     });
 
     it(`should load relation data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
-      const specProject = {
-        modelName: 'Project',
-        fields: [
-          { name: 'profile_id', type: 'Number' },
-        ],
+      const spec = {
+        modelName: 'User',
         defaultOrderBy: '-updated_at',
       };
 
-      const inputProject = {
-        fields: { profile_id: 2 },
-        loadDirect: ['user:username', 'codingLanguageTags:key'],
+      const input = {
+        loadDirect: ['info:professional_title', 'roles:name'],
       };
 
-      const withLoadDirect = joint.getItems(specProject, inputProject)
+      const withLoadDirect = blogApp.getItems(spec, input)
         .then((data) => {
-          const secondProject = data.models[1];
+          const sixthUser = data.models[5];
 
-          expect(secondProject.attributes)
-            .to.contain({ user: 'the_manic_edge' });
+          expect(sixthUser.attributes)
+            .to.contain({ info: 'Rickforcer' });
 
-          expect(secondProject.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['java', 'jsp', 'xslt', 'html']);
+          expect(sixthUser.attributes)
+            .to.have.property('roles')
+            .that.has.members(['transcendent', 'developer', 'blogger']);
 
-          expect(secondProject)
+          expect(sixthUser)
             .to.have.property('relations')
             .that.is.empty;
         });
@@ -1371,63 +1368,59 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
-      const specProject = {
-        modelName: 'Project',
-        fields: [
-          { name: 'profile_id', type: 'Number' },
-        ],
+      const spec = {
+        modelName: 'User',
         defaultOrderBy: '-updated_at',
       };
 
-      const inputProject = {
-        fields: { profile_id: 2 },
-        associations: ['profile'],
-        loadDirect: ['user:username', 'codingLanguageTags:key'],
+      const input = {
+        associations: ['profiles'],
+        loadDirect: ['info:professional_title', 'roles:name'],
       };
 
-      const withBoth = joint.getItems(specProject, inputProject)
+      const withBoth = blogApp.getItems(spec, input)
         .then((data) => {
-          const thirdProject = data.models[2];
+          const sixthUser = data.models[5];
 
-          expect(thirdProject.attributes)
-            .to.contain({ user: 'the_manic_edge' });
+          expect(sixthUser.attributes)
+            .to.contain({ info: 'Rickforcer' });
 
-          expect(thirdProject.attributes)
-            .to.have.property('coding_language_tags')
-            .that.has.members(['javascript', 'coffee-script']);
+          expect(sixthUser.attributes)
+            .to.have.property('roles')
+            .that.has.members(['transcendent', 'developer', 'blogger']);
 
-          expect(thirdProject.relations).to.have.keys('profile');
+          expect(sixthUser.relations).to.have.keys('profiles');
         });
 
       return Promise.all([withBoth]);
     });
 
-    it('should return paginated results when the "input.paginate" option is used', () => {
+    it(`should return paginated results when the "input.${ACTION.INPUT_PAGINATE}" option is used`, () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'profile_id', type: 'Number' },
+          { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: '-created_at',
       };
       const inputFirstThree = {
-        fields: { profile_id: 11 },
+        fields: { is_internal: false },
         paginate: { skip: 0, limit: 3 },
       };
       const inputSecondThree = {
-        fields: { profile_id: 11 },
+        fields: { is_internal: false },
         paginate: { skip: 3, limit: 3 },
       };
       const inputThirdAndFourth = {
-        fields: { profile_id: 11 },
+        fields: { is_internal: false },
         paginate: { skip: 2, limit: 2 },
       };
       const inputTheRest = {
-        fields: { profile_id: 11 },
+        fields: { is_internal: false },
         paginate: { skip: 6, limit: 99 },
       };
 
-      const firstThree = joint.getItems(specProject, inputFirstThree)
+      const firstThree = projectApp.getItems(specProject, inputFirstThree)
         .then((data) => {
           expect(data.models).to.have.length(3);
           expect(data.models[0]).to.contain({ id: 5 });
@@ -1435,7 +1428,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.models[2]).to.contain({ id: 7 });
         });
 
-      const secondThree = joint.getItems(specProject, inputSecondThree)
+      const secondThree = projectApp.getItems(specProject, inputSecondThree)
         .then((data) => {
           expect(data.models).to.have.length(3);
           expect(data.models[0]).to.contain({ id: 8 });
@@ -1443,14 +1436,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.models[2]).to.contain({ id: 10 });
         });
 
-      const theThirdAndFourth = joint.getItems(specProject, inputThirdAndFourth)
+      const theThirdAndFourth = projectApp.getItems(specProject, inputThirdAndFourth)
         .then((data) => {
           expect(data.models).to.have.length(2);
           expect(data.models[0]).to.contain({ id: 7 });
           expect(data.models[1]).to.contain({ id: 8 });
         });
 
-      const theRest = joint.getItems(specProject, inputTheRest)
+      const theRest = projectApp.getItems(specProject, inputTheRest)
         .then((data) => {
           expect(data.models).to.have.length(4);
           expect(data.models[0]).to.contain({ id: 11 });
@@ -1466,22 +1459,22 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'profile_id', type: 'Number' },
+          { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: '-created_at',
       };
       const inputProjects = {
-        fields: { profile_id: 11 },
-        paginate: { skip: 99999, limit: 10 },
+        fields: { is_internal: false },
+        paginate: { skip: 9999, limit: 10 },
       };
 
-      return joint.getItems(specProject, inputProjects)
+      return projectApp.getItems(specProject, inputProjects)
         .then((data) => {
           expect(data.models).to.have.length(0);
         });
     });
 
-    it('should order the results according to the "spec.defaultOrderBy" and "input.orderBy" options', () => {
+    it(`should order the results according to the "spec.${ACTION.SPEC_DEFAULT_ORDER_BY}" and "input.orderBy" options`, () => {
       // -------
       // Profile
       // -------
@@ -1497,23 +1490,19 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'profile_id', type: 'Number' },
+          { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: '-created_at',
       };
       const projectsDefaultOrder = {
-        fields: {
-          profile_id: 11,
-        },
+        fields: { is_internal: false },
       };
       const projectsNameASC = {
-        fields: {
-          profile_id: 11,
-        },
+        fields: { is_internal: false },
         orderBy: 'name',
       };
 
-      const getProfilesInDefaultOrder = joint.getItems(specProfile, profilesDefaultOrder)
+      const getProfilesInDefaultOrder = blogApp.getItems(specProfile, profilesDefaultOrder)
         .then((data) => {
           expect(data.models).to.have.length(11);
           expect(data.models[0]).to.contain({ id: 1 });
@@ -1529,7 +1518,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.models[10]).to.contain({ id: 11 });
         });
 
-      const getProjectsInDefaultOrder = joint.getItems(specProject, projectsDefaultOrder)
+      const getProjectsInDefaultOrder = projectApp.getItems(specProject, projectsDefaultOrder)
         .then((data) => {
           expect(data.models).to.have.length(10);
           expect(data.models[0]).to.contain({ id: 5 });
@@ -1544,7 +1533,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(data.models[9]).to.contain({ id: 14 });
         });
 
-      const getProjectsInNameASC = joint.getItems(specProject, projectsNameASC)
+      const getProjectsInNameASC = projectApp.getItems(specProject, projectsNameASC)
         .then((data) => {
           expect(data.models).to.have.length(10);
           expect(data.models[0]).to.contain({ id: 12 }); // A
@@ -1567,25 +1556,20 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const modelName = 'Project';
-      const profileID = 11;
+      const modelName = 'User';
 
       const spec = {
         modelName,
-        fields: [
-          { name: 'profile_id', type: 'Number' },
-        ],
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: '-created_at',
       };
 
       const input = {
-        fields: { profile_id: profileID },
-        paginate: { skip: 0, limit: 3 },
-        associations: ['profile'],
-        loadDirect: ['user:username'],
+        loadDirect: ['roles:name'],
+        associations: ['profiles'],
+        paginate: { skip: 3, limit: 3 },
       };
 
-      const globalLevel = jointJsonApi.getItems(spec, input)
+      const globalLevel = blogAppJsonApi.getItems(spec, input)
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
@@ -1600,7 +1584,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(payload.meta)
             .to.contain({
               total_items: 10,
-              skip: 0,
+              skip: 3,
               limit: 3,
             });
 
@@ -1609,18 +1593,19 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(firstItem)
             .to.contain({
               type: modelName,
-              id: 5,
+              id: 4,
             });
+
           expect(firstItem).to.have.property('attributes');
           expect(firstItem.attributes)
-            .to.contain({
-              user: 'jerrysmith',
-            });
+            .to.have.property('roles')
+            .that.has.members(['admin', 'moderator', 'developer', 'blogger']);
+
           expect(firstItem).to.have.property('relationships');
-          expect(firstItem.relationships).to.have.keys('profile');
+          expect(firstItem.relationships).to.have.keys('profiles');
         });
 
-      const methodLevel = joint.getItems(spec, input, 'json-api')
+      const methodLevel = blogApp.getItems(spec, input, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
@@ -1635,7 +1620,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(payload.meta)
             .to.contain({
               total_items: 10,
-              skip: 0,
+              skip: 3,
               limit: 3,
             });
 
@@ -1644,15 +1629,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
           expect(firstItem)
             .to.contain({
               type: modelName,
-              id: 5,
+              id: 4,
             });
+
           expect(firstItem).to.have.property('attributes');
           expect(firstItem.attributes)
-            .to.contain({
-              user: 'jerrysmith',
-            });
+            .to.have.property('roles')
+            .that.has.members(['admin', 'moderator', 'developer', 'blogger']);
+
           expect(firstItem).to.have.property('relationships');
-          expect(firstItem.relationships).to.have.keys('profile');
+          expect(firstItem.relationships).to.have.keys('profiles');
         });
 
       return Promise.all([globalLevel, methodLevel]);
@@ -1678,13 +1664,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      return expect(joint.deleteItem(spec, input))
+      return expect(projectApp.deleteItem(spec, input))
         .to.eventually.be.rejectedWithJointStatusError(404);
     });
 
     it('should delete the resource when the spec is satisfied', () => {
       const spec = {
-        modelName: 'Profile',
+        modelName: 'Project',
         fields: [
           { name: 'id', type: 'Number', required: true },
         ],
@@ -1696,16 +1682,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       };
 
-      return joint.deleteItem(spec, input)
+      return projectApp.deleteItem(spec, input)
         .then((data) => {
           expect(data.attributes).to.be.empty;
 
-          return expect(joint.getItem(spec, input))
+          return expect(projectApp.getItem(spec, input))
             .to.eventually.be.rejectedWithJointStatusError(404);
         });
     });
 
-    it('should support the "lookupField" option, in order to defer authorization on the retrieved item', () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_LOOKUP}" option, in order to defer authorization on the retrieved item`, () => {
       const mockSession = {
         is_logged_in: true,
         id: 4,
@@ -1716,33 +1702,33 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
       const mockRequest = {
         method: 'DELETE',
-        originalUrl: '/api/project/4',
+        originalUrl: '/api/profile/3',
         session: { joint_user: mockSession },
       };
       const authRules = { owner: 'me' };
-      const authBundle = joint.buildAuthBundle(mockRequest, authRules);
+      const authBundle = projectApp.buildAuthBundle(mockRequest, authRules);
 
       const spec = {
-        modelName: 'Project',
+        modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', required: true, lookupField: true },
         ],
         auth: {
-          ownerCreds: ['profile_id => profile_ids'],
+          ownerCreds: ['user_id => id'],
         },
       };
 
       const input = {
-        fields: { id: 4 },
+        fields: { id: 3 },
         authBundle,
       };
 
-      return expect(joint.deleteItem(spec, input))
+      return expect(projectApp.deleteItem(spec, input))
         .to.be.fulfilled;
     });
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const modelName = 'Profile';
+      const modelName = 'Project';
 
       const spec = {
         modelName,
@@ -1751,7 +1737,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         ],
       };
 
-      const globalLevel = jointJsonApi.deleteItem(spec, { fields: { id: 2 } })
+      const globalLevel = projectAppJsonApi.deleteItem(spec, { fields: { id: 2 } })
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');
@@ -1766,7 +1752,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             .that.is.empty;
         });
 
-      const methodLevel = joint.deleteItem(spec, { fields: { id: 3 } }, 'json-api')
+      const methodLevel = projectApp.deleteItem(spec, { fields: { id: 3 } }, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data');

@@ -1,6 +1,7 @@
-// ---------------------
+// ------------------------------
+// Methods for scenario: app-mgmt
 // Resource: AppRegistry
-// ---------------------
+// ------------------------------
 
 module.exports = {
   modelName: 'AppRegistry',

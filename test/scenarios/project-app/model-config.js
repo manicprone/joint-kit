@@ -14,6 +14,7 @@ module.exports = {
     'CodingLanguageTag',
     'ProjectCodingLanguageTag',
     'Project',
+    'Profile',
   ],
 
   models: {
@@ -52,6 +53,12 @@ module.exports = {
     // The reference that maps a role to a user
     UserRole: {
       tableName: 'user_roles_ref',
+      timestamps: { created: 'created_at', updated: 'updated_at' },
+    },
+
+    // A user profile
+    Profile: {
+      tableName: 'user_profiles',
       timestamps: { created: 'created_at', updated: 'updated_at' },
     },
 

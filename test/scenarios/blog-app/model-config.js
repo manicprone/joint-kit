@@ -56,9 +56,9 @@ module.exports = {
       timestamps: { created: 'created_at', updated: 'updated_at' },
     },
 
-    // A blog profile for generating posts
+    // A user profile
     Profile: {
-      tableName: 'profiles',
+      tableName: 'user_profiles',
       timestamps: { created: 'created_at', updated: 'updated_at' },
     },
 

@@ -1,6 +1,7 @@
-// --------------------
+// ------------------------------
+// Methods for scenario: app-mgmt
 // Resource: AppContent
-// --------------------
+// ------------------------------
 
 module.exports = {
   modelName: 'AppContent',
