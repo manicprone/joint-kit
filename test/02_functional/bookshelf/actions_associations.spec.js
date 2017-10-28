@@ -44,7 +44,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -60,7 +60,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -76,7 +76,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         noAssoc: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -92,7 +92,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          noAssociationName: 'codingLanguageTags',
+          noAssociationName: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -234,7 +234,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
@@ -322,7 +322,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
@@ -407,7 +407,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
@@ -495,7 +495,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           },
         },
         association: {
-          name: 'codingLanguageTags',
+          name: 'coding_language_tags',
           modelName: 'CodingLanguageTag',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
@@ -555,7 +555,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should associate a resource when the spec is satisfied', () => {
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -634,7 +634,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should ensure a duplicate association is not created, if the association already exists', () => {
       const mainID = 4;
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -682,7 +682,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const mainModelName = 'Project';
       const mainID = 4;
       const assocModelName = 'CodingLanguageTag';
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -776,7 +776,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should return an error (404) when the requested association does not exist', () => {
       const mainID = 3;
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -815,7 +815,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     it('should return the associated resource, when the association exists', () => {
       const mainID = 2;
       const assocID = 1; // java
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -859,7 +859,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const mainID = 2;
       const assocModelName = 'CodingLanguageTag';
       const assocID = 1; // java
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -940,7 +940,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should return all instances of the associated resource, when the association exists', () => {
       const mainID = 1;
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -976,7 +976,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const mainModelName = 'Project';
       const mainID = 1;
       const assocModelName = 'CodingLanguageTag';
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1050,7 +1050,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     before(() => resetDB(['tags', 'projects']));
 
     it('should remove the association from the main resource, and return the affected main resource', () => {
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1125,7 +1125,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     it('should succeed and return the unaffected main resource, if the association did not exist', () => {
       const mainID = 4;
       const assocID = 1; // java
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1175,7 +1175,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const mainID = 1;
       const assocModelName = 'CodingLanguageTag';
       const assocID = 1; // java
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1258,7 +1258,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should remove the associations from the main resource, and return the affected main resource', () => {
       const mainID = 2;
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1293,7 +1293,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
     it('should succeed and return the unaffected main resource, if the associations did not exist', () => {
       const mainID = 5; // no tags
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {
@@ -1329,7 +1329,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const mainModelName = 'Project';
       const mainID = 4;
-      const associationName = 'codingLanguageTags';
+      const associationName = 'coding_language_tags';
 
       const spec = {
         main: {

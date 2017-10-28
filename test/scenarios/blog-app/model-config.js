@@ -6,6 +6,7 @@
 module.exports = {
 
   modelsEnabled: [
+    'UserCredentials',
     'UserInfo',
     'Role',
     'UserRole',
@@ -18,7 +19,7 @@ module.exports = {
   ],
 
   models: {
-    // A user model, for managing authorization, identity, and permissions
+    // The user information (for managing identity and permissions)
     User: {
       tableName: 'users',
       timestamps: { created: 'created_at', updated: 'updated_at' },
@@ -36,6 +37,11 @@ module.exports = {
           path: 'id => Profile.user_id',
         },
       },
+    },
+
+    // Manages local user accounts (credentials and local account controls)
+    UserCredentials: {
+      tableName: 'user_credentials',
     },
 
     // Extra info supplementing the identity of a user

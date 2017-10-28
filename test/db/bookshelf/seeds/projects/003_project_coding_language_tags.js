@@ -9,17 +9,17 @@ const seeds = [
   {
     id: 1,
     project_id: 1,
-    coding_language_tag_id: 1, // java
+    tag_id: 1, // java
   },
   {
     id: 2,
     project_id: 1,
-    coding_language_tag_id: 2, // jsp
+    tag_id: 2, // jsp
   },
   {
     id: 3,
     project_id: 1,
-    coding_language_tag_id: 3, // javascript
+    tag_id: 3, // javascript
   },
 
   // -------------------------
@@ -28,22 +28,22 @@ const seeds = [
   {
     id: 4,
     project_id: 2,
-    coding_language_tag_id: 1, // java
+    tag_id: 1, // java
   },
   {
     id: 5,
     project_id: 2,
-    coding_language_tag_id: 2, // jsp
+    tag_id: 2, // jsp
   },
   {
     id: 6,
     project_id: 2,
-    coding_language_tag_id: 9, // xslt
+    tag_id: 9, // xslt
   },
   {
     id: 7,
     project_id: 2,
-    coding_language_tag_id: 10, // html
+    tag_id: 10, // html
   },
 
   // ----------------
@@ -52,12 +52,12 @@ const seeds = [
   {
     id: 8,
     project_id: 4,
-    coding_language_tag_id: 3, // javascript
+    tag_id: 3, // javascript
   },
   {
     id: 9,
     project_id: 4,
-    coding_language_tag_id: 4, // coffee-script
+    tag_id: 4, // coffee-script
   },
 
   // -------------------
@@ -66,7 +66,7 @@ const seeds = [
   {
     id: 10,
     project_id: 3,
-    coding_language_tag_id: 6, // python
+    tag_id: 6, // python
   },
 ];
 

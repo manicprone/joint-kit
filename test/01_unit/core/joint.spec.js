@@ -34,7 +34,16 @@ const actionsBookshelf = [
   'removeAssociatedItems',
   'removeAllAssociatedItems',
 ];
-const methodsUser = [
+const modelNamesProjectApp = [
+  'User',
+  'UserInfo',
+  'Project',
+  'ProjectContributor',
+  'CodingLanguageTag',
+  'SoftwareTag',
+  'TechConceptTag',
+];
+const methodNamesUser = [
   'createUser',
   'updateUser',
   'getUser',
@@ -112,16 +121,16 @@ describe('JOINT', () => {
       blogApp.generate({ modelConfig: blogAppModels, log: false });
 
       expect(appMgmt.info().models).to.have.length(3);
-      expect(projectApp.info().models).to.have.length(9);
-      expect(blogApp.info().models).to.have.length(5);
+      expect(projectApp.info().models).to.have.length(14);
+      expect(blogApp.info().models).to.have.length(6);
     });
 
     it('should successfully register custom methods via method-config', () => {
       const projectApp = new Joint({ service: bookshelf });
       projectApp.generate({ methodConfig: projectAppMethods, log: false });
 
-      expect(projectApp.method).to.have.keys('User');
-      expect(projectApp.method.User).to.have.keys(methodsUser);
+      expect(projectApp.method).to.have.keys(modelNamesProjectApp);
+      expect(projectApp.method.User).to.have.keys(methodNamesUser);
     });
   }); // END - service:bookshelf
 

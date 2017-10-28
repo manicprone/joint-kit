@@ -3,7 +3,7 @@
 A Node server library & development kit for rapidly implementing data layers and RESTful endpoints.
 
 Designed to be flexible. Mix it with existing code -_or_- use it to
-generate an entire server-side method library and isomorphic HTTP API.
+generate an entire server-side method library and isomorphic HTTP API from scratch.
 
 <br />
 

@@ -5,7 +5,7 @@ module.exports = {
   test: {
     client: 'sqlite3',
     connection: {
-      filename: './test/db/bookshelf/joint_core_test.sqlite3',
+      filename: './test/db/bookshelf/joint_kit_test.sqlite3',
     },
     migrations: {
       directory: './test/db/bookshelf/migrations',

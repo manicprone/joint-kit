@@ -38,36 +38,39 @@ exports.up = function up(knex, Promise) {
       table.increments();
       table.string('label').notNullable().unique();
       table.string('key').notNullable().unique();
+      table.integer('created_by').nullable();
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('tags_coding_languages', (table) => {
       table.increments();
       table.string('label').notNullable().unique();
       table.string('key').notNullable().unique();
+      table.integer('created_by').nullable();
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('tags_tech_concepts', (table) => {
       table.increments();
       table.string('label').notNullable().unique();
       table.string('key').notNullable().unique();
+      table.integer('created_by').nullable();
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('project_software_tags_ref', (table) => {
       table.increments();
       table.integer('project_id').notNullable().unsigned().references('projects.id');
-      table.integer('software_tag_id').notNullable().unsigned().references('tags_software.id');
+      table.integer('tag_id').notNullable().unsigned().references('tags_software.id');
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('project_coding_language_tags_ref', (table) => {
       table.increments();
       table.integer('project_id').notNullable().unsigned().references('projects.id');
-      table.integer('coding_language_tag_id').notNullable().unsigned().references('tags_coding_languages.id');
+      table.integer('tag_id').notNullable().unsigned().references('tags_coding_languages.id');
       table.timestamps();
     }),
     knex.schema.createTableIfNotExists('project_tech_concepts_tags_ref', (table) => {
       table.increments();
       table.integer('project_id').notNullable().unsigned().references('projects.id');
-      table.integer('tech_concept_tag_id').notNullable().unsigned().references('tags_tech_concepts.id');
+      table.integer('tag_id').notNullable().unsigned().references('tags_tech_concepts.id');
       table.timestamps();
     }),
   ]);
