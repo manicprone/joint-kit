@@ -18,10 +18,12 @@ export function registerModels(joint, log = true) {
   const enabledModels = modelConfig.modelsEnabled;
   const modelDefs = modelConfig.models;
 
-  // Register models to base joint object...
-  joint.model = {};
-  joint.modelByTable = {};
-  joint.modelNameByTable = {};
+  // Prepare model registries...
+  if (!joint.model) {
+    joint.model = {};
+    joint.modelByTable = {};
+    joint.modelNameByTable = {};
+  }
 
   if (log) {
     console.log('----------------------------------------------------');
@@ -37,21 +39,27 @@ export function registerModels(joint, log = true) {
     }
   }
   if (!registerModel) {
-    const message = `[${namespace}] ERROR - Could not find registerModel logic for service: ${serviceKey}`;
+    const message = `Could not find registerModel logic for service: ${serviceKey}`;
     throw new JointError({ message });
   }
 
+  // Register model definitions...
   if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
     enabledModels.forEach((modelName) => {
-      if (log) console.log(`${modelName}`);
+      // Only register new entries...
+      if (!joint.model[modelName]) {
+        if (log) console.log(`${modelName}`);
 
-      const modelDef = modelDefs[modelName];
-      if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] model def =>`, modelDef);
+        const modelDef = modelDefs[modelName];
+        if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] model def =>`, modelDef);
 
-      const modelObject = registerModel(service, modelDef, modelName, debug_registerModels);
-      joint.model[modelName] = modelObject;
-      joint.modelByTable[modelDef.tableName] = modelObject;
-      joint.modelNameByTable[modelDef.tableName] = modelName;
+        const modelObject = registerModel(service, modelDef, modelName, debug_registerModels);
+        joint.model[modelName] = modelObject;
+        joint.modelByTable[modelDef.tableName] = modelObject;
+        joint.modelNameByTable[modelDef.tableName] = modelName;
+      } else if (log) {
+        console.log(`${modelName} (already registered)`);
+      }
     });
   } else if (log) {
     console.log('no models configured');
@@ -63,6 +71,9 @@ export function registerModels(joint, log = true) {
 // -----------------------------------------------------------------------------
 // Register methods from method-config...
 //
+// TODO: Do not register methods, if the modelName does not exist !?!?!?
+//       (At least, report a warning in the log)
+//
 // TODO: Support auto-injected / overrides for input options (on method config) !!!
 //       e.g. Enforce => input.loadDirect: ['roles:key'] on all requests
 //       e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action)
@@ -71,16 +82,16 @@ export function registerMethods(joint, log = true) {
   const methodConfig = joint.methodConfig;
   const resources = methodConfig.resources;
 
-  // Register methods to base joint object...
-  joint.method = {};
-  joint.specByMethod = {};
+  // Prepare method registries...
+  if (!joint.method) {
+    joint.method = {};
+    joint.specByMethod = {};
+  }
 
   if (resources && Array.isArray(resources) && resources.length > 0) {
     resources.forEach((resourceConfig) => {
       const modelNameForResource = resourceConfig.modelName;
       const methods = resourceConfig.methods;
-
-      // TODO: Do not register methods, if the modelName does not exist !!!
 
       // Register resource...
       joint.method[modelNameForResource] = {};
@@ -150,11 +161,11 @@ export function buildRouter(joint, log = true) {
 
   // Exit if a server instance is not loaded or is not recognized/supported...
   if (!server) {
-    const message = `[${namespace}] ERROR - A server must be configured to generate a Joint router.`;
+    const message = 'A server must be configured to generate a Joint router.';
     throw new JointError({ message });
   }
   if (!serverKey) {
-    const message = `[${namespace}] ERROR - Could not generate a router. The provided server is either not recognized or not supported by Joint.`;
+    const message = 'Could not generate a router. The provided server is either not recognized or not supported by Joint.';
     throw new JointError({ message });
   }
 

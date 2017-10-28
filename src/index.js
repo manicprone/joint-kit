@@ -18,11 +18,11 @@ export default class Joint {
 
     // Exit if a service is not loaded or is not recognized/supported...
     if (!this.service) {
-      const message = '[JOINT] ERROR - A service must be configured to use Joint.';
+      const message = 'A service must be configured to use Joint.';
       throw new JointError({ message });
     }
     if (!this.serviceKey) {
-      const message = '[JOINT] ERROR - The provided service is either not recognized or not supported by Joint.';
+      const message = 'The provided service is either not recognized or not supported by Joint.';
       throw new JointError({ message });
     }
 
@@ -44,7 +44,7 @@ export default class Joint {
       }
     }
     if (!actions) {
-      const message = `[JOINT] ERROR - Could not find actions for service: ${this.serviceKey}`;
+      const message = `Could not find actions for service: ${this.serviceKey}`;
       throw new JointError({ message });
     }
     if (actions) {
@@ -75,7 +75,7 @@ export default class Joint {
     const log = objectUtils.get(options, 'log', true);
 
     if (!this.service) {
-      const message = '[JOINT] ERROR - A service must be configured to use Joint.generate.';
+      const message = 'A service must be configured to use: Joint.generate';
       throw new JointError({ message });
     }
 

@@ -17,6 +17,7 @@ export default {
 
   // Field Definitions
   SPEC_FIELDS: 'fields',
+  SPEC_FIELDS_LOOKUP: 'lookupField',
 
   // Columns to Return
   SPEC_COLUMNS_TO_RETURN: 'columnsToReturn',
