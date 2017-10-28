@@ -125,7 +125,7 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
               id: userID,
             });
             expect(data.attributes).to.contain({
-              external_id: '301',
+              display_name: 'Supa Admin',
               username: 'super-admin',
             });
           });

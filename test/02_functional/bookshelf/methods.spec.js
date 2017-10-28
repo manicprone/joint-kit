@@ -3,6 +3,8 @@ import chaiAsPromised from 'chai-as-promised';
 import Joint from '../../../src';
 import appMgmtModels from '../../scenarios/app-mgmt/model-config';
 import appMgmtMethods from '../../scenarios/app-mgmt/method-config';
+import projectAppModels from '../../scenarios/project-app/model-config';
+import projectAppMethods from '../../scenarios/project-app/method-config';
 import blogAppModels from '../../scenarios/blog-app/model-config';
 import blogAppMethods from '../../scenarios/blog-app/method-config';
 import bookshelf from '../../db/bookshelf/bookshelf';
@@ -14,6 +16,7 @@ chai.use(chaiHelpers);
 const expect = chai.expect;
 
 let appMgmt = null;
+let projectApp = null;
 let blogApp = null;
 
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
@@ -24,6 +27,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     appMgmt = new Joint({ service: bookshelf });
     appMgmt.generate({ modelConfig: appMgmtModels, methodConfig: appMgmtMethods, log: false });
 
+    // -----------
+    // Project App
+    // -----------
+    projectApp = new Joint({ service: bookshelf });
+    projectApp.generate({ modelConfig: projectAppModels, methodConfig: projectAppMethods, log: false });
+
     // --------
     // Blog App
     // --------
@@ -32,14 +41,22 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Resource: AppContent
+  // Resource: AppContent (app-mgmt)
   // ---------------------------------------------------------------------------
   describe('AppContent', () => {
     before(() => resetDB());
 
-    // -------------------
+    // -------------------------------------------------------------------------
     // Method: saveContent
-    // -------------------
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'app_id', type: 'String', required: true, lookupField: true },
+    //     { name: 'data', type: 'JSON', required: true },
+    //     { name: 'key', type: 'String', required: true },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
     describe('saveContent', () => {
       it('should return an error (400) when the "app_id" and "data" fields are not provided', () => {
         const appID = 'failed-app';
@@ -191,9 +208,16 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       });
     }); // END - AppContent.saveContent
 
-    // ------------------
+    // -------------------------------------------------------------------------
     // Method: getContent
-    // ------------------
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'app_id', type: 'String', required: true },
+    //     { name: 'key', type: 'String', required: true },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
     describe('getContent', () => {
       it('should return an error (400) when the "app_id" field is not provided', () => {
         const input = {
@@ -260,17 +284,30 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   }); // END - AppContent
 
   // ---------------------------------------------------------------------------
-  // Resource: User
+  // Resource: User (blog-app)
   // ---------------------------------------------------------------------------
   describe('User', () => {
 
-    // ------------------
+    // -------------------------------------------------------------------------
     // Method: createUser
-    // ------------------
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'username', type: 'String', required: true },
+    //     { name: 'external_id', type: 'String' },
+    //     { name: 'email', type: 'String' },
+    //     { name: 'display_name', type: 'String' },
+    //     { name: 'first_name', type: 'String' },
+    //     { name: 'last_name', type: 'String' },
+    //     { name: 'preferred_locale', type: 'String' },
+    //     { name: 'avatar_url', type: 'String' },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
     describe('createUser', () => {
       before(() => resetDB());
 
-      it('should return an error (400) when the "username" field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', () => {
         const email = 'mastablasta@mail.com';
         const displayName = 'Blasta!';
 
@@ -285,7 +322,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .to.eventually.be.rejectedWithJointStatusError(400);
       });
 
-      it('should create a user when the "username" field is provided', () => {
+      it('should create a user when the required field is provided', () => {
         const username = 'mastablasta';
 
         const input = {
@@ -304,11 +341,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           });
       });
 
-      it('should support the optionally provided fields: "external_id", "email", "display_name", "avatar_url"', () => {
+      it('should support all accepted fields in the spec', () => {
         const username = 'the_edge_case';
         const externalID = '333.011';
         const email = 'the_edge_case@mail.com';
         const displayName = 'The Edge Case';
+        const firstName = 'Edge';
+        const lastName = 'Case';
+        const preferredLocale = 'zh-CN';
         const avatarURL = '//edgy.org/profile/333.011/avatar.png';
 
         const input = {
@@ -317,6 +357,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             external_id: externalID,
             email,
             display_name: displayName,
+            first_name: firstName,
+            last_name: lastName,
+            preferred_locale: preferredLocale,
             avatar_url: avatarURL,
           },
         };
@@ -330,19 +373,35 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 external_id: externalID,
                 email,
                 display_name: displayName,
+                first_name: firstName,
+                last_name: lastName,
+                preferred_locale: preferredLocale,
                 avatar_url: avatarURL,
               });
           });
       });
     }); // END - User.createUser
 
-    // ------------------
+    // -------------------------------------------------------------------------
     // Method: updateUser
-    // ------------------
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'id', type: 'Number', required: true, lookupField: true },
+    //     { name: 'username', type: 'String' },
+    //     { name: 'email', type: 'String' },
+    //     { name: 'display_name', type: 'String' },
+    //     { name: 'first_name', type: 'String' },
+    //     { name: 'last_name', type: 'String' },
+    //     { name: 'preferred_locale', type: 'String' },
+    //     { name: 'avatar_url', type: 'String' },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
     describe('updateUser', () => {
       before(() => resetDB(['users']));
 
-      it('should return an error (400) when the "id" field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', () => {
         const displayName = 'Updated Name';
 
         const input = {
@@ -356,7 +415,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .to.eventually.be.rejectedWithJointStatusError(400);
       });
 
-      it('should return an error (404) when the requested "id" does not exist', () => {
+      it('should return an error (404) when the requested user does not exist', () => {
         const userID = 999;
         const displayName = 'Updated Name';
 
@@ -396,12 +455,15 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           });
       });
 
-      it('should support updating the provided fields: "username", "email", "display_name", "avatar_url"', () => {
+      it('should support all accepted fields in the spec', () => {
         const userID = 4;
         const username = 'updated_username';
         const externalID = 'I will not be updated';
         const email = 'updated_email';
         const displayName = 'Updated Display Name';
+        const firstName = 'The New First';
+        const lastName = 'The New Last';
+        const preferredLocale = 'zh-CN';
         const avatarURL = 'https://updated_avatar.jpg';
 
         const input = {
@@ -411,6 +473,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             external_id: externalID,
             email,
             display_name: displayName,
+            first_name: firstName,
+            last_name: lastName,
+            preferred_locale: preferredLocale,
             avatar_url: avatarURL,
           },
         };
@@ -425,19 +490,31 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 external_id: '304',
                 email,
                 display_name: displayName,
+                first_name: firstName,
+                last_name: lastName,
+                preferred_locale: preferredLocale,
                 avatar_url: avatarURL,
               });
           });
       });
     }); // END - User.updateUser
 
-    // ---------------
+    // -------------------------------------------------------------------------
     // Method: getUser
-    // ---------------
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'id', type: 'Number', requiredOr: true },
+    //     { name: 'username', type: 'String', requiredOr: true },
+    //     { name: 'external_id', type: 'String', requiredOr: true },
+    //   ],
+    //   columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    // },
+    // -------------------------------------------------------------------------
     describe('getUser', () => {
       before(() => resetDB(['users']));
 
-      it('should return an error (400) when none of the required fields are provided: "id", "username", or "external_id"', () => {
+      it('should return an error (400) when none of the required fields are provided', () => {
         const input = {
           fields: {
             identifier: 4,
@@ -483,10 +560,11 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         ]);
       });
 
-      it('should return the public attributes of a user with a valid "id", "username", or "external_id"', () => {
+      it('should return only the fields specified by the "columnsToReturn" option', () => {
         const userID = 5;
         const username = 'segmented';
         const externalID = '305';
+        const displayName = 'Segmented';
 
         const inputWithID = {
           fields: {
@@ -511,9 +589,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                external_id: externalID,
-              })
-              .and.to.not.have.property('email');
+                display_name: displayName,
+              });
+
+            expect(data.attributes).to.have.property('avatar_url');
+            expect(data.attributes).to.not.have.property('email');
+            expect(data.attributes).to.not.have.property('external_id');
           });
 
         const viaUsername = blogApp.method.User.getUser(inputWithUsername)
@@ -523,9 +604,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                external_id: externalID,
-              })
-              .and.to.not.have.property('email');
+                display_name: displayName,
+              });
+
+            expect(data.attributes).to.have.property('avatar_url');
+            expect(data.attributes).to.not.have.property('email');
+            expect(data.attributes).to.not.have.property('external_id');
           });
 
         const viaExternalID = blogApp.method.User.getUser(inputWithExternalID)
@@ -535,9 +619,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                external_id: externalID,
-              })
-              .and.to.not.have.property('email');
+                display_name: displayName,
+              });
+
+            expect(data.attributes).to.have.property('avatar_url');
+            expect(data.attributes).to.not.have.property('email');
+            expect(data.attributes).to.not.have.property('external_id');
           });
 
         return Promise.all([
@@ -548,5 +635,74 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       });
     }); // END - User.getUser
 
+    // -------------------------------------------------------------------------
+    // Method: getUsers
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'preferred_locale', type: 'String' },
+    //   ],
+    //   columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    //   defaultOrderBy: '-created_at,username',
+    // },
+    // -------------------------------------------------------------------------
+    describe('getUsers', () => {
+      before(() => resetDB(['users']));
+
+      it('should return all users in the order defined by the spec, when no fields are provided');
+
+      it('should return the filtered set of users when an accepted field is provided');
+
+      it('should return only the fields specified by the "columnsToReturn" option');
+
+    }); // END - User.getUsers
+
+    // -------------------------------------------------------------------------
+    // Method: deleteUser
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'id', type: 'Number', requiredOr: true },
+    //     { name: 'username', type: 'String', requiredOr: true },
+    //     { name: 'external_id', type: 'String', requiredOr: true },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
+    describe.skip('deleteUser', () => {
+      before(() => resetDB(['users']));
+
+    }); // END - User.deleteUser
+
   }); // END - User
+
+  // ---------------------------------------------------------------------------
+  // Resource: Project (project-app)
+  // ---------------------------------------------------------------------------
+  describe('Project', () => {
+    before(() => resetDB());
+
+    // -------------------------------------------------------------------------
+    // Method: createProject
+    // -------------------------------------------------------------------------
+    // spec: {
+    //   fields: [
+    //     { name: 'name', type: 'String', required: true },
+    //     { name: 'alias', type: 'String' },
+    //     { name: 'image_url', type: 'String' },
+    //     { name: 'location', type: 'String' },
+    //     { name: 'brief_description', type: 'String' },
+    //     { name: 'full_description', type: 'String' },
+    //     { name: 'is_internal', type: 'Boolean', defaultValue: false },
+    //     { name: 'status_code', type: 'Number' },
+    //     { name: 'started_at', type: 'String' },
+    //     { name: 'finished_at', type: 'String' },
+    //     { name: 'created_by', type: 'Number' },
+    //   ],
+    // },
+    // -------------------------------------------------------------------------
+    describe.skip('createProject', () => {
+    }); // END - Project.createProject
+
+  }); // END - Project
+
 });

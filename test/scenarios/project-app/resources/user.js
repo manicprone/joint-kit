@@ -58,7 +58,7 @@ module.exports = {
           { name: 'username', type: 'String', requiredOr: true },
           { name: 'external_id', type: 'String', requiredOr: true },
         ],
-        columnsToReturn: ['id', 'external_id', 'username', 'display_name', 'avatar_url'],
+        columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
         // forceLoadDirect: ['roles:name'],
       },
     },
@@ -69,7 +69,7 @@ module.exports = {
         fields: [
           { name: 'preferred_locale', type: 'String' },
         ],
-        columnsToReturn: ['id', 'external_id', 'username', 'display_name', 'avatar_url'],
+        columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
         defaultOrderBy: '-created_at,username',
         // forceLoadDirect: ['roles:name'],
       },

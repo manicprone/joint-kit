@@ -389,14 +389,34 @@ const joint = new Joint({
 });
 ```
 
+<br />
+
 ### Constructor Options
 
-| Name      | Description | Required? |
-| --------- | ----------- | --------- |
-| service   | The configured service instance for your persistence solution. | yes |
-| server    | The server instance for your HTTP router handling.  | no |
-| output    | The format of the returned data payloads. (defaults to `'native'`) | no |
-| settings  | The configurable settings available for a Joint instance.  | no |
+| Name                               | Description | Required? |
+| ---------------------------------- | ----------- | --------- |
+| [service][constructor-opt-service] | The configured service instance for your persistence solution. | Yes |
+| [server][constructor-opt-server] | The server instance for your HTTP router handling.  | No |
+| [output][constructor-opt-output] | The format of the returned data payloads. (defaults to `'native'`) | No |
+| [settings][constructor-opt-settings] | The configurable settings available for a Joint instance.  | No |
+
+<br />
+
+#### service
+
+[TBC]
+
+#### server
+
+[TBC]
+
+#### output
+
+[TBC]
+
+#### settings
+
+[TBC]
 
 <br />
 
@@ -482,25 +502,34 @@ The Joint Action set is the backbone of the Joint Kit solution.
 Each Joint instance provides a robust set of abstract data actions that hook
 directly to your persistence layer, handling the core logic for common data operations.
 
-The actions are implemented to your data schema and your specification, using a config-like JSON syntax.
-
-### Available Actions
-
-| Action                   | Description                                       |
-| ------------------------ | ------------------------------------------------- |
-| createItem               | Create operation for a single item                                        |
-| upsertItem               | Upsert operation for a single item                                        |
-| updateItem               | Update operation for a single item                                        |
-| getItem                  | Read operation for retrieving a single item                               |
-| getItems                 | Read operation for retrieving a collection of items                       |
-| deleteItems              | Delete operation for one to many items                                    |
-| addAssociatedItems       | Operation for associating one to many items of a type to a main resource            |
-| hasAssociatedItem        | Operation for checking the existence of an association on a main resource |
-| getAllAssociatedItems    | Operation for retrieving all associations of a type from a main resource  |
-| removeAssociatedItems    | Operation for disassociating one to many items of a type from a main resource       |
-| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource    |
+The actions are implemented using a config-like JSON syntax.
 
 <span>---</span>
+
+### Base Actions (CRUD)
+
+| Action | Description |
+| ------ | ----------- |
+| createItem | Create operation for a single item. |
+| upsertItem | Upsert operation for a single item. |
+| updateItem | Update operation for a single item. |
+| getItem | Read operation for retrieving a single item. |
+| getItems | Read operation for retrieving a collection of items. |
+| deleteItem | Delete operation for single item. |
+
+<br />
+
+### Association Actions (Relational)
+
+| Action | Description |
+| ------ | ----------- |
+| addAssociatedItems | Operation for associating one to many items of a type to a main resource. |
+| hasAssociatedItem | Operation for checking the existence of an association on a main resource. |
+| getAllAssociatedItems | Operation for retrieving all associations of a type from a main resource. |
+| removeAssociatedItems | Operation for disassociating one to many items of a type from a main resource. |
+| removeAllAssociatedItems | Operation for removing all associations of a type from a main resource. |
+
+<br />
 
 ### Joint Action Syntax
 
@@ -516,31 +545,36 @@ joint.<action>(spec = {}, input = {}, output = 'native')
 
 Each action has two required parts: the `spec` and the `input`.
 
-+ The `spec` defines the functionality of the action.
++ The `spec` &nbsp;&nbsp;&nbsp;&#10132;&nbsp; defines the functionality of the action.
 
-+ The `input` supplies the data for an individual action request.
++ The `input` &nbsp;&#10132;&nbsp; supplies the data for an individual action request.
 
 Each action also supports the optional parameter: `output`.
 
-* The `output` specifies the format of the returned payload.
+* The `output` &nbsp;&#10132;&nbsp; specifies the format of the returned payload.
 
-<span>---</span>
+<br />
 
 ### Spec Options
 
-| Option              | Description | Actions Supported               | Required? |
-| ------------------- | ----------- | ------------------------------  | --------- |
-| modelName           |             | (all)                           |  Yes      |
-| fields              |             | (all)                           |  Yes (* except getItems) |
-| fields.required     |             | (all)                           |  No       |
-| fields.requiredOr   |             | (all)                           |  No       |
-| fields.lookupField  |             | (all)                           |  Yes for upsertItem, updateItem |
-| fields.defaultValue |             | createItem, upsertItem, getItem |  No       |
-| columnsToReturn     |             | getItem, getItems               |  No       |
-| defaultOrderBy      |             | getItems                        |  No       |
-| forceAssociations   |             | getItem, getItems               |  No       |
-| forceLoadDirect     |             | getItem, getItems               |  No       |
-| auth                |             | (all)                           |  No       |
+| Option | Description     | Type | Actions Supported    | Required? |
+| ------ | --------------- | ---- | -------------------- | --------  |
+| modelName | The model name of the resource for the action. | _String_ | (_all_) | Yes |
+| fields | The root property for defining accepted fields. | _Array_ | (_all_) | Yes (*except getItems) |
+| fields.name | The field name. | _String_ | (_all_) | Yes |
+| fields.type | The field data type. | _String_ | (_all_) | Yes |
+| fields.required | If the field is required for the action. | _Boolean_ | (_all_) | No |
+| fields.requiredOr | If the field is one of the fields required to satisfy an OR set. | _Boolean_ | (_all_) | No |
+| fields.lookupField | Denotes the field is required in order to pre-fetch the resource, before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
+| fields.defaultValue | The default value to persist, if the field is not provided in the input. | _Mixed_ | createItem, upsertItem, getItem | No |
+| columnsToReturn | The fields to return in the payload. Returns all fields when not provided. | _Array_<br />-or-<br />_Object_ | getItem, getItems | No |
+| defaultOrderBy | The default sort order for a collection payload. | _String_ | getItems                        | No |
+| forceAssociations | Binds the `associations` to return for all action requests. | _Array_ | getItem, getItems               | No |
+| forceLoadDirect | Binds the `loadDirect` associations to return for all action requests. | _Array_ | getItem, getItems               | No |
+| auth | The root property for defining authorization on the action. | _Object_ | (_all_) | No |
+| auth.ownerCreds | Specifies the fields that can verify resource ownership (for owner auth rules). | _Array_ | (_all_) | No |
+| main | The root property to wrap the `spec` options for the main resource, in an association action. | _Object_ | (_association actions_) | Yes |
+| association | The root property to wrap the `spec` options for the associated resource, in an association action. | _Object_ | (_association actions_) | Yes |
 
 <br />
 
@@ -573,8 +607,6 @@ Each action also supports the optional parameter: `output`.
 [TBC]
 
 <br />
-
-<span>---</span>
 
 ### Input Options
 
@@ -624,8 +656,6 @@ Each action also supports the optional parameter: `output`.
 [TBC]
 
 <br />
-
-<span>---</span>
 
 ### Output Values
 
@@ -1024,6 +1054,14 @@ module.exports = router;
 [section-example-solutions]: #example-solutions
 
 [section-license]: #license
+
+
+
+[constructor-opt-service]: #service
+[constructor-opt-server]: #server
+[constructor-opt-output]: #output
+[constructor-opt-settings]: #settings
+
 
 
 [link-bookshelf-site]: http://bookshelfjs.org
