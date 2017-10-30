@@ -1,21 +1,23 @@
-# Joint Actions To Do
+# Joint Kit Feature Planning
 
 
-### Upcoming actions
+## Upcoming actions
 
-| Action                   | Description                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| snapshotItem             | An advanced create operation for "snapshotting" a single item (with associations) |
+| Action | Description |
+| ------ | ----------- |
+| snapshotItem | An advanced create operation for "snapshotting" a single item into a "version" copy (with associations). |
 
+<br />
 
 ## To Do
 
-* Support multiple configs on single `generate` call.
-  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
+* Rename spec option `columnsToReturn` => `fieldsToReturn`.
 
-* Rename `columnsToReturn` => `fieldsToReturn`.
+* Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
 
-* Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
+* Add concept/logic for supporting authorization rules on the server-side (as a method library).
+  Effectively, abstract `joint.buildAuthBundle` to operate on both a true "session" object (from the request)
+  as well as a server-side managed "user" object.
 
 * Support AND/OR logic for `fields.lookupField` (for allowing aggregate field lookups)
   e.g. lookup with (app_id AND key), but utilize `required:true` to specify if the
@@ -23,6 +25,9 @@
        i.e. `lookup:true` (implied AND), `lookupOr:true` (uses `Or` like current implementation).
 
 * Support model-config without a `modelsEnabled` property (make it optional).
+
+* Support multiple configs on single `generate` call.
+  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
 
 * Support `fields.defaultValue` for `getItem`, `getItems`, et al. (See app-content method config for use case)
 
@@ -41,7 +46,7 @@
        to the camelcase of the provided "title" field.
   e.g. `{ fields.defaultValue: '% now %' }` => which will set a Date field value to the current date/time.
 
-* Hook input field validation framework into action logic.
+* Hook input field validation framework into action logic/syntax.
 
 * Provide action: "snapshotItem" => which implements "createItem" (copy) on a source
   item (i.e. it looks up a source item, auth checks the source, creates a copy
@@ -53,3 +58,19 @@
   their authorization and configure the API functionality (e.g. setting the resource properties
   that are currently managed in the /config/api-config.js, as well as generating an
   "authorizedApp" credential and saving it to the API for auth capabilities, etc).
+
+<br />
+
+## To Consider
+
+* Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
+
+<br />
+
+## README To Do
+
+* For Overview:
+  - "The Joint Concept (In Code)" => A set of code blocks, to explain the overall concept of usage.
+  - "Joint in Practice" => The current content of "The Joint Concept".
+
+* Build simple diagram to assist in the Joint concept (i.e. how it fits into the application stack).

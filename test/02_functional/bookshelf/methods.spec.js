@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import ACTION from '../../../src/actions/action-constants';
 import Joint from '../../../src';
 import appMgmtModels from '../../scenarios/app-mgmt/model-config';
 import appMgmtMethods from '../../scenarios/app-mgmt/method-config';
@@ -508,7 +509,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //     { name: 'username', type: 'String', requiredOr: true },
     //     { name: 'external_id', type: 'String', requiredOr: true },
     //   ],
-    //   columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    //   fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
     // },
     // -------------------------------------------------------------------------
     describe('getUser', () => {
@@ -560,7 +561,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         ]);
       });
 
-      it('should return only the fields specified by the "columnsToReturn" option', () => {
+      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`, () => {
         const userID = 5;
         const username = 'segmented';
         const externalID = '305';
@@ -642,7 +643,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   fields: [
     //     { name: 'preferred_locale', type: 'String' },
     //   ],
-    //   columnsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    //   fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
     //   defaultOrderBy: '-created_at,username',
     // },
     // -------------------------------------------------------------------------
@@ -653,7 +654,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
       it('should return the filtered set of users when an accepted field is provided');
 
-      it('should return only the fields specified by the "columnsToReturn" option');
+      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`);
 
     }); // END - User.getUsers
 

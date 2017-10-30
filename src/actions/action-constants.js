@@ -1,6 +1,6 @@
-// -----------------------------------
-// Constants for the Join action layer
-// -----------------------------------
+// ---------------------
+// Join Action Constants
+// ---------------------
 
 export default {
   // ------------------------------- Association Options
@@ -17,10 +17,10 @@ export default {
 
   // Field Definitions
   SPEC_FIELDS: 'fields',
-  SPEC_FIELDS_LOOKUP: 'lookupField',
+  SPEC_FIELDS_OPT_LOOKUP: 'lookupField',
 
-  // Columns to Return
-  SPEC_COLUMNS_TO_RETURN: 'columnsToReturn',
+  // Fields to Return / Field Set Definitions
+  SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',
 
   // Default Sort Order
   SPEC_DEFAULT_ORDER_BY: 'defaultOrderBy',
@@ -33,8 +33,8 @@ export default {
   // Field Input
   INPUT_FIELDS: 'fields',
 
-  // Column Set
-  INPUT_COLUMN_SET: 'columnSet',
+  // Field Set
+  INPUT_FIELD_SET: 'fieldSet',
 
   // Sort Order
   INPUT_ORDER_BY: 'orderBy',
