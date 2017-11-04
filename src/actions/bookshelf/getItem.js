@@ -14,7 +14,7 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
     const specAuth = spec[ACTION.SPEC_AUTH] || {};
-    const returnColsDef = spec[ACTION.SPEC_COLUMNS_TO_RETURN];
+    const returnColsDef = spec[ACTION.SPEC_FIELDS_TO_RETURN];
     const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS]);
     const trx = input[ACTION.INPUT_TRANSACTING];
     const authBundle = input[ACTION.INPUT_AUTH_BUNDLE];
@@ -44,8 +44,8 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
         actionOpts.columns = returnColsDef;
 
       // Otherwise, try to honor the set requested by the input...
-      } else if (input.columnSet && objectUtils.has(returnColsDef, input.columnSet)) {
-        actionOpts.columns = returnColsDef[input.columnSet];
+      } else if (input[ACTION.INPUT_FIELD_SET] && objectUtils.has(returnColsDef, input[ACTION.INPUT_FIELD_SET])) {
+        actionOpts.columns = returnColsDef[input[ACTION.INPUT_FIELD_SET]];
 
       // If the input does not declare a set, check for a "default" set...
       } else if (returnColsDef.default && Array.isArray(returnColsDef.default)) {

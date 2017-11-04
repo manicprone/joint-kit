@@ -471,7 +471,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   describe('upsertItem', () => {
     before(() => resetDB());
 
-    it('should return an error (400) when the input does not provide a "lookupField"', () => {
+    it('should return an error (400) when the input does not provide a "lookup field"', () => {
       const spec = {
         modelName: 'AppSettings',
         fields: [
@@ -605,7 +605,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   describe('updateItem', () => {
     before(() => resetDB(['profiles', 'projects']));
 
-    it('should return an error (400) when the input does not provide a "lookupField"', () => {
+    it('should return an error (400) when the input does not provide a "lookup field"', () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -670,7 +670,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
     });
 
-    it('should support an "ownerCreds" authorization from a field on the looked-up item data', () => {
+    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the looked-up item data`, () => {
       const mockSession = {
         is_logged_in: true,
         id: 4,
@@ -806,7 +806,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    it('should support an "ownerCreds" authorization from a field on the retrieved item data', () => {
+    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the retrieved item data`, () => {
       const mockSession = {
         is_logged_in: true,
         user_id: 4,
@@ -841,7 +841,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.be.fulfilled;
     });
 
-    it('should only return the column data that is permitted by the spec', () => {
+    it('should only return the field data that is permitted by the spec', () => {
       const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'avatar_url', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
 
       const specBase = {
@@ -853,10 +853,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
 
       const specColsEmptyArray = Object.assign({}, specBase);
-      specColsEmptyArray.columnsToReturn = [];
+      specColsEmptyArray.fieldsToReturn = [];
 
       const specColsSpecified = Object.assign({}, specBase);
-      specColsSpecified.columnsToReturn = ['id', 'title', 'tagline'];
+      specColsSpecified.fieldsToReturn = ['id', 'title', 'tagline'];
 
       const input = {
         fields: {
@@ -876,13 +876,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getSpecifiedCols = blogApp.getItem(specColsSpecified, input)
         .then((data) => {
-          expect(data.attributes).to.have.keys(specColsSpecified.columnsToReturn);
+          expect(data.attributes).to.have.keys(specColsSpecified.fieldsToReturn);
         });
 
       return Promise.all([getAllColsFromBase, getAllColsFromEmptyArray, getSpecifiedCols]);
     });
 
-    it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
+    it(`should support the "input.${ACTION.INPUT_FIELD_SET}" syntax, permitting various sets of returned field data`, () => {
       const allAvailableCols = ['id', 'user_id', 'title', 'slug', 'tagline', 'avatar_url', 'description', 'is_default', 'is_live', 'created_at', 'updated_at'];
 
       const specBase = {
@@ -894,29 +894,29 @@ describe('BASE ACTIONS [bookshelf]', () => {
       };
 
       const specColsWithDefault = Object.assign({}, specBase);
-      specColsWithDefault.columnsToReturn = {
+      specColsWithDefault.fieldsToReturn = {
         default: ['id', 'user_id', 'title', 'slug', 'tagline', 'description'],
         list: ['id', 'user_id', 'title'],
         tagline: ['user_id', 'tagline'],
       };
 
       const specColsWithoutDefault = Object.assign({}, specBase);
-      specColsWithoutDefault.columnsToReturn = {
+      specColsWithoutDefault.fieldsToReturn = {
         list: ['id', 'user_id', 'title'],
         tagline: ['user_id', 'tagline'],
       };
 
       const inputWithUndefinedSet = {
         fields: { id: 1 },
-        columnSet: 'unknown',
+        fieldSet: 'unknown',
       };
       const inputWithDefaultSet = {
         fields: { id: 1 },
-        columnSet: 'default',
+        fieldSet: 'default',
       };
       const inputWithListSet = {
         fields: { id: 1 },
-        columnSet: 'list',
+        fieldSet: 'list',
       };
 
       const getAllColsWithBase = blogApp.getItem(specBase, inputWithListSet)
@@ -926,7 +926,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getDefaultSetImplicitly = blogApp.getItem(specColsWithDefault, inputWithUndefinedSet)
         .then((data) => {
-          expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+          expect(data.attributes).to.have.keys(specColsWithDefault.fieldsToReturn.default);
         });
 
       const getAllColsWithUnknownSetAndNoDefault = blogApp.getItem(specColsWithoutDefault, inputWithUndefinedSet)
@@ -936,12 +936,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getDefaultSetExplicitly = blogApp.getItem(specColsWithDefault, inputWithDefaultSet)
         .then((data) => {
-          expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+          expect(data.attributes).to.have.keys(specColsWithDefault.fieldsToReturn.default);
         });
 
       const getListSet = blogApp.getItem(specColsWithDefault, inputWithListSet)
         .then((data) => {
-          expect(data.attributes).to.have.keys(specColsWithDefault.columnsToReturn.list);
+          expect(data.attributes).to.have.keys(specColsWithDefault.fieldsToReturn.list);
         });
 
       return Promise.all([
@@ -1220,14 +1220,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([getUsers, getAllProfiles, getLiveProfiles, getNotLiveProfiles, getExplicitSetOfProfiles]);
     });
 
-    it('should only return the column data that is permitted by the spec', () => {
+    it('should only return the field data that is permitted by the spec', () => {
       const specBase = {
         modelName: 'User',
         defaultOrderBy: '-created_at',
       };
 
       const specColsSpecified = Object.assign({}, specBase);
-      specColsSpecified.columnsToReturn = ['id', 'username', 'display_name'];
+      specColsSpecified.fieldsToReturn = ['id', 'username', 'display_name'];
 
       const input = {};
 
@@ -1238,34 +1238,34 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getSpecifiedCols = blogApp.getItems(specColsSpecified, input)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsSpecified.columnsToReturn);
+          expect(data.models[0].attributes).to.have.keys(specColsSpecified.fieldsToReturn);
         });
 
       return Promise.all([getAllColsFromBase, getSpecifiedCols]);
     });
 
-    it(`should support the "input.${ACTION.INPUT_COLUMN_SET}" syntax, permitting various sets of returned column data`, () => {
+    it(`should support the "input.${ACTION.INPUT_FIELD_SET}" syntax, permitting various sets of returned field data`, () => {
       const specBase = {
         modelName: 'User',
         defaultOrderBy: '-created_at',
       };
 
       const specColsWithDefault = Object.assign({}, specBase);
-      specColsWithDefault.columnsToReturn = {
+      specColsWithDefault.fieldsToReturn = {
         default: ['id', 'email', 'username', 'display_name', 'external_id'],
         list: ['id', 'username', 'display_name'],
         avatar: ['display_name', 'avatar_url'],
       };
 
       const specColsWithoutDefault = Object.assign({}, specBase);
-      specColsWithoutDefault.columnsToReturn = {
+      specColsWithoutDefault.fieldsToReturn = {
         list: ['id', 'username', 'display_name'],
         avatar: ['display_name', 'avatar_url'],
       };
 
-      const inputWithUndefinedSet = { columnSet: 'unknown' };
-      const inputWithDefaultSet = { columnSet: 'default' };
-      const inputWithListSet = { columnSet: 'list' };
+      const inputWithUndefinedSet = { fieldSet: 'unknown' };
+      const inputWithDefaultSet = { fieldSet: 'default' };
+      const inputWithListSet = { fieldSet: 'list' };
 
       const getAllColsWithBase = blogApp.getItems(specBase, inputWithListSet)
         .then((data) => {
@@ -1274,7 +1274,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getDefaultSetImplicitly = blogApp.getItems(specColsWithDefault, inputWithUndefinedSet)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.fieldsToReturn.default);
         });
 
       const getAllColsWithUnknownSetAndNoDefault = blogApp.getItems(specColsWithoutDefault, inputWithUndefinedSet)
@@ -1284,12 +1284,12 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const getDefaultSetExplicitly = blogApp.getItems(specColsWithDefault, inputWithDefaultSet)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.default);
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.fieldsToReturn.default);
         });
 
       const getListSet = blogApp.getItems(specColsWithDefault, inputWithListSet)
         .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.columnsToReturn.list);
+          expect(data.models[0].attributes).to.have.keys(specColsWithDefault.fieldsToReturn.list);
         });
 
       return Promise.all([
@@ -1301,7 +1301,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    it(`should return relation data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
+    it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
       const spec = {
         modelName: 'User',
         defaultOrderBy: '-updated_at',
@@ -1338,7 +1338,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withAssoc, withoutAssoc]);
     });
 
-    it(`should load relation data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
+    it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const spec = {
         modelName: 'User',
         defaultOrderBy: '-updated_at',
@@ -1474,7 +1474,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
     });
 
-    it(`should order the results according to the "spec.${ACTION.SPEC_DEFAULT_ORDER_BY}" and "input.orderBy" options`, () => {
+    it(`should order the results according to the "spec.${ACTION.SPEC_DEFAULT_ORDER_BY}" and "input.${ACTION.INPUT_ORDER_BY}" options`, () => {
       // -------
       // Profile
       // -------
@@ -1691,7 +1691,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
     });
 
-    it(`should support the "${ACTION.SPEC_FIELDS_LOOKUP}" option, in order to defer authorization on the retrieved item`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, () => {
       const mockSession = {
         is_logged_in: true,
         id: 4,
