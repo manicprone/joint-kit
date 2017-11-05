@@ -52,14 +52,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // -------------------------------------------------------------------------
     // spec: {
     //   fields: [
-    //     { name: 'app_id', type: 'String', required: true, lookupField: true },
+    //     { name: 'app_id', type: 'String', required: true, lookup: true },
     //     { name: 'data', type: 'JSON', required: true },
-    //     { name: 'key', type: 'String', required: true },
+    //     { name: 'key', type: 'String', defaultValue: 'default', lookup: true },
     //   ],
     // },
     // -------------------------------------------------------------------------
     describe('saveContent', () => {
-      it('should return an error (400) when the "app_id" and "data" fields are not provided', () => {
+      it('should return an error (400) when the required fields are not provided', () => {
         const appID = 'failed-app';
         const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } };
 
@@ -84,64 +84,6 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           noData,
         ]);
       });
-
-      // TODO: Complete support for AND/OR logic with "lookup" field option !!!
-
-      // it('should return an error (400) when the "app_id" and "data" fields are not provided', () => {
-      //   const appID = 'failed-app';
-      //   const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } };
-      //
-      //   const inputNoAppID = {
-      //     fields: {
-      //       data: appContent,
-      //     },
-      //   };
-      //   const inputNoData = {
-      //     fields: {
-      //       app_id: appID,
-      //     },
-      //   };
-      //
-      //   const noAppID = expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
-      //     .to.eventually.be.rejectedWithJointStatusError(400);
-      //   const noData = expect(appMgmt.method.AppContent.saveContent(inputNoData))
-      //     .to.eventually.be.rejectedWithJointStatusError(400);
-      //
-      //   return Promise.all([
-      //     noAppID,
-      //     noData,
-      //   ]);
-      // });
-
-      // it('should save a new package of data for a provided "app_id", automatically saving the key value as "default"', () => {
-      //   const appID = 'trendy-boutique';
-      //   const appContent = {
-      //     trending: {
-      //       men: 'hats',
-      //       women: 'belts',
-      //       kids: 'mobile-phone-accessories',
-      //     },
-      //     newBrands: ['twisted-kids', 'forlorn', 'girl-in-the-rain'],
-      //   };
-      //
-      //   const input = {
-      //     fields: {
-      //       app_id: appID,
-      //       data: appContent,
-      //     },
-      //   };
-      //
-      //   return appMgmt.method.AppContent.saveContent(input)
-      //     .then((data) => {
-      //       expect(data.attributes.app_id).to.equal(appID);
-      //       expect(data.attributes.key).to.equal('default');
-      //
-      //       const contentJSON = JSON.parse(data.attributes.data);
-      //       expect(contentJSON.trending.men).to.equal('hats');
-      //       expect(contentJSON.trending.women).to.equal('belts');
-      //       expect(contentJSON.newBrands).to.be.an('array').that.has.length(3);
-      //     });
-      // });
 
       it('should save a new package of data for a provided "app_id" and "key"', () => {
         const appID = 'trendy-boutique';
@@ -176,26 +118,71 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           });
       });
 
-      it('should update an existing package of data for a provided "app_id" and "key"', () => {
+      it(`should save a new package of data for a provided "app_id", using the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" of the "key" to satisfy the lookup requirement`, () => {
+        const appID = 'trendy-boutique';
+        const appContent = {
+          trending: {
+            men: 'hats',
+            women: 'belts',
+            kids: 'mobile-phone-accessories',
+          },
+          newBrands: ['twisted-kids', 'forlorn', 'girl-in-the-rain'],
+        };
+
+        const input = {
+          fields: {
+            app_id: appID,
+            data: appContent,
+          },
+        };
+
+        return appMgmt.method.AppContent.saveContent(input)
+          .then((data) => {
+            expect(data.attributes.id).to.equal(2);
+            expect(data.attributes.app_id).to.equal(appID);
+            expect(data.attributes.key).to.equal('default');
+
+            const contentJSON = JSON.parse(data.attributes.data);
+            expect(contentJSON.trending.men).to.equal('hats');
+            expect(contentJSON.trending.women).to.equal('belts');
+            expect(contentJSON.newBrands).to.be.an('array').that.has.length(3);
+          });
+      });
+
+      it('should update an existing package of data according to the spec defintion', () => {
         const appID = 'trendy-boutique';
         const key = 'winter-promo';
-        const appContent = {
+
+        const contentWinterPromo = {
           trending: {
             men: 'mascara',
             women: 'faux-cotton-socks',
           },
           discountBreakpoints: ['10%', '20%', '30%', '35%', '40%'],
         };
+        const contentDefault = {
+          trending: {
+            men: 'ascots',
+            kids: 'fidget spinners with sharp blades',
+          },
+          newBrands: ['the-darkest-path', 'total-vanity'],
+        };
 
-        const input = {
+        const inputWithKey = {
           fields: {
             app_id: appID,
             key,
-            data: appContent,
+            data: contentWinterPromo,
+          },
+        };
+        const inputNoKey = {
+          fields: {
+            app_id: appID,
+            data: contentDefault,
           },
         };
 
-        return appMgmt.method.AppContent.saveContent(input)
+        const withKey = appMgmt.method.AppContent.saveContent(inputWithKey)
           .then((data) => {
             expect(data.attributes.id).to.equal(1);
             expect(data.attributes.app_id).to.equal(appID);
@@ -206,6 +193,20 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             expect(contentJSON.trending.women).to.equal('faux-cotton-socks');
             expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(5);
           });
+
+        const defaultKey = appMgmt.method.AppContent.saveContent(inputNoKey)
+          .then((data) => {
+            expect(data.attributes.id).to.equal(2);
+            expect(data.attributes.app_id).to.equal(appID);
+            expect(data.attributes.key).to.equal('default');
+
+            const contentJSON = JSON.parse(data.attributes.data);
+            expect(contentJSON.trending.men).to.equal('ascots');
+            expect(contentJSON.trending.kids).to.equal('fidget spinners with sharp blades');
+            expect(contentJSON.newBrands).to.be.an('array').that.has.length(2);
+          });
+
+        return Promise.all([withKey, defaultKey]);
       });
     }); // END - AppContent.saveContent
 
@@ -215,11 +216,13 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // spec: {
     //   fields: [
     //     { name: 'app_id', type: 'String', required: true },
-    //     { name: 'key', type: 'String', required: true },
+    //     { name: 'key', type: 'String', defaultValue: 'default' },
     //   ],
     // },
     // -------------------------------------------------------------------------
     describe('getContent', () => {
+      before(() => resetDB(['app-content']));
+
       it('should return an error (400) when the "app_id" field is not provided', () => {
         const input = {
           fields: {
@@ -227,40 +230,13 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         };
 
-        const noAppID = expect(appMgmt.method.AppContent.getContent(input))
+        return expect(appMgmt.method.AppContent.getContent(input))
           .to.eventually.be.rejectedWithJointStatusError(400);
-
-        return Promise.all([
-          noAppID,
-        ]);
       });
 
-      // TODO: Complete support for AND/OR logic with "lookup" field option !!!
-
-      // it('should retrieve the "default" package of data for a provided "app_id"', () => {
-      //   const appID = 'trendy-boutique';
-      //
-      //   const input = {
-      //     fields: {
-      //       app_id: appID,
-      //     },
-      //   };
-      //
-      //   return appMgmt.method.AppContent.getContent(input)
-      //     .then((data) => {
-      //       expect(data.attributes.app_id).to.equal(appID);
-      //       expect(data.attributes.key).to.equal('default');
-      //
-      //       const contentJSON = JSON.parse(data.attributes.data);
-      //       expect(contentJSON.trending.men).to.equal('hats');
-      //       expect(contentJSON.trending.women).to.equal('belts');
-      //       expect(contentJSON.newBrands).to.be.an('array').that.has.length(3);
-      //     });
-      // });
-
       it('should retrieve the requested package of data for a provided "app_id" and "key"', () => {
-        const appID = 'trendy-boutique';
-        const key = 'winter-promo';
+        const appID = 'app-001';
+        const key = 'v1.0';
 
         const input = {
           fields: {
@@ -275,9 +251,30 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             expect(data.attributes.key).to.equal(key);
 
             const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.trending.men).to.equal('mascara');
-            expect(contentJSON.trending.women).to.equal('faux-cotton-socks');
-            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(5);
+            expect(contentJSON.items_per_page).to.equal(25);
+            expect(contentJSON.is_activated).to.equal(true);
+            expect(contentJSON.modules).to.be.an('array').that.has.length(6);
+          });
+      });
+
+      it(`should retrieve the default package of data for a provided "app_id", using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}"`, () => {
+        const appID = 'app-001';
+
+        const input = {
+          fields: {
+            app_id: appID,
+          },
+        };
+
+        return appMgmt.method.AppContent.getContent(input)
+          .then((data) => {
+            expect(data.attributes.app_id).to.equal(appID);
+            expect(data.attributes.key).to.equal('default');
+
+            const contentJSON = JSON.parse(data.attributes.data);
+            expect(contentJSON.items_per_page).to.equal(50);
+            expect(contentJSON.is_activated).to.equal(false);
+            expect(contentJSON.modules).to.be.an('array').that.has.length(3);
           });
       });
     }); // END - AppContent.getContent
@@ -388,7 +385,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // -------------------------------------------------------------------------
     // spec: {
     //   fields: [
-    //     { name: 'id', type: 'Number', required: true, lookupField: true },
+    //     { name: 'id', type: 'Number', required: true, lookup: true },
     //     { name: 'username', type: 'String' },
     //     { name: 'email', type: 'String' },
     //     { name: 'display_name', type: 'String' },

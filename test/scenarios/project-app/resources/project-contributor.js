@@ -26,7 +26,7 @@ module.exports = {
       action: 'updateItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'contributor_role', type: 'String' },
           { name: 'is_active_contributor', type: 'Boolean' },
           { name: 'started_at', type: 'String' },

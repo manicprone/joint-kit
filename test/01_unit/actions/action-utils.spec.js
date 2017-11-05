@@ -12,7 +12,7 @@ describe('ACTION-UTILS', () => {
   // Testing: checkRequiredFields
   // ----------------------------
   describe('checkRequiredFields', () => {
-    it('should fail if input has missing "required" fields, and return an array of the missing field names (as "all")', () => {
+    it(`should fail if input has missing "${ACTION.SPEC_FIELDS_OPT_REQUIRED}" fields, and return an array of the missing field names (as "all")`, () => {
       const fieldSpec = [
         { name: 'user_id', type: 'Number', required: true },
         { name: 'profile_id', type: 'Number', required: true },
@@ -35,7 +35,7 @@ describe('ACTION-UTILS', () => {
       });
     });
 
-    it('should fail if input has not satisfied any of the "requiredOr" fields, and return an array of the missing options (as "oneOf")', () => {
+    it(`should fail if input has not satisfied any of the "${ACTION.SPEC_FIELDS_OPT_REQUIRED_OR}" fields, and return an array of the missing options (as "oneOf")`, () => {
       const fieldSpec = [
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
@@ -84,7 +84,7 @@ describe('ACTION-UTILS', () => {
       expect(emptyInput).to.deep.equal({ satisfied: true });
     });
 
-    it('should pass when the input satisfies the "required" fields', () => {
+    it(`should pass when the input satisfies the "${ACTION.SPEC_FIELDS_OPT_REQUIRED}" fields`, () => {
       const fieldSpec = [
         { name: 'profile_id', type: 'Number', required: true },
         { name: 'status_id', type: 'Number', required: true },
@@ -105,7 +105,7 @@ describe('ACTION-UTILS', () => {
       expect(result).to.deep.equal({ satisfied: true });
     });
 
-    it('should correctly support the "requiredOr" and "required" properties', () => {
+    it(`should support the combined usage of "${ACTION.SPEC_FIELDS_OPT_REQUIRED_OR}" and "${ACTION.SPEC_FIELDS_OPT_REQUIRED}" fields`, () => {
       const fieldSpecRequiredOrOnly = [
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
@@ -181,6 +181,138 @@ describe('ACTION-UTILS', () => {
       });
     });
   }); // END - checkRequiredFields
+
+  // ---------------------------
+  // Testing: getLookupFieldData
+  // ---------------------------
+  describe('getLookupFieldData', () => {
+    it('should return null when the spec does not define a lookup field', () => {
+      const fieldSpec = [
+        { name: 'id', type: 'Number', required: true, lookup: false },
+        { name: 'external_id', type: 'String', lookupOr: false },
+        { name: 'slug', type: 'String', lookupOr: false },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldData = {
+        id: 1,
+        slug: 'post-001',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
+        .to.be.null;
+    });
+
+    it('should return null when the input does not provide a matching lookup field data pair', () => {
+      const fieldSpecLookup = [
+        { name: 'id', type: 'Number', required: true, lookup: true },
+        { name: 'slug', type: 'String' },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+      const fieldSpecLookupOr = [
+        { name: 'id', type: 'Number', lookupOr: true },
+        { name: 'external_id', type: 'String', lookupOr: true },
+        { name: 'slug', type: 'String' },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldData = {
+        title: 'Updated Post Title',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookup, fieldData))
+        .to.be.null;
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldData))
+        .to.be.null;
+    });
+
+    it('should return all required lookup fields', () => {
+      const fieldSpec = [
+        { name: 'id', type: 'Number', lookup: true },
+        { name: 'key', type: 'String', lookup: true },
+        { name: 'full_version', type: 'Boolean', lookup: true },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldData = {
+        id: 333,
+        key: 'omega',
+        full_version: true,
+        title: 'Updated Post Title',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
+        .to.deep.equal({ id: 333, key: 'omega', full_version: true });
+    });
+
+    it('should return the first matching lookup field data pair in an OR set', () => {
+      const fieldSpecLookupOr = [
+        { name: 'id', type: 'Number', lookupOr: true },
+        { name: 'external_id', type: 'String', lookupOr: true },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldDataWithSecondOr = {
+        external_id: 'external-id-333',
+        title: 'Updated Post Title',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldDataWithSecondOr))
+        .to.deep.equal({ external_id: 'external-id-333' });
+    });
+
+    it(`should return the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a required lookup field, when the input does not provide the data`, () => {
+      const fieldSpecLookup01 = [
+        { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+      const fieldSpecLookup02 = [
+        { name: 'id', type: 'Number', lookup: true },
+        { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldDataNoKey = {
+        id: 333,
+        title: 'Updated Post Title',
+      };
+      const fieldDataWithKey = {
+        id: 333,
+        key: 'beta',
+        title: 'Updated Post Title',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookup01, fieldDataNoKey))
+        .to.deep.equal({ key: 'alpha' });
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataNoKey))
+        .to.deep.equal({ id: 333, key: 'alpha' });
+      expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataWithKey))
+        .to.deep.equal({ id: 333, key: 'beta' });
+    });
+
+    it(`should ignore the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a "${ACTION.SPEC_FIELDS_OPT_LOOKUP_OR}" field`, () => {
+      const fieldSpec = [
+        { name: 'id', type: 'Number', lookupOr: true },
+        { name: 'slug', type: 'String', defaultValue: 'item-011', lookupOr: true },
+        { name: 'title', type: 'String' },
+        { name: 'body', type: 'String' },
+      ];
+
+      const fieldData = {
+        title: 'Updated Post Title',
+      };
+
+      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
+        .to.be.null;
+    });
+  }); // END - getLookupFieldData
 
   // ------------------------
   // Testing: parseOwnerCreds
@@ -305,69 +437,6 @@ describe('ACTION-UTILS', () => {
       });
     });
   }); // END - parseLoadDirect
-
-  // ---------------------------
-  // Testing: getLookupFieldData
-  // ---------------------------
-  describe('getLookupFieldData', () => {
-    it('should return null when the spec does not define a "lookupField"', () => {
-      const fieldSpec = [
-        { name: 'id', type: 'Number', required: true, lookupField: false },
-        { name: 'slug', type: 'String' },
-        { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
-      ];
-
-      const fieldData = {
-        id: 1,
-        slug: 'post-001',
-      };
-
-      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.be.null;
-    });
-
-    it('should return null when the input does not provide a matching "lookupField" data pair', () => {
-      const fieldSpec = [
-        { name: 'id', type: 'Number', required: true, lookupField: true },
-        { name: 'slug', type: 'String', lookupField: true },
-        { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
-      ];
-
-      const fieldData = {
-        title: 'Updated Post Title',
-      };
-
-      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.be.null;
-    });
-
-    it('should return the first matching "lookupField" data pair', () => {
-      const fieldSpec = [
-        { name: 'id', type: 'Number', required: true, lookupField: true },
-        { name: 'slug', type: 'String', lookupField: true },
-        { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
-      ];
-
-      const fieldDataSlugOnly = {
-        slug: 'post-001',
-        title: 'Updated Post Title',
-      };
-
-      const fieldDataIdAndSlug = {
-        id: 300,
-        slug: 'post-001',
-        title: 'Updated Post Title',
-      };
-
-      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldDataSlugOnly))
-        .to.deep.equal({ slug: 'post-001' });
-      expect(ActionUtils.getLookupFieldData(fieldSpec, fieldDataIdAndSlug))
-        .to.deep.equal({ id: 300 });
-    });
-  }); // END - getLookupFieldData
 
   // -------------------------
   // Testing: prepareFieldData

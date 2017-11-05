@@ -227,7 +227,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const specForUpdate = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
         ],
         auth: {
           ownerCreds: ['id => profile_ids', 'user_id'],
@@ -475,7 +475,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'AppSettings',
         fields: [
-          { name: 'app_id', type: 'String', lookupField: true },
+          { name: 'app_id', type: 'String', lookup: true },
           { name: 'data', type: 'JSON', required: true },
         ],
       };
@@ -494,7 +494,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'AppSettings',
         fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'data', type: 'JSON', required: true },
         ],
       };
@@ -520,7 +520,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'AppSettings',
         fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'data', type: 'JSON', required: true },
         ],
       };
@@ -550,7 +550,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName,
         fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'data', type: 'JSON', required: true },
         ],
       };
@@ -609,7 +609,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
           { name: 'brief_description', type: 'String' },
         ],
@@ -628,7 +628,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
           { name: 'brief_description', type: 'String' },
         ],
@@ -648,7 +648,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
           { name: 'brief_description', type: 'String' },
         ],
@@ -690,7 +690,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'title', type: 'String' },
           { name: 'tagline', type: 'String' },
         ],
@@ -719,7 +719,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName,
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
           { name: 'brief_description', type: 'String' },
         ],
@@ -1022,10 +1022,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
               user_id: 4,
               professional_title: 'EdgeCaser',
               tagline: 'Catapult like impulse, infect like madness',
-              description: null,
-              created_at: null,
-              updated_at: null,
             });
+          expect(data.attributes.info)
+            .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at']);
 
           expect(data.attributes)
             .to.have.property('roles')
@@ -1304,7 +1303,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: 'updated_at',
       };
       const inputWithAssoc = {
         associations: ['info'],
@@ -1341,7 +1340,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: 'updated_at',
       };
 
       const input = {
@@ -1370,7 +1369,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: '-updated_at',
+        defaultOrderBy: 'updated_at',
       };
 
       const input = {
@@ -1401,7 +1400,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: 'created_at',
       };
       const inputFirstThree = {
         fields: { is_internal: false },
@@ -1461,7 +1460,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: 'created_at',
       };
       const inputProjects = {
         fields: { is_internal: false },
@@ -1480,7 +1479,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       // -------
       const specProfile = {
         modelName: 'Profile',
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: 'created_at',
       };
       const profilesDefaultOrder = {};
 
@@ -1492,7 +1491,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'is_internal', type: 'Boolean' },
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: 'created_at',
       };
       const projectsDefaultOrder = {
         fields: { is_internal: false },
@@ -1560,7 +1559,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const spec = {
         modelName,
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: 'created_at',
       };
 
       const input = {
@@ -1711,7 +1710,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
         ],
         auth: {
           ownerCreds: ['user_id => id'],

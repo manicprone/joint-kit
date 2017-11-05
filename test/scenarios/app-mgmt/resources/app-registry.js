@@ -12,7 +12,7 @@ module.exports = {
       action: 'upsertItem',
       spec: {
         fields: [
-          { name: 'app_id', type: 'String', required: true, lookupField: true },
+          { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'app_name', type: 'String' },
           // { name: 'app_name', type: 'String', defaultValue: '% namify(app_id) %' },
         ],
