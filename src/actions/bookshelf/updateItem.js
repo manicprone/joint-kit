@@ -76,7 +76,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
         if (inputFields && specFields) {
           specFields.forEach((fieldSpec) => {
             const fieldName = fieldSpec.name;
-            const isLookupField = objectUtils.get(fieldSpec, 'lookupField', false);
+            const isLookupField = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
             const hasInput = objectUtils.has(inputFields, fieldName);
 
             if (hasInput && !isLookupField) {

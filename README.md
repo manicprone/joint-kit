@@ -26,7 +26,8 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 * [Install][section-install]
 
 ### Overview
-* [The Joint Concept][section-the-joint-concept]
+* [The Joint Concept (In Code)][section-the-joint-concept]
+* [Joint in Practice][section-joint-in-practice]
 
 ### API
 * [Joint Constructor][section-joint-constructor]
@@ -65,7 +66,7 @@ The Joint Kit currently supports:
 | ------------------------------------ | --------------------------------------------- | ---------------------------- |
 | [Bookshelf][link-bookshelf-site]     | [registry][link-bookshelf-plugin-registry], [pagination][link-bookshelf-plugin-pagination] | Postgres, MySQL, SQLite3     |
 
-<br />
+<span>---</span>
 
 If you wish to generate RESTful API endpoints, you need:
 
@@ -87,7 +88,13 @@ $ npm install joint-kit --save
 
 <br />
 
-## The Joint Concept
+## The Joint Concept (In Code)
+
+[TBC]
+
+<br />
+
+## Joint in Practice
 
 To implement solutions with the Joint Kit, you create _Joints_.
 
@@ -120,16 +127,12 @@ const joint = new Joint({
 
 You can continue configuring data models with your service natively, or you can dynamically generate them with Joint using a JSON descriptor:
 
-<details>
-<summary>Defining models with a Joint descriptor</summary>
-
-<br />
 /model-config.js
 
 ```javascript
 export default {
   models: {
-    // Define and register a model named: "Profile"...
+    // Define a model named: "Profile":
     Profile: {
       tableName: 'blog_profiles',
       timestamps: { created: 'created_at', updated: 'updated_at' },
@@ -148,16 +151,13 @@ export default {
         },
       },
     },
-
-    ... other models
-
   },
 };
 ```
-</details>
+
 <br />
 
-Use the `generate` function to dynamically generate your models:
+Use the `generate` function to dynamically build and register your models:
 
 ```javascript
 import modelConfig from './model-config'; // your defined models
@@ -203,7 +203,7 @@ export function updateProfile(input) {
   const spec = {
     modelName: 'Profile',
     fields: [
-      { name: 'id', type: 'Number', required: true, lookupField: true },
+      { name: 'id', type: 'Number', required: true, lookup: true },
       { name: 'slug', type: 'String' },
       { name: 'title', type: 'String' },
       { name: 'tagline', type: 'String' },
@@ -259,10 +259,6 @@ export function deleteProfile(input) {
 
 You can dynamically generate them from a JSON descriptor:
 
-<details>
-<summary>Defining methods with a Joint descriptor</summary>
-
-<br />
 /method-config.js
 
 ```javascript
@@ -285,46 +281,14 @@ export default {
           },
         },
         {
-          name: 'updateProfile',
-          action: 'updateItem',
-          spec: {
-            fields: [
-              { name: 'id', type: 'Number', required: true, lookupField: true },
-              { name: 'slug', type: 'String' },
-              { name: 'title', type: 'String' },
-              { name: 'tagline', type: 'String' },
-              { name: 'is_live', type: 'Boolean'},
-            ],
-          },
-        },
-        {
-          name: 'getProfile',
-          action: 'getItem',
-          spec: {
-            fields: [
-              { name: 'id', type: 'Number', requiredOr: true },
-      		  { name: 'slug', type: 'String', requiredOr: true },
-            ],
-          },
-        },
-        {
           name: 'getProfiles',
           action: 'getItems',
           spec: {
             fields: [
-              { name: 'id', type: 'Number', requiredOr: true },
-              { name: 'slug', type: 'String', requiredOr: true },
+              { name: 'user_id', type: 'Number', requiredOr: true },
+              { name: 'is_live', type: 'String', requiredOr: true },
             ],
-          },
-        },
-        {
-          name: 'deleteProfile',
-          action: 'deleteItem',
-          spec: {
-            fields: [
-              { name: 'id', type: 'Number', requiredOr: true },
-              { name: 'slug', type: 'String', requiredOr: true },
-            ],
+            defaultOrderBy: '-created_at,title',
           },
         },
       ],
@@ -332,7 +296,7 @@ export default {
   ],
 };
 ```
-</details>
+
 <br />
 
 Use the `generate` function to dynamically generate your methods:
@@ -344,15 +308,12 @@ import methodConfig from './method-config'; // your defined method logic
 joint.generate({ methodConfig });
 
 // You can now utilize the methods using the syntax:
-joint.method.Profile.createProfile(input)
-  .then((result) => { ... })
-  .catch((error) => { ... });
-
+const input = {
+  fields: { is_live: true },
+};
 joint.method.Profile.getProfiles(input)
   .then((result) => { ... })
   .catch((error) => { ... });
-
-etc...
 ```
 
 <span>---</span>
@@ -367,6 +328,37 @@ You can hand-roll the router logic yourself:
 
 You can dynamically generate a router from a JSON descriptor:
 
+/route-config.js
+
+```javascript
+export default {
+  routes: [
+    {
+      uri: '/profile',
+      post: { method: 'Profile.createProfile', successStatus: 201, body: true },
+    },
+    {
+      uri: '/profiles',
+      get: { method: 'Profile.getProfiles' },
+    },
+  ],
+};
+```
+
+<br />
+
+Use the `generate` function to dynamically generate your router logic:
+
+```javascript
+import routeConfig from './route-config'; // your defined router logic
+
+// Dynamically generate the defined routes:
+joint.generate({ routeConfig });
+
+// Provide the generated router to your server:
+const app = express();
+app.use('/api', joint.router);
+```
 <br />
 
 ## Joint Constructor
@@ -564,8 +556,9 @@ Each action also supports the optional parameter: `output`.
 | fields.name | The field name. | _String_ | (_all_) | Yes |
 | fields.type | The field data type. | _String_ | (_all_) | Yes |
 | fields.required | If the field is required for the action. | _Boolean_ | (_all_) | No |
-| fields.requiredOr | If the field is one of the fields required to satisfy an OR set. | _Boolean_ | (_all_) | No |
-| fields.lookupField | Denotes the field is required in order to pre-fetch the resource, before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
+| fields.requiredOr | If the field is required for the action (within an OR set). | _Boolean_ | (_all_) | No |
+| fields.lookup | Denotes the field is required to pre-fetch the resource before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
+| fields.lookupOr | Denotes the field is required (within an OR set) to pre-fetch the resource before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
 | fields.defaultValue | The default value to persist, if the field is not provided in the input. | _Mixed_ | createItem, upsertItem, getItem | No |
 | fieldsToReturn | The fields to return with the payload. Returns all fields when not provided. | _Array_<br />-or-<br />_Object_ | getItem, getItems | No |
 | defaultOrderBy | The default sort order for a collection payload. | _String_ | getItems                        | No |
@@ -603,6 +596,14 @@ Each action also supports the optional parameter: `output`.
 [TBC]
 
 #### auth
+
+[TBC]
+
+#### main
+
+[TBC]
+
+#### association
 
 [TBC]
 
@@ -1036,6 +1037,7 @@ module.exports = router;
 [section-install]: #install
 
 [section-the-joint-concept]: #the-joint-concept
+[section-joint-in-practice]: #the-joint-in-practice
 
 [section-joint-constructor]: #joint-constructor
 [section-joint-instance]: #joint-instance

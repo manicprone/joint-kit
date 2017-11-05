@@ -28,7 +28,7 @@ module.exports = {
       action: 'updateItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', required: true, lookupField: true },
+          { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'username', type: 'String' },
           { name: 'email', type: 'String' },
           { name: 'display_name', type: 'String' },
@@ -44,7 +44,7 @@ module.exports = {
     //   action: 'updateItem',
     //   spec: {
     //     fields: [
-    //       { name: 'id', type: 'Number', required: true, lookupField: true },
+    //       { name: 'id', type: 'Number', required: true, lookup: true },
     //       { name: 'last_login_at', type: 'String', autoValue: '% now %' },
     //     ],
     //   },

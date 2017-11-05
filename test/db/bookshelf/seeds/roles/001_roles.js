@@ -39,7 +39,7 @@ exports.seed = function seed(knex, Promise) {
   const time = moment().utc();
 
   return Promise.all(seeds.map((data) => {
-    const timestamp = time.add(5, 'minutes');
+    const timestamp = time.add(5, 'minutes').format();
 
     return knex(tableName).insert({
       ...data,

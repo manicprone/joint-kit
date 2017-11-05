@@ -37,9 +37,9 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
     let isRequiredOrSatisfied = false;
 
     fieldSpec.forEach((field) => {
-      const isRequired = objectUtils.get(field, 'required', false);
-      const isRequiredOr = objectUtils.get(field, 'requiredOr', false);
-      const fieldName = objectUtils.get(field, 'name', null);
+      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null);
+      const isRequired = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED, false);
+      const isRequiredOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED_OR, false);
 
       // Record missing "required" fields...
       if (fieldName && isRequired && !objectUtils.has(fieldData, fieldName)) {
@@ -64,6 +64,61 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
   } // end-if (Array.isArray(fieldSpec) && fieldSpec.length > 0)
 
   return result;
+}
+
+// -----------------------------------------------------------------------------
+// Looks at the provided fieldSpec defintion and fieldData to return an
+// acceptable name/value set for performing a resource lookup.
+// -----------------------------------------------------------------------------
+// If a "lookup" is not defined on the spec, or if the input does not
+// staisfy the specified lookup fields, the function returns null.
+//
+// Otherwise, the first found acceptable name/value sets are returned.
+//
+// e.g.
+// { id: 100, key: 'v1.0.0' }
+// -----------------------------------------------------------------------------
+export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
+  let lookupData = null;
+
+  // Loop through field spec, checking if all lookup field requirements are satisfied...
+  if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
+    const lookupOrs = [];
+    let isLookupOrSatisfied = false;
+
+    for (let i = 0; i < fieldSpec.length; i++) {
+      const field = fieldSpec[i];
+      const dataType = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_TYPE, 'String');
+      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null);
+
+      if (fieldName) {
+        const isLookup = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP, false);
+        const isLookupOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
+        const hasInput = objectUtils.has(fieldData, fieldName);
+
+        if (isLookupOr && !isLookupOrSatisfied) {
+          lookupOrs.push(fieldName); // track all lookupOr fields
+          if (hasInput) {
+            if (!lookupData) lookupData = {};
+            lookupData[fieldName] = castValue(fieldData[fieldName], dataType);
+            isLookupOrSatisfied = true; // mark as satisfied
+          }
+        } // end-if (isLookupOr && !isLookupOrSatisfied)
+
+        if (isLookup) {
+          const hasDefault = objectUtils.has(field, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+          if (hasInput || hasDefault) {
+            if (!lookupData) lookupData = {};
+            lookupData[fieldName] = (hasInput)
+                ? castValue(fieldData[fieldName], dataType)
+                : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType);
+          }
+        } // end-if (isLookup)
+      } // end-if (fieldName)
+    } // end-for
+  } // end-if (Array.isArray(fieldSpec) && fieldSpec.length > 0)
+
+  return lookupData;
 }
 
 // -----------------------------------------------------------------------------
@@ -169,42 +224,6 @@ export function parseLoadDirect(loadDirectSpec = []) {
   }
 
   return loadDirect;
-}
-
-// -----------------------------------------------------------------------------
-// Looks at the provided fieldSpec defintion and fieldData to return an
-// acceptable data pair for performing resource lookup.
-// -----------------------------------------------------------------------------
-// If a "lookupField" is not defined on the spec, or if the input does not
-// contain any of the possible lookup fields, the function returns null.
-//
-// Otherwise, the first matching field name/value pair is returned.
-//
-// e.g.
-// { id: 100 }
-// -----------------------------------------------------------------------------
-export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
-  let lookupData = null;
-
-  if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
-    // Look for defined lookup fields on spec...
-    for (let i = 0; i < fieldSpec.length; i++) {
-      const field = fieldSpec[i];
-      const isLookupField = objectUtils.get(field, 'lookupField', false);
-
-      if (isLookupField) {
-        const fieldName = objectUtils.get(field, 'name', null);
-        const dataType = objectUtils.get(field, 'type', 'String');
-        if (fieldName && objectUtils.has(fieldData, fieldName)) {
-          lookupData = {};
-          lookupData[fieldName] = castValue(fieldData[fieldName], dataType);
-          break;
-        }
-      } // end-if (isLookupField)
-    } // end-for
-  } // end-if (Array.isArray(fieldSpec) && fieldSpec.length > 0)
-
-  return lookupData;
 }
 
 // -----------------------------------------------------------------------------

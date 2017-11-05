@@ -13,7 +13,7 @@ module.exports = {
       spec: {
         fields: [
           { name: 'name', type: 'String', required: true },
-          { name: 'alias', type: 'String' },
+          { name: 'alias', type: 'String' /* , defaultValue: '% slugify(name) %' */},
           { name: 'image_url', type: 'String' },
           { name: 'location', type: 'String' },
           { name: 'brief_description', type: 'String' },
@@ -31,8 +31,8 @@ module.exports = {
       action: 'updateItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', requiredOr: true, lookupField: true },
-          { name: 'alias', type: 'String' },
+          { name: 'id', type: 'Number', requiredOr: true, lookupOr: true },
+          { name: 'alias', type: 'String', requiredOr: true, lookupOr: true },
           { name: 'name', type: 'String' },
           { name: 'image_url', type: 'String' },
           { name: 'location', type: 'String' },

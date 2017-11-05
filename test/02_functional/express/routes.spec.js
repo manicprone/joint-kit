@@ -72,7 +72,7 @@ describe('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(firstItem).to.have.property('attributes');
             expect(firstItem).to.contain({
               type: 'User',
-              id: 2,
+              id: 10,
             });
           });
       });

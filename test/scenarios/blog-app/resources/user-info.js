@@ -24,7 +24,7 @@ module.exports = {
       action: 'updateItem',
       spec: {
         fields: [
-          { name: 'user_id', type: 'Number', required: true, lookupField: true },
+          { name: 'user_id', type: 'Number', required: true, lookup: true },
           { name: 'tagline', type: 'String' },
           { name: 'description', type: 'String' },
           { name: 'professional_title', type: 'String' },

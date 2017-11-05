@@ -23,8 +23,8 @@ module.exports = {
       action: 'updateItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', requiredOr: true, lookupField: true },
-          { name: 'key', type: 'String', requiredOr: true, lookupField: true },
+          { name: 'id', type: 'Number', requiredOr: true, lookupOr: true },
+          { name: 'key', type: 'String', requiredOr: true, lookupOr: true },
           { name: 'label', type: 'String' },
         ],
       },

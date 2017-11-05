@@ -17,7 +17,13 @@ export default {
 
   // Field Definitions
   SPEC_FIELDS: 'fields',
-  SPEC_FIELDS_OPT_LOOKUP: 'lookupField',
+  SPEC_FIELDS_OPT_NAME: 'name',
+  SPEC_FIELDS_OPT_TYPE: 'type',
+  SPEC_FIELDS_OPT_DEFAULT_VALUE: 'defaultValue',
+  SPEC_FIELDS_OPT_REQUIRED: 'required',
+  SPEC_FIELDS_OPT_REQUIRED_OR: 'requiredOr',
+  SPEC_FIELDS_OPT_LOOKUP: 'lookup',
+  SPEC_FIELDS_OPT_LOOKUP_OR: 'lookupOr',
 
   // Fields to Return / Field Set Definitions
   SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',
