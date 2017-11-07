@@ -1,11 +1,24 @@
 import objectUtils from '../utils/object-utils';
 // import { authorizedApps as authorizedAppConfig } from '../config/server-config';
 
-// TODO: Add CSRF check to rules & logic !!!
 // TODO: Fix the "owner / delegateRole" protection logic !!!
-// TODO: Add support for "rolesAll" !!!
+//       -----------------------------------------------------------------------
+//       Remove delegateRole, extend "owner" to support more string values:
+//       e.g.
+//       ----------------------
+//       owner: ['me', 'admin']
+//       ----------------------
+//       "me" =>    (existing logic)
+//       "admin" => (will look for this value in the roles of the context)
+//
+//       The context property for "roles" is configurable via settings.
+//       The order of the values specifies the order of the check.
+//       -----------------------------------------------------------------------
 
-const debugPrep = false;
+// TODO: Add support for "rolesAll" !!!
+// TODO: Add CSRF check to rules & logic !!!
+// TODO: Populate request_uri based upon server implementation !!!
+
 const debugCheck = false;
 
 // -----------------------------------------------------------------------------
@@ -62,10 +75,17 @@ const debugCheck = false;
 // -----------------------------------------------------------------------------
 // The returned authBundle package has the shape:
 //
+// e.g. (with server-side context)
 // {
-//   user: <user_session_info>,
-//   request_method: 'POST' | 'GET' | ... etc,
-//   request_uri: <request_uri>,
+//   user: <user_auth_context>,
+//   rules,
+// }
+//
+// e.g. (with HTTP request context)
+// {
+//   user: <user_auth_context>,
+//   request_method: 'POST',
+//   request_uri: '/profile/333',
 //   request_headers: <request_headers>,
 //   rules,
 // }
@@ -74,29 +94,46 @@ const debugCheck = false;
 // to be aware of the contents returned with the "authBundle" package. The
 // "isAllowed" logic will follow the orders specified by the "rules".
 // -----------------------------------------------------------------------------
-export function buildAuthBundle(settings, request, rules = {}) {
+export function buildAuthBundle(settings, context, rules = {}) {
   const bundle = {};
 
-  if (debugPrep) console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle...');
+  const debugBuild = objectUtils.get(settings, 'auth.debugBuild', false);
+  const isHttpRequest = (objectUtils.has(context, 'session'));
+
+  if (debugBuild) {
+    if (isHttpRequest) console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle for HTTP request...');
+    else console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle for server-side request...');
+  }
 
   // Build bundle...
-  bundle.request_method = objectUtils.get(request, 'method', null);
-  bundle.request_uri = objectUtils.get(request, 'originalUrl', ''); // TODO: Look at server implementation to determine this !!!
-  bundle.request_headers = objectUtils.get(request, 'headers', null);
   bundle.rules = rules;
+  if (isHttpRequest) {
+    // Load request info...
+    bundle.request_method = objectUtils.get(context, 'method', null);
+    bundle.request_uri = objectUtils.get(context, 'originalUrl', '');
+    bundle.request_headers = objectUtils.get(context, 'headers', null);
 
-  // Load authenticated info from the session...
-  const sessionNameForUser = objectUtils.get(settings, 'auth.sessionNameForUser', null);
-  bundle.user = objectUtils.get(request, `session.${sessionNameForUser}`, {});
+    // Load authenticated info from the session...
+    const sessionNameForUser = objectUtils.get(settings, 'auth.sessionNameForUser', null);
+    bundle.user = objectUtils.get(context, `session.${sessionNameForUser}`, {});
 
-  if (debugPrep) {
-    if (bundle.user) {
-      console.log(`Authed session info (${sessionNameForUser}):`);
+    if (debugBuild) {
+      if (bundle.user) {
+        console.log(`Authed session info (${sessionNameForUser}):`);
+        console.log(bundle.user);
+      }
+      console.log('Request headers:');
+      console.log(bundle.request_headers);
+    }
+  } else {
+    bundle.user = context;
+    if (debugBuild && bundle.user) {
+      console.log('Authed context info:');
       console.log(bundle.user);
     }
-    console.log('Request headers:');
-    console.log(bundle.request_headers);
+  }
 
+  if (debugBuild) {
     console.log('[JOINT] [AUTH-UTILS] authBundle =>');
     console.log(bundle);
     console.log('-------------------------------------------\n');
@@ -122,7 +159,7 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
 
   const authRules = authBundle.rules || {};
   // const requestHeaders = authBundle.request_headers;
-  const sessionUser = authBundle.user;
+  const userContext = authBundle.user;
 
   if (debugCheck) {
     console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authBundle.request_method} ${authBundle.request_uri}`);
@@ -142,20 +179,20 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
 
   // Check owner...
   if (ownerToCheck) {
-    result = isAllowedOwner(ownerToCheck, ownerCreds, sessionUser);
+    result = isAllowedOwner(ownerToCheck, ownerCreds, userContext);
   }
 
   // TODO: This check should be executed inside the "if (ownerToCheck)" clause,
   //       because it is only relevant if ownership auth is declared !!!
   // Check delegate role...
   if (!result && delegateRoleToCheck) {
-    result = isAllowedRole(delegateRoleToCheck, sessionUser);
+    result = isAllowedRole(delegateRoleToCheck, userContext);
   }
 
   // Check roles any...
   if (!result && rolesAnyToCheck) {
     for (let i = 0; i < rolesAnyToCheck.length; i++) {
-      result = isAllowedRole(rolesAnyToCheck[i], sessionUser);
+      result = isAllowedRole(rolesAnyToCheck[i], userContext);
       if (result) break;
     }
   }
@@ -167,7 +204,7 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
 
   // Check for explicitly denied scenarios...
   if (result && denyWhenAnyToCheck) {
-    const isDenied = isDeniedByAny(denyWhenAnyToCheck, sessionUser);
+    const isDenied = isDeniedByAny(denyWhenAnyToCheck, userContext);
     if (isDenied) result = false;
   }
 
@@ -176,16 +213,16 @@ export function isAllowed(authBundle = {}, ownerCreds = {}) {
   return result;
 }
 
-export function isAllowedOwner(ownerToCheck, ownerCreds, sessionUser) {
+export function isAllowedOwner(ownerToCheck, ownerCreds, userContext) {
   let result = false;
 
   if (debugCheck) {
     console.log('checking owner =>', ownerToCheck);
-    console.log('checking against session info:');
-    console.log(sessionUser);
+    console.log('checking against context info:');
+    console.log(userContext);
   }
 
-  if (!sessionUser) return false; // reject if no session value is found
+  if (!userContext) return false; // reject if no auth context is found
 
   // Handle the special "me" value...
   if (ownerToCheck === 'me') {
@@ -195,13 +232,13 @@ export function isAllowedOwner(ownerToCheck, ownerCreds, sessionUser) {
       const credFieldName = fields[0];
       const credFieldValue = ownerCreds[credFieldName];
 
-      // Ensure the sessionUser matches the ownerCreds...
-      if (Array.isArray(sessionUser[credFieldName])) {
-        result = objectUtils.includes(sessionUser[credFieldName], credFieldValue);
-        if (debugCheck) console.log(`Does ${credFieldValue} exist in session[${credFieldName}] ? ${result}`);
+      // Ensure the userContext matches the ownerCreds...
+      if (Array.isArray(userContext[credFieldName])) {
+        result = objectUtils.includes(userContext[credFieldName], credFieldValue);
+        if (debugCheck) console.log(`Does ${credFieldValue} exist in context[${credFieldName}] ? ${result}`);
       } else {
-        result = (sessionUser[credFieldName] === credFieldValue);
-        if (debugCheck) console.log(`Does ${credFieldName}: ${credFieldValue} === session[${credFieldName}]: ${sessionUser[credFieldName]} ? ${result}`);
+        result = (userContext[credFieldName] === credFieldValue);
+        if (debugCheck) console.log(`Does ${credFieldName}: ${credFieldValue} === context[${credFieldName}]: ${userContext[credFieldName]} ? ${result}`);
       }
     } else if (debugCheck) {
       console.log('The ownerCreds provided is empty, so ownership cannot be verified');
@@ -211,20 +248,20 @@ export function isAllowedOwner(ownerToCheck, ownerCreds, sessionUser) {
   return result;
 }
 
-export function isAllowedRole(roleToCheck, sessionUser) {
+export function isAllowedRole(roleToCheck, userContext) {
   let result = false;
 
   if (debugCheck) {
     console.log('checking role =>', roleToCheck);
-    console.log('checking against session info:');
-    console.log(sessionUser);
+    console.log('checking against context info:');
+    console.log(userContext);
   }
 
-  if (!sessionUser) return false; // reject if no session value is found
+  if (!userContext) return false; // reject if no auth context is found
 
-  // Ensure the sessionUser has the specified role...
-  result = objectUtils.includes(sessionUser.roles, roleToCheck);
-  if (debugCheck) console.log(`Does role ${roleToCheck} exist in set [${sessionUser.roles}] ? ${result}`);
+  // Ensure the userContext has the specified role...
+  result = objectUtils.includes(userContext.roles, roleToCheck);
+  if (debugCheck) console.log(`Does role ${roleToCheck} exist in set [${userContext.roles}] ? ${result}`);
 
   return result;
 }
@@ -262,23 +299,23 @@ export function isAllowedRole(roleToCheck, sessionUser) {
 //   return result;
 // }
 
-export function isDeniedByAny(denyWhenAnyToCheck, sessionUser) {
+export function isDeniedByAny(denyWhenAnyToCheck, userContext) {
   let result = false;
 
   if (debugCheck) {
     console.log('checking deny scenarios (any) =>', denyWhenAnyToCheck);
-    console.log('checking against session info:');
-    console.log(sessionUser);
+    console.log('checking against context info:');
+    console.log(userContext);
   }
 
-  // Check the sessionUser for matching deny scenarios...
+  // Check the userContext for matching deny scenarios...
   if (Array.isArray(denyWhenAnyToCheck) && denyWhenAnyToCheck.length > 0) {
     for (let i = 0; i < denyWhenAnyToCheck.length; i++) {
       const denyOn = denyWhenAnyToCheck[i];
       const prop = Object.keys(denyOn)[0];
       const value = denyOn[prop];
-      result = (objectUtils.has(sessionUser, prop) && sessionUser[prop] === value);
-      if (debugCheck) console.log(`Does ${prop}: ${value} exist in session ? ${result}`);
+      result = (objectUtils.has(userContext, prop) && userContext[prop] === value);
+      if (debugCheck) console.log(`Does ${prop}: ${value} exist in user context ? ${result}`);
       if (result) break;
     }
   }

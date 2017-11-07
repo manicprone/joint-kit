@@ -671,7 +671,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the looked-up item data`, () => {
-      const mockSession = {
+      const userContext = {
         is_logged_in: true,
         id: 4,
         external_id: '304',
@@ -679,13 +679,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: [],
         profile_ids: [1, 2, 3],
       };
-      const mockRequest = {
-        method: 'POST',
-        originalUrl: '/api/profile/1',
-        session: { joint_user: mockSession },
-      };
       const authRules = { owner: 'me' };
-      const authBundle = blogApp.buildAuthBundle(mockRequest, authRules);
+      const authBundle = blogApp.buildAuthBundle(userContext, authRules);
 
       const spec = {
         modelName: 'Profile',
@@ -807,7 +802,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the retrieved item data`, () => {
-      const mockSession = {
+      const userContext = {
         is_logged_in: true,
         user_id: 4,
         external_id: '304',
@@ -815,13 +810,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: ['moderator', 'admin'],
         profile_ids: [1, 2, 3],
       };
-      const mockRequest = {
-        method: 'GET',
-        originalUrl: '/api/profile/1',
-        session: { joint_user: mockSession },
-      };
       const authRules = { owner: 'me' };
-      const authBundle = blogApp.buildAuthBundle(mockRequest, authRules);
+      const authBundle = blogApp.buildAuthBundle(userContext, authRules);
 
       const spec = {
         modelName: 'Profile',
@@ -1691,7 +1681,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, () => {
-      const mockSession = {
+      const userContext = {
         is_logged_in: true,
         id: 4,
         external_id: '304',
@@ -1699,13 +1689,8 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: [],
         profile_ids: [1, 2, 3],
       };
-      const mockRequest = {
-        method: 'DELETE',
-        originalUrl: '/api/profile/3',
-        session: { joint_user: mockSession },
-      };
       const authRules = { owner: 'me' };
-      const authBundle = projectApp.buildAuthBundle(mockRequest, authRules);
+      const authBundle = projectApp.buildAuthBundle(userContext, authRules);
 
       const spec = {
         modelName: 'Profile',

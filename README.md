@@ -440,6 +440,7 @@ When a Joint has been instantiated, the following properties and functions are a
 | setServer(&nbsp;server&nbsp;) | Allows configuration of the server implementation, post-instantiation. |
 | setOutput(&nbsp;output&nbsp;) | Allows configuration of the output format, post-instantiation. |
 | updateSettings(&nbsp;settings&nbsp;) | Allows modification of the Joint settings, post-instantiation. |
+| buildAuthBundle(&nbsp;context, rules&nbsp;) | Generates the authBundle for an action request. This is used when hand-rolling method or router logic. |
 | &lt;_action_&gt;(&nbsp;spec, input, output&nbsp;) | The action logic provided by the Joint instance. This is the backbone of the solution. See [Joint Actions][section-joint-actions] for the full list and usage details. |
 
 <br />
