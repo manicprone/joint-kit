@@ -991,6 +991,46 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withToOneAssoc, withToManyAssoc, withoutAssoc]);
     });
 
+    it(`should support the "spec.${ACTION.SPEC_FORCE_ASSOCIATIONS}" option`, () => {
+      const associationNameInfo = 'info';
+      const associationNameRoles = 'roles';
+      const associationNameProfiles = 'profiles';
+
+      const spec = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+        forceAssociations: [associationNameInfo, associationNameProfiles],
+      };
+      const inputNoAssoc = {
+        fields: { id: 4 },
+      };
+      const inputWithAssoc = {
+        fields: { id: 4 },
+        associations: [associationNameProfiles, associationNameRoles],
+      };
+
+      const withoutInputAssoc = blogApp.getItem(spec, inputNoAssoc)
+        .then((data) => {
+          expect(data.relations).to.have.keys([
+            associationNameInfo,
+            associationNameProfiles,
+          ]);
+        });
+
+      const withInputAssoc = blogApp.getItem(spec, inputWithAssoc)
+        .then((data) => {
+          expect(data.relations).to.have.keys([
+            associationNameInfo,
+            associationNameProfiles,
+            associationNameRoles,
+          ]);
+        });
+
+      return Promise.all([withoutInputAssoc, withInputAssoc]);
+    });
+
     it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const spec = {
         modelName: 'User',
@@ -1035,6 +1075,83 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
 
       return Promise.all([withLoadDirect]);
+    });
+
+    it(`should support the "spec.${ACTION.SPEC_FORCE_LOAD_DIRECT}" option, granting precendence over the input`, () => {
+      const spec = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+        forceLoadDirect: ['info:*', 'roles:{name,display_name}'],
+      };
+      const inputNoLoadDirect = {
+        fields: { id: 4 },
+      };
+      const inputWithLoadDirect = {
+        fields: { id: 4 },
+        loadDirect: ['info:user_id', 'profiles:slug'],
+      };
+
+      const noInputLoadDirect = blogApp.getItem(spec, inputNoLoadDirect)
+        .then((data) => {
+          expect(data.attributes)
+            .to.have.property('info')
+            .to.contain({
+              id: 1,
+              user_id: 4,
+              professional_title: 'EdgeCaser',
+              tagline: 'Catapult like impulse, infect like madness',
+            });
+          expect(data.attributes.info)
+            .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at']);
+
+          expect(data.attributes)
+            .to.have.property('roles')
+            .to.deep.equal([
+              { name: 'admin', display_name: 'Admin' },
+              { name: 'moderator', display_name: 'Moderator' },
+              { name: 'developer', display_name: 'Developer' },
+              { name: 'blogger', display_name: 'Blogger' },
+            ]);
+
+          expect(data)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      const withInputLoadDirect = blogApp.getItem(spec, inputWithLoadDirect)
+        .then((data) => {
+          expect(data.attributes)
+            .to.have.property('info')
+            .to.contain({
+              id: 1,
+              user_id: 4,
+              professional_title: 'EdgeCaser',
+              tagline: 'Catapult like impulse, infect like madness',
+            });
+          expect(data.attributes.info)
+            .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at']);
+
+          expect(data.attributes)
+            .to.have.property('roles')
+            .to.deep.equal([
+              { name: 'admin', display_name: 'Admin' },
+              { name: 'moderator', display_name: 'Moderator' },
+              { name: 'developer', display_name: 'Developer' },
+              { name: 'blogger', display_name: 'Blogger' },
+            ]);
+
+          expect(data.attributes)
+            .to.have.property('profiles')
+            .that.has.members(['functional-fanatic', 'heavy-synapse', 'a-life-organized']);
+
+          expect(data)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([noInputLoadDirect, withInputLoadDirect]);
     });
 
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
@@ -1327,6 +1444,46 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([withAssoc, withoutAssoc]);
     });
 
+    it(`should support the "spec.${ACTION.SPEC_FORCE_ASSOCIATIONS}" option`, () => {
+      const associationNameInfo = 'info';
+      const associationNameRoles = 'roles';
+      const associationNameProfiles = 'profiles';
+
+      const spec = {
+        modelName: 'User',
+        defaultOrderBy: 'updated_at',
+        forceAssociations: [associationNameInfo, associationNameProfiles],
+      };
+
+      const inputWithoutAssoc = {};
+      const inputWithAssoc = {
+        associations: [associationNameProfiles, associationNameRoles],
+      };
+
+      const withoutInputAssoc = blogApp.getItems(spec, inputWithoutAssoc)
+        .then((data) => {
+          const fourthUser = data.models[3];
+
+          expect(fourthUser.relations).to.have.keys([
+            associationNameInfo,
+            associationNameProfiles,
+          ]);
+        });
+
+      const withInputAssoc = blogApp.getItems(spec, inputWithAssoc)
+        .then((data) => {
+          const fourthUser = data.models[3];
+
+          expect(fourthUser.relations).to.have.keys([
+            associationNameInfo,
+            associationNameProfiles,
+            associationNameRoles,
+          ]);
+        });
+
+      return Promise.all([withoutInputAssoc, withInputAssoc]);
+    });
+
     it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const spec = {
         modelName: 'User',
@@ -1354,6 +1511,49 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
 
       return Promise.all([withLoadDirect]);
+    });
+
+    it(`should support the "spec.${ACTION.SPEC_FORCE_LOAD_DIRECT}" option, granting precendence over the input`, () => {
+      const spec = {
+        modelName: 'User',
+        defaultOrderBy: 'updated_at',
+        forceLoadDirect: ['info:professional_title'],
+      };
+
+      const inputNoLoadDirect = {};
+      const inputWithLoadDirect = {
+        loadDirect: ['info:*', 'roles:name'],
+      };
+
+      const noInputLoadDirect = blogApp.getItems(spec, inputNoLoadDirect)
+        .then((data) => {
+          const sixthUser = data.models[5];
+
+          expect(sixthUser.attributes)
+            .to.contain({ info: 'Rickforcer' });
+
+          expect(sixthUser)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      const withInputLoadDirect = blogApp.getItems(spec, inputWithLoadDirect)
+        .then((data) => {
+          const sixthUser = data.models[5];
+
+          expect(sixthUser.attributes)
+            .to.contain({ info: 'Rickforcer' });
+
+          expect(sixthUser.attributes)
+            .to.have.property('roles')
+            .that.has.members(['transcendent', 'developer', 'blogger']);
+
+          expect(sixthUser)
+            .to.have.property('relations')
+            .that.is.empty;
+        });
+
+      return Promise.all([withInputLoadDirect, noInputLoadDirect]);
     });
 
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {

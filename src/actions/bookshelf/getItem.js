@@ -53,21 +53,25 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
       }
     } // end-if (returnColsDef)
 
-    // Include associations (associations and loadDirect will be combined into a distinct set)...
-    let associations = null;
-    const loadDirect = ActionUtils.parseLoadDirect(input[ACTION.INPUT_LOAD_DIRECT]);
-    const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS];
-    if (inputAssocs && Array.isArray(inputAssocs)) associations = inputAssocs.slice();
-    if (loadDirect.associations && loadDirect.associations.length > 0) {
-      if (associations) {
-        loadDirect.associations.forEach((assocName) => {
-          if (!objectUtils.includes(associations, assocName)) associations.push(assocName);
-        });
-      } else {
-        associations = loadDirect.associations;
-      }
-    }
-    if (associations) actionOpts.withRelated = associations;
+    // -------------------------------------------------------------------------
+    // Include associations (associations & loadDirect will be combined)
+    // -------------------------------------------------------------------------
+    // Handle "loadDirect" option...
+    const inputLoadDirectDef = input[ACTION.INPUT_LOAD_DIRECT] || [];
+    const loadDirectDef = (spec[ACTION.SPEC_FORCE_LOAD_DIRECT])
+        ? spec[ACTION.SPEC_FORCE_LOAD_DIRECT].concat(inputLoadDirectDef)
+        : inputLoadDirectDef;
+    const loadDirect = ActionUtils.parseLoadDirect(loadDirectDef);
+    // Handle "associations" option...
+    const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS] || [];
+    const assocs = (spec[ACTION.SPEC_FORCE_ASSOCIATIONS])
+        ? objectUtils.union(spec[ACTION.SPEC_FORCE_ASSOCIATIONS], inputAssocs)
+        : inputAssocs;
+    // Combine...
+    const allAssociations = (loadDirect.associations && loadDirect.associations.length > 0)
+        ? objectUtils.union(assocs, loadDirect.associations)
+        : assocs;
+    if (allAssociations.length > 0) actionOpts.withRelated = allAssociations;
 
     // Build where clause...
     const whereOpts = {};

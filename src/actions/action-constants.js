@@ -28,6 +28,10 @@ export default {
   // Fields to Return / Field Set Definitions
   SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',
 
+  // Force Associations
+  SPEC_FORCE_ASSOCIATIONS: 'forceAssociations',
+  SPEC_FORCE_LOAD_DIRECT: 'forceLoadDirect',
+
   // Default Sort Order
   SPEC_DEFAULT_ORDER_BY: 'defaultOrderBy',
 
