@@ -605,7 +605,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   describe('updateItem', () => {
     before(() => resetDB(['profiles', 'projects']));
 
-    it('should return an error (400) when the input does not provide a "lookup field"', () => {
+    it('should return an error (400) when the input does not provide a "lookup" field', () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -667,6 +667,88 @@ describe('BASE ACTIONS [bookshelf]', () => {
             id,
             name,
           });
+        });
+    });
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const defaultName = 'Default Name';
+
+      const specNoDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookup: true },
+          { name: 'name', type: 'String', locked: true },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+      const specWithDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookup: true },
+          { name: 'name', type: 'String', locked: true, defaultValue: defaultName },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+
+      const id = 1;
+      const name = 'Name is Locked';
+
+      const input = {
+        fields: { id, name },
+      };
+
+      // If no "defaultValue" is provided, the field will not be updated...
+      const noDefaultValue = projectApp.updateItem(specNoDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id,
+            name: 'Mega-Seed Mini-Sythesizer',
+          });
+        });
+
+      const withDefaultValue = projectApp.updateItem(specWithDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id,
+            name: defaultName,
+          });
+        });
+
+      return Promise.all([noDefaultValue, withDefaultValue]);
+    });
+
+    it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookup: true },
+          { name: 'alias', type: 'String', locked: true, defaultValue: '% camelCase(full_description) %' },
+          { name: 'location', type: 'String', defaultValue: '% kebabCase(full_description) %' },
+          { name: 'name', type: 'String', defaultValue: '% snakeCase(full_description) %' },
+          { name: 'brief_description', type: 'String', defaultValue: '% pascalCase(full_description) %' },
+          { name: 'started_at', type: 'String', defaultValue: '% now %' },
+          { name: 'full_description', type: 'String' },
+        ],
+      };
+
+      const id = 4;
+      // const valueToTransform = 'teSt ThIS guY';
+      const valueToTransform = 'test This guy';
+
+      const input = {
+        fields: { id, full_description: valueToTransform },
+      };
+
+      return projectApp.updateItem(spec, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id,
+            alias: 'testThisGuy', // camel case
+            location: 'test-this-guy', // kebab case
+            name: 'test_this_guy', // snake case
+            brief_description: 'TestThisGuy', // pascal case
+          });
+          expect(data.attributes.started_at).to.have.length(20);
         });
     });
 

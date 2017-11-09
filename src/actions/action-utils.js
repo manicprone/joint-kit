@@ -1,4 +1,6 @@
+import dateUtils from '../utils/date-utils';
 import objectUtils from '../utils/object-utils';
+import stringUtils from '../utils/string-utils';
 import ACTION from './action-constants';
 
 // -----------------------------------------------------------------------------
@@ -224,6 +226,79 @@ export function parseLoadDirect(loadDirectSpec = []) {
   }
 
   return loadDirect;
+}
+
+// -----------------------------------------------------------------------------
+// Handles the processing of the "defaultValue" field option.
+// -----------------------------------------------------------------------------
+// This facade function exists, specifically, to handle the dynamic value
+// operations (i.e. interpolations).
+//
+// A dynamic value string is denoted by enclosing the chosen operator
+// within "%" characters. For example: defaultValue: '% now %'
+//
+// Supported dynamic value operations:
+//
+// now                     => Generates a timestamp reflecting the date/time
+//                            the action request is executed.
+//
+// kebabCase<fieldName>)   => Transforms the specified field value to kebab case.
+//
+// snakeCase(<fieldName>)  => Transforms the specified field value to snake case.
+//
+// camelCase(<fieldName>)  => Transforms the specified field value to camel case.
+//
+// pascalCase(<fieldName>) => Transforms the specified field value to pascal case.
+// -----------------------------------------------------------------------------
+export function processDefaultValue(fieldData = {}, defaultValue) {
+  let value = null;
+
+  if (defaultValue) {
+    const dynamicOperationPattern = /^%(.+)%/;
+    const match = dynamicOperationPattern.exec(defaultValue);
+
+    // Handle interpolation...
+    if (match && match.length > 1) {
+      const dynamicOperation = match[1].trim();
+      const opPattern = /^(.+)\((.+)\)/;
+      const opMatch = opPattern.exec(dynamicOperation);
+
+      // Decompose operation instructions...
+      let operator = dynamicOperation;
+      let operand = null;
+      if (opMatch && opMatch.length > 2) {
+        operator = opMatch[1].trim();
+        operand = opMatch[2].trim();
+      }
+
+      // "now" operator...
+      if (operator === 'now') {
+        value = dateUtils.now();
+
+      // "camelCase" operator...
+      } else if (operator === 'camelCase') {
+        value = (fieldData[operand]) ? stringUtils.toCamelCase(fieldData[operand]) : null;
+
+      // "kebabCase" operator...
+      } else if (operator === 'kebabCase') {
+        value = (fieldData[operand]) ? stringUtils.toKebabCase(fieldData[operand]) : null;
+
+      // "snakeCase" operator...
+      } else if (operator === 'snakeCase') {
+        value = (fieldData[operand]) ? stringUtils.toSnakeCase(fieldData[operand]) : null;
+
+      // "pascalCase" operator...
+      } else if (operator === 'pascalCase') {
+        value = (fieldData[operand]) ? stringUtils.toPascalCase(fieldData[operand]) : null;
+      }
+
+    // Otherwise, just return the original value...
+    } else {
+      value = defaultValue;
+    }
+  }
+
+  return value;
 }
 
 // -----------------------------------------------------------------------------

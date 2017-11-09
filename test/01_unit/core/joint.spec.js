@@ -46,6 +46,7 @@ const modelNamesProjectApp = [
 const methodNamesUser = [
   'createUser',
   'updateUser',
+  'markLogin',
   'getUser',
   'getUsers',
   'deleteUser',

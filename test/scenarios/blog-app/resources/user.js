@@ -39,16 +39,16 @@ module.exports = {
         ],
       },
     },
-    // {
-    //   name: 'markLogin',
-    //   action: 'updateItem',
-    //   spec: {
-    //     fields: [
-    //       { name: 'id', type: 'Number', required: true, lookup: true },
-    //       { name: 'last_login_at', type: 'String', autoValue: '% now %' },
-    //     ],
-    //   },
-    // },
+    {
+      name: 'markLogin',
+      action: 'updateItem',
+      spec: {
+        fields: [
+          { name: 'id', type: 'Number', required: true, lookup: true },
+          { name: 'last_login_at', type: 'String', locked: true, defaultValue: '% now %' },
+        ],
+      },
+    },
     {
       name: 'getUser',
       action: 'getItem',

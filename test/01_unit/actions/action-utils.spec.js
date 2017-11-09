@@ -438,6 +438,75 @@ describe('ACTION-UTILS', () => {
     });
   }); // END - parseLoadDirect
 
+  // ----------------------------
+  // Testing: processDefaultValue
+  // ----------------------------
+  describe('processDefaultValue', () => {
+    it('should return null when a "defaultValue" parameter is not provided', () => {
+      const fieldData = {
+        title: 'The Very First',
+        alias: 'alias-from-input',
+      };
+
+      expect(ActionUtils.processDefaultValue(fieldData))
+        .to.be.null;
+    });
+
+    it('should return the original "defaultValue" for standard scenarios', () => {
+      const fieldData = {
+        title: 'The Very First',
+        alias: 'alias-from-input',
+      };
+
+      const defaultValue = 'standard-value';
+
+      expect(ActionUtils.processDefaultValue(fieldData, defaultValue))
+        .to.equal(defaultValue);
+    });
+
+    it('should support the "now" operator', () => {
+      const fieldData = {
+        title: 'The Very First',
+        alias: 'alias-from-input',
+      };
+
+      const nowOperator = '% now %';
+
+      expect(ActionUtils.processDefaultValue(fieldData, nowOperator))
+        .to.have.length(20);
+    });
+
+    it('should support the transformation operators (camelCase, kebabCase, snakeCase, pascalCase)', () => {
+      const fieldData = {
+        title: 'The Very First',
+        alias: 'alias-from-input',
+      };
+
+      const camelCase = '% camelCase(title) %';
+      const kebabCase = '% kebabCase(title) %';
+      const snakeCase = '% snakeCase(title) %';
+      const pascalCase = '% pascalCase(title) %';
+
+      // Returns null if operator not recognized, or if operand field is not provided...
+      const unknownOp = '% unknownOp(title) %';
+      const absentField = '% unknownOp(description) %';
+
+      expect(ActionUtils.processDefaultValue(fieldData, camelCase))
+        .to.equal('theVeryFirst');
+      expect(ActionUtils.processDefaultValue(fieldData, kebabCase))
+        .to.equal('the-very-first');
+      expect(ActionUtils.processDefaultValue(fieldData, snakeCase))
+        .to.equal('the_very_first');
+      expect(ActionUtils.processDefaultValue(fieldData, pascalCase))
+        .to.equal('TheVeryFirst');
+
+      expect(ActionUtils.processDefaultValue(fieldData, unknownOp))
+        .to.be.null;
+      expect(ActionUtils.processDefaultValue(fieldData, absentField))
+        .to.be.null;
+    });
+  }); // END - processDefaultValue
+
   // -------------------------
   // Testing: prepareFieldData
   // -------------------------
