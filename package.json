@@ -1,6 +1,6 @@
 {
   "name": "joint-kit",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A Node server library & development kit for rapidly implementing data layers and RESTful endpoints | Part of the Joint Stack",
   "author": "|M| <manicprone@gmail.com>",
   "license": "MIT",
