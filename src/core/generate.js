@@ -15,8 +15,8 @@ export function registerModels(joint, log = true) {
   const modelConfig = joint.modelConfig;
   const serviceKey = joint.serviceKey;
   const service = joint.service;
-  const enabledModels = modelConfig.modelsEnabled;
   const modelDefs = modelConfig.models;
+  const enabledModels = modelConfig.modelsEnabled || Object.keys(modelDefs);
 
   // Prepare model registries...
   if (!joint.model) {
