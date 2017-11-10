@@ -162,8 +162,7 @@ Use the `generate` function to dynamically build and register your models:
 ```javascript
 import modelConfig from './model-config'; // your defined models
 
-// Dynamically generate the defined models:
-joint.generate({ modelConfig });
+joint.generate({ modelConfig }); // generate the models
 
 // Access all models using the syntax joint.model.<modelName>:
 if (joint.model.Profile) console.log('The Profile model exists !!!');
@@ -288,7 +287,7 @@ export default {
             fields: [
               { name: 'id', type: 'Number', required: true, lookup: true },
               { name: 'title', type: 'String' },
-        	  { name: 'slug', type: 'String' },
+        	    { name: 'slug', type: 'String' },
               { name: 'tagline', type: 'String' },
               { name: 'is_live', type: 'Boolean' },
             ],
@@ -300,7 +299,7 @@ export default {
           spec: {
             fields: [
               { name: 'id', type: 'Number', requiredOr: true },
-      		  { name: 'slug', type: 'String', requiredOr: true },
+      		    { name: 'slug', type: 'String', requiredOr: true },
             ],
           },
         },
@@ -321,7 +320,7 @@ export default {
           spec: {
             fields: [
               { name: 'id', type: 'Number', requiredOr: true },
-      		  { name: 'slug', type: 'String', requiredOr: true },
+      		    { name: 'slug', type: 'String', requiredOr: true },
             ],
           },
         },
@@ -338,10 +337,9 @@ Use the `generate` function to dynamically generate your methods:
 ```javascript
 import methodConfig from './method-config'; // your defined method logic
 
-// Dynamically generate the defined methods:
-joint.generate({ methodConfig });
+joint.generate({ methodConfig }); // generate the methods
 
-// Utilize the method logic using the syntax:
+// Utilize the method logic:
 const input = {
   fields: { is_live: true }, // retrieve all "live" profiles
 };
@@ -392,12 +390,13 @@ Use the `generate` function to dynamically generate your router logic:
 ```javascript
 import routeConfig from './route-config'; // your defined router logic
 
-// Dynamically generate the defined routes:
-joint.generate({ routeConfig });
+joint.generate({ routeConfig }); // generate the router
 
 // Provide the generated router to your server:
 const app = express();
 app.use('/api', joint.router);
+
+// Now serving: GET /api/profile/333
 ```
 <br />
 
