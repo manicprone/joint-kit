@@ -76,11 +76,18 @@ function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
         if (inputFields && specFields) {
           specFields.forEach((fieldSpec) => {
             const fieldName = fieldSpec.name;
-            const isLookupField = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
+            const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+            const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null;
             const hasInput = objectUtils.has(inputFields, fieldName);
+            const isLookup = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
+            const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false);
 
-            if (hasInput && !isLookupField) {
-              updates[fieldName] = inputFields[fieldName];
+            if (!isLocked && !isLookup && (hasInput || hasDefault)) {
+              updates[fieldName] = (hasInput)
+                  ? inputFields[fieldName]
+                  : defaultValue;
+            } else if (isLocked && !isLookup && hasDefault) {
+              updates[fieldName] = defaultValue;
             }
           }); // end-specFields.forEach
         } // end-if (inputFields && specFields)

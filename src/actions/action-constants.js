@@ -24,6 +24,7 @@ export default {
   SPEC_FIELDS_OPT_REQUIRED_OR: 'requiredOr',
   SPEC_FIELDS_OPT_LOOKUP: 'lookup',
   SPEC_FIELDS_OPT_LOOKUP_OR: 'lookupOr',
+  SPEC_FIELDS_OPT_LOCKED: 'locked',
 
   // Fields to Return / Field Set Definitions
   SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',

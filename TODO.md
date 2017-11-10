@@ -3,12 +3,7 @@
 
 ## Upcoming features
 
-* Implement advanced `fields.defaultValue` feature that supports auto-transforms and other
-  useful dynamic mutations.
-  e.g. `{ fields.defaultValue: '% camelCase(title) %' }` => which will set the default value
-       to the camelcase of the provided "title" field.
-  e.g. `{ fields.defaultValue: '% now %' }` => which will set a Date field value to the current date/time.
-
+* Support model-config without a `modelsEnabled` property (make it optional).
 
 <br />
 
@@ -20,6 +15,8 @@
 
 * Build simple diagram to assist in the Joint concept (i.e. how it fits into the application stack).
 
+* Start a formal online doc!!! (jointjs.org)
+
 <br />
 
 ## Backlog
@@ -30,19 +27,10 @@
 
 * Fix `owner` / `delegateRole` auth rule logic.
 
-* Support model-config without a `modelsEnabled` property (make it optional).
-
 * Support multiple configs on single `generate` call.
   e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
 
 * Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
-
-* Support `fields.defaultValue` for `getItems`, et al. (See app-content method config for use case)
-
-* Support `fields.locked: true` option, for permitting a field declaration on a spec, that is
-  exposed for automatic handling (i.e. does not accept user-provided input).
-  e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action).
-       In this scenario, the field would use `defaultValue: '% now %'` along with `locked: true`.
 
 * Hook input field validation framework into action logic/syntax.
 

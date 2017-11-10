@@ -78,15 +78,17 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name;
-        const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
+        const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+        const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null;
         const hasInput = objectUtils.has(inputFields, fieldName);
+        const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false);
 
-        if (hasInput || hasDefault) {
-          const fieldValue = (hasInput)
+        if (!isLocked && (hasInput || hasDefault)) {
+          whereOpts[fieldName] = (hasInput)
               ? inputFields[fieldName]
-              : fieldSpec.defaultValue;
-
-          whereOpts[fieldName] = fieldValue;
+              : defaultValue;
+        } else if (isLocked && hasDefault) {
+          whereOpts[fieldName] = defaultValue;
         }
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
