@@ -3,7 +3,7 @@
 
 ## Upcoming features
 
-* Complete defaultValue / locked support for => createItem, upsertItem, getItem, getItems.
+* Support model-config without a `modelsEnabled` property (make it optional).
 
 <br />
 
@@ -15,6 +15,8 @@
 
 * Build simple diagram to assist in the Joint concept (i.e. how it fits into the application stack).
 
+* Start a formal online doc!!! (jointjs.org)
+
 <br />
 
 ## Backlog
@@ -25,14 +27,10 @@
 
 * Fix `owner` / `delegateRole` auth rule logic.
 
-* Support model-config without a `modelsEnabled` property (make it optional).
-
 * Support multiple configs on single `generate` call.
   e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
 
 * Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
-
-* Support `fields.defaultValue` for `getItems`, et al. (See app-content method config for use case)
 
 * Hook input field validation framework into action logic/syntax.
 

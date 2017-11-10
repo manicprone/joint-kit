@@ -558,10 +558,10 @@ Each action also supports the optional parameter: `output`.
 | fields.type | The field data type. | _String_ | (_all_) | Yes |
 | fields.required | If the field is required for the action. | _Boolean_ | (_all_) | No |
 | fields.requiredOr | If the field is required for the action (within an OR set). | _Boolean_ | (_all_) | No |
-| fields.lookup | Denotes the field is required to pre-fetch the resource before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
-| fields.lookupOr | Denotes the field is required (within an OR set) to pre-fetch the resource before an update can occur. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
-| fields.locked | Denotes the field cannot be updated by user input. Instead, the `defaultValue` option is set by hand-rolling method logic or by use of dynamic values. | _Boolean_ | (_all_) | Yes for upsertItem, updateItem |
-| fields.defaultValue | The default value to persist, if the field is not provided in the input. | _Mixed_ | createItem, upsertItem, updateItem, getItem | No |
+| fields.lookup | Denotes the field is required to pre-fetch the resource before an update can occur. | _Boolean_ | upsertItem, updateItem, deleteItem | Yes for upsertItem, updateItem |
+| fields.lookupOr | Denotes the field is required (within an OR set) to pre-fetch the resource before an update can occur. | _Boolean_ | upsertItem, updateItem, deleteItem | Yes for upsertItem, updateItem |
+| fields.locked | Denotes the field cannot be updated by user input. Instead, the `defaultValue` option is set by hand-rolling method logic or by use of dynamic values. | _Boolean_ | createItem, upsertItem, updateItem, getItem, getItems | No |
+| fields.defaultValue | The default value to persist, if the field is not provided in the input. Supports dynamic values. | _Mixed_ | createItem, upsertItem, updateItem, getItem, getItems | No |
 | fieldsToReturn | The fields to return with the payload. Returns all fields when not provided. | _Array_<br />-or-<br />_Object_ | getItem, getItems | No |
 | defaultOrderBy | The default sort order for a collection payload. | _String_ | getItems                        | No |
 | forceAssociations | Binds the `associations` to return for all action requests. | _Array_ | getItem, getItems               | No |

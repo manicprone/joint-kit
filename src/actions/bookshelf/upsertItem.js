@@ -62,19 +62,38 @@ function performUpsertItem(bookshelf, spec = {}, input = {}, output) {
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name;
-        const isLookupField = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
-        const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
+        const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+        const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null;
         const hasInput = objectUtils.has(inputFields, fieldName);
+        const isLookup = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
+        const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false);
 
-        if ((hasInput || hasDefault) && !isLookupField) {
-          const fieldValue = (hasInput)
+        if (!isLocked && !isLookup && (hasInput || hasDefault)) {
+          upsertData[fieldName] = (hasInput)
               ? inputFields[fieldName]
-              : fieldSpec.defaultValue;
-
-          upsertData[fieldName] = fieldValue;
+              : defaultValue;
+        } else if (isLocked && !isLookup && hasDefault) {
+          upsertData[fieldName] = defaultValue;
         }
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
+
+    // if (inputFields && specFields) {
+    //   specFields.forEach((fieldSpec) => {
+    //     const fieldName = fieldSpec.name;
+    //     const isLookupField = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP, false) || objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
+    //     const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
+    //     const hasInput = objectUtils.has(inputFields, fieldName);
+    //
+    //     if ((hasInput || hasDefault) && !isLookupField) {
+    //       const fieldValue = (hasInput)
+    //           ? inputFields[fieldName]
+    //           : fieldSpec.defaultValue;
+    //
+    //       upsertData[fieldName] = fieldValue;
+    //     }
+    //   }); // end-specFields.forEach
+    // } // end-if (inputFields && specFields)
 
     // Look for item...
     return model.where(lookupFieldData).fetch(actionOpts)

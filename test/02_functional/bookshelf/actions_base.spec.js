@@ -351,7 +351,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   describe('createItem', () => {
     before(() => resetDB());
 
-    it('should create a new row for the specified model when the spec is satisfied', () => {
+    it('should create a new resource item when the spec is satisfied', () => {
       // ----
       // User
       // ----
@@ -409,6 +409,50 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
 
       return Promise.all([createUser, createProfile]);
+    });
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const projectName = 'Project for Test';
+      const defaultAlias = 'alias-is-locked';
+      const alias = 'user-updated-alias';
+
+      const specNoDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true },
+          { name: 'alias', type: 'String', locked: true },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+      const specWithDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true },
+          { name: 'alias', type: 'String', locked: true, defaultValue: defaultAlias },
+          { name: 'brief_description', type: 'String' },
+        ],
+      };
+
+      const input = {
+        fields: { name: projectName, alias },
+      };
+
+      // If no "defaultValue" is provided, the field value does not get set...
+      const noDefaultValue = projectApp.createItem(specNoDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({ name: projectName });
+          expect(data.attributes).to.not.have.keys(['alias']);
+        });
+
+      const withDefaultValue = projectApp.createItem(specWithDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            name: projectName,
+            alias: defaultAlias,
+          });
+        });
+
+      return Promise.all([noDefaultValue, withDefaultValue]);
     });
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
@@ -542,6 +586,65 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
     });
 
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const defaultAlias = 'alias-is-locked';
+      const alias = 'user-updated-alias';
+
+      const specNoDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true, lookup: true },
+          { name: 'alias', type: 'String', locked: true },
+        ],
+      };
+      const inputNoDefaultValue = {
+        fields: { name: 'Project 1', alias },
+      };
+
+      const specWithDefaultValue = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true, lookup: true },
+          { name: 'alias', type: 'String', locked: true, defaultValue: defaultAlias },
+        ],
+      };
+      const inputWithDefaultValue = {
+        fields: { name: 'Project 2', alias },
+      };
+
+      // If no "defaultValue" is provided, the field value does not get set...
+      const noDefaultValue = projectApp.upsertItem(specNoDefaultValue, inputNoDefaultValue)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            id: 1,
+            name: 'Project 1',
+          });
+          expect(data.attributes).to.not.have.keys(['alias']);
+        });
+
+      // Create...
+      const withDefaultValue = projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
+        .then((created) => {
+          expect(created.attributes).to.contain({
+            id: 2,
+            name: 'Project 2',
+            alias: defaultAlias,
+          });
+
+          // Udpate...
+          return projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
+            .then((udpated) => {
+              expect(udpated.attributes).to.contain({
+                id: 2,
+                name: 'Project 2',
+                alias: defaultAlias,
+              });
+            });
+        });
+
+      return Promise.all([noDefaultValue, withDefaultValue]);
+    });
+
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const modelName = 'AppSettings';
       const appID = 'app-12345';
@@ -671,7 +774,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const id = 1;
       const defaultName = 'Default Name';
+      const name = 'Name is Locked';
 
       const specNoDefaultValue = {
         modelName: 'Project',
@@ -689,9 +794,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'brief_description', type: 'String' },
         ],
       };
-
-      const id = 1;
-      const name = 'Name is Locked';
 
       const input = {
         fields: { id, name },
@@ -718,6 +820,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
     });
 
     it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
+      const id = 4;
+      // const valueToTransform = 'teSt ThIS guY';
+      const valueToTransform = 'test This guy';
+
       const spec = {
         modelName: 'Project',
         fields: [
@@ -730,10 +836,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'full_description', type: 'String' },
         ],
       };
-
-      const id = 4;
-      // const valueToTransform = 'teSt ThIS guY';
-      const valueToTransform = 'test This guy';
 
       const input = {
         fields: { id, full_description: valueToTransform },
@@ -850,7 +952,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // Testing: getItem
   // ----------------
   describe('getItem', () => {
-    before(() => resetDB(['users', 'roles', 'profiles']));
+    before(() => resetDB(['users', 'roles', 'profiles', 'app-content']));
 
     it('should return the row according to the provided spec and input', () => {
       const specUser = {
@@ -881,6 +983,49 @@ describe('BASE ACTIONS [bookshelf]', () => {
       return Promise.all([
         getUser,
       ]);
+    });
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const appID = 'app-001';
+      const key = 'v2.0';
+
+      const specNoDefaultValue = {
+        modelName: 'AppContent',
+        fields: [
+          { name: 'app_id', type: 'String', required: true },
+          { name: 'key', type: 'String', locked: true },
+        ],
+      };
+      const specWithDefaultValue = {
+        modelName: 'AppContent',
+        fields: [
+          { name: 'app_id', type: 'String', required: true },
+          { name: 'key', type: 'String', locked: true, defaultValue: 'v1.0' },
+        ],
+      };
+
+      const input = {
+        fields: { app_id: appID, key },
+      };
+
+      // If no "defaultValue" is provided, the field will not be included in the request...
+      const noDefaultValue = appMgmt.getItem(specNoDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            app_id: appID,
+            key: 'default', // But, bookshelf returns the first created from the matches !!!
+          });
+        });
+
+      const withDefaultValue = appMgmt.getItem(specWithDefaultValue, input)
+        .then((data) => {
+          expect(data.attributes).to.contain({
+            app_id: appID,
+            key: 'v1.0',
+          });
+        });
+
+      return Promise.all([noDefaultValue, withDefaultValue]);
     });
 
     it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the retrieved item data`, () => {
@@ -1406,6 +1551,58 @@ describe('BASE ACTIONS [bookshelf]', () => {
         });
 
       return Promise.all([getUsers, getAllProfiles, getLiveProfiles, getNotLiveProfiles, getExplicitSetOfProfiles]);
+    });
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+      const onlyLiveProfiles = true;
+
+      const specNoDefaultValue = {
+        modelName: 'Profile',
+        fields: [
+          { name: 'id', type: 'Number' },
+          { name: 'user_id', type: 'Number' },
+          { name: 'is_live', type: 'Boolean', locked: true },
+        ],
+        defaultOrderBy: '-created_at',
+      };
+      const specWithDefaultValue = {
+        modelName: 'Profile',
+        fields: [
+          { name: 'id', type: 'Number' },
+          { name: 'user_id', type: 'Number' },
+          { name: 'is_live', type: 'Boolean', locked: true, defaultValue: onlyLiveProfiles },
+        ],
+        defaultOrderBy: '-created_at',
+      };
+      const specWithExplicitIDs = {
+        modelName: 'Profile',
+        fields: [
+          { name: 'id', type: 'Number', locked: true, defaultValue: [1, 2, 4] },
+        ],
+        defaultOrderBy: '-created_at',
+      };
+
+      const input = {
+        fields: { is_live: false },
+      };
+
+      // If no "defaultValue" is provided, the field will not be included in the request...
+      const noDefaultValue = blogApp.getItems(specNoDefaultValue, input)
+        .then((data) => {
+          expect(data.models).to.have.length(11);
+        });
+
+      const withDefaultValue = blogApp.getItems(specWithDefaultValue, input)
+        .then((data) => {
+          expect(data.models).to.have.length(7);
+        });
+
+      const withExplicitIDs = blogApp.getItems(specWithExplicitIDs, input)
+        .then((data) => {
+          expect(data.models).to.have.length(3);
+        });
+
+      return Promise.all([noDefaultValue, withDefaultValue, withExplicitIDs]);
     });
 
     it('should only return the field data that is permitted by the spec', () => {

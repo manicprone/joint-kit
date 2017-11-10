@@ -448,8 +448,7 @@ describe('ACTION-UTILS', () => {
         alias: 'alias-from-input',
       };
 
-      expect(ActionUtils.processDefaultValue(fieldData))
-        .to.be.null;
+      expect(ActionUtils.processDefaultValue(fieldData)).to.be.null;
     });
 
     it('should return the original "defaultValue" for standard scenarios', () => {
@@ -458,10 +457,22 @@ describe('ACTION-UTILS', () => {
         alias: 'alias-from-input',
       };
 
-      const defaultValue = 'standard-value';
+      const stringValue = 'standard-value';
+      const booleanFalseValue = false;
+      const booleanTrueValue = true;
+      const numberValue = 33;
+      const nullValue = null;
 
-      expect(ActionUtils.processDefaultValue(fieldData, defaultValue))
-        .to.equal(defaultValue);
+      expect(ActionUtils.processDefaultValue(fieldData, stringValue))
+        .to.equal(stringValue);
+      expect(ActionUtils.processDefaultValue(fieldData, booleanFalseValue))
+        .to.equal(booleanFalseValue);
+      expect(ActionUtils.processDefaultValue(fieldData, booleanTrueValue))
+        .to.equal(booleanTrueValue);
+      expect(ActionUtils.processDefaultValue(fieldData, numberValue))
+        .to.equal(numberValue);
+      expect(ActionUtils.processDefaultValue(fieldData, nullValue))
+        .to.equal(nullValue);
     });
 
     it('should support the "now" operator', () => {

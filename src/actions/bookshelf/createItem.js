@@ -57,29 +57,31 @@ function performCreateItem(bookshelf, spec = {}, input = {}, output) {
     const actionOpts = {};
     if (trx) actionOpts.transacting = trx;
 
-    // Build row data...
-    const rowData = {};
+    // Build create package...
+    const createData = {};
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name;
-        const hasDefault = objectUtils.has(fieldSpec, 'defaultValue');
+        const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+        const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null;
         const hasInput = objectUtils.has(inputFields, fieldName);
+        const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false);
 
-        if (hasInput || hasDefault) {
-          const fieldValue = (hasInput)
+        if (!isLocked && (hasInput || hasDefault)) {
+          createData[fieldName] = (hasInput)
               ? inputFields[fieldName]
-              : fieldSpec.defaultValue;
-
-          rowData[fieldName] = fieldValue;
+              : defaultValue;
+        } else if (isLocked && hasDefault) {
+          createData[fieldName] = defaultValue;
         }
       }); // end-specFields.forEach
     } // end-if (inputFields && specFields)
 
     // Debug executing logic...
-    if (debug) console.log(`[JOINT] [action:createItem] EXECUTING => CREATE ${modelName} WITH`, rowData);
+    if (debug) console.log(`[JOINT] [action:createItem] EXECUTING => CREATE ${modelName} WITH`, createData);
 
     // Create row...
-    return model.forge(rowData).save(null, actionOpts)
+    return model.forge(createData).save(null, actionOpts)
       .then((data) => {
         // Return data in requested format...
         switch (output) {

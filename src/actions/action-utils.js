@@ -253,7 +253,7 @@ export function parseLoadDirect(loadDirectSpec = []) {
 export function processDefaultValue(fieldData = {}, defaultValue) {
   let value = null;
 
-  if (defaultValue) {
+  if (defaultValue !== undefined) {
     const dynamicOperationPattern = /^%(.+)%/;
     const match = dynamicOperationPattern.exec(defaultValue);
 
