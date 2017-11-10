@@ -165,7 +165,7 @@ import modelConfig from './model-config'; // your defined models
 // Dynamically generate the defined models:
 joint.generate({ modelConfig });
 
-// You can access all models using the syntax joint.model.<modelName>:
+// Access all models using the syntax joint.model.<modelName>:
 if (joint.model.Profile) console.log('The Profile model exists !!!');
 ```
 
@@ -189,8 +189,8 @@ export function createProfile(input) {
     modelName: 'Profile',
     fields: [
       { name: 'user_id', type: 'Number', required: true },
-      { name: 'slug', type: 'String', required: true },
       { name: 'title', type: 'String', required: true },
+      { name: 'slug', type: 'String', defaultValue: '% kebabCase(title) % },
       { name: 'tagline', type: 'String' },
       { name: 'is_live', type: 'Boolean', defaultValue: false },
     ],
@@ -204,8 +204,8 @@ export function updateProfile(input) {
     modelName: 'Profile',
     fields: [
       { name: 'id', type: 'Number', required: true, lookup: true },
-      { name: 'slug', type: 'String' },
       { name: 'title', type: 'String' },
+      { name: 'slug', type: 'String' },
       { name: 'tagline', type: 'String' },
       { name: 'is_live', type: 'Boolean' },
     ],
@@ -233,6 +233,7 @@ export function getProfiles(input) {
       { name: 'user_id', type: 'Number' },
       { name: 'is_live', type: 'Boolean' },
     ],
+    defaultOrderBy: '-created_at,title',
   };
 
   return joint.getItems(spec, input);
@@ -273,10 +274,33 @@ export default {
           spec: {
             fields: [
               { name: 'user_id', type: 'Number', required: true },
-              { name: 'slug', type: 'String', required: true },
-              { name: 'title', type: 'String' },
+              { name: 'title', type: 'String', required: true },
+              { name: 'slug', type: 'String', defaultValue: '% kebabCase(title) %' },
               { name: 'tagline', type: 'String' },
               { name: 'is_live', type: 'Boolean', defaultValue: false },
+            ],
+          },
+        },
+        {
+          name: 'updateProfile',
+          action: 'updateItem',
+          spec: {
+            fields: [
+              { name: 'id', type: 'Number', required: true, lookup: true },
+              { name: 'title', type: 'String' },
+        	  { name: 'slug', type: 'String' },
+              { name: 'tagline', type: 'String' },
+              { name: 'is_live', type: 'Boolean' },
+            ],
+          },
+        },
+        {
+          name: 'getProfile',
+          action: 'getItem',
+          spec: {
+            fields: [
+              { name: 'id', type: 'Number', requiredOr: true },
+      		  { name: 'slug', type: 'String', requiredOr: true },
             ],
           },
         },
@@ -285,10 +309,20 @@ export default {
           action: 'getItems',
           spec: {
             fields: [
-              { name: 'user_id', type: 'Number', requiredOr: true },
-              { name: 'is_live', type: 'String', requiredOr: true },
+              { name: 'user_id', type: 'Number' },
+              { name: 'is_live', type: 'Boolean' },
             ],
             defaultOrderBy: '-created_at,title',
+          },
+        },
+        {
+          name: 'deleteProfile',
+          action: 'deleteItem',
+          spec: {
+            fields: [
+              { name: 'id', type: 'Number', requiredOr: true },
+      		  { name: 'slug', type: 'String', requiredOr: true },
+            ],
           },
         },
       ],
@@ -307,9 +341,9 @@ import methodConfig from './method-config'; // your defined method logic
 // Dynamically generate the defined methods:
 joint.generate({ methodConfig });
 
-// You can now utilize the methods using the syntax:
+// Utilize the method logic using the syntax:
 const input = {
-  fields: { is_live: true },
+  fields: { is_live: true }, // retrieve all "live" profiles
 };
 joint.method.Profile.getProfiles(input)
   .then((result) => { ... })
@@ -336,6 +370,12 @@ export default {
     {
       uri: '/profile',
       post: { method: 'Profile.createProfile', successStatus: 201, body: true },
+    },
+    {
+      uri: '/profile/:id',
+      get: { method: 'Profile.getProfile' },
+      post: { method: 'Profile.updateProfile', body: true },
+      delete: { method: 'Profile.deleteProfile', successStatus: 204 },
     },
     {
       uri: '/profiles',

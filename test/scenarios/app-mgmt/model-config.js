@@ -5,11 +5,11 @@
 
 module.exports = {
 
-  modelsEnabled: [
-    'AppRegistry',
-    'AppContent',
-    'AppSettings',
-  ],
+  // modelsEnabled: [
+  //   'AppRegistry',
+  //   'AppContent',
+  //   'AppSettings',
+  // ],
 
   models: {
     // Manages all registered client applications

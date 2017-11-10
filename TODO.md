@@ -3,8 +3,6 @@
 
 ## Upcoming features
 
-* Support model-config without a `modelsEnabled` property (make it optional).
-
 <br />
 
 ## README To Do
@@ -29,6 +27,17 @@
 
 * Support multiple configs on single `generate` call.
   e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
+
+* Support multiple fields on uri spec for route-config.
+  Likely, this will only work if the fields are of different types
+  (otherwise, the first field of matching type is presumed).
+  e.g.
+  ```
+  {
+    uri: '/profile/{id,slug}',
+    get: { method: 'Profile.getProfile' },
+  },
+  ```
 
 * Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
 
