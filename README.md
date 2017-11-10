@@ -190,7 +190,7 @@ export function createProfile(input) {
     fields: [
       { name: 'user_id', type: 'Number', required: true },
       { name: 'title', type: 'String', required: true },
-      { name: 'slug', type: 'String', defaultValue: '% kebabCase(title) % },
+      { name: 'slug', type: 'String', defaultValue: '% kebabCase(title) %' },
       { name: 'tagline', type: 'String' },
       { name: 'is_live', type: 'Boolean', defaultValue: false },
     ],
