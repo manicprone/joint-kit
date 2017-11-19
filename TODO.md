@@ -7,13 +7,9 @@
 
 ## README To Do
 
-* For Overview:
-  - "The Joint Concept (In Code)" => A set of code blocks, to explain the overall concept of usage.
-  - "Joint in Practice" => The current content of "The Joint Concept".
+* Update README, now that the docs have moved to an official site.
 
 * Build simple diagram to assist in the Joint concept (i.e. how it fits into the application stack).
-
-* Start a formal online doc!!! (jointjs.org)
 
 <br />
 
@@ -24,9 +20,6 @@
 * Add logic for `rolesAll` auth rule.
 
 * Fix `owner` / `delegateRole` auth rule logic.
-
-* Support multiple configs on single `generate` call.
-  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
 
 * Support multiple fields on uri spec for route-config.
   Likely, this will only work if the fields are of different types
@@ -39,9 +32,12 @@
   },
   ```
 
-* Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
-
 * Hook input field validation framework into action logic/syntax.
+
+* Support multiple configs on single `generate` call.
+  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
+
+* Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
 
 * Provide action: `snapshotItem` => which implements "createItem" (copy) on a source
   item (i.e. it looks up a source item, auth checks the source, creates a copy
@@ -49,6 +45,7 @@
   Description: An advanced create operation for "snapshotting" a single item into a version copy (with associations).
 
 * Hook job framework into solution.
+  (A starting use case can be the "delayed publish date", e.g.)
 
 * Add "view count" tracking as a built-in feature.
 
