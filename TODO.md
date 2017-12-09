@@ -21,6 +21,11 @@
 
 * Fix `owner` / `delegateRole` auth rule logic.
 
+* Complete route-config handling
+
+  - In buildRouter.js => determine if method being built is an association action,
+    and prepare the input appropriately (currently only building base action syntax).
+
 * Support multiple fields on uri spec for route-config.
   Likely, this will only work if the fields are of different types
   (otherwise, the first field of matching type is presumed).
