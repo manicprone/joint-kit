@@ -1,4 +1,5 @@
 import objectUtils from '../../utils/object-utils';
+// import MODEL from '../constants/model-config-constants';
 import * as CoreUtils from '../core-utils';
 
 export default function registerModel(bookshelf = {}, modelDef = {}, modelName, debug = false) {

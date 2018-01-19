@@ -1,7 +1,44 @@
 # Joint Kit Feature Planning
 
 
-## Upcoming features
+## Upcoming Features
+
+* Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
+
+* Add constants files for each config syntax (i.e. `src/core/model-config-constants.js`, etc).
+
+* Eliminate the declaration ordering issue with the `generate` logic for models:
+
+  - Register the modelNames first, then register their associations.
+  - Get rid of the `modelsEnabled` property.
+
+* Update the config syntax:
+
+  ```
+  {
+
+    modelConfig: [
+      { name: 'User', tableName: 'user_account' },
+    ],
+
+    methodConfig: [
+      { modelName: 'User', methods: [ ... ] },
+    ],
+
+    routeConfig: [
+      { uri: '/user', get: { ... }, post: { ... } },
+    ],
+
+  }
+  ```
+
+* Update the db scenarios for testing:
+
+  - Change all tables to use singular names
+  - Rename "users" => "user_account"
+  - Rename "user_info" => "user_ext_info"
+  - Rename "roles" => "user_role"
+  - Finish the schema for the blog_app scenario
 
 <br />
 
@@ -9,11 +46,13 @@
 
 * Update README, now that the docs have moved to an official site.
 
-* Build simple diagram to assist in the Joint concept (i.e. how it fits into the application stack).
+* Add software stack info, etc.
 
 <br />
 
 ## Backlog
+
+* Support `orderBy` on associations (via <b>model config</b>).
 
 * Complete support for `authorizedApps` auth rule / infrastructure.
 
@@ -37,10 +76,9 @@
   },
   ```
 
-* Hook input field validation framework into action logic/syntax.
+* Complete `routeConfig` functional testing, using the updated db scenarios.
 
-* Support multiple configs on single `generate` call.
-  e.g. `joint.generate({ modelConfig: [userModels, projectModels] })`;
+* Hook input field validation framework into action logic/syntax.
 
 * Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
 
@@ -64,5 +102,68 @@
 ## To Consider
 
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
+
+* Theoretical (all-in-one) syntax that could be desired / supported:
+
+  ```
+  const config = [
+    // --------------
+    // Resource: User
+    // --------------
+    {
+      modelName: 'User',
+      idField: 'id',
+      tableName: 'user_account',
+      timestamps: { created: 'created_at', updated: 'updated_at' },
+      associations: {
+        profile: {
+          type: 'toOne',
+          path: 'id => UserProfile.user_id',
+        },
+        roles: {
+          type: 'toMany',
+          path: 'id => UserRoleRef.user_id => UserRoleRef.role_id => UserRole.id',
+        },
+      },
+      methods: [
+        {
+          name: 'createUser',
+          action: 'createItem',
+          spec: {
+            fields: [
+              { name: 'username', type: 'String', required: true },
+              { name: 'external_id', type: 'String' },
+              { name: 'email', type: 'String' },
+              { name: 'display_name', type: 'String' },
+              { name: 'first_name', type: 'String' },
+              { name: 'last_name', type: 'String' },
+              { name: 'preferred_locale', type: 'String' },
+              { name: 'avatar_url', type: 'String' },
+            ],
+          },
+        },
+        { ... },
+      ],
+      routes: [
+        {
+          uri: '/user',
+          get: { method: 'User.getUser' },
+          post: { method: 'User.createUser', successStatus: 201, body: true },
+        },
+        {
+          uri: '/user/:id/mark_login',
+          post: { method: 'User.markLogin' },
+        },
+        { ... },
+      ],
+    },
+  ];
+
+  // If array => universal config
+  joint.generate(config);
+
+  // If object => segregated config
+  joint.generate({ modelConfig, methodConfig, routeConfig });
+  ```
 
 <br />

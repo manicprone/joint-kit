@@ -1,6 +1,7 @@
 import objectUtils from '../utils/object-utils';
 import JointError from '../errors/JointError';
-import ACTION from '../actions/action-constants';
+import MODEL from './constants/model-config-constants';
+import METHOD from './constants/method-config-constants';
 import registerModelBookshelf from './bookshelf/registerModel';
 import buildRouterExpress from './express/buildRouter';
 
@@ -15,8 +16,8 @@ export function registerModels(joint, log = true) {
   const modelConfig = joint.modelConfig;
   const serviceKey = joint.serviceKey;
   const service = joint.service;
-  const modelDefs = modelConfig.models;
-  const enabledModels = modelConfig.modelsEnabled || Object.keys(modelDefs);
+  const modelDefs = modelConfig[MODEL.MODEL_SET];
+  const enabledModels = modelConfig[MODEL.MODELS_ENABLED] || Object.keys(modelDefs);
 
   // Prepare model registries...
   if (!joint.model) {
@@ -106,10 +107,10 @@ export function registerMethods(joint, log = true) {
       // Load all methods...
       if (methods && Array.isArray(methods) && methods.length > 0) {
         methods.forEach((methodDef) => {
-          const methodName = methodDef.name;
+          const methodName = methodDef[METHOD.NAME];
           const jointAction = methodDef.action;
           const methodSpec = methodDef.spec;
-          methodSpec[ACTION.SPEC_MODEL_NAME] = modelNameForResource;
+          methodSpec[METHOD.MODEL_NAME] = modelNameForResource;
 
           if (debug_registerMethods) {
             console.log(`[${namespace}] ============================================ [DEBUG]`);

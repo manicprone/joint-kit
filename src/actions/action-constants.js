@@ -1,6 +1,6 @@
-// ---------------------
-// Join Action Constants
-// ---------------------
+// ----------------------
+// Joint Action Constants
+// ----------------------
 
 export default {
   // ------------------------------- Association Options
