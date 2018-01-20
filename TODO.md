@@ -3,15 +3,6 @@
 
 ## Upcoming Features
 
-* Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
-
-* Add constants files for each config syntax (i.e. `src/core/model-config-constants.js`, etc).
-
-* Eliminate the declaration ordering issue with the `generate` logic for models:
-
-  - Register the modelNames first, then register their associations.
-  - Get rid of the `modelsEnabled` property.
-
 * Update the config syntax:
 
   ```
@@ -31,6 +22,15 @@
 
   }
   ```
+
+* Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
+
+* Eliminate the declaration ordering issue with the `generate` logic for models:
+
+  - Register the modelNames first, then register their associations.
+  - Get rid of the `modelsEnabled` property.
+
+* Utilize the constants (for all syntax) within the code.
 
 * Update the db scenarios for testing:
 
@@ -88,7 +88,10 @@
   Description: An advanced create operation for "snapshotting" a single item into a version copy (with associations).
 
 * Hook job framework into solution.
-  (A starting use case can be the "delayed publish date", e.g.)
+
+  Initial jobs to provide:
+  - the "delayed publish date"
+  - delete specific data, after a TTL has been reached (for the Storytold sample app)
 
 * Add "view count" tracking as a built-in feature.
 
@@ -104,6 +107,7 @@
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
 
 * Theoretical (all-in-one) syntax that could be desired / supported:
+  > But, would I ever want to actually use this ???
 
   ```
   const config = [
