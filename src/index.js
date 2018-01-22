@@ -17,6 +17,9 @@ export default class Joint {
     this.output = objectUtils.get(options, 'output', 'native');
     this.settings = (options.settings) ? Object.assign(defaultSettings, options.settings) : defaultSettings;
 
+    // Set generated flag...
+    this.hasGenerated = false;
+
     // Exit if a service is not loaded or is not recognized/supported...
     if (!this.service) {
       const message = 'A service must be configured to use Joint.';
@@ -68,6 +71,7 @@ export default class Joint {
     Object.assign(this.settings, settings);
   }
 
+  // TODO: Merge configs, to support continuous invocations !!!
   generate(options) {
     // Parse options...
     this.modelConfig = objectUtils.get(options, 'modelConfig', null);
@@ -84,6 +88,7 @@ export default class Joint {
     // Build model registry...
     // -----------------------
     // Models are loaded as => this.model.<modelName>
+    // if (this.modelConfig || !this.hasGenerated) JointGenerate.registerModels(this, log);
     if (this.modelConfig) JointGenerate.registerModels(this, log);
 
     // -----------------------
@@ -97,6 +102,9 @@ export default class Joint {
     // --------------------------
     // The router is loaded as => this.router
     if (this.routeConfig) JointGenerate.buildRouter(this, log);
+
+    // Set generated flag...
+    this.hasGenerated = true;
   } // END - generate
 
   info() {

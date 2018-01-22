@@ -2,6 +2,8 @@ import objectUtils from '../../utils/object-utils';
 // import MODEL from '../constants/model-config-constants';
 import * as CoreUtils from '../core-utils';
 
+const namespace = 'JOINT';
+
 export default function registerModel(bookshelf = {}, modelDef = {}, modelName, debug = false) {
   let registryEntry = null;
 
@@ -24,11 +26,19 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
           const assocDef = associations[assocName];
           const assocType = assocDef.type;
           const assocPath = assocDef.path;
-          if (debug) console.log(`[JOINT] [registerModel] defining association: ${assocName} =>`, assocDef);
+          if (debug) {
+            console.log(`[${namespace}] Bookshelf:registerModel defining association => (${assocName})`);
+            console.log(assocDef);
+            console.log('');
+          }
 
           // Parse path string...
           const info = CoreUtils.parseAssociationPath(assocPath);
-          if (debug) console.log('[JOINT] [registerModel] parsed association path:', info);
+          if (debug) {
+            console.log(`[${namespace}] Bookshelf:registerModel parsed association path:`);
+            console.log(info);
+            console.log('');
+          }
 
           if (info) {
             // Add lookup of association modelName to bookshelf...
@@ -70,6 +80,11 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
                 assocHooks[assocName] = function () {
                   return this[assocMethod](info.targetModelName, throughTableName, info.through.fromField, info.through.toField, info.sourceField, info.targetField);
                 };
+
+                // assocHooks[assocName] = function () {
+                //   return this[assocMethod](info.targetModelName)
+                //     .through(info.through.modelName, info.through.fromField, info.through.toField);
+                // };
 
               // Handle direct path...
               } else {

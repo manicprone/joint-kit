@@ -3,6 +3,11 @@
 
 ## Upcoming Features
 
+* Remove Bookshelf and Knex from the dependencies!!! Why are they even there to begin with ???
+
+* Eliminate the declaration ordering issue with the `generate` logic for models
+  (build a modelName => table lookup registry to solve).
+
 * Update the config syntax:
 
   ```
@@ -25,11 +30,6 @@
 
 * Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
 
-* Eliminate the declaration ordering issue with the `generate` logic for models:
-
-  - Register the modelNames first, then register their associations.
-  - Get rid of the `modelsEnabled` property.
-
 * Utilize the constants (for all syntax) within the code.
 
 * Update the db scenarios for testing:
@@ -39,6 +39,9 @@
   - Rename "user_info" => "user_ext_info"
   - Rename "roles" => "user_role"
   - Finish the schema for the blog_app scenario
+
+* Support successive `generate` calls (i.e. merge provided configs into the
+  existing set, then run the generate logic on the full set).
 
 <br />
 
@@ -51,6 +54,11 @@
 <br />
 
 ## Backlog
+
+* Remove the quotes on the modelNames in the error messages.
+
+* Change the nomenclature of the package/service from "Joint" => "Joint Kit"
+  (namely in the logging and error messages, et al).
 
 * Support `orderBy` on associations (via <b>model config</b>).
 
@@ -106,16 +114,13 @@
 
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
 
-* Theoretical (all-in-one) syntax that could be desired / supported:
-  > But, would I ever want to actually use this ???
 
-  ```
-  const config = [
-    // --------------
-    // Resource: User
-    // --------------
+```
+const config = {
+
+  modelConfig: [
     {
-      modelName: 'User',
+      name: 'User',
       idField: 'id',
       tableName: 'user_account',
       timestamps: { created: 'created_at', updated: 'updated_at' },
@@ -129,6 +134,12 @@
           path: 'id => UserRoleRef.user_id => UserRoleRef.role_id => UserRole.id',
         },
       },
+    },
+  ],
+
+  methodConfig: [
+    {
+      modelName: 'User',
       methods: [
         {
           name: 'createUser',
@@ -146,28 +157,32 @@
             ],
           },
         },
-        { ... },
-      ],
-      routes: [
         {
-          uri: '/user',
-          get: { method: 'User.getUser' },
-          post: { method: 'User.createUser', successStatus: 201, body: true },
+          name: 'getUser',
+          action: 'getItem',
+          spec: {
+            fields: [
+              { name: 'id', type: 'Number', requiredOr: true },
+              { name: 'username', type: 'String', requiredOr: true },
+              { name: 'external_id', type: 'String', requiredOr: true },
+            ],
+            forceLoadDirect: ['roles:name'],
+          },
         },
-        {
-          uri: '/user/:id/mark_login',
-          post: { method: 'User.markLogin' },
-        },
-        { ... },
       ],
     },
-  ];
+  ],
 
-  // If array => universal config
-  joint.generate(config);
-
-  // If object => segregated config
-  joint.generate({ modelConfig, methodConfig, routeConfig });
-  ```
-
-<br />
+  routeConfig: [
+    {
+      uri: '/user',
+      get: { method: 'User.getUser' },
+      post: { method: 'User.createUser', successStatus: 201, body: true },
+    },
+    {
+      uri: '/user/:id/mark_login',
+      post: { method: 'User.markLogin' },
+    },
+  ],
+},
+```
