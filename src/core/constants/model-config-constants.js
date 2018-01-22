@@ -3,9 +3,6 @@
 // ----------------------
 
 export default {
-  MODELS_ENABLED: 'modelsEnabled',
-  MODEL_SET: 'models',
-
   // Model Name
   NAME: 'name',
 

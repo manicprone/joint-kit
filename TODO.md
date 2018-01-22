@@ -5,8 +5,12 @@
 
 * Remove Bookshelf and Knex from the dependencies!!! Why are they even there to begin with ???
 
-* Eliminate the declaration ordering issue with the `generate` logic for models
-  (build a modelName => table lookup registry to solve).
+* Eliminate the declaration ordering issue with the `generate` logic for models:
+
+  - Populate the `joint.modelNameByTable` registry upfront, before invoking the
+    `registerModel` logic.
+  - Pass the full joint instance to `registerModel`, instead of just the service
+    (to access the lookup registry).
 
 * Update the config syntax:
 
@@ -32,14 +36,6 @@
 
 * Utilize the constants (for all syntax) within the code.
 
-* Update the db scenarios for testing:
-
-  - Change all tables to use singular names
-  - Rename "users" => "user_account"
-  - Rename "user_info" => "user_ext_info"
-  - Rename "roles" => "user_role"
-  - Finish the schema for the blog_app scenario
-
 * Support successive `generate` calls (i.e. merge provided configs into the
   existing set, then run the generate logic on the full set).
 
@@ -54,6 +50,16 @@
 <br />
 
 ## Backlog
+
+* Update the db scenarios for testing:
+
+  - Change all tables to use singular names
+  - Rename "users" => "user_account"
+  - Rename "user_info" => "user_ext_info"
+  - Rename "roles" => "user_role"
+  - Finish the schema for the blog_app scenario
+
+* Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Remove the quotes on the modelNames in the error messages.
 
@@ -84,8 +90,6 @@
   },
   ```
 
-* Complete `routeConfig` functional testing, using the updated db scenarios.
-
 * Hook input field validation framework into action logic/syntax.
 
 * Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
@@ -113,76 +117,3 @@
 ## To Consider
 
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
-
-
-```
-const config = {
-
-  modelConfig: [
-    {
-      name: 'User',
-      idField: 'id',
-      tableName: 'user_account',
-      timestamps: { created: 'created_at', updated: 'updated_at' },
-      associations: {
-        profile: {
-          type: 'toOne',
-          path: 'id => UserProfile.user_id',
-        },
-        roles: {
-          type: 'toMany',
-          path: 'id => UserRoleRef.user_id => UserRoleRef.role_id => UserRole.id',
-        },
-      },
-    },
-  ],
-
-  methodConfig: [
-    {
-      modelName: 'User',
-      methods: [
-        {
-          name: 'createUser',
-          action: 'createItem',
-          spec: {
-            fields: [
-              { name: 'username', type: 'String', required: true },
-              { name: 'external_id', type: 'String' },
-              { name: 'email', type: 'String' },
-              { name: 'display_name', type: 'String' },
-              { name: 'first_name', type: 'String' },
-              { name: 'last_name', type: 'String' },
-              { name: 'preferred_locale', type: 'String' },
-              { name: 'avatar_url', type: 'String' },
-            ],
-          },
-        },
-        {
-          name: 'getUser',
-          action: 'getItem',
-          spec: {
-            fields: [
-              { name: 'id', type: 'Number', requiredOr: true },
-              { name: 'username', type: 'String', requiredOr: true },
-              { name: 'external_id', type: 'String', requiredOr: true },
-            ],
-            forceLoadDirect: ['roles:name'],
-          },
-        },
-      ],
-    },
-  ],
-
-  routeConfig: [
-    {
-      uri: '/user',
-      get: { method: 'User.getUser' },
-      post: { method: 'User.createUser', successStatus: 201, body: true },
-    },
-    {
-      uri: '/user/:id/mark_login',
-      post: { method: 'User.markLogin' },
-    },
-  ],
-},
-```

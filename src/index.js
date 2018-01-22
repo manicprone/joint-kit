@@ -16,6 +16,7 @@ export default class Joint {
     this.serverKey = CoreUtils.determineServerKeyFromServer(this.server);
     this.output = objectUtils.get(options, 'output', 'native');
     this.settings = (options.settings) ? Object.assign(defaultSettings, options.settings) : defaultSettings;
+    // const log = objectUtils.get(options, 'log', true);
 
     // Set generated flag...
     this.hasGenerated = false;
@@ -88,7 +89,6 @@ export default class Joint {
     // Build model registry...
     // -----------------------
     // Models are loaded as => this.model.<modelName>
-    // if (this.modelConfig || !this.hasGenerated) JointGenerate.registerModels(this, log);
     if (this.modelConfig) JointGenerate.registerModels(this, log);
 
     // -----------------------

@@ -8,7 +8,7 @@ import projectAppModels from '../../scenarios/project-app/model-config';
 import projectAppMethods from '../../scenarios/project-app/method-config';
 import blogAppModels from '../../scenarios/blog-app/model-config';
 import blogAppMethods from '../../scenarios/blog-app/method-config';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
 

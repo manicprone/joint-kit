@@ -10,14 +10,12 @@ import codingLanguageTag from './resources/coding-language-tag';
 import softwareTag from './resources/software-tag';
 import techConceptTag from './resources/tech-concept-tag';
 
-module.exports = {
-  resources: [
-    user,
-    userInfo,
-    project,
-    projectContributor,
-    codingLanguageTag,
-    softwareTag,
-    techConceptTag,
-  ],
-};
+module.exports = [
+  user,
+  userInfo,
+  project,
+  projectContributor,
+  codingLanguageTag,
+  softwareTag,
+  techConceptTag,
+];

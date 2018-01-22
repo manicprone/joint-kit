@@ -10,7 +10,22 @@ const debug_registerModels = false;
 const debug_registerMethods = false;
 
 // -----------------------------------------------------------------------------
-// Register models from model config (and existing models from the service)...
+// Register models from service...
+// -----------------------------------------------------------------------------
+export function registerModelsFromService(joint, log = true) {
+  if (log) {
+    console.log('----------------------------------------------------');
+    console.log('Loading resource models from service');
+    console.log('----------------------------------------------------');
+  }
+
+  // TODO ...
+
+  if (log) console.log('');
+}
+
+// -----------------------------------------------------------------------------
+// Register models from model config...
 // -----------------------------------------------------------------------------
 export function registerModels(joint, log = true) {
   const service = joint.service;
@@ -79,8 +94,7 @@ export function registerModels(joint, log = true) {
 //       (At least, report a warning in the log)
 // -----------------------------------------------------------------------------
 export function registerMethods(joint, log = true) {
-  const methodConfig = joint.methodConfig;
-  const resources = methodConfig.resources;
+  const resources = joint.methodConfig;
 
   // Prepare method registries...
   if (!joint.method) {

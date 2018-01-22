@@ -1,5 +1,5 @@
 import chai from 'chai';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 import * as CoreUtils from '../../../src/core/core-utils';
 
 const expect = chai.expect;

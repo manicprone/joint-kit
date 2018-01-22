@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import Joint from '../../../src';
 import projectAppModels from '../../scenarios/project-app/model-config';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
 

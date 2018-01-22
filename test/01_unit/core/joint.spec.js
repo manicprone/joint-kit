@@ -7,7 +7,7 @@ import projectAppModels from '../../scenarios/project-app/model-config';
 import projectAppMethods from '../../scenarios/project-app/method-config';
 import projectAppRoutes from '../../scenarios/project-app/route-config';
 import blogAppModels from '../../scenarios/blog-app/model-config';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 
 const expect = chai.expect;
 
