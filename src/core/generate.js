@@ -162,10 +162,9 @@ function generateMethod(joint, action, spec) {
 // Build router from route config...
 // -----------------------------------------------------------------------------
 export function buildRouter(joint, log = true) {
-  const routeConfig = joint.routeConfig;
   const serverKey = joint.serverKey;
   const server = joint.server;
-  const routeDefs = routeConfig.routes;
+  const routeDefs = joint.routeConfig;
 
   if (log) {
     console.log('----------------------------------------------------');
