@@ -3,34 +3,33 @@
 
 ## Upcoming Features
 
-* Update the config syntax:
-
-  ```
-  {
-
-    modelConfig: [
-      { name: 'User', tableName: 'user_account' },
-    ],
-
-    methodConfig: [
-      { modelName: 'User', methods: [ ... ] },
-    ],
-
-    routeConfig: [
-      { uri: '/user', get: { ... }, post: { ... } },
-    ],
-
-  }
-  ```
-
-* Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
+* Remove Bookshelf and Knex from the dependencies!!! Why are they even there to begin with ???
 
 * Eliminate the declaration ordering issue with the `generate` logic for models:
 
-  - Register the modelNames first, then register their associations.
-  - Get rid of the `modelsEnabled` property.
+  - Populate the `joint.modelNameByTable` registry upfront, before invoking the
+    `registerModel` logic.
+  - Pass the full joint instance to `registerModel`, instead of just the service
+    (to access the lookup registry).
+
+* Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
 
 * Utilize the constants (for all syntax) within the code.
+
+* Support successive `generate` calls (i.e. merge provided configs into the
+  existing set, then run the generate logic on the full set).
+
+<br />
+
+## README To Do
+
+* Add general info / overview, once jointkit.org is ready.
+
+* Add software stack info, etc.
+
+<br />
+
+## Backlog
 
 * Update the db scenarios for testing:
 
@@ -40,17 +39,12 @@
   - Rename "roles" => "user_role"
   - Finish the schema for the blog_app scenario
 
-<br />
+* Complete `routeConfig` functional testing, using the updated db scenarios.
 
-## README To Do
+* Remove the quotes on the modelNames in the error messages.
 
-* Update README, now that the docs have moved to an official site.
-
-* Add software stack info, etc.
-
-<br />
-
-## Backlog
+* Change the nomenclature of the package/service from "Joint" => "Joint Kit"
+  (namely in the logging and error messages, et al).
 
 * Support `orderBy` on associations (via <b>model config</b>).
 
@@ -75,8 +69,6 @@
     get: { method: 'Profile.getProfile' },
   },
   ```
-
-* Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Hook input field validation framework into action logic/syntax.
 
@@ -105,69 +97,3 @@
 ## To Consider
 
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
-
-* Theoretical (all-in-one) syntax that could be desired / supported:
-  > But, would I ever want to actually use this ???
-
-  ```
-  const config = [
-    // --------------
-    // Resource: User
-    // --------------
-    {
-      modelName: 'User',
-      idField: 'id',
-      tableName: 'user_account',
-      timestamps: { created: 'created_at', updated: 'updated_at' },
-      associations: {
-        profile: {
-          type: 'toOne',
-          path: 'id => UserProfile.user_id',
-        },
-        roles: {
-          type: 'toMany',
-          path: 'id => UserRoleRef.user_id => UserRoleRef.role_id => UserRole.id',
-        },
-      },
-      methods: [
-        {
-          name: 'createUser',
-          action: 'createItem',
-          spec: {
-            fields: [
-              { name: 'username', type: 'String', required: true },
-              { name: 'external_id', type: 'String' },
-              { name: 'email', type: 'String' },
-              { name: 'display_name', type: 'String' },
-              { name: 'first_name', type: 'String' },
-              { name: 'last_name', type: 'String' },
-              { name: 'preferred_locale', type: 'String' },
-              { name: 'avatar_url', type: 'String' },
-            ],
-          },
-        },
-        { ... },
-      ],
-      routes: [
-        {
-          uri: '/user',
-          get: { method: 'User.getUser' },
-          post: { method: 'User.createUser', successStatus: 201, body: true },
-        },
-        {
-          uri: '/user/:id/mark_login',
-          post: { method: 'User.markLogin' },
-        },
-        { ... },
-      ],
-    },
-  ];
-
-  // If array => universal config
-  joint.generate(config);
-
-  // If object => segregated config
-  joint.generate({ modelConfig, methodConfig, routeConfig });
-  ```
-
-<br />

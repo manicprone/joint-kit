@@ -10,14 +10,27 @@ const debug_registerModels = false;
 const debug_registerMethods = false;
 
 // -----------------------------------------------------------------------------
-// Register models from model-config...
+// Register models from service...
+// -----------------------------------------------------------------------------
+export function registerModelsFromService(joint, log = true) {
+  if (log) {
+    console.log('----------------------------------------------------');
+    console.log('Loading resource models from service');
+    console.log('----------------------------------------------------');
+  }
+
+  // TODO ...
+
+  if (log) console.log('');
+}
+
+// -----------------------------------------------------------------------------
+// Register models from model config...
 // -----------------------------------------------------------------------------
 export function registerModels(joint, log = true) {
-  const modelConfig = joint.modelConfig;
-  const serviceKey = joint.serviceKey;
   const service = joint.service;
-  const modelDefs = modelConfig[MODEL.MODEL_SET];
-  const enabledModels = modelConfig[MODEL.MODELS_ENABLED] || Object.keys(modelDefs);
+  const serviceKey = joint.serviceKey;
+  const modelDefs = joint.modelConfig;
 
   // Prepare model registries...
   if (!joint.model) {
@@ -32,7 +45,7 @@ export function registerModels(joint, log = true) {
     console.log('----------------------------------------------------');
   }
 
-  // Load the registerModel function for the service implementation...
+  // Load the register function for the service implementation...
   let registerModel = null;
   switch (serviceKey) {
     case 'bookshelf': {
@@ -45,14 +58,19 @@ export function registerModels(joint, log = true) {
   }
 
   // Register model definitions...
-  if (enabledModels && Array.isArray(enabledModels) && enabledModels.length > 0) {
-    enabledModels.forEach((modelName) => {
+  if (modelDefs && Array.isArray(modelDefs) && modelDefs.length > 0) {
+    modelDefs.forEach((modelDef) => {
+      const modelName = modelDef[MODEL.NAME];
+
       // Only register new entries...
       if (!joint.model[modelName]) {
         if (log) console.log(`${modelName}`);
 
-        const modelDef = modelDefs[modelName];
-        if (debug_registerModels) console.log(`[${namespace}] [generate:registerModels] model def =>`, modelDef);
+        if (debug_registerModels) {
+          console.log(`[${namespace}] generate:registerModels => (modelDef)`);
+          console.log(modelDef);
+          console.log('');
+        }
 
         const modelObject = registerModel(service, modelDef, modelName, debug_registerModels);
         joint.model[modelName] = modelObject;
@@ -70,18 +88,13 @@ export function registerModels(joint, log = true) {
 } // END - registerModels
 
 // -----------------------------------------------------------------------------
-// Register methods from method-config...
+// Register methods from method config...
 //
 // TODO: Do not register methods, if the modelName does not exist !?!?!?
 //       (At least, report a warning in the log)
-//
-// TODO: Support auto-injected / overrides for input options (on method config) !!!
-//       e.g. Enforce => input.loadDirect: ['roles:key'] on all requests
-//       e.g. Support => the markLogin concept (where "now" is injected into input of updateItem action)
 // -----------------------------------------------------------------------------
 export function registerMethods(joint, log = true) {
-  const methodConfig = joint.methodConfig;
-  const resources = methodConfig.resources;
+  const resources = joint.methodConfig;
 
   // Prepare method registries...
   if (!joint.method) {
@@ -146,13 +159,12 @@ function generateMethod(joint, action, spec) {
 } // END - generateMethod
 
 // -----------------------------------------------------------------------------
-// Build router from route-config...
+// Build router from route config...
 // -----------------------------------------------------------------------------
 export function buildRouter(joint, log = true) {
-  const routeConfig = joint.routeConfig;
   const serverKey = joint.serverKey;
   const server = joint.server;
-  const routeDefs = routeConfig.routes;
+  const routeDefs = joint.routeConfig;
 
   if (log) {
     console.log('----------------------------------------------------');

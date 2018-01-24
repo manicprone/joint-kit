@@ -5,9 +5,7 @@
 import user from './resources/user';
 import userInfo from './resources/user-info';
 
-module.exports = {
-  resources: [
-    user,
-    userInfo,
-  ],
-};
+module.exports = [
+  user,
+  userInfo,
+];

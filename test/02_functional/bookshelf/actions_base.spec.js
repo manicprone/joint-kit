@@ -5,7 +5,7 @@ import Joint from '../../../src';
 import appMgmtModels from '../../scenarios/app-mgmt/model-config';
 import projectAppModels from '../../scenarios/project-app/model-config';
 import blogAppModels from '../../scenarios/blog-app/model-config';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 import { resetDB } from '../../db/bookshelf/db-utils';
 import chaiHelpers from '../chai-helpers';
 
@@ -1173,6 +1173,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
     it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
       const associationNameInfo = 'info';
       const associationNameProfiles = 'profiles';
+      const associationNameRoles = 'roles';
 
       const spec = {
         modelName: 'User',
@@ -1180,32 +1181,45 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', required: true },
         ],
       };
-      const inputWithToOneAssoc = {
+      const inputWithOneToOneAssoc = {
         fields: { id: 4 },
         associations: [associationNameInfo], // One-to-One
       };
-      const inputWithToManyAssoc = {
+      const inputWithOneToManyAssoc = {
         fields: { id: 4 },
         associations: [associationNameProfiles], // One-to-Many
+      };
+      const inputWithManyToManyAssoc = {
+        fields: { id: 4 },
+        associations: [associationNameRoles], // Many-to-Many
       };
       const inputWithoutAssoc = {
         fields: { id: 1 },
       };
 
-      const withToOneAssoc = blogApp.getItem(spec, inputWithToOneAssoc)
+      const withOneToOneAssoc = blogApp.getItem(spec, inputWithOneToOneAssoc)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
             .that.has.property(associationNameInfo);
         });
 
-      const withToManyAssoc = blogApp.getItem(spec, inputWithToManyAssoc)
+      const withOneToManyAssoc = blogApp.getItem(spec, inputWithOneToManyAssoc)
         .then((data) => {
           expect(data)
             .to.have.property('relations')
             .that.has.property(associationNameProfiles);
 
           expect(data.relations[associationNameProfiles]).to.have.length(3);
+        });
+
+      const withManyToManyAssoc = blogApp.getItem(spec, inputWithManyToManyAssoc)
+        .then((data) => {
+          expect(data)
+            .to.have.property('relations')
+            .that.has.property(associationNameRoles);
+
+          expect(data.relations[associationNameRoles]).to.have.length(4);
         });
 
       const withoutAssoc = blogApp.getItem(spec, inputWithoutAssoc)
@@ -1215,7 +1229,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
             .that.is.empty;
         });
 
-      return Promise.all([withToOneAssoc, withToManyAssoc, withoutAssoc]);
+      return Promise.all([withOneToOneAssoc, withOneToManyAssoc, withManyToManyAssoc, withoutAssoc]);
     });
 
     it(`should support the "spec.${ACTION.SPEC_FORCE_ASSOCIATIONS}" option`, () => {

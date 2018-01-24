@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import bookshelf from './bookshelf';
+import bookshelf from './service';
 
 const debug = false;
 

@@ -3,32 +3,27 @@
 // (model-config)
 // -----------------------------
 
-module.exports = {
+module.exports = [
 
-  // modelsEnabled: [
-  //   'AppRegistry',
-  //   'AppContent',
-  //   'AppSettings',
-  // ],
+  // Manages all registered client applications
+  {
+    name: 'AppRegistry',
+    tableName: 'app_registry',
+    timestamps: { created: 'registered_at' },
+  },
 
-  models: {
-    // Manages all registered client applications
-    AppRegistry: {
-      tableName: 'app_registry',
-      timestamps: { created: 'registered_at' },
-    },
+  // Provides a modest content persistence solution for registered applications
+  {
+    name: 'AppContent',
+    tableName: 'app_content',
+    timestamps: { created: 'created_at', updated: 'updated_at' },
+  },
 
-    // Provides a modest content persistence solution for registered applications
-    AppContent: {
-      tableName: 'app_content',
-      timestamps: { created: 'created_at', updated: 'updated_at' },
-    },
+  // Provides version and key-based storage of settings data for registered applications
+  {
+    name: 'AppSettings',
+    tableName: 'app_settings',
+    timestamps: { created: 'created_at', updated: 'updated_at' },
+  },
 
-    // Provides version and key-based storage of settings data for registered applications
-    AppSettings: {
-      tableName: 'app_settings',
-      timestamps: { created: 'created_at', updated: 'updated_at' },
-    },
-  }, // END - models
-
-};
+];

@@ -16,6 +16,10 @@ export default class Joint {
     this.serverKey = CoreUtils.determineServerKeyFromServer(this.server);
     this.output = objectUtils.get(options, 'output', 'native');
     this.settings = (options.settings) ? Object.assign(defaultSettings, options.settings) : defaultSettings;
+    // const log = objectUtils.get(options, 'log', true);
+
+    // Set generated flag...
+    this.hasGenerated = false;
 
     // Exit if a service is not loaded or is not recognized/supported...
     if (!this.service) {
@@ -68,6 +72,7 @@ export default class Joint {
     Object.assign(this.settings, settings);
   }
 
+  // TODO: Merge configs, to support continuous invocations !!!
   generate(options) {
     // Parse options...
     this.modelConfig = objectUtils.get(options, 'modelConfig', null);
@@ -97,6 +102,9 @@ export default class Joint {
     // --------------------------
     // The router is loaded as => this.router
     if (this.routeConfig) JointGenerate.buildRouter(this, log);
+
+    // Set generated flag...
+    this.hasGenerated = true;
   } // END - generate
 
   info() {

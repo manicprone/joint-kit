@@ -7,7 +7,7 @@ import projectAppModels from '../../scenarios/project-app/model-config';
 import projectAppMethods from '../../scenarios/project-app/method-config';
 import projectAppRoutes from '../../scenarios/project-app/route-config';
 import blogAppModels from '../../scenarios/blog-app/model-config';
-import bookshelf from '../../db/bookshelf/bookshelf';
+import bookshelf from '../../db/bookshelf/service';
 
 const expect = chai.expect;
 
@@ -20,6 +20,7 @@ const jointProps = [
   'output',
   'settings',
   'buildAuthBundle',
+  'hasGenerated',
 ];
 const actionsBookshelf = [
   'createItem',
@@ -87,6 +88,7 @@ describe('JOINT', () => {
       }
     });
 
+    // TODO: Move to a separate describe block (for bundled testing) !!!
     // it('should be bundled correctly for shared use', () => {
     //   const joint = new JointDist({
     //     service: bookshelf,
@@ -97,6 +99,18 @@ describe('JOINT', () => {
     //   expect(joint.serviceKey).to.equal('bookshelf');
     // });
   }); // END - constructor
+
+  // ---------------------------------------------------------------------------
+  // TODO: joint.generate permutations to test !!!
+  // ---------------------------------------------------------------------------
+  // No params or empty object  => Will load natively defined models from
+  //                               the service (on first invocation only).
+  //
+  // Combined model scenario    => Existing models on service and modelConfig
+  //                               (on first invocation).
+  //
+  // Continuous invocations     => Will add only new model config defs.
+  // ---------------------------------------------------------------------------
 
   // --------------------------------------------
   // Testing: service implementation => bookshelf
@@ -110,7 +124,7 @@ describe('JOINT', () => {
       expect(joint.serviceKey).to.equal('bookshelf');
     });
 
-    it('should successfully register bookshelf models via model-config', () => {
+    it('should successfully register bookshelf models via model config', () => {
       const appMgmt = new Joint({ service: bookshelf });
       appMgmt.generate({ modelConfig: appMgmtModels, log: false });
       appMgmt.generate({ modelConfig: appMgmtModels, log: false }); // Run again to test redundant attempts !!!
@@ -126,7 +140,7 @@ describe('JOINT', () => {
       expect(blogApp.info().models).to.have.length(6);
     });
 
-    it('should successfully register custom methods via method-config', () => {
+    it('should successfully register custom methods via method config', () => {
       const projectApp = new Joint({ service: bookshelf });
       projectApp.generate({ methodConfig: projectAppMethods, log: false });
 
@@ -150,7 +164,7 @@ describe('JOINT', () => {
       expect(joint.serverKey).to.equal('express');
     });
 
-    it('should successfully build an express router via route-config', () => {
+    it('should successfully build an express router via route config', () => {
       const projectApp = new Joint({
         service: bookshelf,
         server: express,
