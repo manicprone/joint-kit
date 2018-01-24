@@ -12,26 +12,6 @@
   - Pass the full joint instance to `registerModel`, instead of just the service
     (to access the lookup registry).
 
-* Update the config syntax:
-
-  ```
-  {
-
-    modelConfig: [
-      { name: 'User', tableName: 'user_account' },
-    ],
-
-    methodConfig: [
-      { modelName: 'User', methods: [ ... ] },
-    ],
-
-    routeConfig: [
-      { uri: '/user', get: { ... }, post: { ... } },
-    ],
-
-  }
-  ```
-
 * Change modelConfig property `idAttribute` => `idField`, and add scenario/tests.
 
 * Utilize the constants (for all syntax) within the code.
@@ -43,7 +23,7 @@
 
 ## README To Do
 
-* Update README, now that the docs have moved to an official site.
+* Add general info / overview, once jointkit.org is ready.
 
 * Add software stack info, etc.
 

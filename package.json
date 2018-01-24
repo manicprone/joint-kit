@@ -1,7 +1,7 @@
 {
   "name": "joint-kit",
   "version": "0.0.17",
-  "description": "A Node server library & development kit for rapidly implementing data layers and RESTful endpoints | Part of the Joint Stack",
+  "description": "A server-side toolset for building data layers and RESTful endpoints with NodeJS",
   "author": "|M| <manicprone@gmail.com>",
   "license": "MIT",
   "main": "joint.js",
