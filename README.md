@@ -1,12 +1,13 @@
 # Joint Kit
 
-A server-side toolset for building data layers and RESTful endpoints with NodeJS.
+A server-side toolset for building secure data layers and RESTful endpoints with NodeJS.
 
-Joint Kit solutions are configuration-driven — allowing you to quickly implement
-robust data operation logic, using a JSON-based configuration syntax.
+Joint Kit solutions are configuration-driven - Use JSON objects to rapidly
+implement data operation logic on top of your custom data schema.
 
-Designed to be flexible. Mix it with existing code (programmatically) -_or_- use it to dynamically
-generate an entire server-side method library and RESTful API router from JSON configs.
+Designed to be flexible. Mix it with existing code (programmatically) -_or_- use
+it to dynamically generate an entire server-side method library and RESTful API
+router from configuration.
 
 <br />
 
