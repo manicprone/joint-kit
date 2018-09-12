@@ -28,7 +28,7 @@ export default {
   FUNC_SET_SERVER: 'setServer',
   FUNC_SET_PAYLOAD_FORMAT: 'setOutput',
   FUNC_UPDATE_SETTINGS: 'updateSettings',
-  FUNC_BUILD_AUTH_BUNDLE: 'buildAuthBundle',
+  FUNC_PREPARE_AUTH_CONTEXT: 'prepareAuthContext',
   FUNC_PRINT_INFO: 'info',
 
   // ------------------------------- Model Registries

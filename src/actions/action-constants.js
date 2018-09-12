@@ -38,6 +38,7 @@ export default {
 
   // Authorization Specification
   SPEC_AUTH: 'auth',
+  SPEC_AUTH_RULES: 'rules',
   SPEC_AUTH_OWNER_CREDS: 'ownerCreds',
 
   // ------------------------------- Input Options
@@ -65,5 +66,5 @@ export default {
   INPUT_TRANSACTING: 'trx',
 
   // Authorization
-  INPUT_AUTH_BUNDLE: 'authBundle',
+  INPUT_AUTH_CONTEXT: 'authContext',
 };

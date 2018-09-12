@@ -1,36 +1,22 @@
 import objectUtils from '../utils/object-utils';
-// import { authorizedApps as authorizedAppConfig } from '../config/server-config';
 
-// TODO: Fix the "owner / delegateRole" protection logic !!!
-//       -----------------------------------------------------------------------
-//       Remove delegateRole, extend "owner" to support more string values:
-//       e.g.
-//       ----------------------
-//       owner: ['me', 'admin']
-//       ----------------------
-//       "me" =>    (existing logic)
-//       "admin" => (will look for this value in the roles of the context)
-//
-//       The context property for "roles" is configurable via settings.
-//       The order of the values specifies the order of the check.
-//       -----------------------------------------------------------------------
-
-// TODO: Add support for "rolesAll" !!!
-// TODO: Add CSRF check to rules & logic !!!
-// TODO: Populate request_uri based upon server implementation !!!
-
-const debugCheck = false;
+const debugCheck = false; // TODO: Determine from instance !!!
 
 // -----------------------------------------------------------------------------
-// Generates an authBundle to handle authorization on a Joint Action request.
-// -----------------------------------------------------------------------------
-// (1) Use this function to generate an "authBundle" that describes the
-//     authorization rules for a Joint Action request.
-//
-// (2) Then, use the "isAllowed" function to determine if the user request
-//     is authorized (against the generated "authBundle" and the user input).
+// Auth Rules
 // -----------------------------------------------------------------------------
 // Supported rules (in order of processing logic):
+//
+// authorizedApps: <Array>   => Restricts the usage of the request to authorized
+//                              apps. The value is an array of app idendifiers
+//                              that have registered with the system. The request
+//                              must contain the proprietary header and secret
+//                              that was shared with the app during registration
+//                              to be granted authorization.
+//
+// authenticated: <Boolean>  => Requires the active user session has been
+//                              authenticated, following the scheme configured
+//                              via auth settings.
 //
 // owner: <String>         => Restricts the usage of the request to
 //                            the designated ownership of the data.
@@ -56,13 +42,6 @@ const debugCheck = false;
 //                            the roles provided in the array (AND).
 //                            If an owner rule is provided, both rules must pass.
 //
-// authorizedApps: <Array> => Restricts the usage of the request to authorized
-//                            apps. The value is an array of app idendifiers
-//                            that have registered with the system. The request
-//                            must contain the proprietary header and secret
-//                            that was shared with the app during registration
-//                            to be granted authorization.
-//
 // denyWhenAny: <Array>    => Restricts the usage of this request when any of
 //                            the provided name/value pairs is present in the
 //                            session info (OR). Use this rule to ban specific
@@ -73,12 +52,43 @@ const debugCheck = false;
 //                            the provided name/value pairs are present in the
 //                            session info (AND).
 // -----------------------------------------------------------------------------
-// The returned authBundle package has the shape:
+
+
+// TODO: Fix the "owner / delegateRole" protection logic !!!
+//       -----------------------------------------------------------------------
+//       Remove delegateRole, extend "owner" to support more string values:
+//       e.g.
+//       ----------------------
+//       owner: ['me', 'admin']
+//       ----------------------
+//       "me" =>    (existing logic)
+//       "admin" => (will look for this value in the roles of the context)
+//
+//       The context property for "roles" is configurable via settings.
+//       The order of the values specifies the order of the check.
+//       -----------------------------------------------------------------------
+
+// TODO: Add support for "rolesAll" !!!
+// TODO: Add CSRF check to rules & logic !!!
+// TODO: Populate request_uri based upon server implementation !!!
+// -----------------------------------------------------------------------------
+// Generates an authContext to handle authorization on a Joint Action request.
+// -----------------------------------------------------------------------------
+// For programmatic usage:
+//
+// (1) Use this function to prepare the "authContext" object, which describes
+//     the active authed session that is making the request. Provide the object
+//     with the input of the Joint Action.
+//
+// (2) Then, use the "isAllowed" function within the implementation of the
+//     Joint Action, to determine if the user request is authorized, according
+//     to rules specified on the spec.
+// -----------------------------------------------------------------------------
+// The returned authContext package has the shape:
 //
 // e.g. (with server-side context)
 // {
 //   user: <user_auth_context>,
-//   rules,
 // }
 //
 // e.g. (with HTTP request context)
@@ -87,26 +97,21 @@ const debugCheck = false;
 //   request_method: 'POST',
 //   request_uri: '/profile/333',
 //   request_headers: <request_headers>,
-//   rules,
 // }
-//
-// NOTE: When the "isAllowed" function is used, it is technically unnecessary
-// to be aware of the contents returned with the "authBundle" package. The
-// "isAllowed" logic will follow the orders specified by the "rules".
 // -----------------------------------------------------------------------------
-export function buildAuthBundle(settings, context, rules = {}) {
+export function prepareAuthContext(joint, context) {
   const bundle = {};
 
-  const debugBuild = objectUtils.get(settings, 'auth.debugBuild', false);
+  const authSettings = objectUtils.get(joint, 'settings.auth', {});
+  const debugBuild = authSettings.debugBuild;
   const isHttpRequest = (objectUtils.has(context, 'session'));
 
   if (debugBuild) {
-    if (isHttpRequest) console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle for HTTP request...');
-    else console.log('[JOINT] [AUTH-UTILS] Preparing auth bundle for server-side request...');
+    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Preparing auth context for HTTP request (from ${joint.serviceKey})...`);
+    else console.log('[JOINT] [AUTH-UTILS] Preparing auth context for server-side request...');
   }
 
-  // Build bundle...
-  bundle.rules = rules;
+  // Prepare context...
   if (isHttpRequest) {
     // Load request info...
     bundle.request_method = objectUtils.get(context, 'method', null);
@@ -114,7 +119,7 @@ export function buildAuthBundle(settings, context, rules = {}) {
     bundle.request_headers = objectUtils.get(context, 'headers', null);
 
     // Load authenticated info from the session...
-    const sessionNameForUser = objectUtils.get(settings, 'auth.sessionNameForUser', null);
+    const sessionNameForUser = authSettings.sessionNameForUser;
     bundle.user = objectUtils.get(context, `session.${sessionNameForUser}`, {});
 
     if (debugBuild) {
@@ -134,7 +139,7 @@ export function buildAuthBundle(settings, context, rules = {}) {
   }
 
   if (debugBuild) {
-    console.log('[JOINT] [AUTH-UTILS] authBundle =>');
+    console.log('[JOINT] [AUTH-UTILS] authContext =>');
     console.log(bundle);
     console.log('-------------------------------------------\n');
   }
@@ -142,31 +147,27 @@ export function buildAuthBundle(settings, context, rules = {}) {
   return bundle;
 }
 
+// TODO: Can we move the parseOwnerCreds logic into here ???
+//       Thus, can change the signature to simply: (authContext, specAuth) !!!
 // -----------------------------------------------------------------------------
 // Use this method to perform the validation of auth rules within an API action.
-// Include the authBundle passed to the action, and optionally an "ownerCreds"
-// object (described below).
+// Include the authContext passed to the action, the rules from the spec, and
+// optionally an "ownerCreds" object.
 // -----------------------------------------------------------------------------
-// In order to support owner-level authorization, an action must call this
-// method providing an "ownerCreds" object. Effectively, this object describes
-// the owner of the data upon which it is acting.
-//
-// TODO: Complete description of functionality/usage !!!
-//
-// -----------------------------------------------------------------------------
-export function isAllowed(authBundle = {}, ownerCreds = {}) {
+export function isAllowed(authContext = {}, authRules = {}, ownerCreds = {}) {
   let result = false;
 
-  const authRules = authBundle.rules || {};
-  // const requestHeaders = authBundle.request_headers;
-  const userContext = authBundle.user;
+  // const requestHeaders = authContext.request_headers;
+  const userContext = authContext.user;
+  const isHttpRequest = (objectUtils.has(authContext, 'request_method'));
 
   if (debugCheck) {
-    console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authBundle.request_method} ${authBundle.request_uri}`);
-    console.log('------------------- ownerCreds');
-    console.log(ownerCreds);
+    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authContext.request_method} ${authContext.request_uri}`);
+    else console.log('[JOINT] [AUTH-UTILS] Checking if request is allowed for:', userContext);
     console.log('------------------- authRules');
     console.log(authRules);
+    console.log('------------------- ownerCreds');
+    console.log(ownerCreds);
     console.log('');
   }
 

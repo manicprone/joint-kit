@@ -14,10 +14,11 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
     const modelName = spec[ACTION.SPEC_MODEL_NAME];
     const specFields = spec[ACTION.SPEC_FIELDS];
     const specAuth = spec[ACTION.SPEC_AUTH] || {};
+    const authRules = specAuth[ACTION.SPEC_AUTH_RULES];
     const returnColsDef = spec[ACTION.SPEC_FIELDS_TO_RETURN];
     const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS]);
     const trx = input[ACTION.INPUT_TRANSACTING];
-    const authBundle = input[ACTION.INPUT_AUTH_BUNDLE];
+    const authContext = input[ACTION.INPUT_AUTH_CONTEXT];
 
     // Reject if model does not exist...
     const model = bookshelf.model(modelName);
@@ -100,13 +101,13 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
     return model.where(whereOpts).fetch(actionOpts)
       .then((data) => {
         // Respect auth...
-        if (authBundle) {
+        if (authRules) {
           const combinedFields = Object.assign({}, data.attributes, inputFields);
           const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
-          if (!AuthUtils.isAllowed(authBundle, ownerCreds)) {
+          if (!AuthUtils.isAllowed(authContext, authRules, ownerCreds)) {
             return reject(StatusErrors.generateNotAuthorizedError());
           }
-        } // end-if (authBundle)
+        } // end-if (authRules)
 
         // Handle loadDirect requests...
         if (loadDirect.associations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.associations);

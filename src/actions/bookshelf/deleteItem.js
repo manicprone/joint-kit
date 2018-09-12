@@ -28,7 +28,7 @@ function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
   const specAuth = spec[ACTION.SPEC_AUTH] || {};
   const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS]);
   const trx = input[ACTION.INPUT_TRANSACTING];
-  const authBundle = input[ACTION.INPUT_AUTH_BUNDLE];
+  const authContext = input[ACTION.INPUT_AUTH_CONTEXT];
 
   // Reject if model does not exist...
   const model = bookshelf.model(modelName);
@@ -47,14 +47,14 @@ function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
   // Perform lookup of item first, if specified...
   const lookupFieldData = ActionUtils.getLookupFieldData(specFields, inputFields);
   if (lookupFieldData) {
-    return doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authBundle, trx, output);
+    return doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output);
   }
 
   // Otherwise, just perform action...
-  return doAction(bookshelf, modelName, specFields, specAuth, null, inputFields, authBundle, trx, output);
+  return doAction(bookshelf, modelName, specFields, specAuth, null, inputFields, authContext, trx, output);
 } // END - performDeleteItem
 
-function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authBundle, trx, output) {
+function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
   const getItemOpts = { require: true };
   if (trx) getItemOpts.transacting = trx;
 
@@ -64,7 +64,7 @@ function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, s
       const combinedFields = Object.assign({}, resource.attributes, inputFields);
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
 
-      return doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authBundle, trx, output);
+      return doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output);
     })
     .catch((error) => {
       // (404)
@@ -77,14 +77,15 @@ function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, s
     });
 } // END - doLookupThenAction
 
-function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authBundle, trx, output) {
+function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
   // Respect auth...
-  if (authBundle) {
+  const authRules = specAuth[ACTION.SPEC_AUTH_RULES];
+  if (authRules) {
     const ownerCredsData = ownerCreds || ActionUtils.parseOwnerCreds(specAuth, inputFields);
-    if (!AuthUtils.isAllowed(authBundle, ownerCredsData)) {
+    if (!AuthUtils.isAllowed(authContext, authRules, ownerCredsData)) {
       return Promise.reject(StatusErrors.generateNotAuthorizedError());
     }
-  } // end-if (authBundle)
+  } // end-if (authRules)
 
   // Prepare action options...
   const actionOpts = { require: true };

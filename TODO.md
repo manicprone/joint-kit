@@ -3,7 +3,9 @@
 
 ## Upcoming Features
 
-* Remove Bookshelf and Knex from the dependencies!!! Why are they even there to begin with ???
+* Remove Bluebird from the dependencies!!!
+
+* Replace moment with date-fns !!!
 
 * Eliminate the declaration ordering issue with the `generate` logic for models:
 
@@ -31,24 +33,11 @@
 
 ## Backlog
 
-* Update the db scenarios for testing:
-
-  - Change all tables to use singular names
-  - Rename "users" => "user_account"
-  - Rename "user_info" => "user_ext_info"
-  - Rename "roles" => "user_role"
-  - Finish the schema for the blog_app scenario
-
 * Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Remove the quotes on the modelNames in the error messages.
 
-* Change the nomenclature of the package/service from "Joint" => "Joint Kit"
-  (namely in the logging and error messages, et al).
-
 * Support `orderBy` on associations (via <b>model config</b>).
-
-* Complete support for `authorizedApps` auth rule / infrastructure.
 
 * Add logic for `rolesAll` auth rule.
 
@@ -87,13 +76,26 @@
 
 * Add "view count" tracking as a built-in feature.
 
+<br />
+
+## To Consider
+
+* Complete support for `authorizedApps` auth rule / infrastructure.
+
 * Add "APIConfig" resource API, to expose endpoint for client applications to manage
   their authorization and configure the API functionality (e.g. setting the resource properties
   that are currently managed in the /config/api-config.js, as well as generating an
   "authorizedApp" credential and saving it to the API for auth capabilities, etc).
 
-<br />
-
-## To Consider
-
 * Mount Joint Actions under "action" root property: e.g. `Joint.action.getItem()` ???
+
+* Update the db scenarios for testing:
+
+  - Change all tables to use singular names
+  - Rename "users" => "user_account"
+  - Rename "user_info" => "user_ext_info"
+  - Rename "roles" => "user_role"
+  - Finish the schema for the blog_app scenario
+
+* Change the nomenclature of the package/service from "Joint" => "Joint Kit"
+  (namely in the logging and error messages, et al).

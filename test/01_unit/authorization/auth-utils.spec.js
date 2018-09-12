@@ -4,12 +4,16 @@ import * as AuthUtils from '../../../src/authorization/auth-utils';
 const expect = chai.expect;
 
 describe('AUTH-UTILS', () => {
-  // -----------------------
-  // Testing: buildAuthBundle
-  // -----------------------
-  describe('buildAuthBundle', () => {
-    it('should return the expected authBundle package, in a server-side request scenario', () => {
-      const settings = {};
+  // ---------------------------
+  // Testing: prepareAuthContext
+  // ---------------------------
+  describe('prepareAuthContext', () => {
+    it('should return the expected authContext package, in a server-side request scenario', () => {
+      const mockJoint = {
+        settings: {
+          auth: {},
+        },
+      };
 
       const context = {
         is_logged_in: true,
@@ -21,19 +25,18 @@ describe('AUTH-UTILS', () => {
         profile_ids: [5, 7, 9],
       };
 
-      const rules = { owner: 'me', rolesAll: ['moderator', 'blogger'] };
-
-      expect(AuthUtils.buildAuthBundle(settings, context, rules))
+      expect(AuthUtils.prepareAuthContext(mockJoint, context))
         .to.deep.equal({
-          rules,
           user: context,
         });
     });
 
-    it('should return the expected authBundle package, in a client-side HTTP request scenario', () => {
-      const settings = {
-        auth: {
-          sessionNameForUser: 'joint_user',
+    it('should return the expected authContext package, in a client-side HTTP request scenario', () => {
+      const mockJoint = {
+        settings: {
+          auth: {
+            sessionNameForUser: 'joint_user',
+          },
         },
       };
 
@@ -55,18 +58,15 @@ describe('AUTH-UTILS', () => {
         },
       };
 
-      const rules = { owner: 'me', rolesAny: ['moderator', 'blogger'] };
-
-      expect(AuthUtils.buildAuthBundle(settings, mockRequest, rules))
+      expect(AuthUtils.prepareAuthContext(mockJoint, mockRequest))
         .to.deep.equal({
           request_method: 'POST',
           request_uri: '/api/blog/post/7/unpublish',
           request_headers: null,
-          rules,
           user: mockSessionInfo,
         });
     });
-  }); // END - buildAuthBundle
+  }); // END - prepareAuthContext
 
   // -----------------------
   // Testing: isAllowedOwner

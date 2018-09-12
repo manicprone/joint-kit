@@ -19,7 +19,7 @@ const jointProps = [
   'serverKey',
   'output',
   'settings',
-  'buildAuthBundle',
+  'prepareAuthContext',
   'hasGenerated',
 ];
 const actionsBookshelf = [

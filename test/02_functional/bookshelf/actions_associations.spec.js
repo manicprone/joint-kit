@@ -491,6 +491,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             { name: 'alias', type: 'String', requiredOr: true },
           ],
           auth: {
+            rules: { owner: 'me' },
             ownerCreds: ['created_by'],
           },
         },
@@ -508,7 +509,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           fields: {
             id: 1,
           },
-          authBundle: {},
+          authContext: {},
         },
         association: {
           fields: {
