@@ -31,10 +31,10 @@ export default class Joint {
       throw new JointError({ message });
     }
 
-    // --------------------------------
-    // Load buildAuthBundle function...
-    // --------------------------------
-    this.buildAuthBundle = function (req, rules) { return AuthUtils.buildAuthBundle(this.settings, req, rules); };
+    // -----------------------------------
+    // Load prepareAuthContext function...
+    // -----------------------------------
+    this.prepareAuthContext = req => AuthUtils.prepareAuthContext(this, req);
 
     // TODO: Load existing models from service to this.model !!!
 
@@ -54,7 +54,7 @@ export default class Joint {
     }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
-        this[actionName] = function (spec, input, ouput = `${this.output}`) { return actions[actionName](this.service, spec, input, ouput); };
+        this[actionName] = (spec, input, ouput = `${this.output}`) => actions[actionName](this.service, spec, input, ouput);
       });
     }
   } // END - constructor
@@ -70,6 +70,7 @@ export default class Joint {
 
   updateSettings(settings) {
     Object.assign(this.settings, settings);
+    // TODO: Need to update / rebuild the "prepareAuthContext" function !!!
   }
 
   // TODO: Merge configs, to support continuous invocations !!!

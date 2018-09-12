@@ -62,7 +62,15 @@ describe('BASE ACTIONS [bookshelf]', () => {
     // --------
     // Blog App
     // --------
-    blogApp = new Joint({ service: bookshelf });
+    blogApp = new Joint({
+      service: bookshelf,
+      settings: {
+        auth: {
+          debugBuild: false,
+          debugCheck: false,
+        },
+      },
+    });
     blogApp.generate({ modelConfig: blogAppModels, log: false });
 
     blogAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' });
@@ -213,6 +221,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'user_id', type: 'Number' },
         ],
         auth: {
+          rules: { owner: 'me' },
           ownerCreds: ['id => profile_ids', 'user_id'],
         },
       };
@@ -220,7 +229,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: {
           title: 'How to Blow Up Every Morning',
         },
-        authBundle: {},
+        authContext: {},
       };
 
       // With lookup field (for update/upsert)...
@@ -230,6 +239,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', required: true, lookup: true },
         ],
         auth: {
+          rules: { owner: 'me' },
           ownerCreds: ['id => profile_ids', 'user_id'],
         },
       };
@@ -237,7 +247,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: {
           id: 1,
         },
-        authBundle: {},
+        authContext: {},
       };
 
       // createItem
@@ -821,7 +831,6 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
     it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
       const id = 4;
-      // const valueToTransform = 'teSt ThIS guY';
       const valueToTransform = 'test This guy';
 
       const spec = {
@@ -863,8 +872,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: [],
         profile_ids: [1, 2, 3],
       };
-      const authRules = { owner: 'me' };
-      const authBundle = blogApp.buildAuthBundle(userContext, authRules);
+      const authContext = blogApp.prepareAuthContext(userContext);
 
       const spec = {
         modelName: 'Profile',
@@ -874,6 +882,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'tagline', type: 'String' },
         ],
         auth: {
+          rules: { owner: 'me' },
           ownerCreds: ['user_id => id'],
         },
       };
@@ -883,7 +892,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
           id: 1,
           title: 'A New Title for a New Day',
         },
-        authBundle,
+        authContext,
       };
 
       return expect(blogApp.updateItem(spec, input))
@@ -1037,8 +1046,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: ['moderator', 'admin'],
         profile_ids: [1, 2, 3],
       };
-      const authRules = { owner: 'me' };
-      const authBundle = blogApp.buildAuthBundle(userContext, authRules);
+      const authContext = blogApp.prepareAuthContext(userContext);
 
       const spec = {
         modelName: 'Profile',
@@ -1046,12 +1054,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', required: true },
         ],
         auth: {
+          rules: { owner: 'me' },
           ownerCreds: ['user_id'],
         },
       };
       const input = {
         fields: { id: 1 },
-        authBundle,
+        authContext,
       };
 
       return expect(blogApp.getItem(spec, input))
@@ -2182,8 +2191,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         roles: [],
         profile_ids: [1, 2, 3],
       };
-      const authRules = { owner: 'me' };
-      const authBundle = projectApp.buildAuthBundle(userContext, authRules);
+      const authContext = projectApp.prepareAuthContext(userContext);
 
       const spec = {
         modelName: 'Profile',
@@ -2191,13 +2199,14 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', required: true, lookup: true },
         ],
         auth: {
+          rules: { owner: 'me' },
           ownerCreds: ['user_id => id'],
         },
       };
 
       const input = {
         fields: { id: 3 },
-        authBundle,
+        authContext,
       };
 
       return expect(projectApp.deleteItem(spec, input))
