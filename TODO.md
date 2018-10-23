@@ -3,7 +3,9 @@
 
 ## Upcoming Features
 
-* Remove Bluebird from the dependencies!!!
+* Inject full Joint instance into action implementations (i.e. no need to break down to service and other params) !!!
+
+* Remove Bluebird from the dependencies !!!
 
 * Replace moment with date-fns !!!
 
@@ -20,6 +22,8 @@
 
 * Support successive `generate` calls (i.e. merge provided configs into the
   existing set, then run the generate logic on the full set).
+
+* Support client-provided debug options.
 
 <br />
 
