@@ -20,6 +20,7 @@ const jointProps = [
   'output',
   'settings',
   'prepareAuthContext',
+  'transaction',
   'hasGenerated',
 ];
 const actionsBookshelf = [

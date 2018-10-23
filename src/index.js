@@ -2,6 +2,7 @@ import objectUtils from './utils/object-utils';
 import JointError from './errors/JointError';
 import defaultSettings from './core/settings';
 // import PARAM from './core/constants/constructor-constants';
+import trxBookshelf from './core/bookshelf/transaction';
 import * as CoreUtils from './core/core-utils';
 import * as JointGenerate from './core/generate';
 import * as AuthUtils from './authorization/auth-utils';
@@ -38,14 +39,16 @@ export default class Joint {
 
     // TODO: Load existing models from service to this.model !!!
 
-    // -------------------------------------
-    // Load actions for specified service...
-    // -------------------------------------
+    // ---------------------------------------------
+    // Load actions and trx for specified service...
+    // ---------------------------------------------
     // Actions are loaded as => this.<action>
+    // Transaction function is loaded as => this.transaction
     let actions = null;
     switch (this.serviceKey) {
       case 'bookshelf': {
         actions = ActionsBookshelf;
+        this.transaction = trxBookshelf(this.service);
       }
     }
     if (!actions) {
