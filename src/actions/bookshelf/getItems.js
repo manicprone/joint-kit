@@ -143,7 +143,7 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
           }
         })
         .catch((error) => {
-          if (debug) console.log('[JOINT] [action:getItems] Action encountered an error =>', error);
+          console.error(`[JOINT] [action:getItems] Action encountered a third-party error: ${error.message} =>`, error);
           return reject(StatusErrors.generateThirdPartyError(error));
         });
     }
@@ -165,7 +165,7 @@ export default function getItems(bookshelf, spec = {}, input = {}, output) {
         }
       })
       .catch((error) => {
-        if (debug) console.log('[JOINT] [action:getItems] Action encountered an error =>', error);
+        console.error(`[JOINT] [action:getItems] Action encountered a third-party error: ${error.message} =>`, error);
         return reject(StatusErrors.generateThirdPartyError(error));
       });
   });

@@ -123,11 +123,12 @@ function performUpsertItem(bookshelf, spec = {}, input = {}, output) {
             }
           })
           .catch((error) => {
-            if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on update =>', error);
+            console.error(`[JOINT] [action:upsertItem] Action encountered a third-party error: ${error.message} =>`, error);
             return reject(StatusErrors.generateThirdPartyError(error));
           });
       })
       .catch((error) => {
+        // (404)
         if (error.message && error.message === 'EmptyResponse') {
           // Respect auth...
           if (authRules) {
@@ -152,12 +153,11 @@ function performUpsertItem(bookshelf, spec = {}, input = {}, output) {
               }
             })
             .catch((createError) => {
-              if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error on create =>', createError);
+              console.error(`[JOINT] [action:upsertItem] Action encountered a third-party error: ${createError.message} =>`, createError);
               return reject(StatusErrors.generateThirdPartyError(createError));
             });
         }
-
-        if (debug) console.log('[JOINT] [action:upsertItem] Action encountered an error =>', error);
+        console.error(`[JOINT] [action:upsertItem] Action encountered a third-party error: ${error.message} =>`, error);
         return reject(StatusErrors.generateThirdPartyError(error));
       });
   });

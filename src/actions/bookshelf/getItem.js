@@ -123,8 +123,7 @@ export default function getItem(bookshelf, spec = {}, input = {}, output) {
         if (error.message && error.message === 'EmptyResponse') {
           return reject(StatusErrors.generateResourceNotFoundError(modelName));
         }
-        // (500)
-        if (debug) console.log('[JOINT] [action:getItem] Action encountered an error =>', error);
+        console.error(`[JOINT] [action:getItem] Action encountered a third-party error: ${error.message} =>`, error);
         return reject(StatusErrors.generateThirdPartyError(error));
       });
   });

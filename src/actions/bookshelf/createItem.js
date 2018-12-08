@@ -91,7 +91,7 @@ function performCreateItem(bookshelf, spec = {}, input = {}, output) {
         }
       })
       .catch((error) => {
-        if (debug) console.log('[JOINT] [action:createItem] Action encountered an error =>', error);
+        console.error(`[JOINT] [action:createItem] Action encountered a third-party error: ${error.message} =>`, error);
         return reject(StatusErrors.generateThirdPartyError(error));
       });
   });
