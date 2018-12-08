@@ -1,4 +1,4 @@
-import objectUtils from '../utils/object-utils';
+import objectUtils from '../../utils/object-utils';
 
 const debugCheck = false; // TODO: Determine from instance !!!
 

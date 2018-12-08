@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import * as StatusErrors from '../../errors/status-errors';
-import ACTION from '../action-constants';
+import ACTION from '../../core/constants/action-constants';
 import getItem from './getItem';
 import toJsonApi from './serializers/json-api';
 
