@@ -71,8 +71,7 @@ function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, s
       if (error.message && error.message === 'EmptyResponse') {
         return Promise.reject(StatusErrors.generateResourceNotFoundError(modelName));
       }
-      // (500)
-      if (debug) console.log('[JOINT] [action:deleteItem] Action encountered an error =>', error);
+      console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
       return Promise.reject(StatusErrors.generateThirdPartyError(error));
     });
 } // END - doLookupThenAction
@@ -121,8 +120,7 @@ function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputF
       if (error.message && error.message === 'No Rows Deleted') {
         return Promise.reject(StatusErrors.generateResourceNotFoundError(modelName));
       }
-      // (500)
-      if (debug) console.log('[JOINT] [action:deleteItem] Action encountered an error =>', error);
+      console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
       return Promise.reject(StatusErrors.generateThirdPartyError(error));
     });
 } // END - doAction

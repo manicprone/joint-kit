@@ -3,6 +3,33 @@
 
 ## Upcoming Features
 
+* Restructure `src`:
+  ```
+  src
+    |__ actions
+    |     |__ bookshelf            --> (add transaction.js)
+    |     |__ action-utils.js
+    |
+    |__ core
+    |     |__ authorization
+    |     |__ constants            --> all constants (add action-constants.js)
+    |     |__ errors
+    |     |__ core-utils.js
+    |     |__ generate.js
+    |     |__ settings.js
+    |
+    |__ models
+    |     |__ bookshelf            --> registerModel.js
+    |
+    |__ routers
+    |     |__ express              --> buildRouter.js
+    |
+    |__ utils
+    |
+    |__ index.js
+
+  ```
+
 * Inject full Joint instance into action implementations (i.e. no need to break down to service and other params) !!!
 
 * Remove Bluebird from the dependencies !!!

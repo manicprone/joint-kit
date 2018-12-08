@@ -106,7 +106,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
             }
           })
           .catch((error) => {
-            if (debug) console.log('[JOINT] [action:updateItem] Action encountered an error =>', error);
+            console.error(`[JOINT] [action:updateItem] Action encountered a third-party error: ${error.message} =>`, error);
             return reject(StatusErrors.generateThirdPartyError(error));
           });
       })
@@ -115,8 +115,7 @@ function performUpdateItem(bookshelf, spec = {}, input = {}, output) {
         if (error.message && error.message === 'EmptyResponse') {
           return reject(StatusErrors.generateResourceNotFoundError(modelName));
         }
-        // (500)
-        if (debug) console.log('[JOINT] [action:updateItem] Action encountered an error =>', error);
+        console.error(`[JOINT] [action:updateItem] Action encountered a third-party error: ${error.message} =>`, error);
         return reject(StatusErrors.generateThirdPartyError(error));
       });
   });

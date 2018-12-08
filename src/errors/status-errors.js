@@ -81,12 +81,12 @@ export function generateAssociatedItemsDoNotExistError(resourceName = '') {
   });
 }
 
-// -------------------------------------------- General System / 3rd-party (500)
+// ------------------------------------------- General System / 3rd-party (500+)
 
 export function generateThirdPartyError(error) {
   return new JointStatusError({
-    status: 500,
-    message: error.message,
+    status: error.status || 500,
+    message: 'A system error was encountered.',
   });
 }
 
