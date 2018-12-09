@@ -3,25 +3,13 @@
     "dist",
   ],
   "env": {
-    "dev": {
-      "presets": [
-        "es2015",
-        "stage-2",
-      ],
-    },
     "test": {
-      "presets": [
-        "es2015",
-        "stage-2",
-      ],
+      "presets": ["@babel/env"],
+      "plugins": ["@babel/plugin-transform-runtime"],
     },
     "build": {
       "presets": [
-        ["es2015", { "modules": false }],
-        "stage-2",
-      ],
-      "plugins": [
-        "external-helpers",
+        ["@babel/env", { "modules": false }],
       ],
     },
   },

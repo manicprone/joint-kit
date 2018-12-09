@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as StatusErrors from '../../errors/status-errors';
+import * as StatusErrors from '../../core/errors/status-errors';
 import * as AuthUtils from '../../core/authorization/auth-utils';
 import ACTION from '../../core/constants/action-constants';
 import * as ActionUtils from '../action-utils';

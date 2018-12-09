@@ -1,6 +1,5 @@
-import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as StatusErrors from '../../errors/status-errors';
+import * as StatusErrors from '../../core/errors/status-errors';
 import * as AuthUtils from '../../core/authorization/auth-utils';
 import ACTION from '../../core/constants/action-constants';
 import * as ActionUtils from '../action-utils';
@@ -8,7 +7,7 @@ import toJsonApi from './serializers/json-api';
 
 const debug = false;
 
-export default function deleteItem(bookshelf, spec = {}, input = {}, output) {
+export default async function deleteItem(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING];
 
   // Continue on existing transaction...
@@ -22,7 +21,7 @@ export default function deleteItem(bookshelf, spec = {}, input = {}, output) {
   });
 }
 
-function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
+async function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
   const modelName = spec[ACTION.SPEC_MODEL_NAME];
   const specFields = spec[ACTION.SPEC_FIELDS];
   const specAuth = spec[ACTION.SPEC_AUTH] || {};
@@ -54,29 +53,35 @@ function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
   return doAction(bookshelf, modelName, specFields, specAuth, null, inputFields, authContext, trx, output);
 } // END - performDeleteItem
 
-function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
+async function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
   const getItemOpts = { require: true };
   if (trx) getItemOpts.transacting = trx;
 
-  return bookshelf.model(modelName).where(lookupFieldData).fetch(getItemOpts)
-    .then((resource) => {
-      // Prepare ownerCreds from retrieved data...
-      const combinedFields = Object.assign({}, resource.attributes, inputFields);
-      const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
+  try {
+    const resource = await bookshelf.model(modelName).where(lookupFieldData).fetch(getItemOpts);
 
-      return doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output);
-    })
-    .catch((error) => {
+    // Prepare ownerCreds from retrieved data...
+    const combinedFields = Object.assign({}, resource.attributes, inputFields);
+    const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields);
+
+    return doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output);
+  } catch (error) {
+    let jointError = null;
+    if (error.message) {
       // (404)
-      if (error.message && error.message === 'EmptyResponse') {
-        return Promise.reject(StatusErrors.generateResourceNotFoundError(modelName));
+      if (error.message === 'EmptyResponse') {
+        jointError = StatusErrors.generateResourceNotFoundError(modelName);
       }
-      console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
-      return Promise.reject(StatusErrors.generateThirdPartyError(error));
-    });
+      // (500)
+    } else {
+      if (debug) console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
+      jointError = StatusErrors.generateThirdPartyError(error);
+    }
+    throw jointError;
+  }
 } // END - doLookupThenAction
 
-function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
+async function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
   // Respect auth...
   const authRules = specAuth[ACTION.SPEC_AUTH_RULES];
   if (authRules) {
@@ -96,7 +101,6 @@ function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputF
     specFields.forEach((fieldSpec) => {
       const fieldName = fieldSpec.name;
       const hasInput = objectUtils.has(inputFields, fieldName);
-
       if (hasInput) {
         whereOpts[fieldName] = inputFields[fieldName];
       }
@@ -106,21 +110,27 @@ function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputF
   // Debug executing logic...
   if (debug) console.log(`[JOINT] [action:deleteItem] EXECUTING => DELETE ${modelName} WHERE`, whereOpts);
 
-  // Delete item...
-  return bookshelf.model(modelName).where(whereOpts).destroy(actionOpts)
-    .then((data) => {
-      // Return data in requested format...
-      switch (output) {
-        case 'json-api': return Promise.resolve(toJsonApi(modelName, data, bookshelf));
-        default: return Promise.resolve(data);
-      }
-    })
-    .catch((error) => {
+  try {
+    // Delete item...
+    const data = await bookshelf.model(modelName).where(whereOpts).destroy(actionOpts);
+
+    // Return data in requested format...
+    switch (output) {
+      case 'json-api': return toJsonApi(modelName, data, bookshelf);
+      default: return data;
+    }
+  } catch (error) {
+    let jointError = null;
+    if (error.message) {
       // (404)
-      if (error.message && error.message === 'No Rows Deleted') {
-        return Promise.reject(StatusErrors.generateResourceNotFoundError(modelName));
+      if (error.message === 'No Rows Deleted') {
+        jointError = StatusErrors.generateResourceNotFoundError(modelName);
       }
-      console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
-      return Promise.reject(StatusErrors.generateThirdPartyError(error));
-    });
+      // (500)
+    } else {
+      if (debug) console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error);
+      jointError = StatusErrors.generateThirdPartyError(error);
+    }
+    throw jointError;
+  }
 } // END - doAction

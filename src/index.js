@@ -1,5 +1,5 @@
 import objectUtils from './utils/object-utils';
-import JointError from './errors/JointError';
+import JointError from './core/errors/JointError';
 import defaultSettings from './core/settings';
 // import PARAM from './core/constants/constructor-constants';
 import * as CoreUtils from './core/core-utils';

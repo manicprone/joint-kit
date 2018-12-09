@@ -224,23 +224,23 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       ]);
     });
 
-    it.only('should return an error (400) when the specified main model or association type do not exist', () => {
-      // const specNoMain = {
-      //   main: {
-      //     modelName: 'AlienProject',
-      //     fields: [
-      //       { name: 'id', type: 'Number', requiredOr: true },
-      //       { name: 'alias', type: 'String', requiredOr: true },
-      //     ],
-      //   },
-      //   association: {
-      //     name: 'coding_language_tags',
-      //     fields: [
-      //       { name: 'id', type: 'Number', requiredOr: true },
-      //       { name: 'key', type: 'String', requiredOr: true },
-      //     ],
-      //   },
-      // };
+    it('should return an error (400) when the specified main model or association type do not exist', () => {
+      const specNoMain = {
+        main: {
+          modelName: 'AlienProject',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'alias', type: 'String', requiredOr: true },
+          ],
+        },
+        association: {
+          name: 'coding_language_tags',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'key', type: 'String', requiredOr: true },
+          ],
+        },
+      };
       const specNoAssoc = {
         main: {
           modelName: 'Project',
@@ -271,44 +271,44 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       };
 
       // addAssociatedItems
-      // const addAssociatedItems01 = expect(projectApp.addAssociatedItems(specNoMain, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
       const addAssociatedItems02 = expect(projectApp.addAssociatedItems(specNoAssoc, input))
         .to.eventually.be.rejectedWithJointStatusError(400);
 
       // hasAssociatedItem
-      // const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(specNoMain, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-      // const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(specNoAssoc, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(specNoAssoc, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // getAllAssociatedItems
-      // const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(specNoMain, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAssociatedItems
-      // const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(specNoMain, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
-      // const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(specNoAssoc, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(specNoAssoc, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       // removeAllAssociatedItems
-      // const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(specNoMain, input))
-      //   .to.eventually.be.rejectedWithJointStatusError(400);
+      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(specNoMain, input))
+        .to.eventually.be.rejectedWithJointStatusError(400);
 
       return Promise.all([
-        // addAssociatedItems01,
+        addAssociatedItems01,
         addAssociatedItems02,
 
-        // hasAssociatedItem01,
-        // hasAssociatedItem02,
+        hasAssociatedItem01,
+        hasAssociatedItem02,
 
-        // getAllAssociatedItems01,
+        getAllAssociatedItems01,
 
-        // removeAssociatedItems01,
-        // removeAssociatedItems02,
-        //
-        // removeAllAssociatedItems01,
+        removeAssociatedItems01,
+        removeAssociatedItems02,
+
+        removeAllAssociatedItems01,
       ]);
     });
 
@@ -362,10 +362,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(404);
-      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
-        .to.eventually.be.rejectedWithJointStatusError(404);
+      // const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
+      //   .to.eventually.be.rejectedWithJointStatusError(404);
+      // const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
+      //   .to.eventually.be.rejectedWithJointStatusError(404);
 
       // getAllAssociatedItems
       const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
@@ -385,8 +385,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         addAssociatedItems01,
         addAssociatedItems02,
 
-        hasAssociatedItem01,
-        hasAssociatedItem02,
+        // hasAssociatedItem01,
+        // hasAssociatedItem02,
 
         getAllAssociatedItems01,
 
