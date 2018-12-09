@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import ACTION from '../../../src/actions/action-constants';
+import ACTION from '../../../src/core/constants/action-constants';
 import Joint from '../../../src';
 import appMgmtModels from '../../scenarios/app-mgmt/model-config';
 import appMgmtMethods from '../../scenarios/app-mgmt/method-config';

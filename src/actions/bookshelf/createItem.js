@@ -1,9 +1,9 @@
 import Promise from 'bluebird';
 import objectUtils from '../../utils/object-utils';
-import * as AuthUtils from '../../authorization/auth-utils';
-import * as StatusErrors from '../../errors/status-errors';
+import * as StatusErrors from '../../core/errors/status-errors';
+import * as AuthUtils from '../../core/authorization/auth-utils';
+import ACTION from '../../core/constants/action-constants';
 import * as ActionUtils from '../action-utils';
-import ACTION from '../action-constants';
 import toJsonApi from './serializers/json-api';
 
 const debug = false;

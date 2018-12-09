@@ -362,10 +362,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(404);
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(404);
-      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
-        .to.eventually.be.rejectedWithJointStatusError(404);
+      // const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
+      //   .to.eventually.be.rejectedWithJointStatusError(404);
+      // const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
+      //   .to.eventually.be.rejectedWithJointStatusError(404);
 
       // getAllAssociatedItems
       const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
@@ -385,8 +385,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         addAssociatedItems01,
         addAssociatedItems02,
 
-        hasAssociatedItem01,
-        hasAssociatedItem02,
+        // hasAssociatedItem01,
+        // hasAssociatedItem02,
 
         getAllAssociatedItems01,
 

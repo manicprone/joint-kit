@@ -1,6 +1,6 @@
 import objectUtils from '../../utils/object-utils';
-// import MODEL from '../constants/model-config-constants';
-import * as CoreUtils from '../core-utils';
+// import MODEL from '../../core/constants/model-config-constants';
+import * as CoreUtils from '../../core/core-utils';
 
 const namespace = 'JOINT';
 

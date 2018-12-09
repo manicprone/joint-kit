@@ -1,7 +1,7 @@
 import dateUtils from '../utils/date-utils';
 import objectUtils from '../utils/object-utils';
 import stringUtils from '../utils/string-utils';
-import ACTION from './action-constants';
+import ACTION from '../core/constants/action-constants';
 
 // -----------------------------------------------------------------------------
 // Looks at the provided fieldSpec defintion, and ensures the provided

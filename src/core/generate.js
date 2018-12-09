@@ -1,9 +1,9 @@
 import objectUtils from '../utils/object-utils';
-import JointError from '../errors/JointError';
+import registerModelBookshelf from '../models/bookshelf/registerModel';
+import buildRouterExpress from '../routers/express/buildRouter';
+import JointError from './errors/JointError';
 import MODEL from './constants/model-config-constants';
 import METHOD from './constants/method-config-constants';
-import registerModelBookshelf from './bookshelf/registerModel';
-import buildRouterExpress from './express/buildRouter';
 
 const namespace = 'JOINT';
 const debug_registerModels = false;

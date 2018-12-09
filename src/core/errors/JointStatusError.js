@@ -1,4 +1,4 @@
-import objectUtils from '../utils/object-utils';
+import objectUtils from '../../utils/object-utils';
 
 export default class JointStatusError extends Error {
   constructor(data) {
