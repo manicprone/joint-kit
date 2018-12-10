@@ -1,5 +1,5 @@
 import chai from 'chai';
-import * as AuthUtils from '../../../src/core/authorization/auth-utils';
+import * as AuthUtils from '../../src/core/authorization/auth-utils';
 
 const expect = chai.expect;
 

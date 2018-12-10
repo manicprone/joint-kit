@@ -1,13 +1,13 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import ACTION from '../../../src/core/constants/action-constants';
-import Joint from '../../../src';
-import appMgmtModels from '../../scenarios/app-mgmt/model-config';
-import projectAppModels from '../../scenarios/project-app/model-config';
-import blogAppModels from '../../scenarios/blog-app/model-config';
-import bookshelf from '../../db/bookshelf/service';
-import { resetDB } from '../../db/bookshelf/db-utils';
-import chaiHelpers from '../chai-helpers';
+import ACTION from '../../../../src/core/constants/action-constants';
+import Joint from '../../../../src';
+import appMgmtModels from '../../../scenarios/app-mgmt/model-config';
+import projectAppModels from '../../../scenarios/project-app/model-config';
+import blogAppModels from '../../../scenarios/blog-app/model-config';
+import bookshelf from '../../../db/bookshelf/service';
+import { resetDB } from '../../../db/bookshelf/db-utils';
+import chaiHelpers from '../../chai-helpers';
 
 chai.use(chaiAsPromised);
 chai.use(chaiHelpers);

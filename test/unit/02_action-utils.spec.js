@@ -1,6 +1,6 @@
 import chai from 'chai';
-import * as ActionUtils from '../../../src/actions/action-utils';
-import ACTION from '../../../src/core/constants/action-constants';
+import * as ActionUtils from '../../src/actions/action-utils';
+import ACTION from '../../src/core/constants/action-constants';
 
 const expect = chai.expect;
 
