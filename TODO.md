@@ -3,11 +3,15 @@
 
 ## Upcoming Features
 
+* Support determined error specification syntax (for client response error data).
+
+* Rename `removeAssociatedItems` / `removeAllAssociatedItems` => `detach...`.
+
+* Update action `deleteItem` => `deleteItems`, to support one to many deletes of a type (model).
+
 * Inject full Joint instance into action implementations (i.e. no need to break down to service and other params) !!!
 
 * Remove Bluebird from the dependencies !!!
-
-* Replace moment with date-fns !!!
 
 * Eliminate the declaration ordering issue with the `generate` logic for models:
 
@@ -20,8 +24,7 @@
 
 * Utilize the constants (for all syntax) within the code.
 
-* Support successive `generate` calls (i.e. merge provided configs into the
-  existing set, then run the generate logic on the full set).
+* Support successive `generate` calls (i.e. merge provided configs into the existing set, then run the generate logic on the full set).
 
 * Support client-provided debug options.
 
@@ -38,6 +41,8 @@
 ## Backlog
 
 * Complete `routeConfig` functional testing, using the updated db scenarios.
+
+* Replace moment with date-fns !!!
 
 * Remove the quotes on the modelNames in the error messages.
 
@@ -66,8 +71,6 @@
   ```
 
 * Hook input field validation framework into action logic/syntax.
-
-* Update action "deleteItem" => "deleteItems", to support one to many deletes of a type (model).
 
 * Provide action: `snapshotItem` => which implements "createItem" (copy) on a source
   item (i.e. it looks up a source item, auth checks the source, creates a copy

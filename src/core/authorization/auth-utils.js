@@ -1,6 +1,6 @@
-import objectUtils from '../../utils/object-utils';
+import objectUtils from '../../utils/object-utils'
 
-const debugCheck = false; // TODO: Determine from instance !!!
+const debugCheck = false // TODO: Determine from instance !!!
 
 // -----------------------------------------------------------------------------
 // Auth Rules
@@ -100,51 +100,51 @@ const debugCheck = false; // TODO: Determine from instance !!!
 // }
 // -----------------------------------------------------------------------------
 export function prepareAuthContext(joint, context) {
-  const bundle = {};
+  const bundle = {}
 
-  const authSettings = objectUtils.get(joint, 'settings.auth', {});
-  const debugBuild = authSettings.debugBuild;
-  const isHttpRequest = (objectUtils.has(context, 'session'));
+  const authSettings = objectUtils.get(joint, 'settings.auth', {})
+  const debugBuild = authSettings.debugBuild
+  const isHttpRequest = (objectUtils.has(context, 'session'))
 
   if (debugBuild) {
-    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Preparing auth context for HTTP request (from ${joint.serviceKey})...`);
-    else console.log('[JOINT] [AUTH-UTILS] Preparing auth context for server-side request...');
+    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Preparing auth context for HTTP request (from ${joint.serviceKey})...`)
+    else console.log('[JOINT] [AUTH-UTILS] Preparing auth context for server-side request...')
   }
 
   // Prepare context...
   if (isHttpRequest) {
     // Load request info...
-    bundle.request_method = objectUtils.get(context, 'method', null);
-    bundle.request_uri = objectUtils.get(context, 'originalUrl', '');
-    bundle.request_headers = objectUtils.get(context, 'headers', null);
+    bundle.request_method = objectUtils.get(context, 'method', null)
+    bundle.request_uri = objectUtils.get(context, 'originalUrl', '')
+    bundle.request_headers = objectUtils.get(context, 'headers', null)
 
     // Load authenticated info from the session...
-    const sessionNameForUser = authSettings.sessionNameForUser;
-    bundle.user = objectUtils.get(context, `session.${sessionNameForUser}`, {});
+    const sessionNameForUser = authSettings.sessionNameForUser
+    bundle.user = objectUtils.get(context, `session.${sessionNameForUser}`, {})
 
     if (debugBuild) {
       if (bundle.user) {
-        console.log(`Authed session info (${sessionNameForUser}):`);
-        console.log(bundle.user);
+        console.log(`Authed session info (${sessionNameForUser}):`)
+        console.log(bundle.user)
       }
-      console.log('Request headers:');
-      console.log(bundle.request_headers);
+      console.log('Request headers:')
+      console.log(bundle.request_headers)
     }
   } else {
-    bundle.user = context;
+    bundle.user = context
     if (debugBuild && bundle.user) {
-      console.log('Authed context info:');
-      console.log(bundle.user);
+      console.log('Authed context info:')
+      console.log(bundle.user)
     }
   }
 
   if (debugBuild) {
-    console.log('[JOINT] [AUTH-UTILS] authContext =>');
-    console.log(bundle);
-    console.log('-------------------------------------------\n');
+    console.log('[JOINT] [AUTH-UTILS] authContext =>')
+    console.log(bundle)
+    console.log('-------------------------------------------\n')
   }
 
-  return bundle;
+  return bundle
 }
 
 // TODO: Can we move the parseOwnerCreds logic into here ???
@@ -155,46 +155,46 @@ export function prepareAuthContext(joint, context) {
 // optionally an "ownerCreds" object.
 // -----------------------------------------------------------------------------
 export function isAllowed(authContext = {}, authRules = {}, ownerCreds = {}) {
-  let result = false;
+  let result = false
 
   // const requestHeaders = authContext.request_headers;
-  const userContext = authContext.user;
-  const isHttpRequest = (objectUtils.has(authContext, 'request_method'));
+  const userContext = authContext.user
+  const isHttpRequest = (objectUtils.has(authContext, 'request_method'))
 
   if (debugCheck) {
-    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authContext.request_method} ${authContext.request_uri}`);
-    else console.log('[JOINT] [AUTH-UTILS] Checking if request is allowed for:', userContext);
-    console.log('------------------- authRules');
-    console.log(authRules);
-    console.log('------------------- ownerCreds');
-    console.log(ownerCreds);
-    console.log('');
+    if (isHttpRequest) console.log(`[JOINT] [AUTH-UTILS] Checking if request is allowed on: ${authContext.request_method} ${authContext.request_uri}`)
+    else console.log('[JOINT] [AUTH-UTILS] Checking if request is allowed for:', userContext)
+    console.log('------------------- authRules')
+    console.log(authRules)
+    console.log('------------------- ownerCreds')
+    console.log(ownerCreds)
+    console.log('')
   }
 
   // Parse auth rules...
-  const ownerToCheck = authRules.owner;
-  const delegateRoleToCheck = authRules.delegateRole;
-  const rolesAnyToCheck = authRules.rolesAny;
+  const ownerToCheck = authRules.owner
+  const delegateRoleToCheck = authRules.delegateRole
+  const rolesAnyToCheck = authRules.rolesAny
   // const appsToCheck = authRules.authorizedApps;
-  const denyWhenAnyToCheck = authRules.denyWhenAny;
+  const denyWhenAnyToCheck = authRules.denyWhenAny
 
   // Check owner...
   if (ownerToCheck) {
-    result = isAllowedOwner(ownerToCheck, ownerCreds, userContext);
+    result = isAllowedOwner(ownerToCheck, ownerCreds, userContext)
   }
 
   // TODO: This check should be executed inside the "if (ownerToCheck)" clause,
   //       because it is only relevant if ownership auth is declared !!!
   // Check delegate role...
   if (!result && delegateRoleToCheck) {
-    result = isAllowedRole(delegateRoleToCheck, userContext);
+    result = isAllowedRole(delegateRoleToCheck, userContext)
   }
 
   // Check roles any...
   if (!result && rolesAnyToCheck) {
     for (let i = 0; i < rolesAnyToCheck.length; i++) {
-      result = isAllowedRole(rolesAnyToCheck[i], userContext);
-      if (result) break;
+      result = isAllowedRole(rolesAnyToCheck[i], userContext)
+      if (result) break
     }
   }
 
@@ -205,66 +205,66 @@ export function isAllowed(authContext = {}, authRules = {}, ownerCreds = {}) {
 
   // Check for explicitly denied scenarios...
   if (result && denyWhenAnyToCheck) {
-    const isDenied = isDeniedByAny(denyWhenAnyToCheck, userContext);
-    if (isDenied) result = false;
+    const isDenied = isDeniedByAny(denyWhenAnyToCheck, userContext)
+    if (isDenied) result = false
   }
 
-  if (debugCheck) console.log('=========> isAllowed?', result);
+  if (debugCheck) console.log('=========> isAllowed?', result)
 
-  return result;
+  return result
 }
 
 export function isAllowedOwner(ownerToCheck, ownerCreds, userContext) {
-  let result = false;
+  let result = false
 
   if (debugCheck) {
-    console.log('checking owner =>', ownerToCheck);
-    console.log('checking against context info:');
-    console.log(userContext);
+    console.log('checking owner =>', ownerToCheck)
+    console.log('checking against context info:')
+    console.log(userContext)
   }
 
-  if (!userContext) return false; // reject if no auth context is found
+  if (!userContext) return false // reject if no auth context is found
 
   // Handle the special "me" value...
   if (ownerToCheck === 'me') {
     // Access the field data to use for identification...
-    const fields = Object.keys(ownerCreds);
+    const fields = Object.keys(ownerCreds)
     if (fields.length > 0) {
-      const credFieldName = fields[0];
-      const credFieldValue = ownerCreds[credFieldName];
+      const credFieldName = fields[0]
+      const credFieldValue = ownerCreds[credFieldName]
 
       // Ensure the userContext matches the ownerCreds...
       if (Array.isArray(userContext[credFieldName])) {
-        result = objectUtils.includes(userContext[credFieldName], credFieldValue);
-        if (debugCheck) console.log(`Does ${credFieldValue} exist in context[${credFieldName}] ? ${result}`);
+        result = objectUtils.includes(userContext[credFieldName], credFieldValue)
+        if (debugCheck) console.log(`Does ${credFieldValue} exist in context[${credFieldName}] ? ${result}`)
       } else {
-        result = (userContext[credFieldName] === credFieldValue);
-        if (debugCheck) console.log(`Does ${credFieldName}: ${credFieldValue} === context[${credFieldName}]: ${userContext[credFieldName]} ? ${result}`);
+        result = (userContext[credFieldName] === credFieldValue)
+        if (debugCheck) console.log(`Does ${credFieldName}: ${credFieldValue} === context[${credFieldName}]: ${userContext[credFieldName]} ? ${result}`)
       }
     } else if (debugCheck) {
-      console.log('The ownerCreds provided is empty, so ownership cannot be verified');
+      console.log('The ownerCreds provided is empty, so ownership cannot be verified')
     }
   } // end-if (ownerToCheck === 'me')
 
-  return result;
+  return result
 }
 
 export function isAllowedRole(roleToCheck, userContext) {
-  let result = false;
+  let result = false
 
   if (debugCheck) {
-    console.log('checking role =>', roleToCheck);
-    console.log('checking against context info:');
-    console.log(userContext);
+    console.log('checking role =>', roleToCheck)
+    console.log('checking against context info:')
+    console.log(userContext)
   }
 
-  if (!userContext) return false; // reject if no auth context is found
+  if (!userContext) return false // reject if no auth context is found
 
   // Ensure the userContext has the specified role...
-  result = objectUtils.includes(userContext.roles, roleToCheck);
-  if (debugCheck) console.log(`Does role ${roleToCheck} exist in set [${userContext.roles}] ? ${result}`);
+  result = objectUtils.includes(userContext.roles, roleToCheck)
+  if (debugCheck) console.log(`Does role ${roleToCheck} exist in set [${userContext.roles}] ? ${result}`)
 
-  return result;
+  return result
 }
 
 // export function isAuthorizedApp(appsToCheck, requestHeaders) {
@@ -301,25 +301,25 @@ export function isAllowedRole(roleToCheck, userContext) {
 // }
 
 export function isDeniedByAny(denyWhenAnyToCheck, userContext) {
-  let result = false;
+  let result = false
 
   if (debugCheck) {
-    console.log('checking deny scenarios (any) =>', denyWhenAnyToCheck);
-    console.log('checking against context info:');
-    console.log(userContext);
+    console.log('checking deny scenarios (any) =>', denyWhenAnyToCheck)
+    console.log('checking against context info:')
+    console.log(userContext)
   }
 
   // Check the userContext for matching deny scenarios...
   if (Array.isArray(denyWhenAnyToCheck) && denyWhenAnyToCheck.length > 0) {
     for (let i = 0; i < denyWhenAnyToCheck.length; i++) {
-      const denyOn = denyWhenAnyToCheck[i];
-      const prop = Object.keys(denyOn)[0];
-      const value = denyOn[prop];
-      result = (objectUtils.has(userContext, prop) && userContext[prop] === value);
-      if (debugCheck) console.log(`Does ${prop}: ${value} exist in user context ? ${result}`);
-      if (result) break;
+      const denyOn = denyWhenAnyToCheck[i]
+      const prop = Object.keys(denyOn)[0]
+      const value = denyOn[prop]
+      result = (objectUtils.has(userContext, prop) && userContext[prop] === value)
+      if (debugCheck) console.log(`Does ${prop}: ${value} exist in user context ? ${result}`)
+      if (result) break
     }
   }
 
-  return result;
+  return result
 }

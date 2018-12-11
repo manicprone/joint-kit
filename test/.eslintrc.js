@@ -21,5 +21,6 @@ module.exports = {
     'no-unused-expressions': 'off',
     'no-new': 'off',
     'brace-style': 'off',
+    'semi': ['error', 'never'],
   },
 };

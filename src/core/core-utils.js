@@ -4,13 +4,13 @@
 // function returns null.
 // -----------------------------------------------------------------------------
 export function determineServiceKeyFromService(service) {
-  let serviceKey = null;
+  let serviceKey = null
 
   if (service) {
-    if (service.knex && typeof service.model === 'function') serviceKey = 'bookshelf';
+    if (service.knex && typeof service.model === 'function') serviceKey = 'bookshelf'
   }
 
-  return serviceKey;
+  return serviceKey
 }
 
 // -----------------------------------------------------------------------------
@@ -19,13 +19,13 @@ export function determineServiceKeyFromService(service) {
 // function returns null.
 // -----------------------------------------------------------------------------
 export function determineServerKeyFromServer(server) {
-  let serverKey = null;
+  let serverKey = null
 
   if (server) {
-    if (server) serverKey = 'express';
+    if (server) serverKey = 'express'
   }
 
-  return serverKey;
+  return serverKey
 }
 
 // -----------------------------------------------------------------------------
@@ -62,25 +62,25 @@ export function determineServerKeyFromServer(server) {
 // }
 // -----------------------------------------------------------------------------
 export function parseAssociationPath(path = '') {
-  let info = null;
+  let info = null
 
-  const pathParts = path.replace(/\s+/g, '').split('=>');
-  const source = pathParts[0];
-  const sourceParts = source.split('.');
-  const sourceField = (sourceParts.length > 1) ? sourceParts[1] : sourceParts[0];
+  const pathParts = path.replace(/\s+/g, '').split('=>')
+  const source = pathParts[0]
+  const sourceParts = source.split('.')
+  const sourceField = (sourceParts.length > 1) ? sourceParts[1] : sourceParts[0]
 
   // Parse through connection...
   if (pathParts.length === 4) {
-    const thruFrom = pathParts[1];
-    const thruFromParts = thruFrom.split('.');
-    const thruTo = pathParts[2];
-    const thruToParts = thruTo.split('.');
-    const target = pathParts[3];
-    const targetParts = target.split('.');
+    const thruFrom = pathParts[1]
+    const thruFromParts = thruFrom.split('.')
+    const thruTo = pathParts[2]
+    const thruToParts = thruTo.split('.')
+    const target = pathParts[3]
+    const targetParts = target.split('.')
 
     if (thruFromParts.length > 1 && thruToParts.length > 1 && targetParts.length > 1) {
-      const thruFromModel = thruFromParts[0];
-      const thruToModel = thruToParts[0];
+      const thruFromModel = thruFromParts[0]
+      const thruToModel = thruToParts[0]
       if (thruFromModel === thruToModel) {
         info = {
           sourceField,
@@ -89,21 +89,21 @@ export function parseAssociationPath(path = '') {
           },
           targetModelName: targetParts[0],
           targetField: targetParts[1],
-        };
+        }
       }
     }
 
   // Parse direct connection...
   } else if (pathParts.length === 2) {
-    const target = pathParts[1];
-    const targetParts = target.split('.');
+    const target = pathParts[1]
+    const targetParts = target.split('.')
 
     if (targetParts.length > 1) {
       info = {
         sourceField,
         targetModelName: targetParts[0],
         targetField: targetParts[1],
-      };
+      }
     }
   } // end-if-else (pathParts.length === 4)
 
@@ -112,5 +112,5 @@ export function parseAssociationPath(path = '') {
   //   console.error(message);
   // }
 
-  return info;
+  return info
 }

@@ -11,4 +11,4 @@ export default {
   NAME: 'name',
   ACTION: 'action',
   SPEC: 'spec',
-};
+}

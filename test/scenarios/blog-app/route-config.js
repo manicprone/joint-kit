@@ -22,4 +22,4 @@ module.exports = [
     get: { method: 'User.getUsers' },
   },
 
-];
+]

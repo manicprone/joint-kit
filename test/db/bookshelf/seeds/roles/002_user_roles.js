@@ -1,6 +1,6 @@
-import moment from 'moment';
+import moment from 'moment'
 
-const tableName = 'user_roles_ref';
+const tableName = 'user_roles_ref'
 
 const seeds = [
   // ---------------------------------
@@ -68,18 +68,18 @@ const seeds = [
     user_id: 7,
     role_id: 5, // blogger
   },
-];
+]
 
 exports.seed = function seed(knex, Promise) {
-  const time = moment().utc();
+  const time = moment().utc()
 
   return Promise.all(seeds.map((data) => {
-    const timestamp = time.add(5, 'minutes').format();
+    const timestamp = time.add(5, 'minutes').format()
 
     return knex(tableName).insert({
       ...data,
       created_at: timestamp,
       updated_at: timestamp,
-    });
-  }));
-};
+    })
+  }))
+}

@@ -13,16 +13,16 @@ exports.up = function up(knex, Promise) {
     //   table.timestamps();
     // }),
     knex.schema.createTableIfNotExists('tags', (table) => {
-      table.increments();
-      table.string('label').notNullable().unique();
-      table.string('key').notNullable().unique();
-      table.timestamps();
+      table.increments()
+      table.string('label').notNullable().unique()
+      table.string('key').notNullable().unique()
+      table.timestamps()
     }),
     knex.schema.createTableIfNotExists('profile_tags_ref', (table) => {
-      table.increments();
-      table.integer('profile_id').notNullable().unsigned().references('user_profiles.id');
-      table.integer('tag_id').notNullable().unsigned().references('tags.id');
-      table.timestamps();
+      table.increments()
+      table.integer('profile_id').notNullable().unsigned().references('user_profiles.id')
+      table.integer('tag_id').notNullable().unsigned().references('tags.id')
+      table.timestamps()
     }),
     // knex.schema.createTableIfNotExists('blog_post_tags_ref', (table) => {
     //   table.increments();
@@ -30,8 +30,8 @@ exports.up = function up(knex, Promise) {
     //   table.integer('tag_id').notNullable().unsigned().references('tags.id');
     //   table.timestamps();
     // }),
-  ]);
-};
+  ])
+}
 
 exports.down = function down(knex, Promise) {
   return Promise.all([
@@ -41,6 +41,6 @@ exports.down = function down(knex, Promise) {
     return Promise.all([
       knex.schema.dropTableIfExists('tags'),
       // knex.schema.dropTableIfExists('blog_posts'),
-    ]);
-  });
-};
+    ])
+  })
+}

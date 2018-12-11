@@ -8,4 +8,4 @@ export default {
   PARSE_QUERY: 'query',
   PARSE_BODY: 'body',
   STATUS_SUCCESS: 'successStatus',
-};
+}

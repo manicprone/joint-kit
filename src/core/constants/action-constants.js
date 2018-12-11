@@ -67,4 +67,4 @@ export default {
 
   // Authorization
   INPUT_AUTH_CONTEXT: 'authContext',
-};
+}

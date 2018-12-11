@@ -16,5 +16,6 @@ module.exports = {
     'camelcase': 'off',
     'no-param-reassign': 'off',
     'func-names': 'off',
+    'semi': ['error', 'never'],
   },
 };

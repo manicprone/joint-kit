@@ -1,7 +1,7 @@
-import lodashString from 'lodash/string';
+import lodashString from 'lodash/string'
 
 function toPascalCase(str) {
-  return lodashString.startCase(str).replace(/\s/g, '');
+  return lodashString.startCase(str).replace(/\s/g, '')
 }
 
 export default {
@@ -9,4 +9,4 @@ export default {
   toKebabCase: lodashString.kebabCase,
   toSnakeCase: lodashString.snakeCase,
   toPascalCase,
-};
+}

@@ -14,4 +14,4 @@ module.exports = {
       directory: './test/db/bookshelf/seeds',
     },
   },
-};
+}

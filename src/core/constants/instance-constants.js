@@ -42,4 +42,4 @@ export default {
 
   // ------------------------------- Generated Router
   ROUTER: 'router',
-};
+}

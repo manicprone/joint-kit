@@ -24,4 +24,4 @@ export default {
   ASSOCIATIONS_PATH: 'path',
   ASSOCIATIONS_ORDER_BY: 'orderBy',
 
-};
+}

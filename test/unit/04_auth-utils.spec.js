@@ -1,7 +1,7 @@
-import chai from 'chai';
-import * as AuthUtils from '../../src/core/authorization/auth-utils';
+import chai from 'chai'
+import * as AuthUtils from '../../src/core/authorization/auth-utils'
 
-const expect = chai.expect;
+const expect = chai.expect
 
 describe('AUTH-UTILS', () => {
   // ---------------------------
@@ -13,7 +13,7 @@ describe('AUTH-UTILS', () => {
         settings: {
           auth: {},
         },
-      };
+      }
 
       const context = {
         is_logged_in: true,
@@ -23,13 +23,13 @@ describe('AUTH-UTILS', () => {
         display_name: 'Moderator Blogger',
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
-      };
+      }
 
       expect(AuthUtils.prepareAuthContext(mockJoint, context))
         .to.deep.equal({
           user: context,
-        });
-    });
+        })
+    })
 
     it('should return the expected authContext package, in a client-side HTTP request scenario', () => {
       const mockJoint = {
@@ -38,7 +38,7 @@ describe('AUTH-UTILS', () => {
             sessionNameForUser: 'joint_user',
           },
         },
-      };
+      }
 
       const mockSessionInfo = {
         is_logged_in: true,
@@ -48,7 +48,7 @@ describe('AUTH-UTILS', () => {
         display_name: 'Moderator Blogger',
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
-      };
+      }
 
       const mockRequest = {
         method: 'POST',
@@ -56,7 +56,7 @@ describe('AUTH-UTILS', () => {
         session: {
           joint_user: mockSessionInfo,
         },
-      };
+      }
 
       expect(AuthUtils.prepareAuthContext(mockJoint, mockRequest))
         .to.deep.equal({
@@ -64,9 +64,9 @@ describe('AUTH-UTILS', () => {
           request_uri: '/api/blog/post/7/unpublish',
           request_headers: null,
           user: mockSessionInfo,
-        });
-    });
-  }); // END - prepareAuthContext
+        })
+    })
+  }) // END - prepareAuthContext
 
   // -----------------------
   // Testing: isAllowedOwner
@@ -83,14 +83,14 @@ describe('AUTH-UTILS', () => {
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
         default_profile_status_id: 3,
-      };
+      }
 
-      const ownerToCheck = 'me';
-      const ownerCreds = { profile_name: 5 };
+      const ownerToCheck = 'me'
+      const ownerCreds = { profile_name: 5 }
 
-      const result = AuthUtils.isAllowedOwner(ownerToCheck, ownerCreds, mockSessionInfo);
-      expect(result).to.equal(false);
-    });
+      const result = AuthUtils.isAllowedOwner(ownerToCheck, ownerCreds, mockSessionInfo)
+      expect(result).to.equal(false)
+    })
 
     it('should support owner authorization checks on both atomic and array session values', () => {
       const mockSessionInfo = {
@@ -103,17 +103,17 @@ describe('AUTH-UTILS', () => {
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
         default_profile_status_id: 3,
-      };
+      }
 
-      const ownerToCheck = 'me';
-      const ownerCredsFromArray = { profile_ids: 5 };
-      const ownerCredsFromAtomic = { external_id: 10000 };
+      const ownerToCheck = 'me'
+      const ownerCredsFromArray = { profile_ids: 5 }
+      const ownerCredsFromAtomic = { external_id: 10000 }
 
-      const resultFromArray = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromArray, mockSessionInfo);
-      const resultFromAtomic = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromAtomic, mockSessionInfo);
+      const resultFromArray = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromArray, mockSessionInfo)
+      const resultFromAtomic = AuthUtils.isAllowedOwner(ownerToCheck, ownerCredsFromAtomic, mockSessionInfo)
 
-      expect(resultFromArray).to.equal(true);
-      expect(resultFromAtomic).to.equal(true);
-    });
-  }); // END - isAllowedOwner
-});
+      expect(resultFromArray).to.equal(true)
+      expect(resultFromAtomic).to.equal(true)
+    })
+  }) // END - isAllowedOwner
+})

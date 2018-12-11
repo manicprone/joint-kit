@@ -1,7 +1,7 @@
-import lodashObject from 'lodash/object';
-import lodashLang from 'lodash/lang';
-import lodashArray from 'lodash/array';
-import lodashCollection from 'lodash/collection';
+import lodashObject from 'lodash/object'
+import lodashLang from 'lodash/lang'
+import lodashArray from 'lodash/array'
+import lodashCollection from 'lodash/collection'
 
 export default {
   get: lodashObject.get,
@@ -10,4 +10,4 @@ export default {
   cloneDeep: lodashLang.cloneDeep,
   union: lodashArray.union,
   includes: lodashCollection.includes,
-};
+}
