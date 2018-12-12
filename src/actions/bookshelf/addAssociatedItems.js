@@ -1,26 +1,28 @@
 import * as StatusErrors from '../../core/errors/status-errors'
+import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import getItem from './getItem'
 import getItems from './getItems'
-import toJsonApi from './serializers/json-api'
+import { handleDataResponse } from './handlers/response-handlers'
 
 const debug = false
 
-export default async function addAssociatedItems(bookshelf, spec = {}, input = {}, output) {
+export default async function addAssociatedItems(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Continue on existing transaction...
-  if (trx) return performAddAssociatedItems(bookshelf, spec, input, output)
+  if (trx) return performAddAssociatedItems(joint, spec, input, output)
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input)
     newInput[ACTION.INPUT_TRANSACTING] = newTrx
-    return performAddAssociatedItems(bookshelf, spec, newInput, output)
+    return performAddAssociatedItems(joint, spec, newInput, output)
   })
 }
 
-async function performAddAssociatedItems(bookshelf, spec = {}, input = {}, output) {
+async function performAddAssociatedItems(joint, spec = {}, input = {}, output) {
   const specMain = spec[ACTION.RESOURCE_MAIN]
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
@@ -44,8 +46,8 @@ async function performAddAssociatedItems(bookshelf, spec = {}, input = {}, outpu
   // Lookup model name of association, add to spec if not provided...
   let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME]
   if (!modelNameAssoc) {
-    modelNameAssoc = (bookshelf.modelNameForAssoc[modelNameMain])
-        ? bookshelf.modelNameForAssoc[modelNameMain][assocName]
+    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain])
+        ? joint.modelNameOfAssoc[modelNameMain][assocName]
         : null
     specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc
   }
@@ -59,8 +61,8 @@ async function performAddAssociatedItems(bookshelf, spec = {}, input = {}, outpu
 
   try {
     // Lookup resources...
-    const main = await getItem(bookshelf, specMain, inputMain)
-    const assoc = await getItems(bookshelf, specAssoc, inputAssoc)
+    const main = await getItem(joint, specMain, inputMain)
+    const assoc = await getItems(joint, specAssoc, inputAssoc)
 
     // Reject with 404 if instances of the requested association were not found...
     if (assoc.length === 0) {
@@ -70,11 +72,8 @@ async function performAddAssociatedItems(bookshelf, spec = {}, input = {}, outpu
     // Otherwise, attach associations to main...
     await main.related(assocName).attach(assoc.models, { transacting: trx })
 
-    // Return data in requested format...
-    switch (output) {
-      case 'json-api': return toJsonApi(modelNameMain, main, bookshelf)
-      default: return main
-    }
+    // Return data...
+    return handleDataResponse(joint, modelNameMain, main, output)
 
   } catch (error) {
     if (error.name === 'JointStatusError') throw error

@@ -1,27 +1,30 @@
 import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import * as AuthUtils from '../../core/authorization/auth-utils'
+import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
-import toJsonApi from './serializers/json-api'
+import { handleDataResponse } from './handlers/response-handlers'
 
 const debug = false
 
-export default async function createItem(bookshelf, spec = {}, input = {}, output) {
+export default async function createItem(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Continue on existing transaction...
-  if (trx) return performCreateItem(bookshelf, spec, input, output)
+  if (trx) return performCreateItem(joint, spec, input, output)
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input)
     newInput[ACTION.INPUT_TRANSACTING] = newTrx
-    return performCreateItem(bookshelf, spec, newInput, output)
+    return performCreateItem(joint, spec, newInput, output)
   })
 }
 
-async function performCreateItem(bookshelf, spec = {}, input = {}, output) {
+async function performCreateItem(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = spec[ACTION.SPEC_FIELDS]
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
@@ -83,11 +86,8 @@ async function performCreateItem(bookshelf, spec = {}, input = {}, output) {
     // Create item...
     const data = await model.forge(createData).save(null, actionOpts)
 
-    // Return data in requested format...
-    switch (output) {
-      case 'json-api': return toJsonApi(modelName, data, bookshelf)
-      default: return data
-    }
+    // Return data...
+    return handleDataResponse(joint, modelName, data, output)
 
   } catch (error) {
     if (debug) console.error(`[JOINT] [action:createItem] Action encountered a third-party error: ${error.message} =>`, error)

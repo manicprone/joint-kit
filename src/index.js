@@ -58,7 +58,8 @@ export default class Joint {
     }
     if (actions) {
       Object.keys(actions).forEach((actionName) => {
-        this[actionName] = (spec, input, ouput = `${this.output}`) => actions[actionName](this.service, spec, input, ouput)
+        // this[actionName] = (spec, input, output = `${this.output}`) => actions[actionName](this.service, spec, input, output)
+        this[actionName] = (spec, input, output = `${this.output}`) => actions[actionName](this, spec, input, output)
       })
     }
   } // END - constructor

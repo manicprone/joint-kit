@@ -28,7 +28,6 @@ export function registerModelsFromService(joint, log = true) {
 // Register models from model config...
 // -----------------------------------------------------------------------------
 export function registerModels(joint, log = true) {
-  const service = joint.service
   const serviceKey = joint.serviceKey
   const modelDefs = joint.modelConfig
 
@@ -37,6 +36,7 @@ export function registerModels(joint, log = true) {
     joint.model = {}
     joint.modelByTable = {}
     joint.modelNameByTable = {}
+    joint.modelNameOfAssoc = {}
   }
 
   if (log) {
@@ -72,14 +72,17 @@ export function registerModels(joint, log = true) {
           console.log('')
         }
 
-        const modelObject = registerModel(service, modelDef, modelName, debug_registerModels)
+        const { modelObject, assocMap } = registerModel(joint, modelDef, modelName, debug_registerModels)
         joint.model[modelName] = modelObject
         joint.modelByTable[modelDef.tableName] = modelObject
         joint.modelNameByTable[modelDef.tableName] = modelName
+        if (!objectUtils.isEmpty(assocMap)) joint.modelNameOfAssoc[modelName] = assocMap
+
       } else if (log) {
         console.log(`${modelName} (already registered)`)
       }
     })
+
   } else if (log) {
     console.log('no models configured')
   }

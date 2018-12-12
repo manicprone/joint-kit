@@ -1,14 +1,16 @@
 import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import * as AuthUtils from '../../core/authorization/auth-utils'
+import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
 import * as BookshelfUtils from './bookshelf-utils'
-import toJsonApi from './serializers/json-api'
+import { handleDataResponse } from './handlers/response-handlers'
 
 const debug = false
 
-export default async function getItem(bookshelf, spec = {}, input = {}, output) {
+export default async function getItem(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = spec[ACTION.SPEC_FIELDS]
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
@@ -111,11 +113,8 @@ export default async function getItem(bookshelf, spec = {}, input = {}, output) 
     // Handle loadDirect requests...
     if (loadDirect.associations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.associations)
 
-    // Return data in requested format...
-    switch (output) {
-      case 'json-api': return toJsonApi(modelName, data, bookshelf)
-      default: return data
-    }
+    // Return data...
+    return handleDataResponse(joint, modelName, data, output)
 
   } catch (error) {
     let jointError = null

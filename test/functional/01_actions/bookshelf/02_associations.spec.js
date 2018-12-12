@@ -764,7 +764,10 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             })
         })
 
-      return Promise.all([globalLevel, methodLevel])
+      return Promise.all([
+        globalLevel,
+        methodLevel,
+      ])
     })
   }) // END - addAssociatedItems
 

@@ -2,11 +2,11 @@ import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import ACTION from '../../core/constants/action-constants'
 import getItem from './getItem'
-import toJsonApi from './serializers/json-api'
+import { handleDataResponse } from './handlers/response-handlers'
 
 const debug = false
 
-export default async function hasAssociatedItem(bookshelf, spec = {}, input = {}, output) {
+export default async function hasAssociatedItem(joint, spec = {}, input = {}, output) {
   const specMain = spec[ACTION.RESOURCE_MAIN]
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
@@ -30,8 +30,8 @@ export default async function hasAssociatedItem(bookshelf, spec = {}, input = {}
   // Lookup model name of association, add to spec if not provided...
   let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME]
   if (!modelNameAssoc) {
-    modelNameAssoc = (bookshelf.modelNameForAssoc[modelNameMain])
-        ? bookshelf.modelNameForAssoc[modelNameMain][assocName]
+    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain])
+        ? joint.modelNameOfAssoc[modelNameMain][assocName]
         : null
     specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc
   }
@@ -47,24 +47,21 @@ export default async function hasAssociatedItem(bookshelf, spec = {}, input = {}
 
   try {
     // Lookup resources...
-    const main = await getItem(bookshelf, specMain, inputMain)
-    const assoc = await getItem(bookshelf, specAssoc, inputAssoc)
+    const main = await getItem(joint, specMain, inputMain)
+    const assoc = await getItem(joint, specAssoc, inputAssoc)
 
     // If has associated item, return it...
     const idToCheck = assoc.id
     if (objectUtils.includes(main.related(assocName).pluck('id'), idToCheck)) {
-      // Return data in requested format...
-      switch (output) {
-        case 'json-api': return toJsonApi(modelNameAssoc, assoc, bookshelf)
-        default: return assoc
-      }
+      return handleDataResponse(joint, modelNameAssoc, assoc, output)
     }
 
     // Otherwise, reject with a 404...
     return Promise.reject(StatusErrors.generateAssociatedItemDoesNotExistError(modelNameAssoc))
+
   } catch (error) {
     if (error.name === 'JointStatusError') throw error
-    if (debug) console.error(`[JOINT] [action:addAssociatedItems] Action encountered a third-party error: ${error.message} =>`, error)
+    if (debug) console.error(`[JOINT] [action:hasAssociatedItem] Action encountered a third-party error: ${error.message} =>`, error)
     throw StatusErrors.generateThirdPartyError(error)
   }
 } // END - hasAssociatedItem

@@ -2,7 +2,7 @@ import objectUtils from '../../../utils/object-utils'
 
 const debug = false
 
-export default function serialize(type, data, service) {
+export default function serialize(type, data, joint) {
   let json = {}
 
   if (data) {
@@ -14,9 +14,9 @@ export default function serialize(type, data, service) {
     // Build data package...
     const packageType = (data.attributes) ? 'item' : 'collection'
     if (packageType === 'item') {
-      json = buildItemPackage(type, data, relationHash, service)
+      json = buildItemPackage(type, data, relationHash, joint)
     } else {
-      json = buildCollectionPackage(type, data, relationHash, service)
+      json = buildCollectionPackage(type, data, relationHash, joint)
     }
 
     // Build included package (for relationship data)...
@@ -38,15 +38,15 @@ export default function serialize(type, data, service) {
   return json
 }
 
-function buildItemPackage(type, data, relationHash, service) {
+function buildItemPackage(type, data, relationHash, joint) {
   const itemPackage = {}
 
-  itemPackage.data = buildItemData(type, data, relationHash, service)
+  itemPackage.data = buildItemData(type, data, relationHash, joint)
 
   return itemPackage
 }
 
-function buildCollectionPackage(type, data, relationHash, service) {
+function buildCollectionPackage(type, data, relationHash, joint) {
   const collectionPackage = {}
   collectionPackage.data = []
   collectionPackage.meta = {}
@@ -54,7 +54,7 @@ function buildCollectionPackage(type, data, relationHash, service) {
   // Build each item...
   if (data.models && Array.isArray(data.models) && data.models.length > 0) {
     data.models.forEach((itemData) => {
-      collectionPackage.data.push(buildItemData(type, itemData, relationHash, service))
+      collectionPackage.data.push(buildItemData(type, itemData, relationHash, joint))
     })
   }
 
@@ -75,7 +75,7 @@ function buildCollectionPackage(type, data, relationHash, service) {
   return collectionPackage
 }
 
-function buildItemData(type, itemData, relationHash, service) {
+function buildItemData(type, itemData, relationHash, joint) {
   const item = {}
 
   // Set type...
@@ -107,11 +107,11 @@ function buildItemData(type, itemData, relationHash, service) {
         // --------------------------
         // Handle 1-1 relationship...
         // --------------------------
-        const relationDataType = resolveDataTypeFromRelationData(relationData, service)
+        const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
         const relationItemData = buildItemData(relationDataType,
                                                relationData,
                                                relationHash,
-                                               service)
+                                               joint)
 
         // Set type and ID on base item...
         item.relationships[relationName].data = {}
@@ -127,11 +127,11 @@ function buildItemData(type, itemData, relationHash, service) {
         item.relationships[relationName].data = []
         if (relationData.models && Array.isArray(relationData.models) && relationData.models.length > 0) {
           relationData.models.forEach((relationItem) => {
-            const relationDataType = resolveDataTypeFromRelationData(relationData, service)
+            const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
             const relationItemData = buildItemData(relationDataType,
                                                    relationItem,
                                                    relationHash,
-                                                   service)
+                                                   joint)
 
             // Set type and ID on base item array...
             item.relationships[relationName].data.push({
@@ -162,11 +162,11 @@ function buildPaginationInfo(paginationData) {
   return info
 }
 
-function buildFilterInfo(type, filterData, service) {
+function buildFilterInfo(type, filterData, joint) {
   const info = []
 
   filterData.forEach((filter) => {
-    info.push(buildItemData(type, filter, service))
+    info.push(buildItemData(type, filter, joint))
   })
 
   return info
@@ -180,12 +180,12 @@ function processRelationItemData(relationItemData, relationHash) {
   if (!hashEntry[relationItemData.id]) hashEntry[relationItemData.id] = relationItemData
 }
 
-function resolveDataTypeFromRelationData(relationData, service) {
+function resolveDataTypeFromRelationData(relationData, joint) {
   let type = 'unknown'
 
   const tableName = relationData.relatedData.targetTableName
-  if (service.modelNameByTable && service.modelNameByTable[tableName]) {
-    type = service.modelNameByTable[tableName]
+  if (joint.modelNameByTable && joint.modelNameByTable[tableName]) {
+    type = joint.modelNameByTable[tableName]
   }
 
   return type

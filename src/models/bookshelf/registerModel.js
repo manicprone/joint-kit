@@ -4,14 +4,18 @@ import * as CoreUtils from '../../core/core-utils'
 
 const namespace = 'JOINT'
 
-export default function registerModel(bookshelf = {}, modelDef = {}, modelName, debug = false) {
+export default function registerModel(joint, modelDef = {}, modelName, debug = false) {
+  const bookshelf = joint.service
   let registryEntry = null
+  let assocMap = {}
 
   // If already registered on the service, just return it...
-  if (bookshelf.model(modelName)) return bookshelf.model(modelName)
+  if (bookshelf.model(modelName)) {
+    registryEntry = bookshelf.model(modelName)
+    if (bookshelf.modelNameOfAssoc) assocMap = bookshelf.modelNameOfAssoc[modelName]
 
   // Otherwise, register the model...
-  if (bookshelf.Model) {
+  } else if (bookshelf.Model) {
     const tableName = objectUtils.get(modelDef, 'tableName', null)
     if (tableName) {
       const idAttribute = objectUtils.get(modelDef, 'idAttribute', 'id')
@@ -41,10 +45,10 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
           }
 
           if (info) {
-            // Add lookup of association modelName to bookshelf...
-            if (!bookshelf.modelNameForAssoc) bookshelf.modelNameForAssoc = {}
-            if (!bookshelf.modelNameForAssoc[modelName]) bookshelf.modelNameForAssoc[modelName] = {}
-            bookshelf.modelNameForAssoc[modelName][assocName] = info.targetModelName
+            // Build mapping of association name to its underlying model
+            assocMap[assocName] = info.targetModelName
+            if (!bookshelf.modelNameOfAssoc) bookshelf.modelNameOfAssoc = {}
+            bookshelf.modelNameOfAssoc[modelName] = assocMap
 
             // -----------------------------
             // Handle "toOne" association...
@@ -108,12 +112,8 @@ export default function registerModel(bookshelf = {}, modelDef = {}, modelName, 
 
       // Add to bookshelf registry...
       registryEntry = bookshelf.model(modelName, modelObject)
-      if (!bookshelf.modelByTable) bookshelf.modelByTable = {}
-      if (!bookshelf.modelNameByTable) bookshelf.modelNameByTable = {}
-      bookshelf.modelByTable[tableName] = registryEntry
-      bookshelf.modelNameByTable[tableName] = modelName
     } // end-if (tableName)
-  } // end-if (bookshelf.Model)
+  } // end-if-else-if (bookshelf.Model)
 
-  return registryEntry
+  return { modelObject: registryEntry, assocMap }
 } // END - registerModel

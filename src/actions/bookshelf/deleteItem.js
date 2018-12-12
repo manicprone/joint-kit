@@ -1,27 +1,30 @@
 import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import * as AuthUtils from '../../core/authorization/auth-utils'
+import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
-import toJsonApi from './serializers/json-api'
+import { handleDataResponse } from './handlers/response-handlers'
 
 const debug = false
 
-export default async function deleteItem(bookshelf, spec = {}, input = {}, output) {
+export default async function deleteItem(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Continue on existing transaction...
-  if (trx) return performDeleteItem(bookshelf, spec, input, output)
+  if (trx) return performDeleteItem(joint, spec, input, output)
 
   // Otherwise, start new transaction...
   return bookshelf.transaction((newTrx) => {
     const newInput = Object.assign({}, input)
     newInput[ACTION.INPUT_TRANSACTING] = newTrx
-    return performDeleteItem(bookshelf, spec, newInput, output)
+    return performDeleteItem(joint, spec, newInput, output)
   })
 }
 
-async function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
+async function performDeleteItem(joint, spec = {}, input = {}, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = spec[ACTION.SPEC_FIELDS]
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
@@ -46,14 +49,15 @@ async function performDeleteItem(bookshelf, spec = {}, input = {}, output) {
   // Perform lookup of item first, if specified...
   const lookupFieldData = ActionUtils.getLookupFieldData(specFields, inputFields)
   if (lookupFieldData) {
-    return doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output)
+    return doLookupThenAction(joint, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output)
   }
 
   // Otherwise, just perform action...
-  return doAction(bookshelf, modelName, specFields, specAuth, null, inputFields, authContext, trx, output)
+  return doAction(joint, modelName, specFields, specAuth, null, inputFields, authContext, trx, output)
 } // END - performDeleteItem
 
-async function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
+async function doLookupThenAction(joint, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const getItemOpts = { require: true }
   if (trx) getItemOpts.transacting = trx
 
@@ -64,7 +68,7 @@ async function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFie
     const combinedFields = Object.assign({}, resource.attributes, inputFields)
     const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
 
-    return doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output)
+    return doAction(joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output)
   } catch (error) {
     let jointError = null
     if (error.message) {
@@ -81,7 +85,9 @@ async function doLookupThenAction(bookshelf, lookupFieldData, modelName, specFie
   }
 } // END - doLookupThenAction
 
-async function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
+async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
+  const bookshelf = joint[INSTANCE.PROP_SERVICE]
+
   // Respect auth...
   const authRules = specAuth[ACTION.SPEC_AUTH_RULES]
   if (authRules) {
@@ -114,11 +120,9 @@ async function doAction(bookshelf, modelName, specFields, specAuth, ownerCreds, 
     // Delete item...
     const data = await bookshelf.model(modelName).where(whereOpts).destroy(actionOpts)
 
-    // Return data in requested format...
-    switch (output) {
-      case 'json-api': return toJsonApi(modelName, data, bookshelf)
-      default: return data
-    }
+    // Return data...
+    return handleDataResponse(joint, modelName, data, output)
+
   } catch (error) {
     let jointError = null
     if (error.message) {

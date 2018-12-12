@@ -35,6 +35,7 @@ export default {
   REGISTRY_MODEL: 'model',
   REGISTRY_MODEL_BY_TABLE: 'modelByTable',
   REGISTRY_MODEL_NAME_BY_TABLE: 'modelNameByTable',
+  // REGISTRY_MODEL_NAME_OF_ASSOC: 'modelNameOfAssoc', // TODO: Do we mount this here ???
 
   // ------------------------------- Method Registries
   REGISTRY_METHOD: 'method',

@@ -9,10 +9,6 @@
 
 * Update action `deleteItem` => `deleteItems`, to support one to many deletes of a type (model).
 
-* Inject full Joint instance into action implementations (i.e. no need to break down to service and other params) !!!
-
-* Remove Bluebird from the dependencies !!!
-
 * Eliminate the declaration ordering issue with the `generate` logic for models:
 
   - Populate the `joint.modelNameByTable` registry upfront, before invoking the
