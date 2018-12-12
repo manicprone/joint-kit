@@ -4,9 +4,9 @@
 // serviceKey: 'bookshelf'
 // service: bookshelf/knex
 // -------------------------------------------
-import dbConfig from './knexfile';
+import dbConfig from './knexfile'
 
-const test = dbConfig.test;
+const test = dbConfig.test
 
 // Configure knex for test database...
 const knex = require('knex')({
@@ -16,13 +16,13 @@ const knex = require('knex')({
   seeds: test.seeds,
   useNullAsDefault: true,
   // debug: true,
-});
+})
 
 // Initialize bookshelf...
-const bookshelf = require('bookshelf')(knex);
+const bookshelf = require('bookshelf')(knex)
 
 // Enable plugins...
-bookshelf.plugin('registry');
-bookshelf.plugin('pagination');
+bookshelf.plugin('registry')
+bookshelf.plugin('pagination')
 
-export default bookshelf;
+export default bookshelf

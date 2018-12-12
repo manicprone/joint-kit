@@ -1,51 +1,51 @@
-import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-import ACTION from '../../../src/core/constants/action-constants';
-import Joint from '../../../src';
-import appMgmtModels from '../../scenarios/app-mgmt/model-config';
-import appMgmtMethods from '../../scenarios/app-mgmt/method-config';
-import projectAppModels from '../../scenarios/project-app/model-config';
-import projectAppMethods from '../../scenarios/project-app/method-config';
-import blogAppModels from '../../scenarios/blog-app/model-config';
-import blogAppMethods from '../../scenarios/blog-app/method-config';
-import bookshelf from '../../db/bookshelf/service';
-import { resetDB } from '../../db/bookshelf/db-utils';
-import chaiHelpers from '../chai-helpers';
+import chai from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import ACTION from '../../../../src/core/constants/action-constants'
+import Joint from '../../../../src'
+import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
+import appMgmtMethods from '../../../scenarios/app-mgmt/method-config'
+import projectAppModels from '../../../scenarios/project-app/model-config'
+import projectAppMethods from '../../../scenarios/project-app/method-config'
+import blogAppModels from '../../../scenarios/blog-app/model-config'
+import blogAppMethods from '../../../scenarios/blog-app/method-config'
+import bookshelf from '../../../db/bookshelf/service'
+import { resetDB } from '../../../db/bookshelf/db-utils'
+import chaiHelpers from '../../chai-helpers'
 
-chai.use(chaiAsPromised);
-chai.use(chaiHelpers);
-const expect = chai.expect;
+chai.use(chaiAsPromised)
+chai.use(chaiHelpers)
+const expect = chai.expect
 
-let appMgmt = null;
-let projectApp = null;
-let blogApp = null;
+let appMgmt = null
+let projectApp = null
+let blogApp = null
 
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   before(() => {
     // --------
     // App Mgmt
     // --------
-    appMgmt = new Joint({ service: bookshelf });
-    appMgmt.generate({ modelConfig: appMgmtModels, methodConfig: appMgmtMethods, log: false });
+    appMgmt = new Joint({ service: bookshelf })
+    appMgmt.generate({ modelConfig: appMgmtModels, methodConfig: appMgmtMethods, log: false })
 
     // -----------
     // Project App
     // -----------
-    projectApp = new Joint({ service: bookshelf });
-    projectApp.generate({ modelConfig: projectAppModels, methodConfig: projectAppMethods, log: false });
+    projectApp = new Joint({ service: bookshelf })
+    projectApp.generate({ modelConfig: projectAppModels, methodConfig: projectAppMethods, log: false })
 
     // --------
     // Blog App
     // --------
-    blogApp = new Joint({ service: bookshelf });
-    blogApp.generate({ modelConfig: blogAppModels, methodConfig: blogAppMethods, log: false });
-  });
+    blogApp = new Joint({ service: bookshelf })
+    blogApp.generate({ modelConfig: blogAppModels, methodConfig: blogAppMethods, log: false })
+  })
 
   // ---------------------------------------------------------------------------
   // Resource: AppContent (app-mgmt)
   // ---------------------------------------------------------------------------
   describe('AppContent', () => {
-    before(() => resetDB());
+    before(() => resetDB())
 
     // -------------------------------------------------------------------------
     // Method: saveContent
@@ -58,36 +58,36 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe('saveContent', () => {
+    describe('AppContent.saveContent', () => {
       it('should return an error (400) when the required fields are not provided', () => {
-        const appID = 'failed-app';
-        const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } };
+        const appID = 'failed-app'
+        const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } }
 
         const inputNoAppID = {
           fields: {
             data: appContent,
           },
-        };
+        }
         const inputNoData = {
           fields: {
             app_id: appID,
           },
-        };
+        }
 
         const noAppID = expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
-          .to.eventually.be.rejectedWithJointStatusError(400);
+          .to.eventually.be.rejectedWithJointStatusError(400)
         const noData = expect(appMgmt.method.AppContent.saveContent(inputNoData))
-          .to.eventually.be.rejectedWithJointStatusError(400);
+          .to.eventually.be.rejectedWithJointStatusError(400)
 
         return Promise.all([
           noAppID,
           noData,
-        ]);
-      });
+        ])
+      })
 
       it('should save a new package of data for a provided "app_id" and "key"', () => {
-        const appID = 'trendy-boutique';
-        const key = 'winter-promo';
+        const appID = 'trendy-boutique'
+        const key = 'winter-promo'
         const appContent = {
           trending: {
             men: 'pleather-jackets',
@@ -95,7 +95,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             kids: 'serial-killer-pillows',
           },
           discountBreakpoints: ['20%', '30%', '50%'],
-        };
+        }
 
         const input = {
           fields: {
@@ -103,23 +103,23 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             key,
             data: appContent,
           },
-        };
+        }
 
         return appMgmt.method.AppContent.saveContent(input)
           .then((data) => {
-            expect(data.attributes.id).to.equal(1);
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal(key);
+            expect(data.attributes.id).to.equal(1)
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal(key)
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.trending.men).to.equal('pleather-jackets');
-            expect(contentJSON.trending.women).to.equal('faux-cotton-socks');
-            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(3);
-          });
-      });
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.trending.men).to.equal('pleather-jackets')
+            expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
+            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(3)
+          })
+      })
 
       it(`should save a new package of data for a provided "app_id", using the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" of the "key" to satisfy the lookup requirement`, () => {
-        const appID = 'trendy-boutique';
+        const appID = 'trendy-boutique'
         const appContent = {
           trending: {
             men: 'hats',
@@ -127,31 +127,31 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             kids: 'mobile-phone-accessories',
           },
           newBrands: ['twisted-kids', 'forlorn', 'girl-in-the-rain'],
-        };
+        }
 
         const input = {
           fields: {
             app_id: appID,
             data: appContent,
           },
-        };
+        }
 
         return appMgmt.method.AppContent.saveContent(input)
           .then((data) => {
-            expect(data.attributes.id).to.equal(2);
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal('default');
+            expect(data.attributes.id).to.equal(2)
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal('default')
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.trending.men).to.equal('hats');
-            expect(contentJSON.trending.women).to.equal('belts');
-            expect(contentJSON.newBrands).to.be.an('array').that.has.length(3);
-          });
-      });
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.trending.men).to.equal('hats')
+            expect(contentJSON.trending.women).to.equal('belts')
+            expect(contentJSON.newBrands).to.be.an('array').that.has.length(3)
+          })
+      })
 
       it('should update an existing package of data according to the spec defintion', () => {
-        const appID = 'trendy-boutique';
-        const key = 'winter-promo';
+        const appID = 'trendy-boutique'
+        const key = 'winter-promo'
 
         const contentWinterPromo = {
           trending: {
@@ -159,14 +159,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             women: 'faux-cotton-socks',
           },
           discountBreakpoints: ['10%', '20%', '30%', '35%', '40%'],
-        };
+        }
         const contentDefault = {
           trending: {
             men: 'ascots',
             kids: 'fidget spinners with sharp blades',
           },
           newBrands: ['the-darkest-path', 'total-vanity'],
-        };
+        }
 
         const inputWithKey = {
           fields: {
@@ -174,41 +174,41 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             key,
             data: contentWinterPromo,
           },
-        };
+        }
         const inputNoKey = {
           fields: {
             app_id: appID,
             data: contentDefault,
           },
-        };
+        }
 
         const withKey = appMgmt.method.AppContent.saveContent(inputWithKey)
           .then((data) => {
-            expect(data.attributes.id).to.equal(1);
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal(key);
+            expect(data.attributes.id).to.equal(1)
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal(key)
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.trending.men).to.equal('mascara');
-            expect(contentJSON.trending.women).to.equal('faux-cotton-socks');
-            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(5);
-          });
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.trending.men).to.equal('mascara')
+            expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
+            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(5)
+          })
 
         const defaultKey = appMgmt.method.AppContent.saveContent(inputNoKey)
           .then((data) => {
-            expect(data.attributes.id).to.equal(2);
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal('default');
+            expect(data.attributes.id).to.equal(2)
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal('default')
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.trending.men).to.equal('ascots');
-            expect(contentJSON.trending.kids).to.equal('fidget spinners with sharp blades');
-            expect(contentJSON.newBrands).to.be.an('array').that.has.length(2);
-          });
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.trending.men).to.equal('ascots')
+            expect(contentJSON.trending.kids).to.equal('fidget spinners with sharp blades')
+            expect(contentJSON.newBrands).to.be.an('array').that.has.length(2)
+          })
 
-        return Promise.all([withKey, defaultKey]);
-      });
-    }); // END - AppContent.saveContent
+        return Promise.all([withKey, defaultKey])
+      })
+    }) // END - AppContent.saveContent
 
     // -------------------------------------------------------------------------
     // Method: getContent
@@ -220,66 +220,66 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe('getContent', () => {
-      before(() => resetDB(['app-content']));
+    describe('AppContent.getContent', () => {
+      before(() => resetDB(['app-content']))
 
       it('should return an error (400) when the "app_id" field is not provided', () => {
         const input = {
           fields: {
             ignored_field: 'give-me-everything',
           },
-        };
+        }
 
         return expect(appMgmt.method.AppContent.getContent(input))
-          .to.eventually.be.rejectedWithJointStatusError(400);
-      });
+          .to.eventually.be.rejectedWithJointStatusError(400)
+      })
 
       it('should retrieve the requested package of data for a provided "app_id" and "key"', () => {
-        const appID = 'app-001';
-        const key = 'v1.0';
+        const appID = 'app-001'
+        const key = 'v1.0'
 
         const input = {
           fields: {
             app_id: appID,
             key,
           },
-        };
+        }
 
         return appMgmt.method.AppContent.getContent(input)
           .then((data) => {
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal(key);
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal(key)
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.items_per_page).to.equal(25);
-            expect(contentJSON.is_activated).to.equal(true);
-            expect(contentJSON.modules).to.be.an('array').that.has.length(6);
-          });
-      });
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.items_per_page).to.equal(25)
+            expect(contentJSON.is_activated).to.equal(true)
+            expect(contentJSON.modules).to.be.an('array').that.has.length(6)
+          })
+      })
 
       it(`should retrieve the default package of data for a provided "app_id", using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}"`, () => {
-        const appID = 'app-001';
+        const appID = 'app-001'
 
         const input = {
           fields: {
             app_id: appID,
           },
-        };
+        }
 
         return appMgmt.method.AppContent.getContent(input)
           .then((data) => {
-            expect(data.attributes.app_id).to.equal(appID);
-            expect(data.attributes.key).to.equal('default');
+            expect(data.attributes.app_id).to.equal(appID)
+            expect(data.attributes.key).to.equal('default')
 
-            const contentJSON = JSON.parse(data.attributes.data);
-            expect(contentJSON.items_per_page).to.equal(50);
-            expect(contentJSON.is_activated).to.equal(false);
-            expect(contentJSON.modules).to.be.an('array').that.has.length(3);
-          });
-      });
-    }); // END - AppContent.getContent
+            const contentJSON = JSON.parse(data.attributes.data)
+            expect(contentJSON.items_per_page).to.equal(50)
+            expect(contentJSON.is_activated).to.equal(false)
+            expect(contentJSON.modules).to.be.an('array').that.has.length(3)
+          })
+      })
+    }) // END - AppContent.getContent
 
-  }); // END - AppContent
+  }) // END - AppContent
 
   // ---------------------------------------------------------------------------
   // Resource: User (blog-app)
@@ -302,32 +302,32 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe('createUser', () => {
-      before(() => resetDB());
+    describe('User.createUser', () => {
+      before(() => resetDB())
 
       it('should return an error (400) when the required field is not provided', () => {
-        const email = 'mastablasta@mail.com';
-        const displayName = 'Blasta!';
+        const email = 'mastablasta@mail.com'
+        const displayName = 'Blasta!'
 
         const input = {
           fields: {
             email,
             display_name: displayName,
           },
-        };
+        }
 
         return expect(blogApp.method.User.createUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400);
-      });
+          .to.eventually.be.rejectedWithJointStatusError(400)
+      })
 
       it('should create a user when the required field is provided', () => {
-        const username = 'mastablasta';
+        const username = 'mastablasta'
 
         const input = {
           fields: {
             username,
           },
-        };
+        }
 
         return blogApp.method.User.createUser(input)
           .then((data) => {
@@ -335,19 +335,19 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .to.have.property('attributes')
               .that.contains({
                 username,
-              });
-          });
-      });
+              })
+          })
+      })
 
       it('should support all accepted fields in the spec', () => {
-        const username = 'the_edge_case';
-        const externalID = '333.011';
-        const email = 'the_edge_case@mail.com';
-        const displayName = 'The Edge Case';
-        const firstName = 'Edge';
-        const lastName = 'Case';
-        const preferredLocale = 'zh-CN';
-        const avatarURL = '//edgy.org/profile/333.011/avatar.png';
+        const username = 'the_edge_case'
+        const externalID = '333.011'
+        const email = 'the_edge_case@mail.com'
+        const displayName = 'The Edge Case'
+        const firstName = 'Edge'
+        const lastName = 'Case'
+        const preferredLocale = 'zh-CN'
+        const avatarURL = '//edgy.org/profile/333.011/avatar.png'
 
         const input = {
           fields: {
@@ -360,7 +360,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             preferred_locale: preferredLocale,
             avatar_url: avatarURL,
           },
-        };
+        }
 
         return blogApp.method.User.createUser(input)
           .then((data) => {
@@ -375,10 +375,10 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 last_name: lastName,
                 preferred_locale: preferredLocale,
                 avatar_url: avatarURL,
-              });
-          });
-      });
-    }); // END - User.createUser
+              })
+          })
+      })
+    }) // END - User.createUser
 
     // -------------------------------------------------------------------------
     // Method: updateUser
@@ -396,48 +396,48 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe('updateUser', () => {
-      before(() => resetDB(['users']));
+    describe('User.updateUser', () => {
+      before(() => resetDB(['users']))
 
       it('should return an error (400) when the required field is not provided', () => {
-        const displayName = 'Updated Name';
+        const displayName = 'Updated Name'
 
         const input = {
           fields: {
             identifier: 4,
             display_name: displayName,
           },
-        };
+        }
 
         return expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400);
-      });
+          .to.eventually.be.rejectedWithJointStatusError(400)
+      })
 
       it('should return an error (404) when the requested user does not exist', () => {
-        const userID = 999;
-        const displayName = 'Updated Name';
+        const userID = 999
+        const displayName = 'Updated Name'
 
         const input = {
           fields: {
             id: userID,
             display_name: displayName,
           },
-        };
+        }
 
         return expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(404);
-      });
+          .to.eventually.be.rejectedWithJointStatusError(404)
+      })
 
       it('should update an existing user for a single field', () => {
-        const userID = 4;
-        const displayName = 'Updated Name';
+        const userID = 4
+        const displayName = 'Updated Name'
 
         const input = {
           fields: {
             id: userID,
             display_name: displayName,
           },
-        };
+        }
 
         return blogApp.method.User.updateUser(input)
           .then((data) => {
@@ -449,20 +449,20 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 external_id: '304',
                 email: 'the-manic-edge@demo.com',
                 display_name: displayName,
-              });
-          });
-      });
+              })
+          })
+      })
 
       it('should support all accepted fields in the spec', () => {
-        const userID = 4;
-        const username = 'updated_username';
-        const externalID = 'I will not be updated';
-        const email = 'updated_email';
-        const displayName = 'Updated Display Name';
-        const firstName = 'The New First';
-        const lastName = 'The New Last';
-        const preferredLocale = 'zh-CN';
-        const avatarURL = 'https://updated_avatar.jpg';
+        const userID = 4
+        const username = 'updated_username'
+        const externalID = 'I will not be updated'
+        const email = 'updated_email'
+        const displayName = 'Updated Display Name'
+        const firstName = 'The New First'
+        const lastName = 'The New Last'
+        const preferredLocale = 'zh-CN'
+        const avatarURL = 'https://updated_avatar.jpg'
 
         const input = {
           fields: {
@@ -476,7 +476,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             preferred_locale: preferredLocale,
             avatar_url: avatarURL,
           },
-        };
+        }
 
         return blogApp.method.User.updateUser(input)
           .then((data) => {
@@ -492,10 +492,10 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 last_name: lastName,
                 preferred_locale: preferredLocale,
                 avatar_url: avatarURL,
-              });
-          });
-      });
-    }); // END - User.updateUser
+              })
+          })
+      })
+    }) // END - User.updateUser
 
     // -------------------------------------------------------------------------
     // Method: getUser
@@ -509,76 +509,76 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
     // },
     // -------------------------------------------------------------------------
-    describe('getUser', () => {
-      before(() => resetDB(['users']));
+    describe('User.getUser', () => {
+      before(() => resetDB(['users']))
 
       it('should return an error (400) when none of the required fields are provided', () => {
         const input = {
           fields: {
             identifier: 4,
           },
-        };
+        }
 
         return expect(blogApp.method.User.getUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400);
-      });
+          .to.eventually.be.rejectedWithJointStatusError(400)
+      })
 
       it('should return an error (404) when the requested user does not exist', () => {
-        const userID = 999;
-        const username = 'not-segmented';
-        const externalID = '999305';
+        const userID = 999
+        const username = 'not-segmented'
+        const externalID = '999305'
 
         const inputWithID = {
           fields: {
             id: userID,
           },
-        };
+        }
         const inputWithUsername = {
           fields: {
             username,
           },
-        };
+        }
         const inputWithExternalID = {
           fields: {
             external_id: externalID,
           },
-        };
+        }
 
         const viaID = expect(blogApp.method.User.getUser(inputWithID))
-          .to.eventually.be.rejectedWithJointStatusError(404);
+          .to.eventually.be.rejectedWithJointStatusError(404)
         const viaUsername = expect(blogApp.method.User.getUser(inputWithUsername))
-          .to.eventually.be.rejectedWithJointStatusError(404);
+          .to.eventually.be.rejectedWithJointStatusError(404)
         const viaExternalID = expect(blogApp.method.User.getUser(inputWithExternalID))
-          .to.eventually.be.rejectedWithJointStatusError(404);
+          .to.eventually.be.rejectedWithJointStatusError(404)
 
         return Promise.all([
           viaID,
           viaUsername,
           viaExternalID,
-        ]);
-      });
+        ])
+      })
 
       it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`, () => {
-        const userID = 5;
-        const username = 'segmented';
-        const externalID = '305';
-        const displayName = 'Segmented';
+        const userID = 5
+        const username = 'segmented'
+        const externalID = '305'
+        const displayName = 'Segmented'
 
         const inputWithID = {
           fields: {
             id: userID,
           },
-        };
+        }
         const inputWithUsername = {
           fields: {
             username,
           },
-        };
+        }
         const inputWithExternalID = {
           fields: {
             external_id: externalID,
           },
-        };
+        }
 
         const viaID = blogApp.method.User.getUser(inputWithID)
           .then((data) => {
@@ -588,12 +588,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 id: userID,
                 username,
                 display_name: displayName,
-              });
+              })
 
-            expect(data.attributes).to.have.property('avatar_url');
-            expect(data.attributes).to.not.have.property('email');
-            expect(data.attributes).to.not.have.property('external_id');
-          });
+            expect(data.attributes).to.have.property('avatar_url')
+            expect(data.attributes).to.not.have.property('email')
+            expect(data.attributes).to.not.have.property('external_id')
+          })
 
         const viaUsername = blogApp.method.User.getUser(inputWithUsername)
           .then((data) => {
@@ -603,12 +603,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 id: userID,
                 username,
                 display_name: displayName,
-              });
+              })
 
-            expect(data.attributes).to.have.property('avatar_url');
-            expect(data.attributes).to.not.have.property('email');
-            expect(data.attributes).to.not.have.property('external_id');
-          });
+            expect(data.attributes).to.have.property('avatar_url')
+            expect(data.attributes).to.not.have.property('email')
+            expect(data.attributes).to.not.have.property('external_id')
+          })
 
         const viaExternalID = blogApp.method.User.getUser(inputWithExternalID)
           .then((data) => {
@@ -618,20 +618,20 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 id: userID,
                 username,
                 display_name: displayName,
-              });
+              })
 
-            expect(data.attributes).to.have.property('avatar_url');
-            expect(data.attributes).to.not.have.property('email');
-            expect(data.attributes).to.not.have.property('external_id');
-          });
+            expect(data.attributes).to.have.property('avatar_url')
+            expect(data.attributes).to.not.have.property('email')
+            expect(data.attributes).to.not.have.property('external_id')
+          })
 
         return Promise.all([
           viaID,
           viaUsername,
           viaExternalID,
-        ]);
-      });
-    }); // END - User.getUser
+        ])
+      })
+    }) // END - User.getUser
 
     // -------------------------------------------------------------------------
     // Method: getUsers
@@ -644,16 +644,16 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   defaultOrderBy: '-created_at,username',
     // },
     // -------------------------------------------------------------------------
-    describe('getUsers', () => {
-      before(() => resetDB(['users']));
+    describe('User.getUsers', () => {
+      before(() => resetDB(['users']))
 
-      it('should return all users in the order defined by the spec, when no fields are provided');
+      it('should return all users in the order defined by the spec, when no fields are provided')
 
-      it('should return the filtered set of users when an accepted field is provided');
+      it('should return the filtered set of users when an accepted field is provided')
 
-      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`);
+      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`)
 
-    }); // END - User.getUsers
+    }) // END - User.getUsers
 
     // -------------------------------------------------------------------------
     // Method: deleteUser
@@ -666,18 +666,18 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe.skip('deleteUser', () => {
-      before(() => resetDB(['users']));
+    describe.skip('User.deleteUser', () => {
+      before(() => resetDB(['users']))
 
-    }); // END - User.deleteUser
+    }) // END - User.deleteUser
 
-  }); // END - User
+  }) // END - User
 
   // ---------------------------------------------------------------------------
   // Resource: Project (project-app)
   // ---------------------------------------------------------------------------
   describe('Project', () => {
-    before(() => resetDB());
+    before(() => resetDB())
 
     // -------------------------------------------------------------------------
     // Method: createProject
@@ -698,9 +698,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe.skip('createProject', () => {
-    }); // END - Project.createProject
+    describe.skip('Project.createProject', () => {
+    }) // END - Project.createProject
 
-  }); // END - Project
+  }) // END - Project
 
-});
+})

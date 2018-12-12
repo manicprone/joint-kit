@@ -1,7 +1,7 @@
-import dateUtils from '../utils/date-utils';
-import objectUtils from '../utils/object-utils';
-import stringUtils from '../utils/string-utils';
-import ACTION from '../core/constants/action-constants';
+import dateUtils from '../utils/date-utils'
+import objectUtils from '../utils/object-utils'
+import stringUtils from '../utils/string-utils'
+import ACTION from '../core/constants/action-constants'
 
 // -----------------------------------------------------------------------------
 // Looks at the provided fieldSpec defintion, and ensures the provided
@@ -30,42 +30,42 @@ import ACTION from '../core/constants/action-constants';
 export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
   const result = {
     satisfied: true,
-  };
+  }
 
   // Loop through field spec, checking if all field requirements are satisfied...
   if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
-    const missingAllFields = [];
-    const requiredOrs = [];
-    let isRequiredOrSatisfied = false;
+    const missingAllFields = []
+    const requiredOrs = []
+    let isRequiredOrSatisfied = false
 
     fieldSpec.forEach((field) => {
-      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null);
-      const isRequired = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED, false);
-      const isRequiredOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED_OR, false);
+      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
+      const isRequired = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED, false)
+      const isRequiredOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED_OR, false)
 
       // Record missing "required" fields...
       if (fieldName && isRequired && !objectUtils.has(fieldData, fieldName)) {
-        missingAllFields.push(fieldName);
+        missingAllFields.push(fieldName)
 
       // Handle "requiredOr" requirements...
       } else if (fieldName && isRequiredOr) {
-        requiredOrs.push(fieldName); // track all requiredOr fields
-        if (objectUtils.has(fieldData, fieldName)) isRequiredOrSatisfied = true; // mark as satisfied
+        requiredOrs.push(fieldName) // track all requiredOr fields
+        if (objectUtils.has(fieldData, fieldName)) isRequiredOrSatisfied = true // mark as satisfied
       }
-    });
+    })
 
     // If missing fields, provide details and mark satisfied as false...
-    const hasMissingAll = missingAllFields.length > 0;
-    const hasMissingOneOf = requiredOrs.length > 0 && !isRequiredOrSatisfied;
+    const hasMissingAll = missingAllFields.length > 0
+    const hasMissingOneOf = requiredOrs.length > 0 && !isRequiredOrSatisfied
     if (hasMissingAll || hasMissingOneOf) {
-      result.satisfied = false;
-      result.missing = {};
-      if (hasMissingAll) result.missing.all = missingAllFields;
-      if (hasMissingOneOf) result.missing.oneOf = requiredOrs;
+      result.satisfied = false
+      result.missing = {}
+      if (hasMissingAll) result.missing.all = missingAllFields
+      if (hasMissingOneOf) result.missing.oneOf = requiredOrs
     }
   } // end-if (Array.isArray(fieldSpec) && fieldSpec.length > 0)
 
-  return result;
+  return result
 }
 
 // -----------------------------------------------------------------------------
@@ -81,46 +81,46 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
 // { id: 100, key: 'v1.0.0' }
 // -----------------------------------------------------------------------------
 export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
-  let lookupData = null;
+  let lookupData = null
 
   // Loop through field spec, checking if all lookup field requirements are satisfied...
   if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
-    const lookupOrs = [];
-    let isLookupOrSatisfied = false;
+    const lookupOrs = []
+    let isLookupOrSatisfied = false
 
     for (let i = 0; i < fieldSpec.length; i++) {
-      const field = fieldSpec[i];
-      const dataType = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_TYPE, 'String');
-      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null);
+      const field = fieldSpec[i]
+      const dataType = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_TYPE, 'String')
+      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
 
       if (fieldName) {
-        const isLookup = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP, false);
-        const isLookupOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false);
-        const hasInput = objectUtils.has(fieldData, fieldName);
+        const isLookup = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP, false)
+        const isLookupOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false)
+        const hasInput = objectUtils.has(fieldData, fieldName)
 
         if (isLookupOr && !isLookupOrSatisfied) {
-          lookupOrs.push(fieldName); // track all lookupOr fields
+          lookupOrs.push(fieldName) // track all lookupOr fields
           if (hasInput) {
-            if (!lookupData) lookupData = {};
-            lookupData[fieldName] = castValue(fieldData[fieldName], dataType);
-            isLookupOrSatisfied = true; // mark as satisfied
+            if (!lookupData) lookupData = {}
+            lookupData[fieldName] = castValue(fieldData[fieldName], dataType)
+            isLookupOrSatisfied = true // mark as satisfied
           }
         } // end-if (isLookupOr && !isLookupOrSatisfied)
 
         if (isLookup) {
-          const hasDefault = objectUtils.has(field, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE);
+          const hasDefault = objectUtils.has(field, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
           if (hasInput || hasDefault) {
-            if (!lookupData) lookupData = {};
+            if (!lookupData) lookupData = {}
             lookupData[fieldName] = (hasInput)
                 ? castValue(fieldData[fieldName], dataType)
-                : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType);
+                : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType)
           }
         } // end-if (isLookup)
       } // end-if (fieldName)
     } // end-for
   } // end-if (Array.isArray(fieldSpec) && fieldSpec.length > 0)
 
-  return lookupData;
+  return lookupData
 }
 
 // -----------------------------------------------------------------------------
@@ -167,21 +167,21 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
 // ...since "id" is specified to transform into "user_id".
 // -----------------------------------------------------------------------------
 export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
-  const creds = {};
-  const acceptedFields = objectUtils.get(authSpec, ACTION.SPEC_AUTH_OWNER_CREDS, []);
+  const creds = {}
+  const acceptedFields = objectUtils.get(authSpec, ACTION.SPEC_AUTH_OWNER_CREDS, [])
 
   // Prepare ownerCreds field name/value pair, if specified...
   for (let i = 0; i < acceptedFields.length; i++) {
-    const fieldNameMapping = acceptedFields[i].replace(/\s+/g, '').split('=>'); // support arrow notation
-    const inputFieldName = fieldNameMapping[0];
-    const targetFieldName = (fieldNameMapping.length > 1) ? fieldNameMapping[1] : fieldNameMapping[0];
+    const fieldNameMapping = acceptedFields[i].replace(/\s+/g, '').split('=>') // support arrow notation
+    const inputFieldName = fieldNameMapping[0]
+    const targetFieldName = (fieldNameMapping.length > 1) ? fieldNameMapping[1] : fieldNameMapping[0]
     if (objectUtils.has(fieldData, inputFieldName)) {
-      creds[targetFieldName] = fieldData[inputFieldName];
-      break;
+      creds[targetFieldName] = fieldData[inputFieldName]
+      break
     }
   } // end-for
 
-  return creds;
+  return creds
 }
 
 // -----------------------------------------------------------------------------
@@ -204,28 +204,28 @@ export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
 // }
 // -----------------------------------------------------------------------------
 export function parseLoadDirect(loadDirectSpec = []) {
-  const loadDirect = {};
+  const loadDirect = {}
 
   if (Array.isArray(loadDirectSpec) && loadDirectSpec.length > 0) {
-    loadDirect.associations = [];
-    loadDirect.colMappings = {};
+    loadDirect.associations = []
+    loadDirect.colMappings = {}
 
     loadDirectSpec.forEach((assoc) => {
-      const assocOpts = assoc.split(':');
-      const assocName = assocOpts[0];
-      const assocColDef = (assocOpts.length > 1) ? assocOpts[assocOpts.length - 1].trim() : null;
+      const assocOpts = assoc.split(':')
+      const assocName = assocOpts[0]
+      const assocColDef = (assocOpts.length > 1) ? assocOpts[assocOpts.length - 1].trim() : null
 
       if (assocColDef && !objectUtils.includes(loadDirect.associations, assocName)) {
-        const multiColPattern = /^{(.+)}/;
-        const match = multiColPattern.exec(assocColDef);
-        const assocCols = (match && match.length > 1) ? match[1].split(',') : assocColDef;
-        loadDirect.associations.push(assocName);
-        loadDirect.colMappings[assocName] = assocCols;
+        const multiColPattern = /^{(.+)}/
+        const match = multiColPattern.exec(assocColDef)
+        const assocCols = (match && match.length > 1) ? match[1].split(',') : assocColDef
+        loadDirect.associations.push(assocName)
+        loadDirect.colMappings[assocName] = assocCols
       }
-    });
+    })
   }
 
-  return loadDirect;
+  return loadDirect
 }
 
 // -----------------------------------------------------------------------------
@@ -251,54 +251,54 @@ export function parseLoadDirect(loadDirectSpec = []) {
 // pascalCase(<fieldName>) => Transforms the specified field value to pascal case.
 // -----------------------------------------------------------------------------
 export function processDefaultValue(fieldData = {}, defaultValue) {
-  let value = null;
+  let value = null
 
   if (defaultValue !== undefined) {
-    const dynamicOperationPattern = /^%(.+)%/;
-    const match = dynamicOperationPattern.exec(defaultValue);
+    const dynamicOperationPattern = /^%(.+)%/
+    const match = dynamicOperationPattern.exec(defaultValue)
 
     // Handle interpolation...
     if (match && match.length > 1) {
-      const dynamicOperation = match[1].trim();
-      const opPattern = /^(.+)\((.+)\)/;
-      const opMatch = opPattern.exec(dynamicOperation);
+      const dynamicOperation = match[1].trim()
+      const opPattern = /^(.+)\((.+)\)/
+      const opMatch = opPattern.exec(dynamicOperation)
 
       // Decompose operation instructions...
-      let operator = dynamicOperation;
-      let operand = null;
+      let operator = dynamicOperation
+      let operand = null
       if (opMatch && opMatch.length > 2) {
-        operator = opMatch[1].trim();
-        operand = opMatch[2].trim();
+        operator = opMatch[1].trim()
+        operand = opMatch[2].trim()
       }
 
       // "now" operator...
       if (operator === 'now') {
-        value = dateUtils.now();
+        value = dateUtils.now()
 
       // "camelCase" operator...
       } else if (operator === 'camelCase') {
-        value = (fieldData[operand]) ? stringUtils.toCamelCase(fieldData[operand]) : null;
+        value = (fieldData[operand]) ? stringUtils.toCamelCase(fieldData[operand]) : null
 
       // "kebabCase" operator...
       } else if (operator === 'kebabCase') {
-        value = (fieldData[operand]) ? stringUtils.toKebabCase(fieldData[operand]) : null;
+        value = (fieldData[operand]) ? stringUtils.toKebabCase(fieldData[operand]) : null
 
       // "snakeCase" operator...
       } else if (operator === 'snakeCase') {
-        value = (fieldData[operand]) ? stringUtils.toSnakeCase(fieldData[operand]) : null;
+        value = (fieldData[operand]) ? stringUtils.toSnakeCase(fieldData[operand]) : null
 
       // "pascalCase" operator...
       } else if (operator === 'pascalCase') {
-        value = (fieldData[operand]) ? stringUtils.toPascalCase(fieldData[operand]) : null;
+        value = (fieldData[operand]) ? stringUtils.toPascalCase(fieldData[operand]) : null
       }
 
     // Otherwise, just return the original value...
     } else {
-      value = defaultValue;
+      value = defaultValue
     }
   }
 
-  return value;
+  return value
 }
 
 // -----------------------------------------------------------------------------
@@ -307,21 +307,21 @@ export function processDefaultValue(fieldData = {}, defaultValue) {
 // fieldData object, which can be used type-safely within the template logic.
 // -----------------------------------------------------------------------------
 export function prepareFieldData(fieldSpec = [], fieldData = {}) {
-  const preparedFieldData = {};
+  const preparedFieldData = {}
 
   if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
     fieldSpec.forEach((field) => {
-      const fieldName = objectUtils.get(field, 'name', null);
-      const dataType = objectUtils.get(field, 'type', 'String');
+      const fieldName = objectUtils.get(field, 'name', null)
+      const dataType = objectUtils.get(field, 'type', 'String')
 
       // Perform data type cast on provided field values...
       if (fieldName && objectUtils.has(fieldData, fieldName)) {
-        preparedFieldData[fieldName] = castValue(fieldData[fieldName], dataType);
+        preparedFieldData[fieldName] = castValue(fieldData[fieldName], dataType)
       }
-    });
+    })
   }
 
-  return preparedFieldData;
+  return preparedFieldData
 }
 
 // TODO: Add try/catch to protect from bad values !!!
@@ -331,13 +331,13 @@ export function prepareFieldData(fieldSpec = [], fieldData = {}) {
 // -----------------------------------------------------------------------------
 export function castValue(value, dataType) {
   if (Array.isArray(value)) {
-    return value.map(element => castValue(element, dataType));
+    return value.map(element => castValue(element, dataType))
   }
 
   switch (dataType) {
-    case 'Number': return Number(value);
-    case 'Boolean': return (isNaN(value)) ? (value.toLowerCase() == 'true') : Boolean(value); // eslint-disable-line eqeqeq
-    case 'JSON': return JSON.stringify(value);
-    default: return String(value);
+    case 'Number': return Number(value)
+    case 'Boolean': return (isNaN(value)) ? (value.toLowerCase() == 'true') : Boolean(value) // eslint-disable-line eqeqeq
+    case 'JSON': return JSON.stringify(value)
+    default: return String(value)
   }
 }

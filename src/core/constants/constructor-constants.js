@@ -7,4 +7,4 @@ export default {
   SERVER: 'server',
   PAYLOAD_FORMAT: 'output',
   SETTINGS: 'settings',
-};
+}

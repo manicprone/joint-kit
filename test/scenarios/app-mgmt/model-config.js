@@ -26,4 +26,4 @@ module.exports = [
     timestamps: { created: 'created_at', updated: 'updated_at' },
   },
 
-];
+]

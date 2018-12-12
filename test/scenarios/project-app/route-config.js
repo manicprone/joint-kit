@@ -99,4 +99,4 @@ module.exports = [
     get: { method: 'TechConceptTag.getTechConceptTags' },
   },
 
-];
+]

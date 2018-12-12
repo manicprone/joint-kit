@@ -35,4 +35,4 @@ export default {
     debugCheck: false, // TODO: Add to auth-utils.isAllowed logic !!!
   },
 
-};
+}
