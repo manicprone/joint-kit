@@ -116,6 +116,7 @@ export default async function getItem(bookshelf, spec = {}, input = {}, output) 
       case 'json-api': return toJsonApi(modelName, data, bookshelf)
       default: return data
     }
+
   } catch (error) {
     let jointError = null
     if (error.message) {

@@ -56,6 +56,16 @@ module.exports = {
       },
     },
     {
+      name: 'getProjectWithAllRefs',
+      action: 'getItem',
+      spec: {
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+        forceLoadDirect: ['coding_language_tags:{id,key}'],
+      },
+    },
+    {
       name: 'getProjects',
       action: 'getItems',
       spec: {
@@ -100,7 +110,22 @@ module.exports = {
       },
     },
     {
-      name: 'removeCodingLanguageTags',
+      name: 'getAllCodingLanguageTags',
+      action: 'getAllAssociatedItems',
+      spec: {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', required: true },
+          ],
+        },
+        association: {
+          name: 'coding_language_tags',
+        },
+      },
+    },
+    {
+      name: 'detachCodingLanguageTags',
       action: 'removeAssociatedItems',
       spec: {
         main: {
@@ -115,6 +140,21 @@ module.exports = {
             { name: 'id', type: 'Number', requiredOr: true },
             { name: 'key', type: 'String', requiredOr: true },
           ],
+        },
+      },
+    },
+    {
+      name: 'detachAllCodingLanguageTags',
+      action: 'removeAllAssociatedItems',
+      spec: {
+        main: {
+          modelName: 'Project',
+          fields: [
+            { name: 'id', type: 'Number', required: true },
+          ],
+        },
+        association: {
+          name: 'coding_language_tags',
         },
       },
     },

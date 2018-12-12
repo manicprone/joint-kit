@@ -6,7 +6,7 @@ import toJsonApi from './serializers/json-api'
 
 const debug = false
 
-export default function addAssociatedItems(bookshelf, spec = {}, input = {}, output) {
+export default async function addAssociatedItems(bookshelf, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Continue on existing transaction...

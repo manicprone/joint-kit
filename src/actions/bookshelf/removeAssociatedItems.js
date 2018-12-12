@@ -67,6 +67,9 @@ function performRemoveAssociatedItems(bookshelf, spec = {}, input = {}, output) 
     .then(([main, assoc]) => {
       // Reject with 404 if instances of the requested association were not found...
       if (assoc.length === 0) {
+
+        console.log('[DEVING] [REMOVE-ASSOC-ITEMS] I might be a 404 due to invalid field !!!')
+
         return reject(StatusErrors.generateAssociatedItemsDoNotExistError(modelNameAssoc))
       }
 
