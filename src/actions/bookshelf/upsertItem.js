@@ -4,7 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
-import { handleDataResponse } from './handlers/response-handlers'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -124,7 +124,6 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
     } // end-if (404)
 
     // Otherwise, we have an unexpected error...
-    if (debug) console.error(`[JOINT] [action:upsertItem] Action encountered a third-party error: ${error.message} =>`, error)
-    throw StatusErrors.generateThirdPartyError(error)
+    return handleErrorResponse(error, 'upsertItem', modelName)
   }
 } // END - performUpsertItem

@@ -4,7 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
-import { handleDataResponse } from './handlers/response-handlers'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -119,22 +119,9 @@ async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inpu
   try {
     // Delete item...
     const data = await bookshelf.model(modelName).where(whereOpts).destroy(actionOpts)
-
-    // Return data...
     return handleDataResponse(joint, modelName, data, output)
 
   } catch (error) {
-    let jointError = null
-    if (error.message) {
-      // (404)
-      if (error.message === 'No Rows Deleted') {
-        jointError = StatusErrors.generateResourceNotFoundError(modelName)
-      }
-      // (500)
-    } else {
-      if (debug) console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error)
-      jointError = StatusErrors.generateThirdPartyError(error)
-    }
-    throw jointError
+    return handleErrorResponse(error, 'deleteItem', modelName)
   }
 } // END - doAction

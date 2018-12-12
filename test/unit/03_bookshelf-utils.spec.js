@@ -1,5 +1,5 @@
 import chai from 'chai'
-import * as BookshelfUtils from '../../src/actions/bookshelf/bookshelf-utils'
+import * as BookshelfUtils from '../../src/actions/bookshelf/utils/bookshelf-utils'
 
 const expect = chai.expect
 

@@ -2,7 +2,7 @@ import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import ACTION from '../../core/constants/action-constants'
 import getItem from './getItem'
-import { handleDataResponse } from './handlers/response-handlers'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -60,8 +60,6 @@ export default async function hasAssociatedItem(joint, spec = {}, input = {}, ou
     return Promise.reject(StatusErrors.generateAssociatedItemDoesNotExistError(modelNameAssoc))
 
   } catch (error) {
-    if (error.name === 'JointStatusError') throw error
-    if (debug) console.error(`[JOINT] [action:hasAssociatedItem] Action encountered a third-party error: ${error.message} =>`, error)
-    throw StatusErrors.generateThirdPartyError(error)
+    return handleErrorResponse(error, 'hasAssociatedItem', modelNameMain, assocName)
   }
 } // END - hasAssociatedItem

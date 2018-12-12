@@ -2,7 +2,7 @@ import * as StatusErrors from '../../core/errors/status-errors'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import getItem from './getItem'
-import { handleDataResponse } from './handlers/response-handlers'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -57,8 +57,6 @@ async function performRemoveAllAssociatedItems(joint, spec = {}, input = {}, out
     return handleDataResponse(joint, modelNameMain, main, output)
 
   } catch (error) {
-    if (error.name === 'JointStatusError') throw error
-    if (debug) console.error(`[JOINT] [action:removeAllAssociatedItems] Action encountered a third-party error: ${error.message} =>`, error)
-    throw StatusErrors.generateThirdPartyError(error)
+    return handleErrorResponse(error, 'removeAllAssociatedItems', modelNameMain, assocName)
   }
 } // END - performRemoveAllAssociatedItems

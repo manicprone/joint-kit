@@ -3,7 +3,7 @@ import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import getItem from './getItem'
 import getItems from './getItems'
-import { handleDataResponse } from './handlers/response-handlers'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -71,13 +71,9 @@ async function performAddAssociatedItems(joint, spec = {}, input = {}, output) {
 
     // Otherwise, attach associations to main...
     await main.related(assocName).attach(assoc.models, { transacting: trx })
-
-    // Return data...
     return handleDataResponse(joint, modelNameMain, main, output)
 
   } catch (error) {
-    if (error.name === 'JointStatusError') throw error
-    if (debug) console.error(`[JOINT] [action:addAssociatedItems] Action encountered a third-party error: ${error.message} =>`, error)
-    throw StatusErrors.generateThirdPartyError(error)
+    return handleErrorResponse(error, 'addAssociatedItems', modelNameMain)
   }
 } // END - performAddAssociatedItems

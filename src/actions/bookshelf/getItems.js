@@ -4,8 +4,8 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
-import * as BookshelfUtils from './bookshelf-utils'
-import { handleDataResponse } from './handlers/response-handlers'
+import * as BookshelfUtils from './utils/bookshelf-utils'
+import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
 
@@ -138,22 +138,6 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
     return handleDataResponse(joint, modelName, data, output)
 
   } catch (error) {
-    let jointError = null
-    if (error.message) {
-      // (404)
-      if (error.message === 'EmptyResponse') {
-        jointError = StatusErrors.generateResourceNotFoundError(modelName)
-      // (400)
-      } else if (inputAssocs && error.message.includes(inputAssocs)) {
-        jointError = StatusErrors.generateAssociationNotRecognizedError(inputAssocs)
-        if (debug) console.error('[JOINT] [action:getItems]', jointError)
-      }
-      // (500)
-    } else {
-      if (debug) console.error(`[JOINT] [action:getItems] Action encountered a third-party error: ${error.message} =>`, error)
-      jointError = StatusErrors.generateThirdPartyError(error)
-    }
-
-    throw jointError
+    return handleErrorResponse(error, 'getItems', modelName, inputAssocs)
   }
 } // END - getItems
