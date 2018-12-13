@@ -43,9 +43,7 @@ async function performGetAllAssociatedItems(joint, spec = {}, input = {}, output
   // Lookup model name of association, add to spec if not provided...
   let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME]
   if (!modelNameAssoc) {
-    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain])
-        ? joint.modelNameOfAssoc[modelNameMain][assocName]
-        : null
+    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain]) ? joint.modelNameOfAssoc[modelNameMain][assocName] : null
     specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc
   }
 

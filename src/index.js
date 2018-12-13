@@ -6,7 +6,7 @@ import * as CoreUtils from './core/core-utils'
 import * as JointGenerate from './core/generate'
 import * as AuthUtils from './core/authorization/auth-utils'
 import * as ActionsBookshelf from './actions/bookshelf'
-// import trxBookshelf from './actions/bookshelf/transaction'
+import trxBookshelf from './actions/bookshelf/transaction'
 
 export default class Joint {
   constructor(options = {}) {
@@ -48,8 +48,7 @@ export default class Joint {
     switch (this.serviceKey) {
       case 'bookshelf': {
         actions = ActionsBookshelf
-        // this.transaction = () => trxBookshelf(this.service)
-        this.transaction = this.service.transaction
+        this.transaction = trxBookshelf(this.service)
       }
     }
     if (!actions) {

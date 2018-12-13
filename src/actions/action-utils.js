@@ -73,7 +73,7 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
 // acceptable name/value set for performing a resource lookup.
 // -----------------------------------------------------------------------------
 // If a "lookup" is not defined on the spec, or if the input does not
-// staisfy the specified lookup fields, the function returns null.
+// satisfy the specified lookup fields, the function returns null.
 //
 // Otherwise, the first found acceptable name/value sets are returned.
 //
