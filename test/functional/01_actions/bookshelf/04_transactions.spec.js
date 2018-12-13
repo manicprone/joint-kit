@@ -37,7 +37,7 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
       expect(projectWithRefs.data.attributes.coding_language_tags).to.have.length(4)
 
       // Perform a transaction that will fail...
-      projectApp.service.transaction(async (trx) => {
+      projectApp.transaction(async (trx) => {
         try {
           // Detach 3 of 4 tags (explicitly)...
           const detachThree = {
@@ -91,7 +91,7 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
       expect(projectWithRefs.data.attributes.coding_language_tags).to.have.length(4)
 
       // Perform a transaction that will succeed...
-      projectApp.service.transaction(async (trx) => {
+      projectApp.transaction(async (trx) => {
         // Detach all tag associations...
         const input = {
           main: {

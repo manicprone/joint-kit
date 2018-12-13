@@ -1,2 +1,2 @@
 
-export default bookshelf => bookshelf.transaction
+export default bookshelf => cb => bookshelf.transaction(cb)
