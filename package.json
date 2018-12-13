@@ -27,7 +27,6 @@
     "lint"
   ],
   "dependencies": {
-    "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1"
   },
@@ -38,6 +37,7 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.2.0",
     "babel-eslint": "^7.2.3",
+    "bluebird": "^3.5.3",
     "bookshelf": "^0.10.3",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
