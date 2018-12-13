@@ -3,6 +3,8 @@
 
 ## Upcoming Features
 
+* Encapsulate action validation logic into `field-validation-handlers.js` (and possibly other handlers, e.g. authorization).
+
 * Support determined error specification syntax (for client response error data).
 
 * Rename `removeAssociatedItems` / `removeAllAssociatedItems` => `detach...`.
@@ -21,6 +23,8 @@
 * Utilize the constants (for all syntax) within the code.
 
 * Support successive `generate` calls (i.e. merge provided configs into the existing set, then run the generate logic on the full set).
+
+* Handle `removeAssociatedItems` 404 error scenarios better: e.g. it might represent an invalid association name, etc.
 
 * Support client-provided debug options.
 

@@ -46,9 +46,7 @@ async function performRemoveAssociatedItems(joint, spec = {}, input = {}, output
   // Lookup model name of association, add to spec if not provided...
   let modelNameAssoc = specAssoc[ACTION.SPEC_MODEL_NAME]
   if (!modelNameAssoc) {
-    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain])
-        ? joint.modelNameOfAssoc[modelNameMain][assocName]
-        : null
+    modelNameAssoc = (joint.modelNameOfAssoc[modelNameMain]) ? joint.modelNameOfAssoc[modelNameMain][assocName] : null
     specAssoc[ACTION.SPEC_MODEL_NAME] = modelNameAssoc
   }
 
@@ -67,7 +65,7 @@ async function performRemoveAssociatedItems(joint, spec = {}, input = {}, output
     // Reject with 404 if instances of the requested association were not found...
     if (assoc.length === 0) {
       // TODO: Handle the scenario/message for invalid assoc name !!!
-      console.log('[DEVING] [REMOVE-ASSOC-ITEMS] I might be a 404 due to invalid association name !!!')
+      // console.log('[DEVING] [REMOVE-ASSOC-ITEMS] I might be a 404 due to invalid association name !!!')
       return Promise.reject(StatusErrors.generateAssociatedItemsDoNotExistError(modelNameAssoc))
     }
 

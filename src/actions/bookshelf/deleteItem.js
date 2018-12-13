@@ -69,19 +69,9 @@ async function doLookupThenAction(joint, lookupFieldData, modelName, specFields,
     const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
 
     return doAction(joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output)
+
   } catch (error) {
-    let jointError = null
-    if (error.message) {
-      // (404)
-      if (error.message === 'EmptyResponse') {
-        jointError = StatusErrors.generateResourceNotFoundError(modelName)
-      }
-      // (500)
-    } else {
-      if (debug) console.error(`[JOINT] [action:deleteItem] Action encountered a third-party error: ${error.message} =>`, error)
-      jointError = StatusErrors.generateThirdPartyError(error)
-    }
-    throw jointError
+    return handleErrorResponse(error, 'deleteItem', modelName)
   }
 } // END - doLookupThenAction
 
