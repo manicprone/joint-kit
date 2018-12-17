@@ -1,7 +1,7 @@
 import chai from 'chai'
 import express from 'express'
 import Joint from '../../src'
-// import JointDist from '../../dist/lib';
+import JointDist from '../../dist/lib'
 import appMgmtModels from '../scenarios/app-mgmt/model-config'
 import projectAppModels from '../scenarios/project-app/model-config'
 import projectAppMethods from '../scenarios/project-app/method-config'
@@ -89,16 +89,22 @@ describe('JOINT', () => {
       }
     })
 
-    // TODO: Move to a separate describe block (for bundled testing) !!!
-    // it('should be bundled correctly for shared use', () => {
-    //   const joint = new JointDist({
-    //     service: bookshelf,
-    //   });
-    //   const keys = jointProps.concat(actionsBookshelf);
-    //
-    //   expect(joint).to.have.keys(keys);
-    //   expect(joint.serviceKey).to.equal('bookshelf');
-    // });
+    it('should be bundled correctly for shared use', async () => {
+      const joint = new JointDist({ service: bookshelf })
+
+      // Instantiation...
+      const keys = jointProps.concat(actionsBookshelf)
+      expect(joint).to.have.keys(keys)
+      expect(joint.serviceKey).to.equal('bookshelf')
+
+      // Performing an action...
+      try {
+        await joint.getItems({ modelName: 'DurianCandy' }, {})
+      } catch (error) {
+        expect(error.status).to.equal(400)
+        expect(error.message).to.equal('The model "DurianCandy" is not recognized.')
+      }
+    })
   }) // END - constructor
 
   // ---------------------------------------------------------------------------
