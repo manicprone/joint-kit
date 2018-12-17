@@ -14,6 +14,7 @@
     "prepublish": "npm run build",
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "flint": "eslint ./ --fix --cache --ignore-pattern .gitignore",
+    "build-test": "npm run build && npm run test",
     "test": "npm run test:unit && npm run test:functional",
     "test:unit": "cross-env NODE_ENV=test mocha --require @babel/register test/unit/**/*.spec.js",
     "test:functional": "cross-env NODE_ENV=test mocha --require @babel/register test/functional/**/*.spec.js",
