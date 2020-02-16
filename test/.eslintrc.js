@@ -22,5 +22,7 @@ module.exports = {
     'no-new': 'off',
     'brace-style': 'off',
     'semi': ['error', 'never'],
+    'indent': 'off',
+    'no-multi-spaces': 'off',
   },
 };

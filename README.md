@@ -70,11 +70,11 @@ $ yarn add joint-kit
 ### Dev Lint
 
 The app uses [ESLint][link-eslint-site] for source code linting (specifically, the [standard style][link-eslint-standard-site]). The linting will run automatically on `git commit`.
-> You can run the command with flag `--fix`, or an alternate command `flint`, to trigger auto fixing (e.g. `yarn flint`).
 
 ``` sh
 $ yarn lint
 ```
+> You can run with flag `--fix`, or shortcut command *flint*, to trigger auto fixing (e.g. `yarn flint`).
 
 ### Dev Test
 
