@@ -62,6 +62,12 @@ async function performAddAssociatedItems(joint, spec = {}, input = {}, output) {
     const main = await getItem(joint, specMain, inputMain)
     const assoc = await getItems(joint, specAssoc, inputAssoc)
 
+    // TODO: It looks like the latest version of Bookshelf no longer guards against duplicate assoc (via attach) !!!
+    //       We will have to provide the logic here !!!
+    // const existingAssoc = main.relations[assocName]
+    // console.log('[DEV] existing assocs =>', existingAssoc.models)
+    // console.log('[DEV] assocs to add =>', assoc.models)
+
     // Reject with 404 if instances of the requested association were not found...
     if (assoc.length === 0) {
       return Promise.reject(StatusErrors.generateAssociatedItemsDoNotExistError(modelNameAssoc))
