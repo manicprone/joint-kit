@@ -112,3 +112,7 @@ $ yarn test
 [link-bookshelf-plugin-registry]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Model-Registry
 [link-bookshelf-plugin-pagination]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Pagination
 [link-express-site]: http://expressjs.com
+[link-eslint-standard-site]: https://standardjs.com
+[link-eslint-site]: https://eslint.org
+[link-mocha-site]: https://mochajs.org
+[link-chai-site]: http://chaijs.com
