@@ -17,5 +17,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'func-names': 'off',
     'semi': ['error', 'never'],
+    'indent': 'off',
+    'no-multi-spaces': 'off',
   },
 };
