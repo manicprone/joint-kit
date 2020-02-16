@@ -21,7 +21,7 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 
 * [Prerequisites][section-prerequisites]
 * [How to Use][section-how-to-use]
-* [Developer Guide][section-developer-guide]
+* [For Developers][section-for-developers]
 
 <br />
 
@@ -61,27 +61,11 @@ The Joint Kit currently supports:
 $ yarn add joint-kit
 ```
 
+[TBC]
+
 <br />
 
-## Developer Guide
-
-### Dev Prerequisites
-
-To develop the system locally, you need:
-
-* yarn -or- npm
-* git
-
-## Dev Install
-
-(1) Clone the repo into your local dev environment.
-
-``` sh
-$ yarn add joint-kit
-```
-
-(2) [TBC]
-> Describe creation/connection to local supported DB, or can default use the embedded sqlite.
+## For Developers
 
 ### Dev Lint
 
@@ -121,7 +105,7 @@ $ yarn test
 
 [section-prerequisites]: #prerequisites
 [section-how-to-use]: #how-to-use
-[section-developer-guide]: #developer-guide
+[section-for-developers]: #for-developers
 
 [link-joint-docs-site]: http://www.jointkit.org
 [link-bookshelf-site]: http://bookshelfjs.org
