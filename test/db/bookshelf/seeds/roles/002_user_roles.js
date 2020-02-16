@@ -70,7 +70,7 @@ const seeds = [
   },
 ]
 
-exports.seed = function seed(knex, Promise) {
+exports.seed = function seed(knex) {
   const time = moment().utc()
 
   return Promise.all(seeds.map((data) => {

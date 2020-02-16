@@ -1,5 +1,7 @@
+const tableNameTags = 'tags'
+const tableNameProfileTagsRef = 'profile_tags_ref'
 
-exports.up = function up(knex, Promise) {
+exports.up = function up(knex) {
   return Promise.all([
     // knex.schema.createTableIfNotExists('blog_posts', (table) => {
     //   table.increments();
@@ -12,17 +14,23 @@ exports.up = function up(knex, Promise) {
     //   table.dateTime('published_at').nullable();
     //   table.timestamps();
     // }),
-    knex.schema.createTableIfNotExists('tags', (table) => {
-      table.increments()
-      table.string('label').notNullable().unique()
-      table.string('key').notNullable().unique()
-      table.timestamps()
+    knex.schema.hasTable(tableNameTags).then((exists) => {
+      if (exists) return false
+      return knex.schema.createTable(tableNameTags, (table) => {
+        table.increments()
+        table.string('label').notNullable().unique()
+        table.string('key').notNullable().unique()
+        table.timestamps()
+      })
     }),
-    knex.schema.createTableIfNotExists('profile_tags_ref', (table) => {
-      table.increments()
-      table.integer('profile_id').notNullable().unsigned().references('user_profiles.id')
-      table.integer('tag_id').notNullable().unsigned().references('tags.id')
-      table.timestamps()
+    knex.schema.hasTable(tableNameProfileTagsRef).then((exists) => {
+      if (exists) return false
+      return knex.schema.createTable(tableNameProfileTagsRef, (table) => {
+        table.increments()
+        table.integer('profile_id').notNullable().unsigned().references('user_profiles.id')
+        table.integer('tag_id').notNullable().unsigned().references('tags.id')
+        table.timestamps()
+      })
     }),
     // knex.schema.createTableIfNotExists('blog_post_tags_ref', (table) => {
     //   table.increments();
@@ -33,13 +41,13 @@ exports.up = function up(knex, Promise) {
   ])
 }
 
-exports.down = function down(knex, Promise) {
+exports.down = function down(knex) {
   return Promise.all([
     // knex.schema.dropTableIfExists('blog_post_tags_ref'),
-    knex.schema.dropTableIfExists('profile_tags_ref'),
+    knex.schema.dropTableIfExists(tableNameProfileTagsRef),
   ]).then(() => {
     return Promise.all([
-      knex.schema.dropTableIfExists('tags'),
+      knex.schema.dropTableIfExists(tableNameTags),
       // knex.schema.dropTableIfExists('blog_posts'),
     ])
   })

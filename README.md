@@ -17,6 +17,14 @@ Not ready for public use until version 0.1.0 - Syntax and logic are in frequent 
 
 <br />
 
+## Table of Contents
+
+* [Prerequisites][section-prerequisites]
+* [How to Use][section-how-to-use]
+* [For Developers][section-for-developers]
+
+<br />
+
 ## Prerequisites
 
 To use the Joint Kit, you need:
@@ -45,20 +53,48 @@ The Joint Kit currently supports:
 
 <br />
 
-## Install
+## How to Use
+
+### Install
 
 ``` sh
-$ npm install joint-kit --save
+$ yarn add joint-kit
 ```
+
+[TBC]
 
 <br />
 
-## Docs
+## For Developers
 
-Guides and API Reference can be found at [jointkit.org][link-joint-docs-site].
+### Dev Lint
 
-**NOTE** The online docs are not yet complete. They are actively being developed,
-to coincide with the public release of Joint Kit.
+The app uses [ESLint][link-eslint-site] for source code linting (specifically, the [standard style][link-eslint-standard-site]). The linting will run automatically on `git commit`.
+> You can run the command with flag `--fix`, or an alternate command `flint`, to trigger auto fixing (e.g. `yarn flint`).
+
+``` sh
+$ yarn lint
+```
+
+### Dev Test
+
+The app uses [Mocha][link-mocha-site] for the unit testing framework,
+and [Chai][link-chai-site] for its assertions.
+
+### Run Unit Tests
+``` sh
+$ yarn test:unit
+```
+
+### Run Functional Tests
+``` sh
+$ yarn test:functional
+```
+
+#### Run All Tests (Unit + Functional)
+``` sh
+$ yarn test
+```
 
 <br />
 
@@ -67,10 +103,12 @@ to coincide with the public release of Joint Kit.
 [MIT](LICENSE)
 
 
-[link-joint-docs-site]: http://www.jointkit.org
+[section-prerequisites]: #prerequisites
+[section-how-to-use]: #how-to-use
+[section-for-developers]: #for-developers
 
+[link-joint-docs-site]: http://www.jointkit.org
 [link-bookshelf-site]: http://bookshelfjs.org
 [link-bookshelf-plugin-registry]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Model-Registry
 [link-bookshelf-plugin-pagination]: https://github.com/bookshelf/bookshelf/wiki/Plugin:-Pagination
-
 [link-express-site]: http://expressjs.com

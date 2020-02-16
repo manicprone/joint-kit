@@ -10,7 +10,7 @@ export function resetDB(seeds) {
 export function setupDB(seeds) {
   if (debug) console.log('[DB-UTILS] setting up database...')
 
-  // Setup tables and seed data...
+  // Setup tables and seed data
   if (seeds && Array.isArray(seeds) && seeds.length > 0) {
     return bookshelf.knex.migrate.latest()
       .then(() => {
@@ -24,7 +24,7 @@ export function setupDB(seeds) {
       })
   }
 
-  // Otherwise, just setup tables...
+  // Otherwise, just setup tables
   return bookshelf.knex.migrate.latest()
 }
 

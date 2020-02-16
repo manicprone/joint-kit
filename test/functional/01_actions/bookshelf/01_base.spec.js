@@ -20,7 +20,7 @@ let projectAppJsonApi = null
 let blogApp = null
 let blogAppJsonApi = null
 
-// Values for expectation...
+// Values for expectation
 const allColsUser = [
   'id',
   'external_id',
@@ -358,10 +358,10 @@ describe('BASE ACTIONS [bookshelf]', () => {
   // -------------------
   // Testing: createItem
   // -------------------
-  describe('createItem', () => {
+  describe('createItem', async () => {
     before(() => resetDB())
 
-    it('should create a new resource item when the spec is satisfied', () => {
+    it('should create a new resource item when the spec is satisfied', async () => {
       // ----
       // User
       // ----
@@ -396,32 +396,26 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      const createUser = blogApp.createItem(specUser, inputUser)
-        .then((rowData) => {
-          expect(rowData)
-            .to.have.property('attributes')
-            .that.contains({
-              id: 1,
-              username: inputUser.fields.username,
-            })
+      const createUser = await blogApp.createItem(specUser, inputUser)
+      expect(createUser)
+        .to.have.property('attributes')
+        .that.contains({
+          id: 1,
+          username: inputUser.fields.username,
         })
 
-      const createProfile = blogApp.createItem(specProfile, inputProfile)
-        .then((rowData) => {
-          expect(rowData)
-            .to.have.property('attributes')
-            .that.contains({
-              id: 1,
-              user_id: inputProfile.fields.user_id,
-              title: inputProfile.fields.title,
-              is_live: false,
-            })
+      const createProfile = await blogApp.createItem(specProfile, inputProfile)
+      expect(createProfile)
+        .to.have.property('attributes')
+        .that.contains({
+          id: 1,
+          user_id: inputProfile.fields.user_id,
+          title: inputProfile.fields.title,
+          is_live: 0,
         })
-
-      return Promise.all([createUser, createProfile])
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
       const projectName = 'Project for Test'
       const defaultAlias = 'alias-is-locked'
       const alias = 'user-updated-alias'
@@ -448,21 +442,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       // If no "defaultValue" is provided, the field value does not get set...
-      const noDefaultValue = projectApp.createItem(specNoDefaultValue, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({ name: projectName })
-          expect(data.attributes).to.not.have.keys(['alias'])
-        })
+      const noDefaultValue = await projectApp.createItem(specNoDefaultValue, input)
+      expect(noDefaultValue.attributes).to.contain({
+        name: projectName,
+        alias: null,
+      })
 
-      const withDefaultValue = projectApp.createItem(specWithDefaultValue, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            name: projectName,
-            alias: defaultAlias,
-          })
-        })
-
-      return Promise.all([noDefaultValue, withDefaultValue])
+      const withDefaultValue = await projectApp.createItem(specWithDefaultValue, input)
+      expect(withDefaultValue.attributes).to.contain({
+        name: projectName,
+        alias: defaultAlias,
+      })
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
@@ -596,7 +586,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         })
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
       const defaultAlias = 'alias-is-locked'
       const alias = 'user-updated-alias'
 
@@ -616,43 +606,40 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'name', type: 'String', required: true, lookup: true },
           { name: 'alias', type: 'String', locked: true, defaultValue: defaultAlias },
+          { name: 'image_url', type: 'String' },
         ],
       }
       const inputWithDefaultValue = {
         fields: { name: 'Project 2', alias },
       }
+      const updateWithDefaultValue = {
+        fields: { name: 'Project 2', alias, image_url: '/img' },
+      }
 
       // If no "defaultValue" is provided, the field value does not get set...
-      const noDefaultValue = projectApp.upsertItem(specNoDefaultValue, inputNoDefaultValue)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: 1,
-            name: 'Project 1',
-          })
-          expect(data.attributes).to.not.have.keys(['alias'])
-        })
+      const noDefaultValue = await projectApp.upsertItem(specNoDefaultValue, inputNoDefaultValue)
+      expect(noDefaultValue.attributes).to.contain({
+        id: 1,
+        name: 'Project 1',
+        alias: null,
+      })
 
-      // Create...
-      const withDefaultValue = projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
-        .then((created) => {
-          expect(created.attributes).to.contain({
-            id: 2,
-            name: 'Project 2',
-            alias: defaultAlias,
-          })
+      // On Create...
+      const withDefaultValue = await projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
+      expect(withDefaultValue.attributes).to.contain({
+        id: 2,
+        name: 'Project 2',
+        alias: defaultAlias,
+      })
 
-          // Udpate...
-          return projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
-            .then((udpated) => {
-              expect(udpated.attributes).to.contain({
-                id: 2,
-                name: 'Project 2',
-                alias: defaultAlias,
-              })
-            })
-        })
-
-      return Promise.all([noDefaultValue, withDefaultValue])
+      // On Update...
+      const updated = await projectApp.upsertItem(specWithDefaultValue, updateWithDefaultValue)
+      expect(updated.attributes).to.contain({
+        id: 2,
+        name: 'Project 2',
+        alias: defaultAlias,
+        image_url: '/img',
+      })
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
@@ -757,7 +744,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.eventually.be.rejectedWithJointStatusError(404)
     })
 
-    it('should udpate the resource when the spec is satisfied', () => {
+    it('should update the resource when the spec is satisfied', () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -783,10 +770,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
         })
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
       const id = 1
-      const defaultName = 'Default Name'
-      const name = 'Name is Locked'
+      const name = 'An Updated Name'
 
       const specNoDefaultValue = {
         modelName: 'Project',
@@ -796,37 +782,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
           { name: 'brief_description', type: 'String' },
         ],
       }
-      const specWithDefaultValue = {
-        modelName: 'Project',
-        fields: [
-          { name: 'id', type: 'Number', required: true, lookup: true },
-          { name: 'name', type: 'String', locked: true, defaultValue: defaultName },
-          { name: 'brief_description', type: 'String' },
-        ],
-      }
 
       const input = {
-        fields: { id, name },
+        fields: { id, name, brief_description: 'new desc' },
       }
 
-      // If no "defaultValue" is provided, the field will not be updated...
-      const noDefaultValue = projectApp.updateItem(specNoDefaultValue, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            name: 'Mega-Seed Mini-Sythesizer',
-          })
-        })
-
-      const withDefaultValue = projectApp.updateItem(specWithDefaultValue, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            name: defaultName,
-          })
-        })
-
-      return Promise.all([noDefaultValue, withDefaultValue])
+      const updated = await projectApp.updateItem(specNoDefaultValue, input)
+      expect(updated.attributes).to.contain({
+        id,
+        name: 'Mega-Seed Mini-Sythesizer',
+        brief_description: 'new desc',
+      })
     })
 
     it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
@@ -899,7 +865,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         .to.be.fulfilled
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
       const modelName = 'Project'
       const id = 2
       const name = 'The Third Name'
@@ -917,43 +883,37 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { id, name },
       }
 
-      const globalLevel = projectAppJsonApi.updateItem(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id,
-              type: modelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              name,
-            })
+      // Globally set...
+      const globalLevel = await projectAppJsonApi.updateItem(spec, input)
+      // (Top Level)
+      expect(globalLevel).to.have.property('data')
+      expect(globalLevel.data)
+        .to.contain({
+          id,
+          type: modelName,
+        })
+      // (Base Attributes)
+      expect(globalLevel.data).to.have.property('attributes')
+      expect(globalLevel.data.attributes)
+        .to.contain({
+          name,
         })
 
-      const methodLevel = projectApp.updateItem(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id,
-              type: modelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              name,
-            })
+      // Locally set...
+      const methodLevel = await projectApp.updateItem(spec, input, 'json-api')
+      // (Top Level)
+      expect(methodLevel).to.have.property('data')
+      expect(methodLevel.data)
+        .to.contain({
+          id,
+          type: modelName,
         })
-
-      return Promise.all([globalLevel, methodLevel])
+      // (Base Attributes)
+      expect(methodLevel.data).to.have.property('attributes')
+      expect(methodLevel.data.attributes)
+        .to.contain({
+          name,
+        })
     })
   }) // END - updateItem
 
@@ -963,7 +923,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   describe('getItem', () => {
     before(() => resetDB(['users', 'roles', 'profiles', 'app-content']))
 
-    it('should return the row according to the provided spec and input', () => {
+    it('should return the row according to the provided spec and input', async () => {
       const specUser = {
         modelName: 'User',
         fields: [
@@ -979,19 +939,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      const getUser = blogApp.getItem(specUser, inputUser)
-        .then((data) => {
-          expect(data)
-            .to.have.property('attributes')
-            .that.contains({
-              id: 1,
-              external_id: inputUser.fields.external_id,
-            })
+      const getUser = await blogApp.getItem(specUser, inputUser)
+      expect(getUser)
+        .to.have.property('attributes')
+        .that.contains({
+          id: 1,
+          external_id: inputUser.fields.external_id,
         })
-
-      return Promise.all([
-        getUser,
-      ])
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {

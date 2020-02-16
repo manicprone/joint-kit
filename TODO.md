@@ -44,6 +44,8 @@
 
 * Replace moment with date-fns !!!
 
+* Replace promises with `async/await` (esp in tests) !!!
+
 * Remove the quotes on the modelNames in the error messages.
 
 * Support `orderBy` on associations (via <b>model config</b>).

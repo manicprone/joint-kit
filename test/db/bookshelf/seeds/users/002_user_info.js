@@ -48,7 +48,7 @@ const seeds = [
   },
 ]
 
-exports.seed = function seed(knex, Promise) {
+exports.seed = function seed(knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
