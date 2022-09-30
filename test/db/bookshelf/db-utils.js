@@ -1,13 +1,12 @@
-import Promise from 'bluebird'
-import bookshelf from './service'
+/* eslint-disable no-use-before-define */
+const Promise = require('bluebird')
+const bookshelf = require('./service')
 
-const debug = false
-
-export function resetDB(seeds) {
-  return teardownDB().then(() => setupDB(seeds))
+const resetDB = (seeds, debug) => {
+  return teardownDB(debug).then(() => setupDB(seeds, debug))
 }
 
-export function setupDB(seeds) {
+const setupDB = (seeds, debug = false) => {
   if (debug) console.log('[DB-UTILS] setting up database...')
 
   // Setup tables and seed data
@@ -28,7 +27,18 @@ export function setupDB(seeds) {
   return bookshelf.knex.migrate.latest()
 }
 
-export function teardownDB() {
+const teardownDB = (debug) => {
   if (debug) console.log('[DB-UTILS] tearing down database...')
   return bookshelf.knex.migrate.rollback()
+}
+
+const closeDB = (debug = false) => {
+  if (debug) console.log('[DB-UTILS] closing database connection...')
+  return bookshelf.knex.destroy()
+}
+
+module.exports = {
+  resetDB,
+  setupDB,
+  closeDB,
 }
