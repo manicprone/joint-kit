@@ -3,11 +3,11 @@ import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
-import bookshelf from '../../../db/bookshelf/service'
 
 const chai = require('chai')
 const expect = require('chai').expect
 const chaiAsPromised = require('chai-as-promised')
+const bookshelf = require('../../../db/bookshelf/service')
 const { resetDB } = require('../../../db/bookshelf/db-utils')
 
 chai.use(chaiAsPromised)
@@ -77,7 +77,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // Testing: standard error scenarios
+  // standard error scenarios
   // ---------------------------------------------------------------------------
   describe('standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem)', () => {
     before(() => resetDB(['users', 'profiles', 'projects']))
@@ -432,9 +432,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - standard error scenarios
 
-  // -------------------
-  // Testing: createItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // createItem
+  // ---------------------------------------------------------------------------
   describe('createItem', async () => {
     before(() => resetDB())
 
@@ -586,9 +586,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - createItem
 
-  // -------------------
-  // Testing: upsertItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // upsertItem
+  // ---------------------------------------------------------------------------
   describe('upsertItem', () => {
     before(() => resetDB())
 
@@ -607,8 +607,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { data: settingsData },
       }
 
-      return expect(appMgmt.upsertItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(appMgmt.upsertItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'A "lookup field" was either not defined or not provided.',
+        })
     })
 
     it('should perform a create action when the resource does not exist', () => {
@@ -776,9 +781,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - upsertItem
 
-  // -------------------
-  // Testing: updateItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // updateItem
+  // ---------------------------------------------------------------------------
   describe('updateItem', () => {
     before(() => resetDB(['profiles', 'projects']))
 
@@ -797,8 +802,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.updateItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required field: "id"',
+        })
     })
 
     it('should return an error (404) when the requested resource is not found', () => {
@@ -817,11 +827,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(404)
+      expect(projectApp.updateItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 404,
+          message: 'The requested "Project" was not found.',
+        })
     })
 
-    it('should update the resource when the spec is satisfied', () => {
+    it('should update the resource when the spec is satisfied', async () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -833,18 +848,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const id = 2
       const name = 'Updated Name'
-
       const input = {
         fields: { id, name },
       }
 
-      return projectApp.updateItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            name,
-          })
-        })
+      // Perform update
+      const updated = await projectApp.updateItem(spec, input)
+
+      expect(updated.attributes).to.contain({
+        id,
+        name,
+      })
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
@@ -865,6 +879,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       const updated = await projectApp.updateItem(specNoDefaultValue, input)
+
       expect(updated.attributes).to.contain({
         id,
         name: 'Mega-Seed Mini-Sythesizer',
@@ -994,9 +1009,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - updateItem
 
-  // ----------------
-  // Testing: getItem
-  // ----------------
+  // ---------------------------------------------------------------------------
+  // getItem
+  // ---------------------------------------------------------------------------
   describe('getItem', () => {
     before(() => resetDB(['users', 'roles', 'profiles', 'app-content']))
 
@@ -1534,9 +1549,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - getItem
 
-  // -----------------
-  // Testing: getItems
-  // -----------------
+  // ---------------------------------------------------------------------------
+  // getItems
+  // ---------------------------------------------------------------------------
   describe('getItems', () => {
     before(() => resetDB(['users', 'roles', 'profiles', 'projects']))
 
@@ -2167,9 +2182,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - getItems
 
-  // -------------------
-  // Testing: deleteItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // deleteItem
+  // ---------------------------------------------------------------------------
   describe('deleteItem', () => {
     before(() => resetDB(['profiles', 'projects']))
 
@@ -2186,11 +2201,15 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.deleteItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(404)
+      expect(projectApp.deleteItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          status: 404,
+          message: 'The requested "Project" was not found.',
+        })
     })
 
-    it('should delete the resource when the spec is satisfied', () => {
+    it('should delete the resource when the spec is satisfied', async () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -2204,12 +2223,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return projectApp.deleteItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.be.empty
+      // Delete item
+      const deleted = await projectApp.deleteItem(spec, input)
+      expect(deleted.attributes).to.be.empty
 
-          return expect(projectApp.getItem(spec, input))
-            .to.eventually.be.rejectedWithJointStatusError(404)
+      // Ensure item has been deleted
+      expect(projectApp.getItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          status: 404,
+          message: 'The requested "Project" was not found.',
         })
     })
 
