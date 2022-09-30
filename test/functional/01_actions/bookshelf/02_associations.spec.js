@@ -643,7 +643,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
     })
 
-    it.only('should return an error (400) when a required field is not provided', () => {
+    it('should return an error (400) when a required field is not provided', () => {
       const spec = {
         main: {
           modelName: 'Project',
@@ -662,7 +662,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      const inputNoMain = {
+      const inputBadMain = {
         main: {
           fields: {
             identifier: 1,
@@ -675,7 +675,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      const inputNoAssoc = {
+      const inputBadAssoc = {
         main: {
           fields: {
             id: 1,
@@ -691,45 +691,94 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------
       // addAssociatedItems
       // ------------------
-      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const addAssociatedItems02 = expect(projectApp.addAssociatedItems(spec, inputNoAssoc))
-        .to.eventually.be.rejectedWithJointStatusError(400)
 
+      // main missing requiredOr fields
+      expect(projectApp.addAssociatedItems(spec, inputBadMain))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "alias")',
+        })
+
+      // assoc missing requiredOr fields
+      expect(projectApp.addAssociatedItems(spec, inputBadAssoc))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "key")',
+        })
+
+      // -----------------
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const hasAssociatedItem02 = expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      // -----------------
 
+      // main missing requiredOr fields
+      expect(projectApp.hasAssociatedItem(spec, inputBadMain))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "alias")',
+        })
+
+      // assoc missing requiredOr fields
+      expect(projectApp.hasAssociatedItem(spec, inputBadAssoc))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "key")',
+        })
+
+      // ---------------------
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      // ---------------------
 
+      // main missing requiredOr fields
+      expect(projectApp.getAllAssociatedItems(spec, inputBadMain))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "alias")',
+        })
+
+      // ---------------------
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const removeAssociatedItems02 = expect(projectApp.removeAssociatedItems(spec, inputNoAssoc))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      // ---------------------
 
+      // main missing requiredOr fields
+      expect(projectApp.removeAssociatedItems(spec, inputBadMain))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "alias")',
+        })
+
+      // assoc missing requiredOr fields
+      expect(projectApp.removeAssociatedItems(spec, inputBadAssoc))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "key")',
+        })
+
+      // ------------------------
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(spec, inputNoMain))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      // ------------------------
 
-      return Promise.all([
-        addAssociatedItems01,
-        addAssociatedItems02,
-
-        hasAssociatedItem01,
-        hasAssociatedItem02,
-
-        getAllAssociatedItems01,
-
-        removeAssociatedItems01,
-        removeAssociatedItems02,
-
-        removeAllAssociatedItems01,
-      ])
+      // main missing requiredOr fields
+      expect(projectApp.removeAllAssociatedItems(spec, inputBadMain))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required fields: at least one of => ("id", "alias")',
+        })
     })
 
     it('should return an error (403) when the authorization spec is not satisfied', () => {
@@ -754,6 +803,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
       }
+
       const input = {
         main: {
           fields: {
@@ -769,43 +819,60 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       }
 
       // addAssociatedItems
-      const addAssociatedItems01 = expect(projectApp.addAssociatedItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(projectApp.addAssociatedItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // hasAssociatedItem
-      const hasAssociatedItem01 = expect(projectApp.hasAssociatedItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(projectApp.hasAssociatedItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // getAllAssociatedItems
-      const getAllAssociatedItems01 = expect(projectApp.getAllAssociatedItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(projectApp.getAllAssociatedItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // removeAssociatedItems
-      const removeAssociatedItems01 = expect(projectApp.removeAssociatedItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(projectApp.removeAssociatedItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // removeAllAssociatedItems
-      const removeAllAssociatedItems01 = expect(projectApp.removeAllAssociatedItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
-
-      return Promise.all([
-        addAssociatedItems01,
-        hasAssociatedItem01,
-        getAllAssociatedItems01,
-        removeAssociatedItems01,
-        removeAllAssociatedItems01,
-      ])
+      expect(projectApp.removeAllAssociatedItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
     })
   })
 
-  // ---------------------------
-  // Testing: addAssociatedItems
-  // ---------------------------
+  // ---------------------------------------------------------------------------
+  // addAssociatedItems
+  // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('addAssociatedItems', () => {
     before(() => resetDB(['tags', 'projects']))
 
-    it('should associate a resource when the spec is satisfied', () => {
+    it('should associate a resource when the spec is satisfied', async () => {
       const associationName = 'coding_language_tags'
 
       const spec = {
@@ -825,6 +892,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
+      // Project: mega-seed-mini-sythesizer
+      // coding_language_tags: 1 (java), 2 (jsp), 3 (javascript)
       const inputSingle = {
         main: {
           fields: {
@@ -838,6 +907,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
+      // Project: doppelganger-finder
+      // coding_language_tags: 6 (python)
       const inputMultiple = {
         main: {
           fields: {
@@ -851,36 +922,60 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      const addSingleAssoc = projectApp.addAssociatedItems(spec, inputSingle)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: 1,
-          })
+      // ----------------------------------
+      // Project: mega-seed-mini-sythesizer
+      // ----------------------------------
 
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(4)
-          expect(associatedTags.models[0].attributes.key).to.equal('java')
-          expect(associatedTags.models[1].attributes.key).to.equal('jsp')
-          expect(associatedTags.models[2].attributes.key).to.equal('javascript')
-          expect(associatedTags.models[3].attributes.key).to.equal('html')
-        })
+      // Validate expected initial state
+      const project01 = await projectApp.getAllAssociatedItems(spec, {
+        main: {
+          fields: { id: 1 },
+        },
+      })
+      expect(project01.relatedData.parentId).to.equal(1)
+      expect(project01.models).to.have.length(3)
+      expect(project01.models[0].attributes.key).to.equal('java')
+      expect(project01.models[1].attributes.key).to.equal('jsp')
+      expect(project01.models[2].attributes.key).to.equal('javascript')
 
-      const addMultipleAssoc = projectApp.addAssociatedItems(spec, inputMultiple)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: 3,
-          })
+      // Associate single item
+      const addSingleAssoc = await projectApp.addAssociatedItems(spec, inputSingle)
+      expect(addSingleAssoc.attributes).to.contain({ id: 1 }) // ensure correct main
 
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(5)
-          expect(associatedTags.models[0].attributes.key).to.equal('python')
-          expect(associatedTags.models[1].attributes.key).to.equal('java')
-          expect(associatedTags.models[2].attributes.key).to.equal('jsp')
-          expect(associatedTags.models[3].attributes.key).to.equal('xslt')
-          expect(associatedTags.models[4].attributes.key).to.equal('html')
-        })
+      // associations are ordered by created_at (when they were attached)
+      const project01Tags = addSingleAssoc.relations[associationName]
+      expect(project01Tags.models).to.have.length(4)
+      expect(project01Tags.models[0].attributes.key).to.equal('java')
+      expect(project01Tags.models[1].attributes.key).to.equal('jsp')
+      expect(project01Tags.models[2].attributes.key).to.equal('javascript')
+      expect(project01Tags.models[3].attributes.key).to.equal('html')
 
-      return Promise.all([addSingleAssoc, addMultipleAssoc])
+      // ----------------------------
+      // Project: doppelganger-finder
+      // ----------------------------
+
+      // Validate expected initial state
+      const project03 = await projectApp.getAllAssociatedItems(spec, {
+        main: {
+          fields: { id: 3 },
+        },
+      })
+      expect(project03.relatedData.parentId).to.equal(3)
+      expect(project03.models).to.have.length(1)
+      expect(project03.models[0].attributes.key).to.equal('python')
+
+      // Associate multiple items
+      const addMultipleAssoc = await projectApp.addAssociatedItems(spec, inputMultiple)
+      expect(addMultipleAssoc.attributes).to.contain({ id: 3 }) // ensure correct main
+
+      // associations are ordered by created_at (when they were attached)
+      const project03Tags = addMultipleAssoc.relations[associationName]
+      expect(project03Tags.models).to.have.length(5)
+      expect(project03Tags.models[0].attributes.key).to.equal('python')
+      expect(project03Tags.models[1].attributes.key).to.equal('java')
+      expect(project03Tags.models[2].attributes.key).to.equal('jsp')
+      expect(project03Tags.models[3].attributes.key).to.equal('xslt')
+      expect(project03Tags.models[4].attributes.key).to.equal('html')
     })
 
     // TODO: Need to re-implement this support for Bookshelf !!!
@@ -904,6 +999,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
       }
+
       const input = {
         main: {
           fields: {
@@ -1037,9 +1133,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     })
   }) // END - addAssociatedItems
 
-  // --------------------------
-  // Testing: hasAssociatedItem
-  // --------------------------
+  // ---------------------------------------------------------------------------
+  // hasAssociatedItem
+  // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('hasAssociatedItem', () => {
     before(() => resetDB(['tags', 'projects']))
@@ -1065,6 +1161,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ],
         },
       }
+
       const input = {
         main: {
           fields: {
@@ -1078,8 +1175,13 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.hasAssociatedItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(404)
+      expect(projectApp.hasAssociatedItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 404,
+          message: 'The requested "CodingLanguageTag" does exist for the requested resource.',
+        })
     })
 
     it('should return the associated resource, when the association exists', () => {
@@ -1201,9 +1303,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     })
   }) // END - hasAssociatedItem
 
-  // ------------------------------
+  // ---------------------------------------------------------------------------
   // Testing: getAllAssociatedItems
-  // ------------------------------
+  // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('getAllAssociatedItems', () => {
     before(() => resetDB(['tags', 'projects']))
@@ -1312,9 +1414,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     })
   }) // END - getAllAssociatedItems
 
-  // ------------------------------
+  // ---------------------------------------------------------------------------
   // Testing: removeAssociatedItems
-  // ------------------------------
+  // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('removeAssociatedItems', () => {
     before(() => resetDB(['tags', 'projects']))
@@ -1519,9 +1621,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     })
   }) // END - removeAssociatedItems
 
-  // ---------------------------------
+  // ---------------------------------------------------------------------------
   // Testing: removeAllAssociatedItems
-  // ---------------------------------
+  // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('removeAllAssociatedItems', () => {
     before(() => resetDB(['tags', 'projects']))

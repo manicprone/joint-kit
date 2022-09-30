@@ -1,15 +1,14 @@
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import projectAppMethods from '../../../scenarios/project-app/method-config'
-import bookshelf from '../../../db/bookshelf/service'
-import { resetDB } from '../../../db/bookshelf/db-utils'
-import chaiHelpers from '../../chai-helpers'
+
+const chai = require('chai')
+const expect = require('chai').expect
+const chaiAsPromised = require('chai-as-promised')
+const bookshelf = require('../../../db/bookshelf/service')
+const { resetDB, closeDB } = require('../../../db/bookshelf/db-utils')
 
 chai.use(chaiAsPromised)
-chai.use(chaiHelpers)
-const expect = chai.expect
 
 let projectApp = null
 
@@ -23,6 +22,10 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
     // -----------
     projectApp = new Joint({ service: bookshelf })
     projectApp.generate({ modelConfig: projectAppModels, methodConfig: projectAppMethods, log: false })
+  })
+
+  after(() => {
+    closeDB() // close DB connection
   })
 
   describe('programmatic usage', () => {

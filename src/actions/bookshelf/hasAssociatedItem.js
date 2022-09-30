@@ -50,7 +50,10 @@ export default async function hasAssociatedItem(joint, spec = {}, input = {}, ou
     let assoc = {}
     try {
       assoc = await getItem(joint, specAssoc, inputAssoc)
-    } catch (err) {}
+    } catch (err) {
+      // Swallow troubled error response (the final error handler will resolve the correct error scenario)
+      if (err.message !== 'The association "" does not exist for the resource.') throw err
+    }
 
     // If has associated item, return it...
     const idToCheck = assoc.id
