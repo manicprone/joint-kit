@@ -13,6 +13,7 @@ export function handleErrorResponse(error, actionName = '', mainModelName = 'res
   if (error.name === 'JointStatusError') throw error // throw if already handled by Joint
 
   let jointError = null
+
   if (error.message) {
     // 404 scenarios...
     if (error.message === 'EmptyResponse' || error.message === 'No Rows Deleted') {
@@ -21,7 +22,6 @@ export function handleErrorResponse(error, actionName = '', mainModelName = 'res
     // 400 scenarios...
     } else if (assocs && error.message.includes(assocs)) {
       jointError = StatusErrors.generateAssociationNotRecognizedError(assocs)
-      // console.error(`[JOINT] [action:${actionName}]`, jointError)
     }
 
   // 500 scenarios...
@@ -29,5 +29,6 @@ export function handleErrorResponse(error, actionName = '', mainModelName = 'res
     console.error(`[JOINT] [action:${actionName}] Action encountered a third-party error: ${error.message} =>`, error)
     jointError = StatusErrors.generateThirdPartyError(error)
   }
+
   throw jointError
 }

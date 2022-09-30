@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import objectUtils from '../../utils/object-utils'
 import * as StatusErrors from '../../core/errors/status-errors'
 import ACTION from '../../core/constants/action-constants'
@@ -46,11 +47,17 @@ export default async function hasAssociatedItem(joint, spec = {}, input = {}, ou
   try {
     // Lookup resources...
     const main = await getItem(joint, specMain, inputMain)
-    const assoc = await getItem(joint, specAssoc, inputAssoc)
+    let assoc = {}
+    try {
+      assoc = await getItem(joint, specAssoc, inputAssoc)
+    } catch (err) {
+      // Swallow troubled error response (the final error handler will resolve the correct error scenario)
+      if (err.message !== 'The association "" does not exist for the resource.') throw err
+    }
 
     // If has associated item, return it...
     const idToCheck = assoc.id
-    if (objectUtils.includes(main.related(assocName).pluck('id'), idToCheck)) {
+    if (idToCheck && objectUtils.includes(main.related(assocName).pluck('id'), idToCheck)) {
       return handleDataResponse(joint, modelNameAssoc, assoc, output)
     }
 

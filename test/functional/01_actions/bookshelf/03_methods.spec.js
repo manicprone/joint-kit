@@ -1,5 +1,3 @@
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
@@ -8,13 +6,14 @@ import projectAppModels from '../../../scenarios/project-app/model-config'
 import projectAppMethods from '../../../scenarios/project-app/method-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
 import blogAppMethods from '../../../scenarios/blog-app/method-config'
-import bookshelf from '../../../db/bookshelf/service'
-import { resetDB } from '../../../db/bookshelf/db-utils'
-import chaiHelpers from '../../chai-helpers'
+
+const chai = require('chai')
+const expect = require('chai').expect
+const chaiAsPromised = require('chai-as-promised')
+const bookshelf = require('../../../db/bookshelf/service')
+const { resetDB } = require('../../../db/bookshelf/db-utils')
 
 chai.use(chaiAsPromised)
-chai.use(chaiHelpers)
-const expect = chai.expect
 
 let appMgmt = null
 let projectApp = null
@@ -49,6 +48,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
     // -------------------------------------------------------------------------
     // Method: saveContent
+    // Action: upsertItem
     // -------------------------------------------------------------------------
     // spec: {
     //   fields: [
@@ -58,7 +58,9 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   ],
     // },
     // -------------------------------------------------------------------------
-    describe('AppContent.saveContent', () => {
+    describe('AppContent.saveContent (testing upsertItem)', () => {
+      beforeEach(() => resetDB())
+
       it('should return an error (400) when the required fields are not provided', () => {
         const appID = 'failed-app'
         const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } }
@@ -68,24 +70,33 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             data: appContent,
           },
         }
+
         const inputNoData = {
           fields: {
             app_id: appID,
           },
         }
 
-        const noAppID = expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
-          .to.eventually.be.rejectedWithJointStatusError(400)
-        const noData = expect(appMgmt.method.AppContent.saveContent(inputNoData))
-          .to.eventually.be.rejectedWithJointStatusError(400)
+        // No required lookup fields
+        expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required field: "app_id"',
+          })
 
-        return Promise.all([
-          noAppID,
-          noData,
-        ])
+        // No required data fields
+        expect(appMgmt.method.AppContent.saveContent(inputNoData))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required field: "data"',
+          })
       })
 
-      it('should save a new package of data for a provided "app_id" and "key"', () => {
+      it('should save a new package of data for a matching pair of provided fields', async () => {
         const appID = 'trendy-boutique'
         const key = 'winter-promo'
         const appContent = {
@@ -105,20 +116,19 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         }
 
-        return appMgmt.method.AppContent.saveContent(input)
-          .then((data) => {
-            expect(data.attributes.id).to.equal(1)
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal(key)
+        const created = await appMgmt.method.AppContent.saveContent(input)
 
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.trending.men).to.equal('pleather-jackets')
-            expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
-            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(3)
-          })
+        expect(created.attributes.id).to.equal(1)
+        expect(created.attributes.app_id).to.equal(appID)
+        expect(created.attributes.key).to.equal(key)
+
+        const contentJSON = JSON.parse(created.attributes.data)
+        expect(contentJSON.trending.men).to.equal('pleather-jackets')
+        expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
+        expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(3)
       })
 
-      it(`should save a new package of data for a provided "app_id", using the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" of the "key" to satisfy the lookup requirement`, () => {
+      it(`should save a new package of data with a provided lookup field and leveraging the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" of another lookup field to satisfy the lookup requirement`, async () => {
         const appID = 'trendy-boutique'
         const appContent = {
           trending: {
@@ -136,17 +146,16 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         }
 
-        return appMgmt.method.AppContent.saveContent(input)
-          .then((data) => {
-            expect(data.attributes.id).to.equal(2)
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal('default')
+        const created = await appMgmt.method.AppContent.saveContent(input)
 
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.trending.men).to.equal('hats')
-            expect(contentJSON.trending.women).to.equal('belts')
-            expect(contentJSON.newBrands).to.be.an('array').that.has.length(3)
-          })
+        expect(created.attributes.id).to.equal(1)
+        expect(created.attributes.app_id).to.equal(appID)
+        expect(created.attributes.key).to.equal('default')
+
+        const contentJSON = JSON.parse(created.attributes.data)
+        expect(contentJSON.trending.men).to.equal('hats')
+        expect(contentJSON.trending.women).to.equal('belts')
+        expect(contentJSON.newBrands).to.be.an('array').that.has.length(3)
       })
 
       it('should update an existing package of data according to the spec defintion', () => {
@@ -223,18 +232,24 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('AppContent.getContent', () => {
       before(() => resetDB(['app-content']))
 
-      it('should return an error (400) when the "app_id" field is not provided', () => {
+      it('should return an error (400) when required lookup fields are not provided', () => {
         const input = {
           fields: {
             ignored_field: 'give-me-everything',
           },
         }
 
-        return expect(appMgmt.method.AppContent.getContent(input))
-          .to.eventually.be.rejectedWithJointStatusError(400)
+        // No required lookup fields
+        expect(appMgmt.method.AppContent.getContent(input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required field: "app_id"',
+          })
       })
 
-      it('should retrieve the requested package of data for a provided "app_id" and "key"', () => {
+      it('should retrieve the requested package of data for a matching pair of provided fields', () => {
         const appID = 'app-001'
         const key = 'v1.0'
 
@@ -257,7 +272,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
 
-      it(`should retrieve the default package of data for a provided "app_id", using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}"`, () => {
+      it(`should retrieve the default package of data for a provided lookup field, using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" to satisfy the lookup`, () => {
         const appID = 'app-001'
 
         const input = {
@@ -316,8 +331,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         }
 
-        return expect(blogApp.method.User.createUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400)
+        // Missing required field
+        expect(blogApp.method.User.createUser(input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required field: "username"',
+          })
       })
 
       it('should create a user when the required field is provided', () => {
@@ -409,8 +430,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         }
 
-        return expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400)
+        // Missing required field
+        expect(blogApp.method.User.updateUser(input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required field: "id"',
+          })
       })
 
       it('should return an error (404) when the requested user does not exist', () => {
@@ -424,8 +451,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           },
         }
 
-        return expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(404)
+        // Resource does not exist
+        expect(blogApp.method.User.updateUser(input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 404,
+            message: 'The requested "User" was not found.',
+          })
       })
 
       it('should update an existing user for a single field', () => {
@@ -512,15 +545,21 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.getUser', () => {
       before(() => resetDB(['users']))
 
-      it('should return an error (400) when none of the required fields are provided', () => {
+      it('should return an error (400) when none of the requiredOr fields are provided', () => {
         const input = {
           fields: {
             identifier: 4,
           },
         }
 
-        return expect(blogApp.method.User.getUser(input))
-          .to.eventually.be.rejectedWithJointStatusError(400)
+        // Missing all requiredOr fields
+        expect(blogApp.method.User.getUser(input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Missing required fields: at least one of => ("id", "username", "external_id")',
+          })
       })
 
       it('should return an error (404) when the requested user does not exist', () => {
@@ -533,29 +572,45 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             id: userID,
           },
         }
+
         const inputWithUsername = {
           fields: {
             username,
           },
         }
+
         const inputWithExternalID = {
           fields: {
             external_id: externalID,
           },
         }
 
-        const viaID = expect(blogApp.method.User.getUser(inputWithID))
-          .to.eventually.be.rejectedWithJointStatusError(404)
-        const viaUsername = expect(blogApp.method.User.getUser(inputWithUsername))
-          .to.eventually.be.rejectedWithJointStatusError(404)
-        const viaExternalID = expect(blogApp.method.User.getUser(inputWithExternalID))
-          .to.eventually.be.rejectedWithJointStatusError(404)
+        // Using id
+        expect(blogApp.method.User.getUser(inputWithID))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 404,
+            message: 'The requested "User" was not found.',
+          })
 
-        return Promise.all([
-          viaID,
-          viaUsername,
-          viaExternalID,
-        ])
+        // Using username
+        expect(blogApp.method.User.getUser(inputWithUsername))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 404,
+            message: 'The requested "User" was not found.',
+          })
+
+        // Using external_id
+        expect(blogApp.method.User.getUser(inputWithExternalID))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 404,
+            message: 'The requested "User" was not found.',
+          })
       })
 
       it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`, () => {
@@ -569,11 +624,13 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             id: userID,
           },
         }
+
         const inputWithUsername = {
           fields: {
             username,
           },
         }
+
         const inputWithExternalID = {
           fields: {
             external_id: externalID,
@@ -644,7 +701,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   defaultOrderBy: '-created_at,username',
     // },
     // -------------------------------------------------------------------------
-    describe('User.getUsers', () => {
+    describe.skip('User.getUsers', () => {
       before(() => resetDB(['users']))
 
       it('should return all users in the order defined by the spec, when no fields are provided')

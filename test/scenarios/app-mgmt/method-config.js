@@ -2,9 +2,9 @@
 // Methods for scenario: app-mgmt
 // (method-config)
 // ------------------------------
-import appRegistry from './resources/app-registry'
-import appContent from './resources/app-content'
-import appSettings from './resources/app-settings'
+import appRegistry from './methodConfigs/app-registry'
+import appContent from './methodConfigs/app-content'
+import appSettings from './methodConfigs/app-settings'
 
 module.exports = [
   appRegistry,

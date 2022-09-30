@@ -1,17 +1,16 @@
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
-import bookshelf from '../../../db/bookshelf/service'
-import { resetDB } from '../../../db/bookshelf/db-utils'
-import chaiHelpers from '../../chai-helpers'
+
+const chai = require('chai')
+const expect = require('chai').expect
+const chaiAsPromised = require('chai-as-promised')
+const bookshelf = require('../../../db/bookshelf/service')
+const { resetDB } = require('../../../db/bookshelf/db-utils')
 
 chai.use(chaiAsPromised)
-chai.use(chaiHelpers)
-const expect = chai.expect
 
 let appMgmt = null
 let appMgmtJsonApi = null
@@ -36,10 +35,10 @@ const allColsUser = [
   'updated_at',
 ]
 
-// ------------------------
-// BOOKSHELF ACTIONS (base)
-// ------------------------
-describe('BASE ACTIONS [bookshelf]', () => {
+// -----------------------------------------------------------------------------
+// BOOKSHELF ACTIONS (CRUD)
+// -----------------------------------------------------------------------------
+describe('CRUD ACTIONS [bookshelf]', () => {
   before(() => {
     // --------
     // App Mgmt
@@ -77,9 +76,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     blogAppJsonApi.generate({ modelConfig: blogAppModels, log: false })
   })
 
-  // ---------------------------------
-  // Testing: standard error scenarios
-  // ---------------------------------
+  // ---------------------------------------------------------------------------
+  // standard error scenarios
+  // ---------------------------------------------------------------------------
   describe('standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem)', () => {
     before(() => resetDB(['users', 'profiles', 'projects']))
 
@@ -98,37 +97,52 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       // createItem
-      const createItemAction = expect(projectApp.createItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.createItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // upsertItem
-      const upsertItemAction = expect(projectApp.upsertItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.upsertItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // updateItem
-      const updateItemAction = expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.updateItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // getItem
-      const getItemAction = expect(projectApp.getItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.getItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // getItems
-      const getItemsAction = expect(projectApp.getItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.getItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // deleteItem
-      const deleteItemAction = expect(projectApp.deleteItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-
-      return Promise.all([
-        createItemAction,
-        upsertItemAction,
-        updateItemAction,
-        getItemAction,
-        getItemsAction,
-        deleteItemAction,
-      ])
+      expect(projectApp.deleteItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
     })
 
     it('should return an error (400) when a required field is not provided', () => {
@@ -163,55 +177,94 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       // createItem
-      const createItem01 = expect(projectApp.createItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const createItem02 = expect(projectApp.createItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.createItem(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
+
+      expect(projectApp.createItem(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // upsertItem
-      const upsertItem01 = expect(projectApp.upsertItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const upsertItem02 = expect(projectApp.upsertItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.upsertItem(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
+
+      expect(projectApp.upsertItem(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // updateItem
-      const updateItem01 = expect(projectApp.updateItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const updateItem02 = expect(projectApp.updateItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.updateItem(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
+
+      expect(projectApp.updateItem(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // getItem
-      const getItem01 = expect(projectApp.getItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const getItem02 = expect(projectApp.getItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.getItem(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
+
+      expect(projectApp.getItem(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // getItems
-      const getItems01 = expect(projectApp.getItems(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const getItems02 = expect(projectApp.getItems(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.getItems(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
+
+      expect(projectApp.getItems(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
       // deleteItem
-      const deleteItem01 = expect(projectApp.deleteItem(spec01, input01))
-        .to.eventually.be.rejectedWithJointStatusError(400)
-      const deleteItem02 = expect(projectApp.deleteItem(spec02, input02))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.deleteItem(spec01, input01))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
 
-      return Promise.all([
-        createItem01,
-        createItem02,
-        upsertItem01,
-        upsertItem02,
-        updateItem01,
-        updateItem02,
-        getItem01,
-        getItem02,
-        getItems01,
-        getItems02,
-        deleteItem01,
-        deleteItem02,
-      ])
+      expect(projectApp.deleteItem(spec02, input02))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+        })
     })
 
     it('should return an error (403) when the authorization spec is not satisfied', () => {
@@ -232,7 +285,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
         authContext: {},
       }
 
-      // With lookup field (for update/upsert)...
+      // With lookup field (for update/upsert)
       const specForUpdate = {
         modelName: 'Profile',
         fields: [
@@ -251,37 +304,58 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       // createItem
-      const createItemAction = expect(blogApp.createItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(blogApp.createItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // upsertItem
-      const upsertItemAction = expect(blogApp.upsertItem(specForUpdate, inputForUpdate))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(blogApp.upsertItem(specForUpdate, inputForUpdate))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // updateItem
-      const updateItemAction = expect(blogApp.updateItem(specForUpdate, inputForUpdate))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(blogApp.updateItem(specForUpdate, inputForUpdate))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // getItem
-      const getItemAction = expect(blogApp.getItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(blogApp.getItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // getItems
-      const getItemsAction = expect(blogApp.getItems(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
+      expect(blogApp.getItems(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
 
       // deleteItem
-      const deleteItemAction = expect(blogApp.deleteItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(403)
-
-      return Promise.all([
-        createItemAction,
-        upsertItemAction,
-        updateItemAction,
-        getItemAction,
-        getItemsAction,
-        deleteItemAction,
-      ])
+      expect(blogApp.deleteItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 403,
+          message: 'You are not authorized to perform this action.',
+        })
     })
 
     it('should report on missing required fields in a semantic way', () => {
@@ -321,43 +395,46 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: {},
       }
 
-      const testCase01 = projectApp.createItem(spec, missingOneRequired)
-        .catch((error) => {
-          expect(error.message)
-            .to.equal('Missing required field: "user_id"')
+      // Case 01: Missing one "required" field
+      expect(projectApp.createItem(spec, missingOneRequired))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          message: 'Missing required field: "user_id"',
         })
 
-      const testCase02 = projectApp.createItem(spec, missingTwoRequired)
-        .catch((error) => {
-          expect(error.message)
-            .to.equal('Missing required fields: all of => ("user_id", "status_code")')
+      // Case 02: Missing two "required" fields
+      expect(projectApp.createItem(spec, missingTwoRequired))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          message: 'Missing required fields: all of => ("user_id", "status_code")',
         })
 
-      const testCase03 = projectApp.createItem(spec, missingRequiredOrs)
-        .catch((error) => {
-          expect(error.message)
-            .to.equal('Missing required fields: at least one of => ("this_thing", "that_thing")')
+      // Case 03: Missing any "requiredOr" fields
+      expect(projectApp.createItem(spec, missingRequiredOrs))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          message: 'Missing required fields: at least one of => ("this_thing", "that_thing")',
         })
 
-      const testCase04 = projectApp.createItem(spec, missingOneRequiredAndRequiredOrs)
-        .catch((error) => {
-          expect(error.message)
-            .to.equal('Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")')
+      // Case 04: Missing one "required" field and any "requiredOr" fields
+      expect(projectApp.createItem(spec, missingOneRequiredAndRequiredOrs))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          message: 'Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")',
         })
 
-      const testCase05 = projectApp.createItem(spec, missingTwoRequiredAndRequiredOrs)
-        .catch((error) => {
-          expect(error.message)
-            .to.equal('Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")')
+      // Case 05: Missing two "required" fields and any "requiredOr" fields
+      expect(projectApp.createItem(spec, missingTwoRequiredAndRequiredOrs))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          message: 'Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")',
         })
-
-      return Promise.all([testCase01, testCase02, testCase03, testCase04, testCase05])
     })
   }) // END - standard error scenarios
 
-  // -------------------
-  // Testing: createItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // createItem
+  // ---------------------------------------------------------------------------
   describe('createItem', async () => {
     before(() => resetDB())
 
@@ -509,9 +586,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - createItem
 
-  // -------------------
-  // Testing: upsertItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // upsertItem
+  // ---------------------------------------------------------------------------
   describe('upsertItem', () => {
     before(() => resetDB())
 
@@ -530,8 +607,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         fields: { data: settingsData },
       }
 
-      return expect(appMgmt.upsertItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(appMgmt.upsertItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'A "lookup field" was either not defined or not provided.',
+        })
     })
 
     it('should perform a create action when the resource does not exist', () => {
@@ -699,9 +781,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - upsertItem
 
-  // -------------------
-  // Testing: updateItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // updateItem
+  // ---------------------------------------------------------------------------
   describe('updateItem', () => {
     before(() => resetDB(['profiles', 'projects']))
 
@@ -720,8 +802,13 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(400)
+      expect(projectApp.updateItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 400,
+          message: 'Missing required field: "id"',
+        })
     })
 
     it('should return an error (404) when the requested resource is not found', () => {
@@ -740,11 +827,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(404)
+      expect(projectApp.updateItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          name: 'JointStatusError',
+          status: 404,
+          message: 'The requested "Project" was not found.',
+        })
     })
 
-    it('should update the resource when the spec is satisfied', () => {
+    it('should update the resource when the spec is satisfied', async () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -756,18 +848,17 @@ describe('BASE ACTIONS [bookshelf]', () => {
 
       const id = 2
       const name = 'Updated Name'
-
       const input = {
         fields: { id, name },
       }
 
-      return projectApp.updateItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            name,
-          })
-        })
+      // Perform update
+      const updated = await projectApp.updateItem(spec, input)
+
+      expect(updated.attributes).to.contain({
+        id,
+        name,
+      })
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
@@ -788,6 +879,7 @@ describe('BASE ACTIONS [bookshelf]', () => {
       }
 
       const updated = await projectApp.updateItem(specNoDefaultValue, input)
+
       expect(updated.attributes).to.contain({
         id,
         name: 'Mega-Seed Mini-Sythesizer',
@@ -917,9 +1009,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - updateItem
 
-  // ----------------
-  // Testing: getItem
-  // ----------------
+  // ---------------------------------------------------------------------------
+  // getItem
+  // ---------------------------------------------------------------------------
   describe('getItem', () => {
     before(() => resetDB(['users', 'roles', 'profiles', 'app-content']))
 
@@ -1457,9 +1549,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - getItem
 
-  // -----------------
-  // Testing: getItems
-  // -----------------
+  // ---------------------------------------------------------------------------
+  // getItems
+  // ---------------------------------------------------------------------------
   describe('getItems', () => {
     before(() => resetDB(['users', 'roles', 'profiles', 'projects']))
 
@@ -2090,9 +2182,9 @@ describe('BASE ACTIONS [bookshelf]', () => {
     })
   }) // END - getItems
 
-  // -------------------
-  // Testing: deleteItem
-  // -------------------
+  // ---------------------------------------------------------------------------
+  // deleteItem
+  // ---------------------------------------------------------------------------
   describe('deleteItem', () => {
     before(() => resetDB(['profiles', 'projects']))
 
@@ -2109,11 +2201,15 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return expect(projectApp.deleteItem(spec, input))
-        .to.eventually.be.rejectedWithJointStatusError(404)
+      expect(projectApp.deleteItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          status: 404,
+          message: 'The requested "Project" was not found.',
+        })
     })
 
-    it('should delete the resource when the spec is satisfied', () => {
+    it('should delete the resource when the spec is satisfied', async () => {
       const spec = {
         modelName: 'Project',
         fields: [
@@ -2127,12 +2223,16 @@ describe('BASE ACTIONS [bookshelf]', () => {
         },
       }
 
-      return projectApp.deleteItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.be.empty
+      // Delete item
+      const deleted = await projectApp.deleteItem(spec, input)
+      expect(deleted.attributes).to.be.empty
 
-          return expect(projectApp.getItem(spec, input))
-            .to.eventually.be.rejectedWithJointStatusError(404)
+      // Ensure item has been deleted
+      expect(projectApp.getItem(spec, input))
+        .to.eventually.be.rejected
+        .and.to.contain({
+          status: 404,
+          message: 'The requested "Project" was not found.',
         })
     })
 

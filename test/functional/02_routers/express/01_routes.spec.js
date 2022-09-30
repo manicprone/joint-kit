@@ -8,11 +8,9 @@ import blogAppMethods from '../../../scenarios/blog-app/method-config'
 import blogAppRoutes from '../../../scenarios/blog-app/route-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
-import chaiHelpers from '../../chai-helpers'
 
 chai.use(chaiHttp)
 chai.use(chaiAsPromised)
-chai.use(chaiHelpers)
 
 const apiBasePath = '/api/express'
 const apiPort = 9999
@@ -20,7 +18,7 @@ const apiURL = `http://localhost:${apiPort}${apiBasePath}`
 
 let blogApp = null
 
-describe('CUSTOM ROUTER SIMULATION [express]', () => {
+describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
   before(() => {
     // --------
     // Blog App
