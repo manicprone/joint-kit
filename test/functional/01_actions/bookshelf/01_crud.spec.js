@@ -36,9 +36,9 @@ const allColsUser = [
 ]
 
 // -----------------------------------------------------------------------------
-// BOOKSHELF ACTIONS (base)
+// BOOKSHELF ACTIONS (CRUD)
 // -----------------------------------------------------------------------------
-describe('BASE ACTIONS [bookshelf]', () => {
+describe('CRUD ACTIONS [bookshelf]', () => {
   before(() => {
     // --------
     // App Mgmt
