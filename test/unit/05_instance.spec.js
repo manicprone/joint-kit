@@ -131,6 +131,10 @@ describe('JOINT', () => {
       expect(joint.serviceKey).to.equal('bookshelf')
     })
 
+    // TODO - Fix the error handling here !!! This is a common issue that needs to be clear to the developer !!!
+    // it('should return an error (400) when the model config associations are invalid', () => {
+    // })
+
     it('should successfully register bookshelf models via model config', () => {
       const appMgmt = new Joint({ service: bookshelf })
       appMgmt.generate({ modelConfig: appMgmtModels, log: false })

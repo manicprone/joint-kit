@@ -28,10 +28,24 @@ export function generateMissingFieldsError(missingFields = {}) {
   })
 }
 
+export function generateDbConfigError(message = '') {
+  return new JointStatusError({
+    status: 400,
+    message: `There is a problem with your database configuration => ${message}`,
+  })
+}
+
 export function generateModelNotRecognizedError(modelName = '') {
   return new JointStatusError({
     status: 400,
     message: `The model "${modelName}" is not recognized.`,
+  })
+}
+
+export function generateModelConfigError(modelName = '', message = '') {
+  return new JointStatusError({
+    status: 400,
+    message: `There is a problem with the "${modelName}" model config => ${message}`,
   })
 }
 
