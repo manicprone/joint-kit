@@ -1,5 +1,5 @@
-// import { closeDB } from '../db/bookshelf/db-utils'
-//
-// after(async () => {
-//   await closeDB()
-// })
+import { closeDB } from '../db/bookshelf/db-utils'
+
+after(async () => {
+  await closeDB()
+})
