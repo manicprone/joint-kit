@@ -61,7 +61,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('AppContent.saveContent (testing upsertItem)', () => {
       beforeEach(() => resetDB())
 
-      it('should return an error (400) when the required fields are not provided', () => {
+      it('should return an error (400) when the required fields are not provided', async () => {
         const appID = 'failed-app'
         const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } }
 
@@ -78,7 +78,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // No required lookup fields
-        expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
+        await expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -87,7 +87,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // No required data fields
-        expect(appMgmt.method.AppContent.saveContent(inputNoData))
+        await expect(appMgmt.method.AppContent.saveContent(inputNoData))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -232,7 +232,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('AppContent.getContent', () => {
       before(() => resetDB(['app-content']))
 
-      it('should return an error (400) when required lookup fields are not provided', () => {
+      it('should return an error (400) when required lookup fields are not provided', async () => {
         const input = {
           fields: {
             ignored_field: 'give-me-everything',
@@ -240,7 +240,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // No required lookup fields
-        expect(appMgmt.method.AppContent.getContent(input))
+        await expect(appMgmt.method.AppContent.getContent(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -320,7 +320,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.createUser', () => {
       before(() => resetDB())
 
-      it('should return an error (400) when the required field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', async () => {
         const email = 'mastablasta@mail.com'
         const displayName = 'Blasta!'
 
@@ -332,7 +332,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing required field
-        expect(blogApp.method.User.createUser(input))
+        await expect(blogApp.method.User.createUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -420,7 +420,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.updateUser', () => {
       before(() => resetDB(['users']))
 
-      it('should return an error (400) when the required field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', async () => {
         const displayName = 'Updated Name'
 
         const input = {
@@ -431,7 +431,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing required field
-        expect(blogApp.method.User.updateUser(input))
+        await expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -440,7 +440,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
 
-      it('should return an error (404) when the requested user does not exist', () => {
+      it('should return an error (404) when the requested user does not exist', async () => {
         const userID = 999
         const displayName = 'Updated Name'
 
@@ -452,7 +452,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Resource does not exist
-        expect(blogApp.method.User.updateUser(input))
+        await expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -545,7 +545,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.getUser', () => {
       before(() => resetDB(['users']))
 
-      it('should return an error (400) when none of the requiredOr fields are provided', () => {
+      it('should return an error (400) when none of the requiredOr fields are provided', async () => {
         const input = {
           fields: {
             identifier: 4,
@@ -553,7 +553,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing all requiredOr fields
-        expect(blogApp.method.User.getUser(input))
+        await expect(blogApp.method.User.getUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -562,7 +562,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
 
-      it('should return an error (404) when the requested user does not exist', () => {
+      it('should return an error (404) when the requested user does not exist', async () => {
         const userID = 999
         const username = 'not-segmented'
         const externalID = '999305'
@@ -586,7 +586,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Using id
-        expect(blogApp.method.User.getUser(inputWithID))
+        await expect(blogApp.method.User.getUser(inputWithID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -595,7 +595,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // Using username
-        expect(blogApp.method.User.getUser(inputWithUsername))
+        await expect(blogApp.method.User.getUser(inputWithUsername))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -604,7 +604,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // Using external_id
-        expect(blogApp.method.User.getUser(inputWithExternalID))
+        await expect(blogApp.method.User.getUser(inputWithExternalID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
