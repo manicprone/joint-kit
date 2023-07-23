@@ -1,3 +1,4 @@
+import lodashLang from 'lodash/lang'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 
@@ -33,7 +34,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   describe('standard error scenarios (addAssociatedItems, hasAssociatedItem, getAllAssociatedItems, removeAssociatedItems, removeAllAssociatedItems)', () => {
     before(() => resetDB(['tags', 'projects']))
 
-    it('should return an error (400) when the spec and input cannot be parsed for association actions', () => {
+    it('should return an error (400) when the spec and input cannot be parsed for association actions', async () => {
       const spec = {
         main: {
           modelName: 'Project',
@@ -141,7 +142,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------
 
       // missing spec.main
-      expect(projectApp.addAssociatedItems(specMissingMain, input))
+      await expect(projectApp.addAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -150,7 +151,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association
-      expect(projectApp.addAssociatedItems(specMissingAssoc, input))
+      await expect(projectApp.addAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -159,7 +160,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association.name
-      expect(projectApp.addAssociatedItems(specMissingAssocName, input))
+      await expect(projectApp.addAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -168,7 +169,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.main
-      expect(projectApp.addAssociatedItems(spec, inputMissingMain))
+      await expect(projectApp.addAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -177,7 +178,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.association
-      expect(projectApp.addAssociatedItems(spec, inputMissingAssoc))
+      await expect(projectApp.addAssociatedItems(spec, inputMissingAssoc))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -190,7 +191,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // -----------------
 
       // missing spec.main
-      expect(projectApp.hasAssociatedItem(specMissingMain, input))
+      await expect(projectApp.hasAssociatedItem(specMissingMain, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -199,7 +200,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association
-      expect(projectApp.hasAssociatedItem(specMissingAssoc, input))
+      await expect(projectApp.hasAssociatedItem(specMissingAssoc, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -208,7 +209,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association.name
-      expect(projectApp.hasAssociatedItem(specMissingAssocName, input))
+      await expect(projectApp.hasAssociatedItem(specMissingAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -217,7 +218,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.main
-      expect(projectApp.hasAssociatedItem(spec, inputMissingMain))
+      await expect(projectApp.hasAssociatedItem(spec, inputMissingMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -226,7 +227,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.association
-      expect(projectApp.hasAssociatedItem(spec, inputMissingAssoc))
+      await expect(projectApp.hasAssociatedItem(spec, inputMissingAssoc))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -239,7 +240,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // missing spec.main
-      expect(projectApp.getAllAssociatedItems(specMissingMain, input))
+      await expect(projectApp.getAllAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -248,7 +249,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association
-      expect(projectApp.getAllAssociatedItems(specMissingAssoc, input))
+      await expect(projectApp.getAllAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -257,7 +258,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association.name
-      expect(projectApp.getAllAssociatedItems(specMissingAssocName, input))
+      await expect(projectApp.getAllAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -266,7 +267,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.main
-      expect(projectApp.getAllAssociatedItems(spec, inputMissingMain))
+      await expect(projectApp.getAllAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -279,7 +280,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // missing spec.main
-      expect(projectApp.removeAssociatedItems(specMissingMain, input))
+      await expect(projectApp.removeAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -288,7 +289,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association
-      expect(projectApp.removeAssociatedItems(specMissingAssoc, input))
+      await expect(projectApp.removeAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -297,7 +298,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association.name
-      expect(projectApp.removeAssociatedItems(specMissingAssocName, input))
+      await expect(projectApp.removeAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -306,7 +307,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.main
-      expect(projectApp.removeAssociatedItems(spec, inputMissingMain))
+      await expect(projectApp.removeAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -315,7 +316,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.association
-      expect(projectApp.removeAssociatedItems(spec, inputMissingAssoc))
+      await expect(projectApp.removeAssociatedItems(spec, inputMissingAssoc))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -328,7 +329,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------------
 
       // missing spec.main
-      expect(projectApp.removeAllAssociatedItems(specMissingMain, input))
+      await expect(projectApp.removeAllAssociatedItems(specMissingMain, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -337,7 +338,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association
-      expect(projectApp.removeAllAssociatedItems(specMissingAssoc, input))
+      await expect(projectApp.removeAllAssociatedItems(specMissingAssoc, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -346,7 +347,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing spec.association.name
-      expect(projectApp.removeAllAssociatedItems(specMissingAssocName, input))
+      await expect(projectApp.removeAllAssociatedItems(specMissingAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -355,7 +356,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // missing input.main
-      expect(projectApp.removeAllAssociatedItems(spec, inputMissingMain))
+      await expect(projectApp.removeAllAssociatedItems(spec, inputMissingMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -364,7 +365,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
     })
 
-    it('should return an error (400) when the specified main model or association type do not exist', () => {
+    it('should return an error (400) when the specified main model or association type do not exist', async () => {
       const specNoExistMainModel = {
         main: {
           modelName: 'AlienProject',
@@ -417,7 +418,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------
 
       // main modelName does not exist
-      expect(projectApp.addAssociatedItems(specNoExistMainModel, input))
+      await expect(projectApp.addAssociatedItems(specNoExistMainModel, lodashLang.cloneDeep(input)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -426,7 +427,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association name does not exist
-      expect(projectApp.addAssociatedItems(specNoExistAssocName, input))
+      await expect(projectApp.addAssociatedItems(specNoExistAssocName, lodashLang.cloneDeep(input)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -439,7 +440,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // -----------------
 
       // main modelName does not exist
-      expect(projectApp.hasAssociatedItem(specNoExistMainModel, input))
+      await expect(projectApp.hasAssociatedItem(specNoExistMainModel, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -448,7 +449,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association name does not exist
-      expect(projectApp.hasAssociatedItem(specNoExistAssocName, input))
+      await expect(projectApp.hasAssociatedItem(specNoExistAssocName, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -461,7 +462,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // main modelName does not exist
-      expect(projectApp.getAllAssociatedItems(specNoExistMainModel, input))
+      await expect(projectApp.getAllAssociatedItems(specNoExistMainModel, input))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -474,7 +475,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // main modelName does not exist
-      expect(projectApp.removeAssociatedItems(specNoExistMainModel, input))
+      await expect(projectApp.removeAssociatedItems(specNoExistMainModel, lodashLang.cloneDeep(input)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -483,7 +484,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association name does not exist
-      expect(projectApp.removeAssociatedItems(specNoExistAssocName, input))
+      await expect(projectApp.removeAssociatedItems(specNoExistAssocName, lodashLang.cloneDeep(input)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -496,7 +497,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------------
 
       // main modelName does not exist
-      expect(projectApp.removeAllAssociatedItems(specNoExistMainModel, input))
+      await expect(projectApp.removeAllAssociatedItems(specNoExistMainModel, lodashLang.cloneDeep(input)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -505,7 +506,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
     })
 
-    it('should return an error (404) when the requested main or association resources are not found', () => {
+    it('should return an error (404) when the requested main or association resources are not found', async () => {
       const spec = {
         main: {
           modelName: 'Project',
@@ -555,7 +556,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------
 
       // main resource does not exist
-      expect(projectApp.addAssociatedItems(spec, inputNoMain))
+      await expect(projectApp.addAssociatedItems(spec, lodashLang.cloneDeep(inputNoMain)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -564,7 +565,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association resource does not exist
-      expect(projectApp.addAssociatedItems(spec, inputNoAssoc))
+      await expect(projectApp.addAssociatedItems(spec, lodashLang.cloneDeep(inputNoAssoc)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -577,7 +578,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // -----------------
 
       // main resource does not exist
-      expect(projectApp.hasAssociatedItem(spec, inputNoMain))
+      await expect(projectApp.hasAssociatedItem(spec, inputNoMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -586,12 +587,12 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association resource does not exist
-      expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
+      await expect(projectApp.hasAssociatedItem(spec, inputNoAssoc))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
           status: 404,
-          message: 'The requested "CodingLanguageTag" does exist for the requested resource.',
+          message: 'The requested "CodingLanguageTag" was not found.',
         })
 
       // ---------------------
@@ -599,7 +600,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // main resource does not exist
-      expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
+      await expect(projectApp.getAllAssociatedItems(spec, inputNoMain))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -612,7 +613,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ---------------------
 
       // main resource does not exist
-      expect(projectApp.removeAssociatedItems(spec, inputNoMain))
+      await expect(projectApp.removeAssociatedItems(spec, lodashLang.cloneDeep(inputNoMain)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -621,7 +622,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         })
 
       // association resource does not exist
-      expect(projectApp.removeAssociatedItems(spec, inputNoAssoc))
+      await expect(projectApp.removeAssociatedItems(spec, lodashLang.cloneDeep(inputNoAssoc)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',
@@ -634,7 +635,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // ------------------------
 
       // main resource does not exist
-      expect(projectApp.removeAllAssociatedItems(spec, inputNoMain))
+      await expect(projectApp.removeAllAssociatedItems(spec, lodashLang.cloneDeep(inputNoMain)))
         .to.eventually.be.rejected
         .and.to.contain({
           name: 'JointStatusError',

@@ -9,6 +9,9 @@
     "type": "git",
     "url": "git@github.com:manicprone/joint-kit.git"
   },
+  "engines": {
+    "node": "^15.14.0"
+  },
   "scripts": {
     "build": "cross-env NODE_ENV=build rollup -c",
     "prepublish": "npm run build",
