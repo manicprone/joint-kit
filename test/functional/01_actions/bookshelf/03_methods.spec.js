@@ -697,19 +697,62 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   fields: [
     //     { name: 'preferred_locale', type: 'String' },
     //   ],
-    //   fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    //   fieldsToReturn: {
+    //     default: ['id', 'username', 'display_name', 'avatar_url'],
+    //     withCreatedAt: ['id', 'username', 'created_at'],
+    //     withPreferredLocale: ['id', 'username', 'preferred_locale'],
+    //   },
     //   defaultOrderBy: '-created_at,username',
     // },
     // -------------------------------------------------------------------------
-    describe.skip('User.getUsers', () => {
+    describe('User.getUsers', () => {
       before(() => resetDB(['users']))
 
-      it('should return all users in the order defined by the spec, when no fields are provided')
+      it('should return all users in the order defined by the spec, when no fields are provided', async () => {
+        const data = await blogApp.method.User.getUsers({ fieldSet: 'withCreatedAt' })
 
-      it('should return the filtered set of users when an accepted field is provided')
+        data.models.forEach((model, index) => {
+          // matches `fieldsToReturn.withCreatedAt`
+          expect(model).to.have.nested.property('attributes.id')
+          expect(model).to.have.nested.property('attributes.username')
+          expect(model).to.have.nested.property('attributes.created_at')
 
-      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`)
+          // fields not in `fieldsToReturn`
+          expect(model).to.not.have.nested.property('attributes.display_name')
+          expect(model).to.not.have.nested.property('attributes.avatar_url')
 
+          // test created_at is in desecending order
+          if (index > 0) {
+            const previousModel = data.models[index - 1]
+            expect(model.attributes.created_at).to.be.below(previousModel.attributes.created_at)
+          }
+        })
+
+        expect(data).to.have.lengthOf(10)
+      })
+
+      it('should return the filtered set of users when an accepted field is provided', async () => {
+        const data = await blogApp.method.User.getUsers({
+          fields: {
+            preferred_locale: 'en-US',
+          },
+          fieldSet: 'withPreferredLocale',
+        })
+
+        data.models.forEach((model) => {
+         // matches `fieldsToReturn.withPreferredLocale`
+         expect(model).to.have.nested.property('attributes.id')
+         expect(model).to.have.nested.property('attributes.username')
+         expect(model).to.have.nested.property('attributes.preferred_locale', 'en-US')
+
+         // fields not in `fieldsToReturn`
+         expect(model).to.not.have.nested.property('attributes.display_name')
+         expect(model).to.not.have.nested.property('attributes.avatar_url')
+         expect(model).to.not.have.nested.property('attributes.created_at')
+        })
+
+        expect(data).to.have.lengthOf(8)
+      })
     }) // END - User.getUsers
 
     // -------------------------------------------------------------------------
