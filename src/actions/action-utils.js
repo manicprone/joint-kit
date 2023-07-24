@@ -369,7 +369,7 @@ export function castValue(value, dataType) {
 }
 
 // -----------------------------------------------------------------------------
-// Parsse field name and match strategy from input.
+// Parse field name and match strategy from input.
 // -----------------------------------------------------------------------------
 export function parseFieldNameMatchStrategy(rawFieldName) {
   const [fieldName, rawMatchStrategy, ...rest] = rawFieldName.split('.')
