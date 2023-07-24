@@ -95,20 +95,17 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
     // Build where clause...
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
-        const fieldName = fieldSpec.name
+        const { fieldName, matchStrategy } = ActionUtils.parseFieldNameMatchStrategy(fieldSpec.name)
         const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
         const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
         const hasInput = objectUtils.has(inputFields, fieldName)
         const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false)
 
         if (!isLocked && (hasInput || hasDefault)) {
-          const inputValue = (hasInput) ? inputFields[fieldName] : defaultValue
-          if (Array.isArray(inputValue)) queryBuilder.where(fieldName, 'IN', inputValue)
-          else queryBuilder.where(fieldName, '=', inputValue)
-
+          const inputValue = (hasInput) ? inputFields[fieldName].value : defaultValue
+          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, inputValue, matchStrategy)
         } else if (isLocked && hasDefault) {
-          if (Array.isArray(defaultValue)) queryBuilder.where(fieldName, 'IN', defaultValue)
-          else queryBuilder.where(fieldName, '=', defaultValue)
+          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, defaultValue, matchStrategy)
         }
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)

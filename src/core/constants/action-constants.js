@@ -2,6 +2,9 @@
 // Joint Action Constants
 // ----------------------
 
+const INPUT_FIELD_MATCHING_STRATEGY_EXACT = 'exact'
+const INPUT_FIELD_MATCHING_STRATEGY_CONTAINS = 'contains'
+
 export default {
   // ------------------------------- Association Options
   // Main Resource Wrapper
@@ -47,6 +50,14 @@ export default {
 
   // Field Set
   INPUT_FIELD_SET: 'fieldSet',
+
+  // Field Input Matching Strategies
+  INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+  INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
+  INPUT_FIELD_MATCHING_STRATEGIES: [
+    INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+    INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
+  ],
 
   // Sort Order
   INPUT_ORDER_BY: 'orderBy',

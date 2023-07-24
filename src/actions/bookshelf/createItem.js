@@ -63,18 +63,16 @@ async function performCreateItem(joint, spec = {}, input = {}, output) {
   const createData = {}
   if (inputFields && specFields) {
     specFields.forEach((fieldSpec) => {
-      const fieldName = fieldSpec.name
+      const rawFieldName = fieldSpec.name
+      const { fieldName } = ActionUtils.parseFieldNameMatchStrategy(rawFieldName)
       const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
       const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
       const hasInput = objectUtils.has(inputFields, fieldName)
       const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false)
 
-      if (!isLocked && (hasInput || hasDefault)) {
-        createData[fieldName] = (hasInput)
-            ? inputFields[fieldName]
-            : defaultValue
-      } else if (isLocked && hasDefault) {
-        createData[fieldName] = defaultValue
+      if (hasInput || hasDefault) {
+        const inputValue = !isLocked && hasInput ? inputFields[fieldName].value : defaultValue
+        createData[fieldName] = inputValue
       }
     }) // end-specFields.forEach
   } // end-if (inputFields && specFields)

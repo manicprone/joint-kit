@@ -246,7 +246,11 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.deep.equal({ id: 333, key: 'omega', full_version: true })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'omega', matchStrategy: 'exact' },
+          full_version: { value: true, matchStrategy: 'exact' },
+        })
     })
 
     it('should return the first matching lookup field data pair in an OR set', () => {
@@ -263,7 +267,7 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldDataWithSecondOr))
-        .to.deep.equal({ external_id: 'external-id-333' })
+        .to.deep.equal({ external_id: { value: 'external-id-333', matchStrategy: 'exact' } })
     })
 
     it(`should return the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a required lookup field, when the input does not provide the data`, () => {
@@ -290,11 +294,17 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup01, fieldDataNoKey))
-        .to.deep.equal({ key: 'alpha' })
+        .to.deep.equal({ key: { value: 'alpha', matchStrategy: 'exact' } })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataNoKey))
-        .to.deep.equal({ id: 333, key: 'alpha' })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'alpha', matchStrategy: 'exact' },
+        })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataWithKey))
-        .to.deep.equal({ id: 333, key: 'beta' })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'beta', matchStrategy: 'exact' },
+        })
     })
 
     it(`should ignore the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a "${ACTION.SPEC_FIELDS_OPT_LOOKUP_OR}" field`, () => {
@@ -533,6 +543,7 @@ describe('ACTION-UTILS', () => {
         { name: 'is_typical', type: 'Boolean' },
         { name: 'is_unknown', type: 'Boolean' },
         { name: 'is_simple', type: 'Boolean' },
+        { name: 'username.contains', type: 'String' },
       ]
 
       const fieldData = {
@@ -546,20 +557,22 @@ describe('ACTION-UTILS', () => {
         is_unknown: 'FALSE',
         is_simple: 0,
         notRelated: 'I am ignored',
+        'username.contains': 'ed',
       }
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
       expect(preparedFieldData).to.deep.equal({
-        user_id: 1,
-        item_id: [2, 3, 5, 8],
-        title: '123',
-        is_live: true,
-        is_insane: true,
-        is_awesome: true,
-        is_typical: false,
-        is_unknown: false,
-        is_simple: false,
+        user_id: { value: 1, matchStrategy: 'exact' },
+        item_id: { value: [2, 3, 5, 8], matchStrategy: 'exact' },
+        title: { value: '123', matchStrategy: 'exact' },
+        is_live: { value: true, matchStrategy: 'exact' },
+        is_insane: { value: true, matchStrategy: 'exact' },
+        is_awesome: { value: true, matchStrategy: 'exact' },
+        is_typical: { value: false, matchStrategy: 'exact' },
+        is_unknown: { value: false, matchStrategy: 'exact' },
+        is_simple: { value: false, matchStrategy: 'exact' },
+        username: { value: 'ed', matchStrategy: 'contains' },
       })
     })
   }) // END - prepareFieldData

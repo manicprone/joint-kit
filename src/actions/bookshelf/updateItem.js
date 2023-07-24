@@ -4,6 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
+import * as BookshelfUtils from './utils/bookshelf-utils'
 import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
@@ -59,12 +60,17 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
     // Get item to perform the update action...
     const getItemOpts = { require: true }
     if (trx) getItemOpts.transacting = trx
-    const resource = await model.where(lookupFieldData).fetch(getItemOpts)
+    const resource = await model.query((queryBuilder) => {
+      Object.entries(lookupFieldData).forEach(([key, field]) => {
+        BookshelfUtils.appendWhereClause(queryBuilder, key, field.value, field.matchStrategy)
+      })
+    }).fetch(getItemOpts)
 
     // Respect auth...
     if (authRules) {
       const combinedFields = Object.assign({}, resource.attributes, inputFields)
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
+
       if (!AuthUtils.isAllowed(authContext, authRules, ownerCreds)) {
         return Promise.reject(StatusErrors.generateNotAuthorizedError())
       }
@@ -78,7 +84,8 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
     const updates = {}
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
-        const fieldName = fieldSpec.name
+        const rawFieldName = fieldSpec.name
+        const { fieldName } = ActionUtils.parseFieldNameMatchStrategy(rawFieldName)
         const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
         const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
         const hasInput = objectUtils.has(inputFields, fieldName)
@@ -87,7 +94,7 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
 
         if (!isLocked && !isLookup && (hasInput || hasDefault)) {
           updates[fieldName] = (hasInput)
-              ? inputFields[fieldName]
+              ? inputFields[fieldName].value
               : defaultValue
         } else if (isLocked && !isLookup && hasDefault) {
           updates[fieldName] = defaultValue

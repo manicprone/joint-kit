@@ -4,6 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
+import * as BookshelfUtils from './utils/bookshelf-utils'
 import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
@@ -72,7 +73,7 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
 
       if (!isLocked && !isLookup && (hasInput || hasDefault)) {
         upsertData[fieldName] = (hasInput)
-            ? inputFields[fieldName]
+            ? inputFields[fieldName].value
             : defaultValue
       } else if (isLocked && !isLookup && hasDefault) {
         upsertData[fieldName] = defaultValue
@@ -82,7 +83,12 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
 
   try {
     // Look for item...
-    const resource = await model.where(lookupFieldData).fetch(actionOpts)
+    const resource = await model.query((queryBuilder) => {
+      Object.entries(lookupFieldData)
+        .forEach(([fieldName, field]) => {
+          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, field.value, field.matchStrategy)
+        })
+    }).fetch(actionOpts)
 
     // Respect auth...
     if (authRules) {
@@ -97,6 +103,7 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
     if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => UPDATE ${modelName} WITH`, upsertData)
 
     // If item found, perform an update action...
+
     const data = await resource.save(upsertData, actionOpts)
 
     // Return data...
@@ -117,7 +124,7 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
       if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => CREATE ${modelName} WITH`, upsertData)
 
       // Perform create action...
-      const data = await model.forge(lookupFieldData).save(upsertData, actionOpts)
+      const data = await model.forge(ActionUtils.getFieldValueMap(lookupFieldData)).save(upsertData, actionOpts)
 
       // Return data...
       return handleDataResponse(joint, modelName, data, output)
