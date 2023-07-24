@@ -84,7 +84,8 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
 //   key: { value: 'v1.0.0', matchStrategy: 'exact' }
 // }
 // -----------------------------------------------------------------------------
-export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
+export function getLookupFieldData(fieldSpec = [], rawFieldData = {}) {
+  const fieldData = normalizeFieldData(rawFieldData)
   let lookupData = null
 
   // Loop through field spec, checking if all lookup field requirements are satisfied...
@@ -95,20 +96,24 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
     for (let i = 0; i < fieldSpec.length; i++) {
       const field = fieldSpec[i]
       const dataType = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_TYPE, 'String')
-      const rawFieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
-      const { fieldName, matchStrategy } = parseFieldNameMatchStrategy(rawFieldName)
+      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
 
       if (fieldName) {
         const isLookup = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP, false)
         const isLookupOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false)
         const hasInput = objectUtils.has(fieldData, fieldName)
+        const matchStrategy = objectUtils.get(
+          fieldData,
+          `${fieldName}.matchStrategy`,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+        )
 
         if (isLookupOr && !isLookupOrSatisfied) {
           lookupOrs.push(fieldName) // track all lookupOr fields
           if (hasInput) {
             if (!lookupData) lookupData = {}
             lookupData[fieldName] = {
-              value: castValue(getFieldValue(fieldData[rawFieldName]), dataType),
+              value: castValue(fieldData[fieldName].value, dataType),
               matchStrategy,
             }
             isLookupOrSatisfied = true // mark as satisfied
@@ -121,7 +126,7 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
             if (!lookupData) lookupData = {}
             lookupData[fieldName] = {
               value: (hasInput)
-                ? castValue(getFieldValue(fieldData[rawFieldName]), dataType)
+                ? castValue(fieldData[fieldName].value, dataType)
                 : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType),
               matchStrategy,
             }
@@ -322,33 +327,95 @@ export function processDefaultValue(fieldData = {}, defaultValue) {
 // * 'exact'    - exact match
 // * 'contains' - fuzzy search
 // -----------------------------------------------------------------------------
-export function prepareFieldData(fieldSpec = [], fieldData = {}) {
+export function prepareFieldData(rawFieldSpec = [], rawFieldData = {}) {
+  const fieldSpec = normalizeFieldSpec(rawFieldSpec)
+  const fieldData = normalizeFieldData(rawFieldData)
   const preparedFieldData = {}
 
   if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
     fieldSpec.forEach((field) => {
-      const rawFieldName = objectUtils.get(field, 'name', null)
-      const dataType = objectUtils.get(field, 'type', 'String')
-
       // Perform data type cast on provided field values...
-      if (rawFieldName && objectUtils.has(fieldData, rawFieldName)) {
-        const { fieldName, matchStrategy } = parseFieldNameMatchStrategy(rawFieldName)
-        const value = castValue(fieldData[rawFieldName], dataType)
+      if (objectUtils.has(fieldData, field.name)) {
+        const { matchStrategy } = fieldData[field.name]
+        const value = castValue(fieldData[field.name].value, field.type)
 
-        if (matchStrategy === ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS && typeof value !== 'string') {
+        validateMatchStrategyWithType(matchStrategy, field.type)
+
+        if (!field.operators.includes(matchStrategy)) {
           throw new Error(
-            `"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" match strategy ` +
-            'can only be applied to a string value.',
+            `Operator "${matchStrategy}" is not allowed on field ` +
+            `"${field.name}". Check that it is whitelisted on the ` +
+            `field spec with "${ACTION.SPEC_FIELDS_OPT_OPERATORS}"`,
           )
         }
 
-        preparedFieldData[fieldName] = { value, matchStrategy }
+        preparedFieldData[field.name] = { value, matchStrategy }
       }
     })
   }
 
   return preparedFieldData
 }
+
+// -----------------------------------------------------------------------------
+// Normalize field spec:
+//
+// Convert from this format:
+// [
+//   { name: 'user_id', type: 'Number' },
+//   { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+//   { name: 'display_name' }, // default to type 'String'
+//   { type: 'Number' },       // invalid entry (without name) will be discarded
+// ]
+//
+// Into this format:
+// [
+//   { name: 'user_id', type: 'Number', operators: ['exact'] },
+//   { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+//   { name: 'display_name', type: 'String', operators: ['exact'] },
+// ]
+// -----------------------------------------------------------------------------
+export function normalizeFieldSpec(fieldSpec) {
+  return (fieldSpec || [])
+    .filter(field => !!field.name)
+    .map((field) => {
+      if (field.operators) field.operators.forEach(validateMatchStrategy)
+      const type = objectUtils.get(field, 'type', 'String')
+      const operators = objectUtils.get(field, 'operators', [ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT])
+
+      return { ...field, type, operators }
+    })
+}
+
+// -----------------------------------------------------------------------------
+// Normalize field data:
+//
+// Convert from this format:
+// {
+//   user_id: 1,
+//   'username.contains': 'ed'
+// }
+//
+// Into this format:
+// {
+//   user_id: { value: 1, matchStrategy: 'exact' },
+//   username: { value: 'ed', matchStrategy: 'contains' }
+// }
+// -----------------------------------------------------------------------------
+export function normalizeFieldData(fieldData) {
+  return Object.fromEntries(
+    Object.entries((fieldData || {}))
+      .map(([key, value]) => {
+        if (objectUtils.has(value, 'value')) {
+          return [key, value]
+        }
+
+        const { fieldName, matchStrategy } = parseFieldNameMatchStrategy(key)
+        return [fieldName, { value, matchStrategy }]
+      }),
+  )
+}
+
 
 // TODO: Add try/catch to protect from bad values !!!
 // -----------------------------------------------------------------------------
@@ -376,12 +443,7 @@ export function parseFieldNameMatchStrategy(rawFieldName) {
   const matchStrategy = rawMatchStrategy || ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
 
   if (rest.length > 0) throw new Error('Nested field name is not yet supported.')
-  if (!ACTION.INPUT_FIELD_MATCHING_STRATEGIES.includes(matchStrategy)) {
-    throw new Error(
-      `Unsupported match strategy "${matchStrategy}". ` +
-      `Supported values: ${ACTION.INPUT_FIELD_MATCHING_STRATEGIES}`,
-    )
-  }
+  validateMatchStrategy(matchStrategy)
 
   return { fieldName, matchStrategy }
 }
@@ -404,4 +466,28 @@ export function getFieldValueMap(fields) {
     Object.entries(fields)
       .map(([key, value]) => [key, getFieldValue(value)]),
   )
+}
+
+// -----------------------------------------------------------------------------
+// Validates a provided matchStrategy is a recognized strategy.
+// -----------------------------------------------------------------------------
+function validateMatchStrategy(matchStrategy) {
+  if (!ACTION.INPUT_FIELD_MATCHING_STRATEGIES.includes(matchStrategy)) {
+    throw new Error(
+      `Unsupported match strategy "${matchStrategy}". ` +
+      `Supported values: ${ACTION.INPUT_FIELD_MATCHING_STRATEGIES}`,
+    )
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Validates a matchStrategy is applicable to a type.
+// -----------------------------------------------------------------------------
+function validateMatchStrategyWithType(matchStrategy, type) {
+  if (matchStrategy === ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS && type !== 'String') {
+    throw new Error(
+      `"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator ` +
+      'can only be applied to a string value.',
+    )
+  }
 }

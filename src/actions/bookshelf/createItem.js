@@ -63,8 +63,7 @@ async function performCreateItem(joint, spec = {}, input = {}, output) {
   const createData = {}
   if (inputFields && specFields) {
     specFields.forEach((fieldSpec) => {
-      const rawFieldName = fieldSpec.name
-      const { fieldName } = ActionUtils.parseFieldNameMatchStrategy(rawFieldName)
+      const fieldName = fieldSpec.name
       const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
       const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
       const hasInput = objectUtils.has(inputFields, fieldName)

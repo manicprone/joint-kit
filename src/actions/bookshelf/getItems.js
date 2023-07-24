@@ -12,7 +12,7 @@ const debug = false
 export default async function getItems(joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
-  const specFields = spec[ACTION.SPEC_FIELDS]
+  const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
   const authRules = specAuth[ACTION.SPEC_AUTH_RULES]
   const returnColsDef = spec[ACTION.SPEC_FIELDS_TO_RETURN]
@@ -95,10 +95,14 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
     // Build where clause...
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
-        const { fieldName, matchStrategy } = ActionUtils.parseFieldNameMatchStrategy(fieldSpec.name)
+        const fieldName = fieldSpec.name
         const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
         const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
         const hasInput = objectUtils.has(inputFields, fieldName)
+        const matchStrategy = objectUtils.get(inputFields,
+          `${fieldName}.matchStrategy`,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+        )
         const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false)
 
         if (!isLocked && (hasInput || hasDefault)) {

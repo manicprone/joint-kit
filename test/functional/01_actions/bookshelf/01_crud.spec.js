@@ -1620,7 +1620,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
       const onlyLiveProfiles = true
 
       const specNoDefaultValue = {
@@ -1654,22 +1654,20 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       }
 
       // If no "defaultValue" is provided, the field will not be included in the request...
-      const noDefaultValue = blogApp.getItems(specNoDefaultValue, input)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-        })
+      await blogApp.getItems(specNoDefaultValue, input)
+       .then((data) => {
+         expect(data.models).to.have.length(11)
+       })
 
-      const withDefaultValue = blogApp.getItems(specWithDefaultValue, input)
-        .then((data) => {
-          expect(data.models).to.have.length(7)
-        })
+      await blogApp.getItems(specWithDefaultValue, input)
+       .then((data) => {
+         expect(data.models).to.have.length(7)
+       })
 
-      const withExplicitIDs = blogApp.getItems(specWithExplicitIDs, input)
+      await blogApp.getItems(specWithExplicitIDs, input)
         .then((data) => {
           expect(data.models).to.have.length(3)
         })
-
-      return Promise.all([noDefaultValue, withDefaultValue, withExplicitIDs])
     })
 
     it('should only return the field data that is permitted by the spec', () => {

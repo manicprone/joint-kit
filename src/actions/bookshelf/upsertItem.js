@@ -27,7 +27,7 @@ export default async function upsertItem(joint, spec = {}, input = {}, output) {
 async function performUpsertItem(joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
-  const specFields = spec[ACTION.SPEC_FIELDS]
+  const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
   const authRules = specAuth[ACTION.SPEC_AUTH_RULES]
   const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS])
@@ -119,6 +119,14 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
           return Promise.reject(StatusErrors.generateNotAuthorizedError())
         }
       } // end-if (authRules)
+
+      // Prevent creating new resource with operators !== "contains"
+      if (
+        Object.values(lookupFieldData)
+          .some(({ matchStrategy }) => matchStrategy !== ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT)
+      ) {
+        throw StatusErrors.generateInvalidResourceCreationOperatorError()
+      }
 
       // Debug executing logic...
       if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => CREATE ${modelName} WITH`, upsertData)

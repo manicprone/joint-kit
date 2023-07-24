@@ -27,7 +27,7 @@ export default async function deleteItem(joint, spec = {}, input = {}, output) {
 async function performDeleteItem(joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
-  const specFields = spec[ACTION.SPEC_FIELDS]
+  const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
   const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS])
   const trx = input[ACTION.INPUT_TRANSACTING]
@@ -101,9 +101,12 @@ async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inpu
   const queryOpts = (queryBuilder) => {
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
-        const rawFieldName = fieldSpec.name
-        const { fieldName, matchStrategy } = ActionUtils.parseFieldNameMatchStrategy(rawFieldName)
+        const fieldName = fieldSpec.name
         const hasInput = objectUtils.has(inputFields, fieldName)
+        const matchStrategy = objectUtils.get(inputFields,
+          `${fieldName}.matchStrategy`,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+        )
         if (hasInput) {
           BookshelfUtils.appendWhereClause(queryBuilder, fieldName, inputFields[fieldName].value, matchStrategy)
         }

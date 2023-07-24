@@ -755,13 +755,13 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       })
 
       it('should return the filtered set of users when a ".contains" string query is provided', async () => {
-      const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
+        const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
 
-      data.models.forEach((model) => {
-       expect(model).to.have.nested.property('attributes.username').that.have.string('ed')
-      })
+        data.models.forEach((model) => {
+          expect(model).to.have.nested.property('attributes.username').that.have.string('ed')
+        })
 
-      expect(data).to.have.lengthOf(2)
+        expect(data).to.have.lengthOf(2)
       })
     }) // END - User.getUsers
 
