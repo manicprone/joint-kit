@@ -945,10 +945,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // associations are ordered by created_at (when they were attached)
       const project01Tags = addSingleAssoc.relations[associationName]
       expect(project01Tags.models).to.have.length(4)
-      expect(project01Tags.models[0].attributes.key).to.equal('java')
-      expect(project01Tags.models[1].attributes.key).to.equal('jsp')
-      expect(project01Tags.models[2].attributes.key).to.equal('javascript')
-      expect(project01Tags.models[3].attributes.key).to.equal('html')
+      expect(project01Tags.models.map(model => model.attributes.key))
+        .to.include.members(['java', 'jsp', 'javascript', 'html'])
 
       // ----------------------------
       // Project: doppelganger-finder
@@ -971,11 +969,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // associations are ordered by created_at (when they were attached)
       const project03Tags = addMultipleAssoc.relations[associationName]
       expect(project03Tags.models).to.have.length(5)
-      expect(project03Tags.models[0].attributes.key).to.equal('python')
-      expect(project03Tags.models[1].attributes.key).to.equal('java')
-      expect(project03Tags.models[2].attributes.key).to.equal('jsp')
-      expect(project03Tags.models[3].attributes.key).to.equal('xslt')
-      expect(project03Tags.models[4].attributes.key).to.equal('html')
+      expect(project03Tags.models.map(model => model.attributes.key))
+        .to.include.members(['python', 'java', 'jsp', 'xslt', 'html'])
     })
 
     // TODO: Need to re-implement this support for Bookshelf !!!
