@@ -125,7 +125,7 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
         Object.values(lookupFieldData)
           .some(({ matchStrategy }) => matchStrategy !== ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT)
       ) {
-        throw StatusErrors.generateInvalidResourceCreationOperatorError()
+        return Promise.reject(StatusErrors.generateInvalidResourceCreationOperatorError())
       }
 
       // Debug executing logic...

@@ -642,6 +642,33 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
+    it(
+      `should throw an error if "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" other ` +
+      `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}" is used to ` +
+      'create a new resource',
+      async () => {
+        const spec = {
+          modelName: 'AppSettings',
+          fields: [
+            { name: 'app_id', type: 'String', required: true, lookup: true, operators: ['contains'] },
+            { name: 'data', type: 'JSON', required: true },
+          ],
+        }
+
+        const input = {
+          fields: { 'app_id.contains': '999', data: { a: true, b: false, c: 'string-value' } },
+        }
+
+        await expect(appMgmt.upsertItem(spec, input))
+          .to.eventually.be.rejected
+          .and.to.contain({
+            name: 'JointStatusError',
+            status: 400,
+            message: 'Unable to create a new resource using a lookup operator other than "exact".',
+          })
+      },
+    )
+
     it('should perform an update action when the resource already exists', () => {
       const spec = {
         modelName: 'AppSettings',
@@ -662,6 +689,31 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         .then((data) => {
           expect(data.attributes.id).to.equal(1)
           expect(data.attributes.app_id).to.equal(appID)
+
+          const dataJSON = JSON.parse(data.attributes.data)
+          expect(dataJSON.c).to.equal('updated-string-value')
+        })
+    })
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and update the first resource matching the input`, async () => {
+      const spec = {
+        modelName: 'AppSettings',
+        fields: [
+          { name: 'app_id', type: 'String', required: true, lookup: true, operators: ['contains'] },
+          { name: 'data', type: 'JSON', required: true },
+        ],
+      }
+
+      const appID = '12345'
+      const settingsData = { a: true, b: false, c: 'updated-string-value' }
+
+      const input = {
+        fields: { 'app_id.contains': appID, data: settingsData },
+      }
+
+      return appMgmt.upsertItem(spec, input)
+        .then((data) => {
+          expect(data.attributes.app_id).to.contain('12345')
 
           const dataJSON = JSON.parse(data.attributes.data)
           expect(dataJSON.c).to.equal('updated-string-value')
@@ -861,6 +913,30 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       })
     })
 
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and update the first resource matching the input`, async () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true, lookup: true, operators: ['contains'] },
+          { name: 'alias', type: 'String' },
+        ],
+      }
+
+      const input = {
+        fields: {
+          'name.contains': 'er',
+          alias: 'updated-alias',
+        },
+      }
+
+      // Perform update
+      const updated = await projectApp.updateItem(spec, input)
+
+      expect(updated).has.nested.property('attributes.name').that.contains('er')
+      expect(updated).has.nested.property('attributes.alias').that.equals('updated-alias')
+    })
+
+
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
       const id = 1
       const name = 'An Updated Name'
@@ -1038,6 +1114,34 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           id: 1,
           external_id: inputUser.fields.external_id,
         })
+    })
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and return the first row matching the input`, async () => {
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', requiredOr: true },
+          { name: 'username', type: 'String', requiredOr: true, operators: ['contains'] },
+        ],
+      }
+
+      await blogApp.getItem(specUser, { fields: { id: 1 } })
+        .then((model) => {
+          expect(model).to.have.nested.property('attributes.id', 1)
+        })
+
+      await blogApp.getItem(specUser, { fields: { 'username.contains': 'ed' } })
+        .then((model) => {
+          expect(model).to.have.nested.property('attributes.username').that.contains('ed')
+        })
+
+      // await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
+      //  .then((data) => {
+      //    data.models.forEach((model) => {
+      //      expect(model.attributes.username).to.contain('ed')
+      //    })
+      //    expect(data.models).to.have.length(2)
+      //  })
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
@@ -1620,6 +1724,29 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and apply fiter accordingly`, async () => {
+      const specUser = {
+        modelName: 'User',
+        defaultOrderBy: '-created_at',
+        fields: [
+          { name: 'username', type: 'String', operators: ['contains'] },
+        ],
+      }
+
+      await blogApp.getItems(specUser, {})
+        .then((data) => {
+          expect(data.models).to.have.length(10)
+        })
+
+      await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
+        .then((data) => {
+          data.models.forEach((model) => {
+            expect(model.attributes.username).to.contain('ed')
+          })
+          expect(data.models).to.have.length(2)
+        })
+    })
+
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
       const onlyLiveProfiles = true
 
@@ -2182,7 +2309,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   // deleteItem
   // ---------------------------------------------------------------------------
   describe('deleteItem', () => {
-    before(() => resetDB(['profiles', 'projects']))
+    beforeEach(() => resetDB(['profiles', 'projects']))
 
     it('should return an error (404) when the requested resource is not found', async () => {
       const spec = {
@@ -2231,6 +2358,31 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           message: 'The requested "Project" was not found.',
         })
     })
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and delete all matches`, async () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          { name: 'name', type: 'String', required: true, operators: ['contains'] },
+        ],
+      }
+
+      const getItems = () => projectApp.getItems(spec, { fields: { 'name.contains': 'er' } })
+
+      // Check that items exist prior to deletion
+      await getItems().then((data) => {
+        expect(data).to.have.property('models').that.have.lengthOf(2)
+      })
+
+      // Delete items
+      await projectApp.deleteItem(spec, { fields: { 'name.contains': 'er' } })
+
+      // Ensure item has been deleted
+      await getItems().then((data) => {
+        expect(data).to.have.property('models').that.have.lengthOf(0)
+      })
+    })
+
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, () => {
       const userContext = {
