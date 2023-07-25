@@ -4,6 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
+import * as BookshelfUtils from './utils/bookshelf-utils'
 import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
@@ -26,7 +27,7 @@ export default async function deleteItem(joint, spec = {}, input = {}, output) {
 async function performDeleteItem(joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
-  const specFields = spec[ACTION.SPEC_FIELDS]
+  const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
   const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS])
   const trx = input[ACTION.INPUT_TRANSACTING]
@@ -62,7 +63,12 @@ async function doLookupThenAction(joint, lookupFieldData, modelName, specFields,
   if (trx) getItemOpts.transacting = trx
 
   try {
-    const resource = await bookshelf.model(modelName).where(lookupFieldData).fetch(getItemOpts)
+    const resource = await bookshelf.model(modelName).query((queryBuilder) => {
+      Object.entries(lookupFieldData)
+        .forEach(([fieldName, field]) => {
+          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, field.value, field.matchStrategy)
+        })
+    }).fetch(getItemOpts)
 
     // Prepare ownerCreds from retrieved data...
     const combinedFields = Object.assign({}, resource.attributes, inputFields)
@@ -92,23 +98,28 @@ async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inpu
   if (trx) actionOpts.transacting = trx
 
   // Build where clause...
-  const whereOpts = {}
-  if (inputFields && specFields) {
-    specFields.forEach((fieldSpec) => {
-      const fieldName = fieldSpec.name
-      const hasInput = objectUtils.has(inputFields, fieldName)
-      if (hasInput) {
-        whereOpts[fieldName] = inputFields[fieldName]
-      }
-    })
-  } // end-if (inputFields && specFields)
+  const queryOpts = (queryBuilder) => {
+    if (inputFields && specFields) {
+      specFields.forEach((fieldSpec) => {
+        const fieldName = fieldSpec.name
+        const hasInput = objectUtils.has(inputFields, fieldName)
+        const matchStrategy = objectUtils.get(inputFields,
+          `${fieldName}.matchStrategy`,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+        )
+        if (hasInput) {
+          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, inputFields[fieldName].value, matchStrategy)
+        }
+      })
+    } // end-if (inputFields && specFields)
+  }
 
   // Debug executing logic...
-  if (debug) console.log(`[JOINT] [action:deleteItem] EXECUTING => DELETE ${modelName} WHERE`, whereOpts)
+  if (debug) console.log(`[JOINT] [action:deleteItem] EXECUTING => DELETE ${modelName} WHERE`, queryOpts)
 
   try {
     // Delete item...
-    const data = await bookshelf.model(modelName).where(whereOpts).destroy(actionOpts)
+    const data = await bookshelf.model(modelName).query(queryOpts).destroy(actionOpts)
     return handleDataResponse(joint, modelName, data, output)
 
   } catch (error) {

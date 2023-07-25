@@ -40,6 +40,11 @@
 
 ## Backlog
 
+* `ActionUtils.prepareFieldData()` could populate the default value, so that in
+  each DB implementation the query can be built solely by the returned input
+  fields, rather than using a combination of field specs and field data, making
+  the logic DRY-er.
+
 * Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Replace moment with date-fns !!!

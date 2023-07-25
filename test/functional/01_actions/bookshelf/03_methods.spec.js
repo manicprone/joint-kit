@@ -61,7 +61,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('AppContent.saveContent (testing upsertItem)', () => {
       beforeEach(() => resetDB())
 
-      it('should return an error (400) when the required fields are not provided', () => {
+      it('should return an error (400) when the required fields are not provided', async () => {
         const appID = 'failed-app'
         const appContent = { appContent: { a: true, b: 'testMe', c: { deep: 1000 } } }
 
@@ -78,7 +78,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // No required lookup fields
-        expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
+        await expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -87,7 +87,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // No required data fields
-        expect(appMgmt.method.AppContent.saveContent(inputNoData))
+        await expect(appMgmt.method.AppContent.saveContent(inputNoData))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -232,7 +232,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('AppContent.getContent', () => {
       before(() => resetDB(['app-content']))
 
-      it('should return an error (400) when required lookup fields are not provided', () => {
+      it('should return an error (400) when required lookup fields are not provided', async () => {
         const input = {
           fields: {
             ignored_field: 'give-me-everything',
@@ -240,7 +240,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // No required lookup fields
-        expect(appMgmt.method.AppContent.getContent(input))
+        await expect(appMgmt.method.AppContent.getContent(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -320,7 +320,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.createUser', () => {
       before(() => resetDB())
 
-      it('should return an error (400) when the required field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', async () => {
         const email = 'mastablasta@mail.com'
         const displayName = 'Blasta!'
 
@@ -332,7 +332,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing required field
-        expect(blogApp.method.User.createUser(input))
+        await expect(blogApp.method.User.createUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -420,7 +420,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.updateUser', () => {
       before(() => resetDB(['users']))
 
-      it('should return an error (400) when the required field is not provided', () => {
+      it('should return an error (400) when the required field is not provided', async () => {
         const displayName = 'Updated Name'
 
         const input = {
@@ -431,7 +431,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing required field
-        expect(blogApp.method.User.updateUser(input))
+        await expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -440,7 +440,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
 
-      it('should return an error (404) when the requested user does not exist', () => {
+      it('should return an error (404) when the requested user does not exist', async () => {
         const userID = 999
         const displayName = 'Updated Name'
 
@@ -452,7 +452,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Resource does not exist
-        expect(blogApp.method.User.updateUser(input))
+        await expect(blogApp.method.User.updateUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -545,7 +545,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     describe('User.getUser', () => {
       before(() => resetDB(['users']))
 
-      it('should return an error (400) when none of the requiredOr fields are provided', () => {
+      it('should return an error (400) when none of the requiredOr fields are provided', async () => {
         const input = {
           fields: {
             identifier: 4,
@@ -553,7 +553,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Missing all requiredOr fields
-        expect(blogApp.method.User.getUser(input))
+        await expect(blogApp.method.User.getUser(input))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -562,7 +562,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
 
-      it('should return an error (404) when the requested user does not exist', () => {
+      it('should return an error (404) when the requested user does not exist', async () => {
         const userID = 999
         const username = 'not-segmented'
         const externalID = '999305'
@@ -586,7 +586,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         }
 
         // Using id
-        expect(blogApp.method.User.getUser(inputWithID))
+        await expect(blogApp.method.User.getUser(inputWithID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -595,7 +595,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // Using username
-        expect(blogApp.method.User.getUser(inputWithUsername))
+        await expect(blogApp.method.User.getUser(inputWithUsername))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -604,7 +604,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
 
         // Using external_id
-        expect(blogApp.method.User.getUser(inputWithExternalID))
+        await expect(blogApp.method.User.getUser(inputWithExternalID))
           .to.eventually.be.rejected
           .and.to.contain({
             name: 'JointStatusError',
@@ -697,19 +697,72 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     //   fields: [
     //     { name: 'preferred_locale', type: 'String' },
     //   ],
-    //   fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+    //   fieldsToReturn: {
+    //     default: ['id', 'username', 'display_name', 'avatar_url'],
+    //     withCreatedAt: ['id', 'username', 'created_at'],
+    //     withPreferredLocale: ['id', 'username', 'preferred_locale'],
+    //   },
     //   defaultOrderBy: '-created_at,username',
     // },
     // -------------------------------------------------------------------------
-    describe.skip('User.getUsers', () => {
+    describe('User.getUsers', () => {
       before(() => resetDB(['users']))
 
-      it('should return all users in the order defined by the spec, when no fields are provided')
+      it('should return all users in the order defined by the spec, when no fields are provided', async () => {
+        const data = await blogApp.method.User.getUsers({ fieldSet: 'withCreatedAt' })
 
-      it('should return the filtered set of users when an accepted field is provided')
+        data.models.forEach((model, index) => {
+          // matches `fieldsToReturn.withCreatedAt`
+          expect(model).to.have.nested.property('attributes.id')
+          expect(model).to.have.nested.property('attributes.username')
+          expect(model).to.have.nested.property('attributes.created_at')
 
-      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`)
+          // fields not in `fieldsToReturn`
+          expect(model).to.not.have.nested.property('attributes.display_name')
+          expect(model).to.not.have.nested.property('attributes.avatar_url')
 
+          // test created_at is in desecending order
+          if (index > 0) {
+            const previousModel = data.models[index - 1]
+            expect(model.attributes.created_at).to.be.below(previousModel.attributes.created_at)
+          }
+        })
+
+        expect(data).to.have.lengthOf(10)
+      })
+
+      it('should return the filtered set of users when an accepted field is provided', async () => {
+        const data = await blogApp.method.User.getUsers({
+          fields: {
+            preferred_locale: 'en-US',
+          },
+          fieldSet: 'withPreferredLocale',
+        })
+
+        data.models.forEach((model) => {
+         // matches `fieldsToReturn.withPreferredLocale`
+         expect(model).to.have.nested.property('attributes.id')
+         expect(model).to.have.nested.property('attributes.username')
+         expect(model).to.have.nested.property('attributes.preferred_locale', 'en-US')
+
+         // fields not in `fieldsToReturn`
+         expect(model).to.not.have.nested.property('attributes.display_name')
+         expect(model).to.not.have.nested.property('attributes.avatar_url')
+         expect(model).to.not.have.nested.property('attributes.created_at')
+        })
+
+        expect(data).to.have.lengthOf(8)
+      })
+
+      it('should return the filtered set of users when a ".contains" string query is provided', async () => {
+        const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
+
+        data.models.forEach((model) => {
+          expect(model).to.have.nested.property('attributes.username').that.have.string('ed')
+        })
+
+        expect(data).to.have.lengthOf(2)
+      })
     }) // END - User.getUsers
 
     // -------------------------------------------------------------------------

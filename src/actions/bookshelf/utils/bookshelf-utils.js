@@ -1,5 +1,6 @@
 import objectUtils from '../../../utils/object-utils'
 import stringUtils from '../../../utils/string-utils'
+import ACTION from '../../../core/constants/action-constants'
 
 const debug_loadDirect = false
 
@@ -101,4 +102,25 @@ export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelatio
       }
     })
   } // end-if (loadDirect.associations)
+}
+
+// -----------------------------------------------------------------------------
+// Append a where query to an existing query builder, respecting the type of
+// field value and its matchStrategy.
+// -----------------------------------------------------------------------------
+export function appendWhereClause(queryBuilder, fieldName, value, matchStrategy) {
+  switch (matchStrategy) {
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
+      if (Array.isArray(value)) queryBuilder.where(fieldName, 'IN', value)
+      else queryBuilder.where(fieldName, '=', value)
+      break
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
+      // Case insensitive LIKE query
+      // Note that case-sensitivity of LIKE differs per DBMS, comparing always
+      // with lowercase is potentially slower but more portable.
+      queryBuilder.whereRaw(`LOWER("${fieldName}") LIKE '%${value.toLowerCase()}%'`)
+      break
+    default:
+      throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
+  }
 }

@@ -246,7 +246,11 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.deep.equal({ id: 333, key: 'omega', full_version: true })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'omega', matchStrategy: 'exact' },
+          full_version: { value: true, matchStrategy: 'exact' },
+        })
     })
 
     it('should return the first matching lookup field data pair in an OR set', () => {
@@ -263,7 +267,7 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldDataWithSecondOr))
-        .to.deep.equal({ external_id: 'external-id-333' })
+        .to.deep.equal({ external_id: { value: 'external-id-333', matchStrategy: 'exact' } })
     })
 
     it(`should return the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a required lookup field, when the input does not provide the data`, () => {
@@ -290,11 +294,17 @@ describe('ACTION-UTILS', () => {
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup01, fieldDataNoKey))
-        .to.deep.equal({ key: 'alpha' })
+        .to.deep.equal({ key: { value: 'alpha', matchStrategy: 'exact' } })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataNoKey))
-        .to.deep.equal({ id: 333, key: 'alpha' })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'alpha', matchStrategy: 'exact' },
+        })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataWithKey))
-        .to.deep.equal({ id: 333, key: 'beta' })
+        .to.deep.equal({
+          id: { value: 333, matchStrategy: 'exact' },
+          key: { value: 'beta', matchStrategy: 'exact' },
+        })
     })
 
     it(`should ignore the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a "${ACTION.SPEC_FIELDS_OPT_LOOKUP_OR}" field`, () => {
@@ -518,6 +528,63 @@ describe('ACTION-UTILS', () => {
     })
   }) // END - processDefaultValue
 
+  // ---------------------------
+  // Testing: normalizeFieldSpec
+  // ---------------------------
+  describe('normalizeFieldSpec', () => {
+    const fieldSpecInput = [
+        { name: 'user_id', type: 'Number' },
+        { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+        { name: 'display_name' },
+        { type: 'Number' },
+    ]
+
+    it('should normalize spec field from the input', () => {
+      const fieldSpec = ActionUtils.normalizeFieldSpec(fieldSpecInput)
+      expect(fieldSpec).to.deep.equal([
+        { name: 'user_id', type: 'Number', operators: ['exact'] },
+        { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+        { name: 'display_name', type: 'String', operators: ['exact'] },
+      ])
+    })
+
+    it('should accept nullish input', () => {
+      expect(ActionUtils.normalizeFieldSpec()).to.deep.equal([])
+      expect(ActionUtils.normalizeFieldSpec(null)).to.deep.equal([])
+    })
+
+    it('should be idempotent', () => {
+      expect(ActionUtils.normalizeFieldSpec(ActionUtils.normalizeFieldSpec(fieldSpecInput)))
+        .to.deep.equal(ActionUtils.normalizeFieldSpec(fieldSpecInput))
+    })
+  }) // END - normalizeFieldSpec
+
+  // ---------------------------
+  // Testing: normalizeFieldData
+  // ---------------------------
+  describe('normalizeFieldData', () => {
+    const fieldDataInput = { user_id: 1, 'username.contains': 'ed' }
+
+    it('should normalize field data from the input', () => {
+      const fieldData = ActionUtils.normalizeFieldData(fieldDataInput)
+
+      expect(fieldData).to.deep.equal({
+        user_id: { value: 1, matchStrategy: 'exact' },
+        username: { value: 'ed', matchStrategy: 'contains' },
+      })
+    })
+
+    it('should accept nullish input', () => {
+      expect(ActionUtils.normalizeFieldData()).to.deep.equal({})
+      expect(ActionUtils.normalizeFieldData(null)).to.deep.equal({})
+    })
+
+    it('should be idempotent', () => {
+      expect(ActionUtils.normalizeFieldData(ActionUtils.normalizeFieldData(fieldDataInput)))
+        .to.deep.equal(ActionUtils.normalizeFieldData(fieldDataInput))
+    })
+  }) // END - normalizeFieldData
+
   // -------------------------
   // Testing: prepareFieldData
   // -------------------------
@@ -551,16 +618,52 @@ describe('ACTION-UTILS', () => {
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
       expect(preparedFieldData).to.deep.equal({
-        user_id: 1,
-        item_id: [2, 3, 5, 8],
-        title: '123',
-        is_live: true,
-        is_insane: true,
-        is_awesome: true,
-        is_typical: false,
-        is_unknown: false,
-        is_simple: false,
+        user_id: { value: 1, matchStrategy: 'exact' },
+        item_id: { value: [2, 3, 5, 8], matchStrategy: 'exact' },
+        title: { value: '123', matchStrategy: 'exact' },
+        is_live: { value: true, matchStrategy: 'exact' },
+        is_insane: { value: true, matchStrategy: 'exact' },
+        is_awesome: { value: true, matchStrategy: 'exact' },
+        is_typical: { value: false, matchStrategy: 'exact' },
+        is_unknown: { value: false, matchStrategy: 'exact' },
+        is_simple: { value: false, matchStrategy: 'exact' },
       })
+    })
+
+    it(`should by default accept the "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}" operator`, () => {
+      const fieldSpec = [{ name: 'username', type: 'String' }]
+      const fieldData = { 'username.exact': 'ed' }
+
+      const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
+
+      expect(preparedFieldData).to.deep.equal({
+        username: { value: 'ed', matchStrategy: 'exact' },
+      })
+    })
+
+    it('should accept the operators that are whitelisted in the field spec', () => {
+      const fieldSpec = [{ name: 'username', type: 'String', operators: ['contains', 'exact'] }]
+      const fieldData = { 'username.contains': 'ed' }
+
+      const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
+
+      expect(preparedFieldData).to.deep.equal({
+        username: { value: 'ed', matchStrategy: 'contains' },
+      })
+    })
+
+    it('should throw error if an operator is provided but not whitelisted', () => {
+      const fieldSpec = [{ name: 'username', type: 'String' }]
+      const fieldData = { 'username.contains': 'ed' }
+
+      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData)).to.throw(/not allowed/)
+    })
+
+    it('should throw error if a "contains" operator is used on a non-string field', () => {
+      const fieldSpec = [{ name: 'user_id', type: 'Number', operators: ['contains'] }]
+      const fieldData = { 'user_id.contains': '10' }
+
+      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData)).to.throw(/can only be applied to a string value/)
     })
   }) // END - prepareFieldData
 })

@@ -39,18 +39,19 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
     let isRequiredOrSatisfied = false
 
     fieldSpec.forEach((field) => {
-      const fieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
+      const rawFieldName = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_NAME, null)
+      const { fieldName } = parseFieldNameMatchStrategy(rawFieldName)
       const isRequired = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED, false)
       const isRequiredOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_REQUIRED_OR, false)
 
       // Record missing "required" fields...
-      if (fieldName && isRequired && !objectUtils.has(fieldData, fieldName)) {
+      if (rawFieldName && isRequired && !objectUtils.has(fieldData, rawFieldName)) {
         missingAllFields.push(fieldName)
 
       // Handle "requiredOr" requirements...
-      } else if (fieldName && isRequiredOr) {
+      } else if (rawFieldName && isRequiredOr) {
         requiredOrs.push(fieldName) // track all requiredOr fields
-        if (objectUtils.has(fieldData, fieldName)) isRequiredOrSatisfied = true // mark as satisfied
+        if (objectUtils.has(fieldData, rawFieldName)) isRequiredOrSatisfied = true // mark as satisfied
       }
     })
 
@@ -78,9 +79,13 @@ export function checkRequiredFields(fieldSpec = [], fieldData = {}) {
 // Otherwise, the first found acceptable name/value sets are returned.
 //
 // e.g.
-// { id: 100, key: 'v1.0.0' }
+// {
+//   id: { value: 100, matchStrategy: 'exact' },
+//   key: { value: 'v1.0.0', matchStrategy: 'exact' }
+// }
 // -----------------------------------------------------------------------------
-export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
+export function getLookupFieldData(fieldSpec = [], rawFieldData = {}) {
+  const fieldData = normalizeFieldData(rawFieldData)
   let lookupData = null
 
   // Loop through field spec, checking if all lookup field requirements are satisfied...
@@ -97,12 +102,20 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
         const isLookup = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP, false)
         const isLookupOr = objectUtils.get(field, ACTION.SPEC_FIELDS_OPT_LOOKUP_OR, false)
         const hasInput = objectUtils.has(fieldData, fieldName)
+        const matchStrategy = objectUtils.get(
+          fieldData,
+          `${fieldName}.matchStrategy`,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+        )
 
         if (isLookupOr && !isLookupOrSatisfied) {
           lookupOrs.push(fieldName) // track all lookupOr fields
           if (hasInput) {
             if (!lookupData) lookupData = {}
-            lookupData[fieldName] = castValue(fieldData[fieldName], dataType)
+            lookupData[fieldName] = {
+              value: castValue(fieldData[fieldName].value, dataType),
+              matchStrategy,
+            }
             isLookupOrSatisfied = true // mark as satisfied
           }
         } // end-if (isLookupOr && !isLookupOrSatisfied)
@@ -111,9 +124,12 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
           const hasDefault = objectUtils.has(field, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
           if (hasInput || hasDefault) {
             if (!lookupData) lookupData = {}
-            lookupData[fieldName] = (hasInput)
-                ? castValue(fieldData[fieldName], dataType)
-                : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType)
+            lookupData[fieldName] = {
+              value: (hasInput)
+                ? castValue(fieldData[fieldName].value, dataType)
+                : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType),
+              matchStrategy,
+            }
           }
         } // end-if (isLookup)
       } // end-if (fieldName)
@@ -166,9 +182,10 @@ export function getLookupFieldData(fieldSpec = [], fieldData = {}) {
 //
 // ...since "id" is specified to transform into "user_id".
 // -----------------------------------------------------------------------------
-export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
+export function parseOwnerCreds(authSpec = {}, combinedFieldData = {}) {
   const creds = {}
   const acceptedFields = objectUtils.get(authSpec, ACTION.SPEC_AUTH_OWNER_CREDS, [])
+  const fieldData = getFieldValueMap(combinedFieldData)
 
   // Prepare ownerCreds field name/value pair, if specified...
   for (let i = 0; i < acceptedFields.length; i++) {
@@ -184,8 +201,7 @@ export function parseOwnerCreds(authSpec = {}, fieldData = {}) {
   return creds
 }
 
-// -----------------------------------------------------------------------------
-// Looks at the provided loadDirect spec defintion, and parses out the info
+// ----------------------------------------------------------------------------- Looks at the provided loadDirect spec defintion, and parses out the info
 // needed to perform the loadDirect action on resource association data.
 // -----------------------------------------------------------------------------
 // e.g.
@@ -277,19 +293,19 @@ export function processDefaultValue(fieldData = {}, defaultValue) {
 
       // "camelCase" operator...
       } else if (operator === 'camelCase') {
-        value = (fieldData[operand]) ? stringUtils.toCamelCase(fieldData[operand]) : null
+        value = (fieldData[operand]) ? stringUtils.toCamelCase(getFieldValue(fieldData[operand])) : null
 
       // "kebabCase" operator...
       } else if (operator === 'kebabCase') {
-        value = (fieldData[operand]) ? stringUtils.toKebabCase(fieldData[operand]) : null
+        value = (fieldData[operand]) ? stringUtils.toKebabCase(getFieldValue(fieldData[operand])) : null
 
       // "snakeCase" operator...
       } else if (operator === 'snakeCase') {
-        value = (fieldData[operand]) ? stringUtils.toSnakeCase(fieldData[operand]) : null
+        value = (fieldData[operand]) ? stringUtils.toSnakeCase(getFieldValue(fieldData[operand])) : null
 
       // "pascalCase" operator...
       } else if (operator === 'pascalCase') {
-        value = (fieldData[operand]) ? stringUtils.toPascalCase(fieldData[operand]) : null
+        value = (fieldData[operand]) ? stringUtils.toPascalCase(getFieldValue(fieldData[operand])) : null
       }
 
     // Otherwise, just return the original value...
@@ -303,26 +319,103 @@ export function processDefaultValue(fieldData = {}, defaultValue) {
 
 // -----------------------------------------------------------------------------
 // Iterates through the provided fieldSpec, performing the relevant data type
-// conversion (cast) on matching fieldData values. Returns the prepared
-// fieldData object, which can be used type-safely within the template logic.
+// conversion (cast) on matching fieldData values, and their matchStrategy.
+// Returns the prepared fieldData object, which can be used type-safely within
+// the template logic.
+//
+// Currently supported match strategies:
+// * 'exact'    - exact match
+// * 'contains' - fuzzy search (case insensitive)
 // -----------------------------------------------------------------------------
-export function prepareFieldData(fieldSpec = [], fieldData = {}) {
+export function prepareFieldData(rawFieldSpec = [], rawFieldData = {}) {
+  const fieldSpec = normalizeFieldSpec(rawFieldSpec)
+  const fieldData = normalizeFieldData(rawFieldData)
   const preparedFieldData = {}
 
   if (Array.isArray(fieldSpec) && fieldSpec.length > 0) {
     fieldSpec.forEach((field) => {
-      const fieldName = objectUtils.get(field, 'name', null)
-      const dataType = objectUtils.get(field, 'type', 'String')
-
       // Perform data type cast on provided field values...
-      if (fieldName && objectUtils.has(fieldData, fieldName)) {
-        preparedFieldData[fieldName] = castValue(fieldData[fieldName], dataType)
+      if (objectUtils.has(fieldData, field.name)) {
+        const { matchStrategy } = fieldData[field.name]
+        const value = castValue(fieldData[field.name].value, field.type)
+
+        validateMatchStrategyWithType(matchStrategy, field.type)
+
+        if (!field.operators.includes(matchStrategy)) {
+          throw new Error(
+            `Operator "${matchStrategy}" is not allowed on field ` +
+            `"${field.name}". Check that it is whitelisted on the ` +
+            `field spec with "${ACTION.SPEC_FIELDS_OPT_OPERATORS}"`,
+          )
+        }
+
+        preparedFieldData[field.name] = { value, matchStrategy }
       }
     })
   }
 
   return preparedFieldData
 }
+
+// -----------------------------------------------------------------------------
+// Normalize field spec:
+//
+// Convert from this format:
+// [
+//   { name: 'user_id', type: 'Number' },
+//   { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+//   { name: 'display_name' }, // default to type 'String'
+//   { type: 'Number' },       // invalid entry (without name) will be discarded
+// ]
+//
+// Into this format:
+// [
+//   { name: 'user_id', type: 'Number', operators: ['exact'] },
+//   { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+//   { name: 'display_name', type: 'String', operators: ['exact'] },
+// ]
+// -----------------------------------------------------------------------------
+export function normalizeFieldSpec(fieldSpec) {
+  return (fieldSpec || [])
+    .filter(field => !!field.name)
+    .map((field) => {
+      if (field.operators) field.operators.forEach(validateMatchStrategy)
+      const type = objectUtils.get(field, 'type', 'String')
+      const operators = objectUtils.get(field, 'operators', [ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT])
+
+      return { ...field, type, operators }
+    })
+}
+
+// -----------------------------------------------------------------------------
+// Normalize field data:
+//
+// Convert from this format:
+// {
+//   user_id: 1,
+//   'username.contains': 'ed'
+// }
+//
+// Into this format:
+// {
+//   user_id: { value: 1, matchStrategy: 'exact' },
+//   username: { value: 'ed', matchStrategy: 'contains' }
+// }
+// -----------------------------------------------------------------------------
+export function normalizeFieldData(fieldData) {
+  return Object.fromEntries(
+    Object.entries((fieldData || {}))
+      .map(([key, value]) => {
+        if (objectUtils.has(value, 'value')) {
+          return [key, value]
+        }
+
+        const { fieldName, matchStrategy } = parseFieldNameMatchStrategy(key)
+        return [fieldName, { value, matchStrategy }]
+      }),
+  )
+}
+
 
 // TODO: Add try/catch to protect from bad values !!!
 // -----------------------------------------------------------------------------
@@ -339,5 +432,62 @@ export function castValue(value, dataType) {
     case 'Boolean': return (isNaN(value)) ? (value.toLowerCase() == 'true') : Boolean(value) // eslint-disable-line eqeqeq
     case 'JSON': return JSON.stringify(value)
     default: return String(value)
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Parse field name and match strategy from input.
+// -----------------------------------------------------------------------------
+export function parseFieldNameMatchStrategy(rawFieldName) {
+  const [fieldName, rawMatchStrategy, ...rest] = rawFieldName.split('.')
+  const matchStrategy = rawMatchStrategy || ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
+
+  if (rest.length > 0) throw new Error('Nested field name is not yet supported.')
+  validateMatchStrategy(matchStrategy)
+
+  return { fieldName, matchStrategy }
+}
+
+// -----------------------------------------------------------------------------
+// Returns a field's value even if it is a complex field with matchStrategy
+// -----------------------------------------------------------------------------
+export function getFieldValue(fieldData) {
+  return objectUtils.has(fieldData, 'value')
+    ? fieldData.value
+    : fieldData
+}
+
+// -----------------------------------------------------------------------------
+// Returns a list of field values from a mix of simple fields and complex fields
+// with matchStrategy
+// -----------------------------------------------------------------------------
+export function getFieldValueMap(fields) {
+  return Object.fromEntries(
+    Object.entries(fields)
+      .map(([key, value]) => [key, getFieldValue(value)]),
+  )
+}
+
+// -----------------------------------------------------------------------------
+// Validates a provided matchStrategy is a recognized strategy.
+// -----------------------------------------------------------------------------
+function validateMatchStrategy(matchStrategy) {
+  if (!ACTION.INPUT_FIELD_MATCHING_STRATEGIES.includes(matchStrategy)) {
+    throw new Error(
+      `Unsupported match strategy "${matchStrategy}". ` +
+      `Supported values: ${ACTION.INPUT_FIELD_MATCHING_STRATEGIES}`,
+    )
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Validates a matchStrategy is applicable to a type.
+// -----------------------------------------------------------------------------
+function validateMatchStrategyWithType(matchStrategy, type) {
+  if (matchStrategy === ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS && type !== 'String') {
+    throw new Error(
+      `"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator ` +
+      'can only be applied to a string value.',
+    )
   }
 }

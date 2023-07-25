@@ -2,6 +2,7 @@
 // Status Errors for the Joint action layer
 // -----------------------------------------------------------------------------
 import JointStatusError from './JointStatusError'
+import ACTION from '../../core/constants/action-constants'
 
 // ---------------------------------------------------------- Bad Requests (400)
 
@@ -67,6 +68,14 @@ export function generateLookupFieldNotProvidedError() {
   return new JointStatusError({
     status: 400,
     message: 'A "lookup field" was either not defined or not provided.',
+  })
+}
+
+export function generateInvalidResourceCreationOperatorError() {
+  return new JointStatusError({
+    status: 400,
+    message: 'Unable to create a new resource using a lookup operator other ' +
+      `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}".`,
   })
 }
 

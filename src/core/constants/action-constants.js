@@ -2,6 +2,9 @@
 // Joint Action Constants
 // ----------------------
 
+const INPUT_FIELD_MATCHING_STRATEGY_EXACT = 'exact'
+const INPUT_FIELD_MATCHING_STRATEGY_CONTAINS = 'contains'
+
 export default {
   // ------------------------------- Association Options
   // Main Resource Wrapper
@@ -25,6 +28,7 @@ export default {
   SPEC_FIELDS_OPT_LOOKUP: 'lookup',
   SPEC_FIELDS_OPT_LOOKUP_OR: 'lookupOr',
   SPEC_FIELDS_OPT_LOCKED: 'locked',
+  SPEC_FIELDS_OPT_OPERATORS: 'operators',
 
   // Fields to Return / Field Set Definitions
   SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',
@@ -47,6 +51,14 @@ export default {
 
   // Field Set
   INPUT_FIELD_SET: 'fieldSet',
+
+  // Field Input Matching Strategies
+  INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+  INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
+  INPUT_FIELD_MATCHING_STRATEGIES: [
+    INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+    INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
+  ],
 
   // Sort Order
   INPUT_ORDER_BY: 'orderBy',

@@ -4,6 +4,7 @@ import * as AuthUtils from '../../core/authorization/auth-utils'
 import INSTANCE from '../../core/constants/instance-constants'
 import ACTION from '../../core/constants/action-constants'
 import * as ActionUtils from '../action-utils'
+import * as BookshelfUtils from './utils/bookshelf-utils'
 import { handleDataResponse, handleErrorResponse } from './handlers/response-handlers'
 
 const debug = false
@@ -26,7 +27,7 @@ export default async function updateItem(joint, spec = {}, input = {}, output) {
 async function performUpdateItem(joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
-  const specFields = spec[ACTION.SPEC_FIELDS]
+  const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
   const specAuth = spec[ACTION.SPEC_AUTH] || {}
   const authRules = specAuth[ACTION.SPEC_AUTH_RULES]
   const inputFields = ActionUtils.prepareFieldData(specFields, input[ACTION.INPUT_FIELDS])
@@ -59,12 +60,17 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
     // Get item to perform the update action...
     const getItemOpts = { require: true }
     if (trx) getItemOpts.transacting = trx
-    const resource = await model.where(lookupFieldData).fetch(getItemOpts)
+    const resource = await model.query((queryBuilder) => {
+      Object.entries(lookupFieldData).forEach(([key, field]) => {
+        BookshelfUtils.appendWhereClause(queryBuilder, key, field.value, field.matchStrategy)
+      })
+    }).fetch(getItemOpts)
 
     // Respect auth...
     if (authRules) {
       const combinedFields = Object.assign({}, resource.attributes, inputFields)
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
+
       if (!AuthUtils.isAllowed(authContext, authRules, ownerCreds)) {
         return Promise.reject(StatusErrors.generateNotAuthorizedError())
       }
@@ -87,7 +93,7 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
 
         if (!isLocked && !isLookup && (hasInput || hasDefault)) {
           updates[fieldName] = (hasInput)
-              ? inputFields[fieldName]
+              ? inputFields[fieldName].value
               : defaultValue
         } else if (isLocked && !isLookup && hasDefault) {
           updates[fieldName] = defaultValue

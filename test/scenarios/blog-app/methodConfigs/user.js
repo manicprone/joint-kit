@@ -67,9 +67,14 @@ module.exports = {
       action: 'getItems',
       spec: {
         fields: [
+          { name: 'username', type: 'String', operators: ['contains'] },
           { name: 'preferred_locale', type: 'String' },
         ],
-        fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+        fieldsToReturn: {
+          default: ['id', 'username', 'display_name', 'avatar_url'],
+          withCreatedAt: ['id', 'username', 'created_at'],
+          withPreferredLocale: ['id', 'username', 'preferred_locale'],
+        },
         defaultOrderBy: '-created_at,username',
         // forceLoadDirect: ['roles:name'],
       },
