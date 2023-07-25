@@ -1724,27 +1724,50 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and apply fiter accordingly`, async () => {
-      const specUser = {
-        modelName: 'User',
-        defaultOrderBy: '-created_at',
-        fields: [
-          { name: 'username', type: 'String', operators: ['contains'] },
-        ],
-      }
+    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option`, async () => {
+      it('should respect the option and apply fiter accordingly', async () => {
+        const specUser = {
+          modelName: 'User',
+          defaultOrderBy: '-created_at',
+          fields: [
+            { name: 'username', type: 'String', operators: ['contains'] },
+          ],
+        }
 
-      await blogApp.getItems(specUser, {})
-        .then((data) => {
-          expect(data.models).to.have.length(10)
-        })
-
-      await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
-        .then((data) => {
-          data.models.forEach((model) => {
-            expect(model.attributes.username).to.contain('ed')
+        await blogApp.getItems(specUser, {})
+          .then((data) => {
+            expect(data.models).to.have.length(10)
           })
-          expect(data.models).to.have.length(2)
+
+        await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
+          .then((data) => {
+            data.models.forEach((model) => {
+              expect(model.attributes.username).to.contain('ed')
+            })
+            expect(data.models).to.have.length(2)
+          })
+      })
+
+      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should filter in a case-insensitive manner`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'display_name', type: 'String', operators: ['contains'] },
+          ],
+        }
+
+        const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'r' } })
+        const upperCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'R' } })
+        const getAttrs = result => result.models.map(model => model.attributes)
+
+        lowerCaseResult.models.forEach((model) => {
+          expect(model).to.have.nested.property('attributes.display_name')
+            .that.match(/[rR]/)
         })
+        expect(lowerCaseResult.models).to.have.length(4)
+
+        expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
+      })
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {

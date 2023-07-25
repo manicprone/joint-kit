@@ -325,7 +325,7 @@ export function processDefaultValue(fieldData = {}, defaultValue) {
 //
 // Currently supported match strategies:
 // * 'exact'    - exact match
-// * 'contains' - fuzzy search
+// * 'contains' - fuzzy search (case insensitive)
 // -----------------------------------------------------------------------------
 export function prepareFieldData(rawFieldSpec = [], rawFieldData = {}) {
   const fieldSpec = normalizeFieldSpec(rawFieldSpec)
