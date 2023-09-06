@@ -1700,7 +1700,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       await blogApp.getItems(specUser, inputUsers)
         .then((data) => {
-          expect(data.models).to.have.length(10)
+          expect(data.models).to.have.length(11)
         })
 
       await blogApp.getItems(specProfile, inputAllProfiles)
@@ -1736,7 +1736,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
         await blogApp.getItems(specUser, {})
           .then((data) => {
-            expect(data.models).to.have.length(10)
+            expect(data.models).to.have.length(11)
           })
 
         await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
@@ -1764,9 +1764,26 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(model).to.have.nested.property('attributes.display_name')
             .that.match(/[rR]/)
         })
-        expect(lowerCaseResult.models).to.have.length(4)
+        expect(lowerCaseResult.models).to.have.length(5)
 
         expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
+      })
+
+      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should allow filtering special characters`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'display_name', type: 'String', operators: ['contains'] },
+          ],
+        }
+
+        const result = await blogApp.getItems(specUser, { fields: { 'display_name.contains': '\'' } })
+
+        result.models.forEach((model) => {
+          expect(model).to.have.nested.property('attributes.display_name')
+            .that.contains("'")
+        })
+        expect(result.models).to.have.length(1)
       })
     })
 
@@ -2266,7 +2283,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload).to.have.property('meta')
           expect(payload.meta)
             .to.contain({
-              total_items: 10,
+              total_items: 11,
               skip: 3,
               limit: 3,
             })
@@ -2302,7 +2319,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload).to.have.property('meta')
           expect(payload.meta)
             .to.contain({
-              total_items: 10,
+              total_items: 11,
               skip: 3,
               limit: 3,
             })
