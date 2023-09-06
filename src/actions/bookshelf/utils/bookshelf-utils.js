@@ -118,7 +118,7 @@ export function appendWhereClause(queryBuilder, fieldName, value, matchStrategy)
       // Case insensitive LIKE query
       // Note that case-sensitivity of LIKE differs per DBMS, comparing always
       // with lowercase is potentially slower but more portable.
-      queryBuilder.whereRaw(`LOWER("${fieldName}") LIKE '%${value.toLowerCase()}%'`)
+      queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [fieldName, `%${value.toLowerCase()}%`])
       break
     default:
       throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
