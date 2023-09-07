@@ -113,6 +113,17 @@ const seeds = [
     preferred_locale: 'en-US',
     avatar_url: null,
   },
+  {
+    id: 11,
+    username: 'zaraq',
+    external_id: '987',
+    email: 'zarap@trendymail.org',
+    display_name: "Z'araq",
+    first_name: "Z'araq",
+    last_name: null,
+    preferred_locale: 'zaralianen-EXT',
+    avatar_url: null,
+  },
 ]
 
 exports.seed = function seed(knex) {

@@ -728,7 +728,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         })
 
-        expect(data).to.have.lengthOf(10)
+        expect(data).to.have.lengthOf(11)
       })
 
       it('should return the filtered set of users when an accepted field is provided', async () => {
