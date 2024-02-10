@@ -33,6 +33,7 @@ const allColsUser = [
   'last_login_at',
   'created_at',
   'updated_at',
+  'father_user_id',
 ]
 
 // -----------------------------------------------------------------------------
@@ -1389,6 +1390,51 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
 
       return Promise.all([withOneToOneAssoc, withOneToManyAssoc, withManyToManyAssoc, withoutAssoc])
+    })
+
+    it('should return association data with toMany using primary key', async () => {
+      const spec = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', required: true },
+        ],
+      }
+      const inputWithOneToOneAssoc = {
+        fields: { id: 8 },
+        associations: ['children'],
+      }
+
+      const jerry = await blogApp.getItem(spec, inputWithOneToOneAssoc)
+
+      expect(jerry)
+        .to.have.property('relations')
+        .that.has.property('children')
+        .that.has.lengthOf(2)
+
+      expect(jerry.relations.children.models[0].attributes.display_name).to.equal('Morty')
+      expect(jerry.relations.children.models[1].attributes.display_name).to.equal('Summer')
+    })
+
+    it('should return association data with toMany using non-primary key', async () => {
+      const spec = {
+        modelName: 'UserInfo',
+        fields: [
+          { name: 'user_id', type: 'string', required: true },
+        ],
+      }
+      const inputWithOneToOneAssoc = {
+        fields: { user_id: 6 },
+        associations: ['children'],
+      }
+
+      const jerryUserInfo = await blogApp.getItem(spec, inputWithOneToOneAssoc)
+
+      expect(jerryUserInfo)
+        .to.have.property('relations')
+        .that.has.property('children')
+        .that.has.lengthOf(1)
+
+      expect(jerryUserInfo.relations.children.models[0].attributes.display_name).to.equal('Beth')
     })
 
     it(`should support the "spec.${ACTION.SPEC_FORCE_ASSOCIATIONS}" option`, () => {

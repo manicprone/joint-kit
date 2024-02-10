@@ -94,7 +94,7 @@ export default function registerModel(joint, modelDef = {}, modelName, debug = f
               } else {
                 const assocMethod = 'hasMany'
                 assocHooks[assocName] = function () {
-                  return this[assocMethod](info.targetModelName, info.targetField)
+                  return this[assocMethod](info.targetModelName, info.targetField, info.sourceField)
                 }
               }
             } // end-if (assocType === 'toMany')

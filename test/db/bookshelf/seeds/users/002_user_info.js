@@ -46,6 +46,17 @@ const seeds = [
     tagline: 'Umm.',
     description: null,
   },
+
+  // -----------------------------
+  // user: 9, username: bethsmith
+  // -----------------------------
+  {
+    id: 5,
+    user_id: 9,
+    professional_title: 'Space Beth',
+    tagline: 'Defying dimensions, one adventure at a time.',
+    description: null,
+  },
 ]
 
 exports.seed = function seed(knex) {
