@@ -20,6 +20,7 @@ exports.up = function up(knex) {
         table.string('preferred_locale').nullable()
         table.string('avatar_url').nullable()
         table.dateTime('last_login_at').nullable()
+        table.string('father_user_id').nullable()
         table.timestamps()
       })
     }),

@@ -79,6 +79,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
+    father_user_id: 8,
   },
   {
     id: 8,
@@ -101,6 +102,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
+    father_user_id: 6,
   },
   {
     id: 10,
@@ -112,6 +114,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
+    father_user_id: 8,
   },
   {
     id: 11,
