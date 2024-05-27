@@ -1,0 +1,161 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;

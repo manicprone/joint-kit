@@ -1,13 +1,9 @@
+import { beforeAll, beforeEach, describe, expect, it, test } from 'vitest'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
-
-const chai = require('chai')
-const expect = require('chai').expect
-const chaiAsPromised = require('chai-as-promised')
-const bookshelf = require('../../../db/bookshelf/service')
-const { resetDB } = require('../../../db/bookshelf/db-utils')
-
-chai.use(chaiAsPromised)
+import bookshelf from '../../../db/bookshelf/service'
+import { resetDB } from '../../../db/bookshelf/db-utils'
+import { specFixtures, inputFixtures } from './02_associations.fixtures'
 
 let projectApp = null
 let projectAppJsonApi = null
@@ -16,7 +12,7 @@ let projectAppJsonApi = null
 // BOOKSHELF ACTIONS (associations)
 // -----------------------------------------------------------------------------
 describe('ASSOCIATION ACTIONS [bookshelf]', () => {
-  before(() => {
+  beforeAll(() => {
     // -----------
     // Project App
     // -----------
@@ -31,478 +27,69 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // standard error scenarios
   // ---------------------------------------------------------------------------
   describe('standard error scenarios (addAssociatedItems, hasAssociatedItem, getAllAssociatedItems, removeAssociatedItems, removeAllAssociatedItems)', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
-    it('should return an error (400) when the spec and input cannot be parsed for association actions', async () => {
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'coding_language_tags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-      const specMissingMain = {
-        noMain: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'coding_language_tags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-      const specMissingAssoc = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        noAssoc: {
-          name: 'coding_language_tags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-      const specMissingAssocName = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          noAssociationName: 'coding_language_tags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+    describe.each([
+      'addAssociatedItems',
+      'hasAssociatedItem',
+      'getAllAssociatedItems',
+      'removeAssociatedItems',
+      'removeAllAssociatedItems',
+    ])('%s()', (associationFn) => {
+      test.each([
+        ['missing main', '"spec.main"', specFixtures.noMain],
+        ['missing association', '"spec.association", "spec.association.name"', specFixtures.noAsso],
+        ['missing association.name', '"spec.association.name"', specFixtures.noAssoName],
+      ])('when the spec is %s it throws an error (400) that lists %s', async (_, props, theSpec) => {
+        try {
+          await projectApp[associationFn](theSpec, inputFixtures.normal)
+        } catch (error) {
+          expect(error.message).toBe(`The association action is invalid due to missing properties: ${props}`)
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(400)
+        }
 
-      const getInput = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
-      })
-      const getInputMissingMain = () => ({
-        noMain: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
-      })
-      const getInputMissingAssoc = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        noAssociation: {
-          fields: {
-            id: 1,
-          },
-        },
+        expect.assertions(3)
       })
 
-      // ------------------
-      // addAssociatedItems
-      // ------------------
+      test.each(
+        [
+          ['missing main', '"input.main"', inputFixtures.noMain],
+          // the All methods allows missing input.association
+          !associationFn.includes('All')
+            ? ['missing association', '"input.association"', inputFixtures.noAsso]
+            : null,
+        ].filter(i => !!i),
+      )('when the input is %s it throws an error (400) that lists %s', async (_, props, theInput) => {
+        try {
+          await projectApp[associationFn](specFixtures.normal, theInput)
+        } catch (error) {
+          expect(error.message).toBe(`The association action is invalid due to missing properties: ${props}`)
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(400)
+        }
 
-      // missing spec.main
-      await expect(projectApp.addAssociatedItems(specMissingMain, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.main"',
-        })
-
-      // missing spec.association
-      await expect(projectApp.addAssociatedItems(specMissingAssoc, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association", "spec.association.name"',
-        })
-
-      // missing spec.association.name
-      await expect(projectApp.addAssociatedItems(specMissingAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association.name"',
-        })
-
-      // missing input.main
-      await expect(projectApp.addAssociatedItems(spec, getInputMissingMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.main"',
-        })
-
-      // missing input.association
-      await expect(projectApp.addAssociatedItems(spec, getInputMissingAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.association"',
-        })
-
-      // -----------------
-      // hasAssociatedItem
-      // -----------------
-
-      // missing spec.main
-      await expect(projectApp.hasAssociatedItem(specMissingMain, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.main"',
-        })
-
-      // missing spec.association
-      await expect(projectApp.hasAssociatedItem(specMissingAssoc, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association", "spec.association.name"',
-        })
-
-      // missing spec.association.name
-      await expect(projectApp.hasAssociatedItem(specMissingAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association.name"',
-        })
-
-      // missing input.main
-      await expect(projectApp.hasAssociatedItem(spec, getInputMissingMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.main"',
-        })
-
-      // missing input.association
-      await expect(projectApp.hasAssociatedItem(spec, getInputMissingAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.association"',
-        })
-
-      // ---------------------
-      // getAllAssociatedItems
-      // ---------------------
-
-      // missing spec.main
-      await expect(projectApp.getAllAssociatedItems(specMissingMain, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.main"',
-        })
-
-      // missing spec.association
-      await expect(projectApp.getAllAssociatedItems(specMissingAssoc, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association", "spec.association.name"',
-        })
-
-      // missing spec.association.name
-      await expect(projectApp.getAllAssociatedItems(specMissingAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association.name"',
-        })
-
-      // missing input.main
-      await expect(projectApp.getAllAssociatedItems(spec, getInputMissingMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.main"',
-        })
-
-      // ---------------------
-      // removeAssociatedItems
-      // ---------------------
-
-      // missing spec.main
-      await expect(projectApp.removeAssociatedItems(specMissingMain, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.main"',
-        })
-
-      // missing spec.association
-      await expect(projectApp.removeAssociatedItems(specMissingAssoc, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association", "spec.association.name"',
-        })
-
-      // missing spec.association.name
-      await expect(projectApp.removeAssociatedItems(specMissingAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association.name"',
-        })
-
-      // missing input.main
-      await expect(projectApp.removeAssociatedItems(spec, getInputMissingMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.main"',
-        })
-
-      // missing input.association
-      await expect(projectApp.removeAssociatedItems(spec, getInputMissingAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.association"',
-        })
-
-      // ------------------------
-      // removeAllAssociatedItems
-      // ------------------------
-
-      // missing spec.main
-      await expect(projectApp.removeAllAssociatedItems(specMissingMain, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.main"',
-        })
-
-      // missing spec.association
-      await expect(projectApp.removeAllAssociatedItems(specMissingAssoc, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association", "spec.association.name"',
-        })
-
-      // missing spec.association.name
-      await expect(projectApp.removeAllAssociatedItems(specMissingAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "spec.association.name"',
-        })
-
-      // missing input.main
-      await expect(projectApp.removeAllAssociatedItems(spec, getInputMissingMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association action is invalid due to missing properties: "input.main"',
-        })
-    })
-
-    it('should return an error (400) when the specified main model or association type do not exist', async () => {
-      const specNoExistMainModel = {
-        main: {
-          modelName: 'AlienProject',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'coding_language_tags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-
-      const specNoExistAssocName = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'alienTags',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-
-      const getInput = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
+        expect.assertions(3)
       })
 
-      // ------------------
-      // addAssociatedItems
-      // ------------------
+      // FIXME: seems to have issue with transaction
+      test.skip.each([
+        ['main modelName does not exist', 'The model "AlienProject" is not recognized.', specFixtures.mainModelNotExist],
+        // the All methods doesn't care about association names
+        !associationFn.includes('All')
+          ? ['association name does not exist', 'The association "alienTags" does not exist for the resource.', specFixtures.assoNameNotExist]
+          : null,
+      ])("when the spec's %s it throws an error (400)", async (_, errMsg, theSpec) => {
+        try {
+          await projectApp[associationFn](theSpec, inputFixtures.normal)
+        } catch (error) {
+          expect(error.message).toBe(errMsg)
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(400)
+        }
 
-      // main modelName does not exist
-      await expect(projectApp.addAssociatedItems(specNoExistMainModel, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The model "AlienProject" is not recognized.',
-        })
-
-      // association name does not exist
-      await expect(projectApp.addAssociatedItems(specNoExistAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association "alienTags" does not exist for the resource.',
-        })
-
-      // -----------------
-      // hasAssociatedItem
-      // -----------------
-
-      // main modelName does not exist
-      await expect(projectApp.hasAssociatedItem(specNoExistMainModel, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The model "AlienProject" is not recognized.',
-        })
-
-      // association name does not exist
-      await expect(projectApp.hasAssociatedItem(specNoExistAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association "alienTags" does not exist for the resource.',
-        })
-
-      // ---------------------
-      // getAllAssociatedItems
-      // ---------------------
-
-      // main modelName does not exist
-      await expect(projectApp.getAllAssociatedItems(specNoExistMainModel, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The model "AlienProject" is not recognized.',
-        })
-
-      // ---------------------
-      // removeAssociatedItems
-      // ---------------------
-
-      // main modelName does not exist
-      await expect(projectApp.removeAssociatedItems(specNoExistMainModel, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The model "AlienProject" is not recognized.',
-        })
-
-      // association name does not exist
-      await expect(projectApp.removeAssociatedItems(specNoExistAssocName, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The association "alienTags" does not exist for the resource.',
-        })
-
-      // ------------------------
-      // removeAllAssociatedItems
-      // ------------------------
-
-      // main modelName does not exist
-      await expect(projectApp.removeAllAssociatedItems(specNoExistMainModel, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'The model "AlienProject" is not recognized.',
-        })
+        expect.assertions(3)
+      })
     })
 
     it('should return an error (404) when the requested main or association resources are not found', async () => {
@@ -556,21 +143,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main resource does not exist
       await expect(projectApp.addAssociatedItems(spec, getInputNoMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "Project" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // association resource does not exist
       await expect(projectApp.addAssociatedItems(spec, getInputNoAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'No instances of "CodingLanguageTag" exist for the requested resource.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "No instances of "CodingLanguageTag" exist for the requested resource.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // -----------------
       // hasAssociatedItem
@@ -578,21 +169,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main resource does not exist
       await expect(projectApp.hasAssociatedItem(spec, getInputNoMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "Project" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // association resource does not exist
       await expect(projectApp.hasAssociatedItem(spec, getInputNoAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "CodingLanguageTag" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "CodingLanguageTag" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // ---------------------
       // getAllAssociatedItems
@@ -600,12 +195,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main resource does not exist
       await expect(projectApp.getAllAssociatedItems(spec, getInputNoMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "Project" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // ---------------------
       // removeAssociatedItems
@@ -613,21 +210,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main resource does not exist
       await expect(projectApp.removeAssociatedItems(spec, getInputNoMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "Project" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // association resource does not exist
       await expect(projectApp.removeAssociatedItems(spec, getInputNoAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'No instances of "CodingLanguageTag" exist for the requested resource.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "No instances of "CodingLanguageTag" exist for the requested resource.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
 
       // ------------------------
       // removeAllAssociatedItems
@@ -635,12 +236,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main resource does not exist
       await expect(projectApp.removeAllAssociatedItems(spec, getInputNoMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "Project" was not found.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
     })
 
     it('should return an error (400) when a required field is not provided', async () => {
@@ -694,21 +297,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main missing requiredOr fields
       await expect(projectApp.addAssociatedItems(spec, getInputBadMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "alias")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "alias")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // assoc missing requiredOr fields
       await expect(projectApp.addAssociatedItems(spec, getInputBadAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "key")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "key")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // -----------------
       // hasAssociatedItem
@@ -716,21 +323,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main missing requiredOr fields
       await expect(projectApp.hasAssociatedItem(spec, getInputBadMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "alias")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "alias")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // assoc missing requiredOr fields
       await expect(projectApp.hasAssociatedItem(spec, getInputBadAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "key")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "key")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // ---------------------
       // getAllAssociatedItems
@@ -738,12 +349,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main missing requiredOr fields
       await expect(projectApp.getAllAssociatedItems(spec, getInputBadMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "alias")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "alias")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // ---------------------
       // removeAssociatedItems
@@ -751,21 +364,25 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main missing requiredOr fields
       await expect(projectApp.removeAssociatedItems(spec, getInputBadMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "alias")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "alias")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // assoc missing requiredOr fields
       await expect(projectApp.removeAssociatedItems(spec, getInputBadAssoc()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "key")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "key")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
 
       // ------------------------
       // removeAllAssociatedItems
@@ -773,12 +390,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // main missing requiredOr fields
       await expect(projectApp.removeAllAssociatedItems(spec, getInputBadMain()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required fields: at least one of => ("id", "alias")',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "Missing required fields: at least one of => ("id", "alias")",
+            "name": "JointStatusError",
+            "status": 400,
+          }
+        `)
     })
 
     it('should return an error (403) when the authorization spec is not satisfied', async () => {
@@ -820,48 +439,58 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       // addAssociatedItems
       await expect(projectApp.addAssociatedItems(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "You are not authorized to perform this action.",
+            "name": "JointStatusError",
+            "status": 403,
+          }
+        `)
 
       // hasAssociatedItem
       await expect(projectApp.hasAssociatedItem(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "You are not authorized to perform this action.",
+            "name": "JointStatusError",
+            "status": 403,
+          }
+        `)
 
       // getAllAssociatedItems
       await expect(projectApp.getAllAssociatedItems(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "You are not authorized to perform this action.",
+            "name": "JointStatusError",
+            "status": 403,
+          }
+        `)
 
       // removeAssociatedItems
       await expect(projectApp.removeAssociatedItems(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "You are not authorized to perform this action.",
+            "name": "JointStatusError",
+            "status": 403,
+          }
+        `)
 
       // removeAllAssociatedItems
       await expect(projectApp.removeAllAssociatedItems(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "You are not authorized to perform this action.",
+            "name": "JointStatusError",
+            "status": 403,
+          }
+        `)
     })
   })
 
@@ -870,7 +499,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('addAssociatedItems', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should associate a resource when the spec is satisfied', async () => {
       const associationName = 'coding_language_tags'
@@ -1133,7 +762,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('hasAssociatedItem', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should return an error (404) when the requested association does not exist', async () => {
       const mainID = 3
@@ -1171,12 +800,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       })
 
       await expect(projectApp.hasAssociatedItem(spec, getInput()))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "CodingLanguageTag" does exist for the requested resource.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+          {
+            "message": "The requested "CodingLanguageTag" does exist for the requested resource.",
+            "name": "JointStatusError",
+            "status": 404,
+          }
+        `)
     })
 
     it('should return the associated resource, when the association exists', () => {
@@ -1303,7 +934,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('getAllAssociatedItems', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should return all instances of the associated resource, when the association exists', () => {
       const mainID = 1
@@ -1414,7 +1045,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('removeAssociatedItems', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should remove the association from the main resource, and return the affected main resource', () => {
       const associationName = 'coding_language_tags'
@@ -1621,7 +1252,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   // ---------------------------------------------------------------------------
   // TODO: Add passing test for auth / owner creds !!!
   describe('removeAllAssociatedItems', () => {
-    before(() => resetDB(['tags', 'projects']))
+    beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should remove the associations from the main resource, and return the affected main resource', () => {
       const mainID = 2

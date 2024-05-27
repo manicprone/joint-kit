@@ -1,44 +1,44 @@
-/* eslint-disable no-use-before-define */
-const Promise = require('bluebird')
 const bookshelf = require('./service')
 
-const resetDB = (seeds, debug) => {
-  return teardownDB(debug).then(() => setupDB(seeds, debug))
-}
-
-const setupDB = (seeds, debug = false) => {
+const setupDB = async (seeds, debug = false) => {
   if (debug) console.log('[DB-UTILS] setting up database...')
 
   // Setup tables and seed data
   if (seeds && Array.isArray(seeds) && seeds.length > 0) {
-    return bookshelf.knex.migrate.latest()
-      .then(() => {
-        const seedRootDir = bookshelf.knex.client.config.seeds.directory
+    await bookshelf.knex.migrate.latest()
 
-        return Promise.mapSeries(seeds, (dirName) => {
-          if (debug) console.log('[DB-UTILS] seeding data:', dirName)
-          const directory = `${seedRootDir}/${dirName}`
-          return bookshelf.knex.seed.run({ directory })
-        })
-      })
+    const seedRootDir = bookshelf.knex.client.config.seeds.directory
+
+    /* eslint-disable no-restricted-syntax */
+    for (const dirName of seeds) {
+      if (debug) console.log('[DB-UTILS] seeding data:', dirName)
+      const directory = `${seedRootDir}/${dirName}`
+      /* eslint-disable-next-line no-await-in-loop */
+      await bookshelf.knex.seed.run({ directory })
+    }
   }
 
   // Otherwise, just setup tables
   return bookshelf.knex.migrate.latest()
 }
 
-const teardownDB = (debug) => {
+const teardownDB = async (debug) => {
   if (debug) console.log('[DB-UTILS] tearing down database...')
-  return bookshelf.knex.migrate.rollback()
+  await bookshelf.knex.migrate.rollback()
 }
 
-const closeDB = (debug = false) => {
+const closeDB = async (debug = false) => {
   if (debug) console.log('[DB-UTILS] closing database connection...')
-  return bookshelf.knex.destroy()
+  await bookshelf.knex.destroy()
+}
+
+const resetDB = async (seeds, debug) => {
+  await teardownDB(debug)
+  await setupDB(seeds, debug)
 }
 
 module.exports = {
-  resetDB,
   setupDB,
   closeDB,
+  resetDB,
 }

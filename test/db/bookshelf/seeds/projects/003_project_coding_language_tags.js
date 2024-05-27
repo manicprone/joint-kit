@@ -1,4 +1,4 @@
-import moment from 'moment'
+const moment = require('moment')
 
 const tableName = 'project_coding_language_tags_ref'
 

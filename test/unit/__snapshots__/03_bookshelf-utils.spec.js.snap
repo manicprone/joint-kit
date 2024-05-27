@@ -1,0 +1,179 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BOOKSHELF-UTILS > loadRelationsToItemBase > should delete the original relation data, if not explicitly included 1`] = `
+{
+  "attributes": {
+    "coding_language_tags": [
+      {
+        "key": "java",
+        "label": "Java",
+      },
+      {
+        "key": "dot-net",
+        "label": ".NET",
+      },
+      {
+        "key": "javascript",
+        "label": "JavaScript",
+      },
+    ],
+    "id": 1,
+    "name": "Project Apathy",
+    "profile": {
+      "is_live": false,
+      "tagline": "I don't have habits, I have algorithms.",
+      "title": "Functional Fanatic",
+    },
+    "software_tags": [
+      {
+        "created_by": 1,
+        "id": 1,
+        "key": "vue",
+        "label": "Vue",
+      },
+      {
+        "created_by": 4,
+        "id": 2,
+        "key": "react",
+        "label": "React",
+      },
+      {
+        "created_by": 7,
+        "id": 3,
+        "key": "express",
+        "label": "Express",
+      },
+    ],
+    "status_code": 5,
+    "team": {
+      "email": "team@the-coalition.org",
+      "id": 27,
+      "member_count": 5,
+      "name": "The Coalition",
+      "slug": "the-coalition",
+    },
+    "tech_concept_tags": [
+      "software-architecture",
+      "machine-learning",
+      "blockchain",
+      "crypto-currency",
+      "big-data",
+    ],
+    "user": "the_manic_edge",
+    "user_id": 4,
+  },
+  "relations": {
+    "profile": {
+      "attributes": {
+        "description": null,
+        "id": 1,
+        "is_default": true,
+        "is_live": false,
+        "slug": "functional-fanatic",
+        "tagline": "I don't have habits, I have algorithms.",
+        "title": "Functional Fanatic",
+        "user_id": 4,
+      },
+      "id": 9999,
+    },
+    "softwareTags": {
+      "length": 3,
+      "models": [
+        {
+          "attributes": {
+            "created_by": 1,
+            "id": 1,
+            "key": "vue",
+            "label": "Vue",
+          },
+          "id": 1,
+        },
+        {
+          "attributes": {
+            "created_by": 4,
+            "id": 2,
+            "key": "react",
+            "label": "React",
+          },
+          "id": 2,
+        },
+        {
+          "attributes": {
+            "created_by": 7,
+            "id": 3,
+            "key": "express",
+            "label": "Express",
+          },
+          "id": 3,
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`BOOKSHELF-UTILS > loadRelationsToItemBase > should hoist the specified field data to the base attributes of the main resource 1`] = `
+{
+  "attributes": {
+    "coding_language_tags": [
+      {
+        "key": "java",
+        "label": "Java",
+      },
+      {
+        "key": "dot-net",
+        "label": ".NET",
+      },
+      {
+        "key": "javascript",
+        "label": "JavaScript",
+      },
+    ],
+    "id": 1,
+    "name": "Project Apathy",
+    "profile": {
+      "is_live": false,
+      "tagline": "I don't have habits, I have algorithms.",
+      "title": "Functional Fanatic",
+    },
+    "software_tags": [
+      {
+        "created_by": 1,
+        "id": 1,
+        "key": "vue",
+        "label": "Vue",
+      },
+      {
+        "created_by": 4,
+        "id": 2,
+        "key": "react",
+        "label": "React",
+      },
+      {
+        "created_by": 7,
+        "id": 3,
+        "key": "express",
+        "label": "Express",
+      },
+    ],
+    "status_code": 5,
+    "team": {
+      "email": "team@the-coalition.org",
+      "id": 27,
+      "member_count": 5,
+      "name": "The Coalition",
+      "slug": "the-coalition",
+    },
+    "tech_concept_tags": [
+      "software-architecture",
+      "machine-learning",
+      "blockchain",
+      "crypto-currency",
+      "big-data",
+    ],
+    "user": "the_manic_edge",
+    "user_id": 4,
+  },
+  "relations": {},
+}
+`;

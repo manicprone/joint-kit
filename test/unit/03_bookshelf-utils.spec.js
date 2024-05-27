@@ -1,7 +1,5 @@
-import chai from 'chai'
+import { beforeEach, describe, expect, it } from 'vitest'
 import * as BookshelfUtils from '../../src/actions/bookshelf/utils/bookshelf-utils'
-
-const expect = chai.expect
 
 const itemData = {}
 
@@ -16,109 +14,97 @@ describe('BOOKSHELF-UTILS', function () {
     it('should return an empty array if no value is provided', function () {
       const orderBy = BookshelfUtils.buildOrderBy()
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(0)
+      expect(orderBy).toEqual([])
     })
 
     it('should return the Bookshelf-compatible spec for a single order value (positive/ascending)', function () {
       const fieldValue = 'title'
       const orderBy = BookshelfUtils.buildOrderBy(fieldValue)
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(1)
-
-      expect(orderBy[0])
-        .to.contain({
-          col: 'title',
-          order: 'asc',
-        })
+      expect(orderBy).toMatchInlineSnapshot(`
+        [
+          {
+            "col": "title",
+            "order": "asc",
+          },
+        ]
+      `)
     })
 
     it('should return the Bookshelf-compatible spec for a single order value (negative/descending)', function () {
       const fieldValue = '-title'
       const orderBy = BookshelfUtils.buildOrderBy(fieldValue)
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(1)
-
-      expect(orderBy[0])
-        .to.contain({
-          col: 'title',
-          order: 'desc',
-        })
+      expect(orderBy).toMatchInlineSnapshot(`
+        [
+          {
+            "col": "title",
+            "order": "desc",
+          },
+        ]
+      `)
     })
 
     it('should return the Bookshelf-compatible spec for multiple values (comma-delimited)', function () {
       const fieldValue = '-title,updated_at,status_id'
       const orderBy = BookshelfUtils.buildOrderBy(fieldValue)
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(3)
-
-      expect(orderBy[0])
-        .to.contain({
-          col: 'title',
-          order: 'desc',
-        })
-      expect(orderBy[1])
-        .to.contain({
-          col: 'updated_at',
-          order: 'asc',
-        })
-      expect(orderBy[2])
-        .to.contain({
-          col: 'status_id',
-          order: 'asc',
-        })
+      expect(orderBy).toMatchInlineSnapshot(`
+        [
+          {
+            "col": "title",
+            "order": "desc",
+          },
+          {
+            "col": "updated_at",
+            "order": "asc",
+          },
+          {
+            "col": "status_id",
+            "order": "asc",
+          },
+        ]
+      `)
     })
 
     it('should handle extraneous spaces between values', function () {
       const fieldValue = ' -title, updated_at  ,    status_id'
       const orderBy = BookshelfUtils.buildOrderBy(fieldValue)
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(3)
-
-      expect(orderBy[0])
-        .to.contain({
-          col: 'title',
-          order: 'desc',
-        })
-      expect(orderBy[1])
-        .to.contain({
-          col: 'updated_at',
-          order: 'asc',
-        })
-      expect(orderBy[2])
-        .to.contain({
-          col: 'status_id',
-          order: 'asc',
-        })
+      expect(orderBy).toMatchInlineSnapshot(`
+        [
+          {
+            "col": "title",
+            "order": "desc",
+          },
+          {
+            "col": "updated_at",
+            "order": "asc",
+          },
+          {
+            "col": "status_id",
+            "order": "asc",
+          },
+        ]
+      `)
     })
 
     it('should handle empty values within commas', function () {
       const fieldValue = 'title,  ,   -updated_at  , ,'
       const orderBy = BookshelfUtils.buildOrderBy(fieldValue)
 
-      expect(orderBy)
-        .to.be.an('array')
-        .and.to.have.length(2)
-
-      expect(orderBy[0])
-        .to.contain({
-          col: 'title',
-          order: 'asc',
-        })
-      expect(orderBy[1])
-        .to.contain({
-          col: 'updated_at',
-          order: 'desc',
-        })
+      expect(orderBy).toMatchInlineSnapshot(`
+        [
+          {
+            "col": "title",
+            "order": "asc",
+          },
+          {
+            "col": "updated_at",
+            "order": "desc",
+          },
+        ]
+      `)
     })
   }) // END - buildOrderBy
 
@@ -197,12 +183,12 @@ describe('BOOKSHELF-UTILS', function () {
     })
 
     it('should do nothing if the parsed "loadDirect" info does not contain an "associations" property', function () {
-      const originalItemData = Object.assign({}, itemData)
+      const originalItemData = { ...itemData }
       const loadDirect = {}
 
       BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect)
 
-      expect(itemData).to.deep.equal(originalItemData)
+      expect(itemData).toEqual(originalItemData)
     })
 
     it('should hoist the specified field data to the base attributes of the main resource', function () {
@@ -220,48 +206,7 @@ describe('BOOKSHELF-UTILS', function () {
 
       BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect)
 
-      expect(itemData.attributes)
-        .to.have.property('tech_concept_tags')
-        .that.has.members(['software-architecture', 'machine-learning', 'blockchain', 'crypto-currency', 'big-data'])
-
-      expect(itemData.attributes)
-        .to.have.property('coding_language_tags')
-        .that.deep.equals([
-          { label: 'Java', key: 'java' },
-          { label: '.NET', key: 'dot-net' },
-          { label: 'JavaScript', key: 'javascript' },
-        ])
-
-      expect(itemData.attributes)
-        .to.have.property('software_tags')
-        .that.deep.equals([
-          { id: 1, label: 'Vue', key: 'vue', created_by: 1 },
-          { id: 2, label: 'React', key: 'react', created_by: 4 },
-          { id: 3, label: 'Express', key: 'express', created_by: 7 },
-        ])
-
-      expect(itemData.attributes)
-        .to.contain({
-          user: 'the_manic_edge',
-        })
-
-      expect(itemData.attributes)
-        .to.have.property('profile')
-        .to.contain({
-          title: 'Functional Fanatic',
-          tagline: 'I don\'t have habits, I have algorithms.',
-          is_live: false,
-        })
-
-      expect(itemData.attributes)
-        .to.have.property('team')
-        .to.contain({
-          id: 27,
-          name: 'The Coalition',
-          slug: 'the-coalition',
-          email: 'team@the-coalition.org',
-          member_count: 5,
-        })
+      expect(itemData).toMatchSnapshot()
     })
 
     it('should delete the original relation data, if not explicitly included', function () {
@@ -280,16 +225,7 @@ describe('BOOKSHELF-UTILS', function () {
 
       BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, keepAsRelations)
 
-      // Hoisted attributes...
-      expect(itemData.attributes).to.have.property('tech_concept_tags')
-      expect(itemData.attributes).to.have.property('coding_language_tags')
-      expect(itemData.attributes).to.have.property('software_tags')
-      expect(itemData.attributes).to.have.property('user')
-      expect(itemData.attributes).to.have.property('profile')
-      expect(itemData.attributes).to.have.property('team')
-
-      // Bookshelf relation data...
-      expect(itemData.relations).to.have.keys(keepAsRelations)
+      expect(itemData).toMatchSnapshot()
     })
   }) // END - loadRelationsToItemBase
 })

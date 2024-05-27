@@ -10,7 +10,7 @@
     "url": "git@github.com:manicprone/joint-kit.git"
   },
   "engines": {
-    "node": ">=15.14.0 <16.0.0 || >=16.20.1 <17.0.0 || >=20.8.0"
+    "node": ">=15.14.0 <16.0.0 || >=16.20.1 <17.0.0 || >=20.9.0"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=build rollup -c",
@@ -18,9 +18,10 @@
     "lint": "eslint ./ --cache --ignore-pattern .gitignore",
     "flint": "eslint ./ --fix --cache --ignore-pattern .gitignore",
     "build-test": "npm run build && npm run test",
-    "test": "npm run test:unit && npm run test:functional",
-    "test:unit": "cross-env NODE_ENV=test mocha --require @babel/register test/unit/**/*.spec.js",
-    "test:functional": "cross-env NODE_ENV=test mocha --require @babel/register test/functional/**/*.spec.js",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage --watch=false",
+    "test:unit": "vitest --config test/unit/vitest.config.js",
+    "test:functional": "vitest --config test/functional/vitest.config.js",
     "precommit-message": "echo 'Pre-commit checks (linting)...' && exit 0",
     "knex": "babel-node ./node_modules/.bin/knex --knexfile ./test/db/bookshelf/knexfile.js",
     "migrate:make": "npm run knex migrate:make",
@@ -34,6 +35,14 @@
     "lodash": "4.17.15",
     "moment": "2.29.1"
   },
+  "peerDependencies": {
+    "knex": ">0.21.1"
+  },
+  "peerDependenciesMeta": {
+    "knex": {
+      "optional": false
+    }
+  },
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.2.0",
@@ -43,16 +52,12 @@
     "babel-eslint": "^7.2.3",
     "bluebird": "3.7.2",
     "bookshelf": "1.1.0",
-    "chai": "4.2.0",
-    "chai-as-promised": "7.1.1",
-    "chai-http": "4.3.0",
     "cross-env": "5.1.5",
     "eslint": "4.18.2",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-import": "^2.3.0",
     "express": "4.17.1",
-    "knex": "0.21.1",
-    "mocha": "6.1.4",
+    "knex": "^3.1.0",
     "pre-commit": "1.2.2",
     "rollup": "^0.66.6",
     "rollup-plugin-babel": "^4.0.3",
@@ -60,6 +65,8 @@
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-uglify": "^2.0.1",
-    "sqlite3": "5.1.6"
+    "sqlite3": "5.1.6",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
   }
 }
