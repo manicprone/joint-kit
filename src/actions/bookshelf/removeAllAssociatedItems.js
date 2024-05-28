@@ -26,7 +26,7 @@ async function performRemoveAllAssociatedItems(joint, spec = {}, input = {}, out
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
   const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null
-  const inputMain = input[ACTION.RESOURCE_MAIN]
+  const inputMain = input[ACTION.RESOURCE_MAIN] ? { ...input[ACTION.RESOURCE_MAIN] } : null
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Reject when required properties are not provided...

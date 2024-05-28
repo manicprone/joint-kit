@@ -27,8 +27,8 @@ async function performAddAssociatedItems(joint, spec = {}, input = {}, output) {
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
   const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null
-  const inputMain = input[ACTION.RESOURCE_MAIN]
-  const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION]
+  const inputMain = input[ACTION.RESOURCE_MAIN] ? { ...input[ACTION.RESOURCE_MAIN] } : null
+  const inputAssoc = input[ACTION.RESOURCE_ASSOCIATION] ? { ...input[ACTION.RESOURCE_ASSOCIATION] } : null
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Reject when required properties are not provided...
