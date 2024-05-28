@@ -9,6 +9,28 @@ export const specFixtures = {
     },
     association: {
       name: 'coding_language_tags',
+      modelName: 'CodingLanguageTag',
+      fields: [
+        { name: 'id', type: 'Number', requiredOr: true },
+        { name: 'key', type: 'String', requiredOr: true },
+      ],
+    },
+  },
+  authMe: {
+    main: {
+      modelName: 'Project',
+      fields: [
+        { name: 'id', type: 'Number', requiredOr: true },
+        { name: 'alias', type: 'String', requiredOr: true },
+      ],
+      auth: {
+        rules: { owner: 'me' },
+        ownerCreds: ['created_by'],
+      },
+    },
+    association: {
+      name: 'coding_language_tags',
+      modelName: 'CodingLanguageTag',
       fields: [
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'key', type: 'String', requiredOr: true },
@@ -80,6 +102,18 @@ export const specFixtures = {
       ],
     },
   },
+  assoNameOnly: {
+    main: {
+      modelName: 'Project',
+      fields: [
+        { name: 'id', type: 'Number', requiredOr: true },
+        { name: 'alias', type: 'String', requiredOr: true },
+      ],
+    },
+    association: {
+      name: 'coding_language_tags',
+    },
+  },
 }
 
 export const inputFixtures = {
@@ -89,5 +123,21 @@ export const inputFixtures = {
   },
   noMain: { association: { fields: { id: 1 } } },
   noAsso: { main: { fields: { id: 1 } } },
+  mainNotExist: {
+    main: { fields: { id: 999 } },
+    association: { fields: { id: 1 } },
+  },
+  assoNotExist: {
+    main: { fields: { id: 1 } },
+    association: { fields: { id: 999 } },
+  },
+  mainBad: {
+    main: { fields: { identifier: 1 } },
+    association: { fields: { id: 1 } },
+  },
+  assoBad: {
+    main: { fields: { id: 1 } },
+    association: { fields: { identifier: 1 } },
+  },
 }
 

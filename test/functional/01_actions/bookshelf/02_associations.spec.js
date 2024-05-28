@@ -1,4 +1,6 @@
-import { beforeAll, beforeEach, describe, expect, it, test } from 'vitest'
+import { beforeAll, describe, expect, it, test } from 'vitest'
+import { sortBy } from 'lodash/fp'
+import { filterNotNull, objectWithTimestamps } from '../../../utils'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import bookshelf from '../../../db/bookshelf/service'
@@ -36,6 +38,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       'removeAssociatedItems',
       'removeAllAssociatedItems',
     ])('%s()', (associationFn) => {
+      const isAllFn = associationFn.includes('All')
+
       test.each([
         ['missing main', '"spec.main"', specFixtures.noMain],
         ['missing association', '"spec.association", "spec.association.name"', specFixtures.noAsso],
@@ -53,13 +57,11 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       })
 
       test.each(
-        [
+        filterNotNull([
           ['missing main', '"input.main"', inputFixtures.noMain],
           // the All methods allows missing input.association
-          !associationFn.includes('All')
-            ? ['missing association', '"input.association"', inputFixtures.noAsso]
-            : null,
-        ].filter(i => !!i),
+          !isAllFn ? ['missing association', '"input.association"', inputFixtures.noAsso] : null,
+        ]),
       )('when the input is %s it throws an error (400) that lists %s', async (_, props, theInput) => {
         try {
           await projectApp[associationFn](specFixtures.normal, theInput)
@@ -72,14 +74,15 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         expect.assertions(3)
       })
 
-      // FIXME: seems to have issue with transaction
-      test.skip.each([
-        ['main modelName does not exist', 'The model "AlienProject" is not recognized.', specFixtures.mainModelNotExist],
-        // the All methods doesn't care about association names
-        !associationFn.includes('All')
-          ? ['association name does not exist', 'The association "alienTags" does not exist for the resource.', specFixtures.assoNameNotExist]
-          : null,
-      ])("when the spec's %s it throws an error (400)", async (_, errMsg, theSpec) => {
+      test.each(
+        filterNotNull([
+          ['main modelName does not exist', 'The model "AlienProject" is not recognized.', specFixtures.mainModelNotExist],
+          // the All methods doesn't care about association names
+          !isAllFn
+            ? ['association name does not exist', 'The association "alienTags" does not exist for the resource.', specFixtures.assoNameNotExist]
+            : null,
+        ]),
+      )("when the spec's %s it throws an error (400)", async (_, errMsg, theSpec) => {
         try {
           await projectApp[associationFn](theSpec, inputFixtures.normal)
         } catch (error) {
@@ -90,407 +93,60 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
         expect.assertions(3)
       })
-    })
 
-    it('should return an error (404) when the requested main or association resources are not found', async () => {
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'coding_language_tags',
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+      test.each(
+        filterNotNull([
+          ['main resource does not exist', 'The requested "Project" was not found.', inputFixtures.mainNotExist],
+          // the All methods doesn't care about association names
+          !isAllFn && associationFn !== 'hasAssociatedItem'
+            ? ['association resource does not exist', 'No instances of "CodingLanguageTag" exist for the requested resource.', inputFixtures.assoNotExist]
+            : null,
+          associationFn === 'hasAssociatedItem'
+            ? ['association resource does not exist', 'The requested "CodingLanguageTag" was not found.', inputFixtures.assoNotExist]
+            : null,
+        ]),
+      )("when the input's %s it throws an error (404)", async (_, errMsg, theInput) => {
+        try {
+          await projectApp[associationFn](specFixtures.normal, theInput)
+        } catch (error) {
+          expect(error.message).toBe(errMsg)
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(404)
+        }
 
-      const getInputNoMain = () => ({
-        main: {
-          fields: {
-            id: 999,
-          },
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
+        expect.assertions(3)
       })
 
-      const getInputNoAssoc = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 999,
-          },
-        },
+      test.each(
+        filterNotNull([
+          ['main missing requiredOr fields', 'Missing required fields: at least one of => ("id", "alias")', inputFixtures.mainBad],
+          !isAllFn
+            ? ['assoc missing requiredOr fields', 'Missing required fields: at least one of => ("id", "key")', inputFixtures.assoBad]
+            : null,
+        ]),
+      )("when the input's %s it throws an error (400)", async (_, errMsg, theInput) => {
+        try {
+          await projectApp[associationFn](specFixtures.normal, theInput)
+        } catch (error) {
+          expect(error.message).toBe(errMsg)
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(400)
+        }
+
+        expect.assertions(3)
       })
 
-      // ------------------
-      // addAssociatedItems
-      // ------------------
+      it('should return an error (403) when the authorization spec is not satisfied', async () => {
+        try {
+          await projectApp[associationFn](specFixtures.authMe, inputFixtures.normal)
+        } catch (error) {
+          expect(error.message).toBe('You are not authorized to perform this action.')
+          expect(error.name).toBe('JointStatusError')
+          expect(error.status).toBe(403)
+        }
 
-      // main resource does not exist
-      await expect(projectApp.addAssociatedItems(spec, getInputNoMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "Project" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // association resource does not exist
-      await expect(projectApp.addAssociatedItems(spec, getInputNoAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "No instances of "CodingLanguageTag" exist for the requested resource.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // -----------------
-      // hasAssociatedItem
-      // -----------------
-
-      // main resource does not exist
-      await expect(projectApp.hasAssociatedItem(spec, getInputNoMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "Project" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // association resource does not exist
-      await expect(projectApp.hasAssociatedItem(spec, getInputNoAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "CodingLanguageTag" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // ---------------------
-      // getAllAssociatedItems
-      // ---------------------
-
-      // main resource does not exist
-      await expect(projectApp.getAllAssociatedItems(spec, getInputNoMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "Project" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // ---------------------
-      // removeAssociatedItems
-      // ---------------------
-
-      // main resource does not exist
-      await expect(projectApp.removeAssociatedItems(spec, getInputNoMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "Project" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // association resource does not exist
-      await expect(projectApp.removeAssociatedItems(spec, getInputNoAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "No instances of "CodingLanguageTag" exist for the requested resource.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-
-      // ------------------------
-      // removeAllAssociatedItems
-      // ------------------------
-
-      // main resource does not exist
-      await expect(projectApp.removeAllAssociatedItems(spec, getInputNoMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "The requested "Project" was not found.",
-            "name": "JointStatusError",
-            "status": 404,
-          }
-        `)
-    })
-
-    it('should return an error (400) when a required field is not provided', async () => {
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: 'coding_language_tags',
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-
-      const getInputBadMain = () => ({
-        main: {
-          fields: {
-            identifier: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
+        expect.assertions(3)
       })
-
-      const getInputBadAssoc = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            identifier: 1,
-          },
-        },
-      })
-
-      // ------------------
-      // addAssociatedItems
-      // ------------------
-
-      // main missing requiredOr fields
-      await expect(projectApp.addAssociatedItems(spec, getInputBadMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "alias")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // assoc missing requiredOr fields
-      await expect(projectApp.addAssociatedItems(spec, getInputBadAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "key")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // -----------------
-      // hasAssociatedItem
-      // -----------------
-
-      // main missing requiredOr fields
-      await expect(projectApp.hasAssociatedItem(spec, getInputBadMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "alias")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // assoc missing requiredOr fields
-      await expect(projectApp.hasAssociatedItem(spec, getInputBadAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "key")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // ---------------------
-      // getAllAssociatedItems
-      // ---------------------
-
-      // main missing requiredOr fields
-      await expect(projectApp.getAllAssociatedItems(spec, getInputBadMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "alias")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // ---------------------
-      // removeAssociatedItems
-      // ---------------------
-
-      // main missing requiredOr fields
-      await expect(projectApp.removeAssociatedItems(spec, getInputBadMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "alias")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // assoc missing requiredOr fields
-      await expect(projectApp.removeAssociatedItems(spec, getInputBadAssoc()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "key")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-
-      // ------------------------
-      // removeAllAssociatedItems
-      // ------------------------
-
-      // main missing requiredOr fields
-      await expect(projectApp.removeAllAssociatedItems(spec, getInputBadMain()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "Missing required fields: at least one of => ("id", "alias")",
-            "name": "JointStatusError",
-            "status": 400,
-          }
-        `)
-    })
-
-    it('should return an error (403) when the authorization spec is not satisfied', async () => {
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-          auth: {
-            rules: { owner: 'me' },
-            ownerCreds: ['created_by'],
-          },
-        },
-        association: {
-          name: 'coding_language_tags',
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-
-      const getInput = () => ({
-        main: {
-          fields: {
-            id: 1,
-          },
-          authContext: {},
-        },
-        association: {
-          fields: {
-            id: 1,
-          },
-        },
-      })
-
-      // addAssociatedItems
-      await expect(projectApp.addAssociatedItems(spec, getInput()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "You are not authorized to perform this action.",
-            "name": "JointStatusError",
-            "status": 403,
-          }
-        `)
-
-      // hasAssociatedItem
-      await expect(projectApp.hasAssociatedItem(spec, getInput()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "You are not authorized to perform this action.",
-            "name": "JointStatusError",
-            "status": 403,
-          }
-        `)
-
-      // getAllAssociatedItems
-      await expect(projectApp.getAllAssociatedItems(spec, getInput()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "You are not authorized to perform this action.",
-            "name": "JointStatusError",
-            "status": 403,
-          }
-        `)
-
-      // removeAssociatedItems
-      await expect(projectApp.removeAssociatedItems(spec, getInput()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "You are not authorized to perform this action.",
-            "name": "JointStatusError",
-            "status": 403,
-          }
-        `)
-
-      // removeAllAssociatedItems
-      await expect(projectApp.removeAllAssociatedItems(spec, getInput()))
-        .rejects
-        .toMatchInlineSnapshot(`
-          {
-            "message": "You are not authorized to perform this action.",
-            "name": "JointStatusError",
-            "status": 403,
-          }
-        `)
     })
   })
 
@@ -502,33 +158,13 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should associate a resource when the spec is satisfied', async () => {
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+      const spec = specFixtures.normal
+      const associationName = spec.association.name
 
       // Project: mega-seed-mini-sythesizer
       // coding_language_tags: 1 (java), 2 (jsp), 3 (javascript)
-      const inputSingle = {
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
+      const input = {
+        main: { fields: { id: 1 } },
         association: {
           fields: {
             id: 10, // html
@@ -536,14 +172,44 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
+      // Validate expected initial state
+      const data = await projectApp.getAllAssociatedItems(
+        specFixtures.normal,
+        { main: { fields: { id: 1 } } },
+      )
+
+      expect(data.relatedData).toMatchSnapshot({ parentAttributes: objectWithTimestamps })
+
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      expect(data.models).toHaveLength(3)
+      data.models.forEach((model) => {
+        expect(model.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      // Associate single item
+      const addSingleAssoc = await projectApp.addAssociatedItems(spec, input)
+      expect(addSingleAssoc.attributes).toMatchSnapshot(objectWithTimestamps)
+
+      // associations are ordered by created_at (when they were attached)
+      const tags = addSingleAssoc.relations[associationName]
+      expect(tags.models).toHaveLength(4)
+      tags.models.forEach((model) => {
+        expect(model.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      expect.assertions(11)
+    })
+
+
+    it('should accept multiple ids', async () => {
+      const spec = specFixtures.normal
+      const associationName = spec.association.name
+
       // Project: doppelganger-finder
       // coding_language_tags: 6 (python)
-      const inputMultiple = {
-        main: {
-          fields: {
-            id: 3,
-          },
-        },
+      const input = {
+        main: { fields: { id: 3 } },
         association: {
           fields: {
             id: [1, 2, 9, 10], // java, jsp, xslt, html
@@ -551,55 +217,37 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      // ----------------------------------
-      // Project: mega-seed-mini-sythesizer
-      // ----------------------------------
-
-      // Validate expected initial state
-      const project01 = await projectApp.getAllAssociatedItems(spec, {
-        main: {
-          fields: { id: 1 },
-        },
-      })
-      expect(project01.relatedData.parentId).to.equal(1)
-      expect(project01.models).to.have.length(3)
-      expect(project01.models[0].attributes.key).to.equal('java')
-      expect(project01.models[1].attributes.key).to.equal('jsp')
-      expect(project01.models[2].attributes.key).to.equal('javascript')
-
-      // Associate single item
-      const addSingleAssoc = await projectApp.addAssociatedItems(spec, inputSingle)
-      expect(addSingleAssoc.attributes).to.contain({ id: 1 }) // ensure correct main
-
-      // associations are ordered by created_at (when they were attached)
-      const project01Tags = addSingleAssoc.relations[associationName]
-      expect(project01Tags.models).to.have.length(4)
-      expect(project01Tags.models.map(model => model.attributes.key))
-        .to.include.members(['java', 'jsp', 'javascript', 'html'])
-
       // ----------------------------
       // Project: doppelganger-finder
       // ----------------------------
 
       // Validate expected initial state
-      const project03 = await projectApp.getAllAssociatedItems(spec, {
-        main: {
-          fields: { id: 3 },
-        },
-      })
-      expect(project03.relatedData.parentId).to.equal(3)
-      expect(project03.models).to.have.length(1)
-      expect(project03.models[0].attributes.key).to.equal('python')
+      const data = await projectApp.getAllAssociatedItems(
+        specFixtures.normal,
+        { main: { fields: { id: 3 } } },
+      )
 
-      // Associate multiple items
-      const addMultipleAssoc = await projectApp.addAssociatedItems(spec, inputMultiple)
-      expect(addMultipleAssoc.attributes).to.contain({ id: 3 }) // ensure correct main
+      expect(data.relatedData).toMatchSnapshot({ parentAttributes: objectWithTimestamps })
+
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      expect(data.models).toHaveLength(1)
+      data.models.forEach((model) => {
+        expect(model.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      // Associate multiple item
+      const addMultipleAssoc = await projectApp.addAssociatedItems(spec, input)
+      expect(addMultipleAssoc.attributes).toMatchSnapshot(objectWithTimestamps)
 
       // associations are ordered by created_at (when they were attached)
-      const project03Tags = addMultipleAssoc.relations[associationName]
-      expect(project03Tags.models).to.have.length(5)
-      expect(project03Tags.models.map(model => model.attributes.key))
-        .to.include.members(['python', 'java', 'jsp', 'xslt', 'html'])
+      const tags = addMultipleAssoc.relations[associationName]
+      expect(tags.models).toHaveLength(5)
+      sortBy('id')(tags.models).forEach((model) => {
+        expect(model.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      expect.assertions(10)
     })
 
     // TODO: Need to re-implement this support for Bookshelf !!!
@@ -654,39 +302,19 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       const added = await projectApp.addAssociatedItems(spec, input)
       // console.log('[TEST] added =>', added)
-      expect(added.attributes).to.contain({
-        id: mainID,
-      })
+      expect(added.attributes).toHaveProperty('id', mainID)
 
       const associatedTags = added.relations[associationName]
       // console.log('[TEST] associatedTags =>', associatedTags.models)
-      expect(associatedTags.models).to.have.length(2)
-      expect(associatedTags.models[0].attributes.key).to.equal('javascript')
-      expect(associatedTags.models[1].attributes.key).to.equal('coffee-script')
+      expect(associatedTags.models).toHaveLength(2)
+      expect(associatedTags.models[0].attributes.key).toBe('javascript')
+      expect(associatedTags.models[1].attributes.key).toBe('coffee-script')
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const mainModelName = 'Project'
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.normal
       const mainID = 4
-      const assocModelName = 'CodingLanguageTag'
-      const associationName = 'coding_language_tags'
 
-      const spec = {
-        main: {
-          modelName: mainModelName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
       const input = {
         main: {
           fields: {
@@ -700,60 +328,22 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      const globalLevel = projectAppJsonApi.addAssociatedItems(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
-
-          // Included...
-          expect(payload).to.have.property('included').that.has.length(3)
-          const thirdItem = payload.included[2]
-          expect(thirdItem)
-            .to.contain({
-              id: 7,
-              type: assocModelName,
-            })
-          expect(thirdItem).to.have.property('attributes')
-          expect(thirdItem.attributes)
-            .to.contain({
-              key: 'ruby',
-            })
-        })
-
-      const methodLevel = projectApp.addAssociatedItems(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
-
-          // Included...
-          expect(payload).to.have.property('included').that.has.length(3)
-          const thirdItem = payload.included[2]
-          expect(thirdItem)
-            .to.contain({
-              id: 7,
-              type: assocModelName,
-            })
-          expect(thirdItem).to.have.property('attributes')
-          expect(thirdItem.attributes)
-            .to.contain({
-              key: 'ruby',
-            })
-        })
-
-      return Promise.all([
-        globalLevel,
-        methodLevel,
+      const payloads = await Promise.all([
+        projectAppJsonApi.addAssociatedItems(spec, input),
+        projectAppJsonApi.addAssociatedItems(spec, input, 'json-api'),
       ])
+
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload.data).toMatchSnapshot({ attributes: objectWithTimestamps })
+        expect(payload.included).toHaveLength(3)
+        payload.included.forEach((included) => {
+          expect(included).toMatchSnapshot({ attributes: objectWithTimestamps })
+        })
+      })
+
+      expect.assertions(10)
     })
   }) // END - addAssociatedItems
 
@@ -765,41 +355,16 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
     beforeAll(() => resetDB(['tags', 'projects']))
 
     it('should return an error (404) when the requested association does not exist', async () => {
-      const mainID = 3
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
-
-      const getInput = () => ({
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
+      const input = {
+        main: { fields: { id: 3 } },
         association: {
           fields: {
             id: 9, // xslt
           },
         },
-      })
+      }
 
-      await expect(projectApp.hasAssociatedItem(spec, getInput()))
+      await expect(projectApp.hasAssociatedItem(specFixtures.normal, input))
         .rejects
         .toMatchInlineSnapshot(`
           {
@@ -810,122 +375,52 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         `)
     })
 
-    it('should return the associated resource, when the association exists', () => {
-      const mainID = 2
-      const assocID = 1 // java
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+    it('should return the associated resource, when the association exists', async () => {
       const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
+        main: { fields: { id: 2 } },
         association: {
           fields: {
-            id: assocID,
+            id: 1, // java
           },
         },
       }
 
-      return projectApp.hasAssociatedItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.id).to.equal(assocID)
-          expect(data.attributes.key).to.equal('java')
-        })
+      const data = await projectApp.hasAssociatedItem(specFixtures.normal, input)
+      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "created_at": Any<Date>,
+          "created_by": null,
+          "id": 1,
+          "key": "java",
+          "label": "Java",
+          "updated_at": Any<Date>,
+        }
+      `)
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const mainModelName = 'Project'
-      const mainID = 2
-      const assocModelName = 'CodingLanguageTag'
-      const assocID = 1 // java
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: mainModelName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.normal
       const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
+        main: { fields: { id: 2 } },
         association: {
           fields: {
-            id: assocID,
+            id: 1, // java
           },
         },
       }
 
-      const globalLevel = projectAppJsonApi.hasAssociatedItem(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: assocID,
-              type: assocModelName,
-            })
+      const payloads = await Promise.all([
+        projectAppJsonApi.hasAssociatedItem(spec, input),
+        projectApp.hasAssociatedItem(spec, input, 'json-api'),
+      ])
 
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              key: 'java',
-            })
-        })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload.data).toMatchSnapshot({ attributes: objectWithTimestamps })
+      })
 
-      const methodLevel = projectApp.hasAssociatedItem(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: assocID,
-              type: assocModelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              key: 'java',
-            })
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(2)
     })
   }) // END - hasAssociatedItem
 
@@ -936,107 +431,41 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   describe('getAllAssociatedItems', () => {
     beforeAll(() => resetDB(['tags', 'projects']))
 
-    it('should return all instances of the associated resource, when the association exists', () => {
-      const mainID = 1
-      const associationName = 'coding_language_tags'
+    it('should return all instances of the associated resource, when the association exists', async () => {
+      const spec = specFixtures.assoNameOnly
+      const input = inputFixtures.noAsso
 
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-        },
-      }
-      const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-      }
+      const data = await projectApp.getAllAssociatedItems(spec, input)
+      expect(data.relatedData).toMatchSnapshot({ parentAttributes: objectWithTimestamps })
 
-      return projectApp.getAllAssociatedItems(spec, input)
-        .then((data) => {
-          expect(data.relatedData.parentId).to.equal(mainID)
-          expect(data.models).to.have.length(3)
-          expect(data.models[0].attributes.key).to.equal('java')
-          expect(data.models[1].attributes.key).to.equal('jsp')
-          expect(data.models[2].attributes.key).to.equal('javascript')
-        })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      data.models.forEach((model) => {
+        expect(model.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      expect.assertions(4)
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const mainModelName = 'Project'
-      const mainID = 1
-      const assocModelName = 'CodingLanguageTag'
-      const associationName = 'coding_language_tags'
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.assoNameOnly
+      const input = inputFixtures.noAsso
 
-      const spec = {
-        main: {
-          modelName: mainModelName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-        },
-      }
-      const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-      }
+      const payloads = await Promise.all([
+        projectAppJsonApi.getAllAssociatedItems(spec, input),
+        projectApp.getAllAssociatedItems(spec, input, 'json-api'),
+      ])
 
-      const globalLevel = projectAppJsonApi.getAllAssociatedItems(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-            .that.is.an('array').that.has.lengthOf(3)
-
-          // First Item....
-          const firstItem = payload.data[0]
-          expect(firstItem)
-            .to.contain({
-              type: assocModelName,
-              id: 1,
-            })
-          expect(firstItem).to.have.property('attributes')
-          expect(firstItem.attributes)
-            .to.contain({
-              key: 'java',
-            })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload.data).toHaveLength(3)
+        payload.data.forEach((item) => {
+          expect(item).toMatchSnapshot({ attributes: objectWithTimestamps })
         })
+      })
 
-      const methodLevel = projectApp.getAllAssociatedItems(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-            .that.is.an('array').that.has.lengthOf(3)
-
-          // First Item....
-          const firstItem = payload.data[0]
-          expect(firstItem)
-            .to.contain({
-              type: assocModelName,
-              id: 1,
-            })
-          expect(firstItem).to.have.property('attributes')
-          expect(firstItem.attributes)
-            .to.contain({
-              key: 'java',
-            })
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(8)
     })
   }) // END - getAllAssociatedItems
 
@@ -1047,46 +476,29 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   describe('removeAssociatedItems', () => {
     beforeAll(() => resetDB(['tags', 'projects']))
 
-    it('should remove the association from the main resource, and return the affected main resource', () => {
-      const associationName = 'coding_language_tags'
+    it('should remove the association from the main resource, and return the affected main resource', async () => {
+      const spec = specFixtures.normal
+      const associationName = spec.association.name
+      const input = inputFixtures.normal
 
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+      const data = await projectApp.removeAssociatedItems(spec, input)
+      expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
 
-      const inputSingle = {
-        main: {
-          fields: {
-            id: 1,
-          },
-        },
-        association: {
-          fields: {
-            id: 1, // java
-          },
-        },
-      }
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      expect(data).toHaveProperty(['relations', associationName])
+      data.relations[associationName].forEach((item) => {
+        expect(item.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
 
-      const inputMultiple = {
-        main: {
-          fields: {
-            id: 2,
-          },
-        },
+      expect.assertions(4)
+    })
+
+    it('should accept multiple keys', async () => {
+      const spec = specFixtures.normal
+      const associationName = spec.association.name
+      const input = {
+        main: { fields: { id: 2 } },
         association: {
           fields: {
             key: ['java', 'jsp', 'xslt'], // 1, 2, 9
@@ -1094,156 +506,66 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         },
       }
 
-      const removeSingleAssoc = projectApp.removeAssociatedItems(spec, inputSingle)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: 1,
-          })
+      const data = await projectApp.removeAssociatedItems(spec, input)
+      expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
 
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(2)
-          expect(associatedTags.models[0].attributes.key).to.equal('jsp')
-          expect(associatedTags.models[1].attributes.key).to.equal('javascript')
-        })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      expect(data).toHaveProperty(['relations', associationName])
+      data.relations[associationName].forEach((item) => {
+        expect(item.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
 
-      const removeMultipleAssoc = projectApp.removeAssociatedItems(spec, inputMultiple)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: 2,
-          })
-
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(1)
-          expect(associatedTags.models[0].attributes.key).to.equal('html')
-        })
-
-      return Promise.all([removeSingleAssoc, removeMultipleAssoc])
+      expect.assertions(3)
     })
 
-    it('should succeed and return the unaffected main resource, if the association did not exist', () => {
-      const mainID = 4
-      const assocID = 1 // java
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+    it('should succeed and return the unaffected main resource, if the association did not exist', async () => {
+      const spec = specFixtures.normal
       const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-        association: {
-          fields: {
-            id: assocID,
-          },
-        },
+        main: { fields: { id: 4 } },
+        association: { fields: { id: 1 } }, // java
       }
+      const associationName = spec.association.name
 
-      return projectApp.removeAssociatedItems(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: mainID,
-          })
+      const data = await projectApp.removeAssociatedItems(spec, input)
 
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(2)
-          expect(associatedTags.models[0].attributes.key).to.equal('javascript')
-          expect(associatedTags.models[1].attributes.key).to.equal('coffee-script')
-        })
+      expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
+
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      data.relations[associationName].models.forEach((item) => {
+        expect(item.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
+
+      expect.assertions(3)
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const mainModelName = 'Project'
-      const mainID = 1
-      const assocModelName = 'CodingLanguageTag'
-      const assocID = 1 // java
-      const associationName = 'coding_language_tags'
-
-      const spec = {
-        main: {
-          modelName: mainModelName,
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-          modelName: 'CodingLanguageTag',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      }
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.normal
       const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-        association: {
-          fields: {
-            id: assocID,
-          },
-        },
+        main: { fields: { id: 1 } },
+        association: { fields: { id: 1 } }, // java
       }
 
-      const globalLevel = projectAppJsonApi.removeAssociatedItems(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
+      const payloads = await Promise.all([
+        projectAppJsonApi.removeAssociatedItems(spec, input),
+        projectApp.removeAssociatedItems(spec, input, 'json-api'),
+      ])
 
-          // Relationships...
-          expect(payload.data).to.have.property('relationships')
-          expect(payload.data.relationships).to.have.keys(associationName)
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload).toHaveProperty('data.id', input.main.fields.id)
+        expect(payload).toHaveProperty('data.type', spec.main.modelName)
+        expect(payload.data.relationships).toMatchSnapshot()
 
-          // Included...
-          expect(payload).to.have.property('included').that.has.length(2)
-          expect(payload.included[0]).to.contain({ type: assocModelName })
+        expect(payload.included).toHaveLength(2)
+        payload.included.forEach((included) => {
+          expect(included.attributes).toMatchSnapshot(objectWithTimestamps)
         })
+      })
 
-      const methodLevel = projectApp.removeAssociatedItems(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
-
-          // Relationships...
-          expect(payload.data).to.have.property('relationships')
-          expect(payload.data.relationships).to.have.keys(associationName)
-
-          // Included...
-          expect(payload).to.have.property('included').that.has.length(2)
-          expect(payload.included[0]).to.contain({ type: assocModelName })
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(12)
     })
   }) // END - removeAssociatedItems
 
@@ -1254,142 +576,50 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
   describe('removeAllAssociatedItems', () => {
     beforeAll(() => resetDB(['tags', 'projects']))
 
-    it('should remove the associations from the main resource, and return the affected main resource', () => {
-      const mainID = 2
-      const associationName = 'coding_language_tags'
+    it('should remove the associations from the main resource, and return the affected main resource', async () => {
+      const spec = specFixtures.normal
+      const input = { main: { fields: { id: 2 } } }
+      const associationName = spec.association.name
 
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-        },
-      }
-      const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-      }
+      const data = await projectApp.removeAllAssociatedItems(spec, input)
 
-      return projectApp.removeAllAssociatedItems(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: mainID,
-          })
+      expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
 
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(0)
-        })
+      const associatedTags = data.relations[associationName]
+      expect(associatedTags.models).toMatchInlineSnapshot('[]')
     })
 
-    it('should succeed and return the unaffected main resource, if the associations did not exist', () => {
-      const mainID = 5 // no tags
-      const associationName = 'coding_language_tags'
+    it('should succeed and return the unaffected main resource, if the associations did not exist', async () => {
+      const spec = specFixtures.normal
+      const input = { main: { fields: { id: 5 } } } // no tags
+      const associationName = spec.association.name
 
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-        },
-      }
-      const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-      }
+      const data = await projectApp.removeAllAssociatedItems(spec, input)
+      expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
 
-      return projectApp.removeAllAssociatedItems(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id: mainID,
-          })
-
-          const associatedTags = data.relations[associationName]
-          expect(associatedTags.models).to.have.length(0)
-        })
+      const associatedTags = data.relations[associationName]
+      expect(associatedTags.models).toMatchInlineSnapshot('[]')
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const mainModelName = 'Project'
-      const mainID = 4
-      const associationName = 'coding_language_tags'
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.normal
+      const input = { main: { fields: { id: 4 } } }
 
-      const spec = {
-        main: {
-          modelName: 'Project',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
-        },
-        association: {
-          name: associationName,
-        },
-      }
-      const input = {
-        main: {
-          fields: {
-            id: mainID,
-          },
-        },
-      }
+      const payloads = await Promise.all([
+        projectAppJsonApi.removeAllAssociatedItems(spec, input),
+        projectApp.removeAllAssociatedItems(spec, input, 'json-api'),
+      ])
 
-      const globalLevel = projectAppJsonApi.removeAllAssociatedItems(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload).toHaveProperty('data.id', input.main.fields.id)
+        expect(payload).toHaveProperty('data.type', spec.main.modelName)
+        expect(payload.data.relationships).toMatchSnapshot()
+        expect(payload).not.toHaveProperty('included')
+      })
 
-          // Relationships...
-          expect(payload.data).to.have.property('relationships')
-          expect(payload.data.relationships).to.have.keys(associationName)
-          expect(payload.data.relationships[associationName])
-            .to.have.property('data').that.has.length(0)
-
-          // Included...
-          expect(payload).to.not.have.property('included')
-        })
-
-      const methodLevel = projectApp.removeAllAssociatedItems(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: mainID,
-              type: mainModelName,
-            })
-
-          // Relationships...
-          expect(payload.data).to.have.property('relationships')
-          expect(payload.data.relationships).to.have.keys(associationName)
-          expect(payload.data.relationships[associationName])
-            .to.have.property('data').that.has.length(0)
-
-          // Included...
-          expect(payload).to.not.have.property('included')
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(8)
     })
   }) // END - removeAllAssociatedItems
 })
