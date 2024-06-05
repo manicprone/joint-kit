@@ -41,12 +41,12 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
           // Detach 3 of 4 tags (explicitly)...
           const detachThree = {
             main: {
-              fields: { id: projectID },
+              fields: { id: projectID }
             },
             association: {
-              fields: { key: ['java', 'xslt', 'jsp'] },
+              fields: { key: ['java', 'xslt', 'jsp'] }
             },
-            trx,
+            trx
           }
           const projectOneTag = await projectApp.method.Project.detachCodingLanguageTags(detachThree)
 
@@ -56,24 +56,23 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
           // Provide an invalid value, to force an error during tag detach...
           const detachInvalid = {
             main: {
-              fields: { id: projectID },
+              fields: { id: projectID }
             },
             association: {
-              fields: { key: ['i-am-invalid'] },
+              fields: { key: ['i-am-invalid'] }
             },
-            trx,
+            trx
           }
           await projectApp.method.Project.detachCodingLanguageTags(detachInvalid)
-
         } catch (error) {
           throw error
         }
       }) // end-transaction
-      .catch((error) => {
+        .catch((error) => {
         // console.log('[DEVING] verifying error =>', error)
-        expect(error.name).to.equal('JointStatusError')
-        expect(error.status).to.equal(404)
-      })
+          expect(error.name).to.equal('JointStatusError')
+          expect(error.status).to.equal(404)
+        })
 
       // Ensure changes were rolled-back (project still has the original 4 tags)...
       const getAllTags = { main: { fields: { id: projectID } } }
@@ -94,9 +93,9 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
         // Detach all tag associations...
         const input = {
           main: {
-            fields: { id: projectID },
+            fields: { id: projectID }
           },
-          trx,
+          trx
         }
         const projectNoTags = await projectApp.method.Project.detachAllCodingLanguageTags(input)
 
@@ -116,5 +115,4 @@ describe('TRANSACTIONAL ACTIONS [bookshelf]', () => {
       }
     })
   }) // END - programmatic usage
-
 })

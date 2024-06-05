@@ -6,7 +6,7 @@ import ACTION from '../../core/constants/action-constants'
 
 // ---------------------------------------------------------- Bad Requests (400)
 
-export function generateMissingFieldsError(missingFields = {}) {
+export function generateMissingFieldsError (missingFields = {}) {
   const all = missingFields.all || []
   const oneOf = missingFields.oneOf || []
   const hasAllFields = (all.length > 0)
@@ -25,106 +25,106 @@ export function generateMissingFieldsError(missingFields = {}) {
 
   return new JointStatusError({
     status: 400,
-    message,
+    message
   })
 }
 
-export function generateDbConfigError(message = '') {
+export function generateDbConfigError (message = '') {
   return new JointStatusError({
     status: 400,
-    message: `There is a problem with your database configuration => ${message}`,
+    message: `There is a problem with your database configuration => ${message}`
   })
 }
 
-export function generateModelNotRecognizedError(modelName = '') {
+export function generateModelNotRecognizedError (modelName = '') {
   return new JointStatusError({
     status: 400,
-    message: `The model "${modelName}" is not recognized.`,
+    message: `The model "${modelName}" is not recognized.`
   })
 }
 
-export function generateModelConfigError(modelName = '', message = '') {
+export function generateModelConfigError (modelName = '', message = '') {
   return new JointStatusError({
     status: 400,
-    message: `There is a problem with the "${modelName}" model config => ${message}`,
+    message: `There is a problem with the "${modelName}" model config => ${message}`
   })
 }
 
-export function generateAssociationNotRecognizedError(assocName = '') {
+export function generateAssociationNotRecognizedError (assocName = '') {
   return new JointStatusError({
     status: 400,
-    message: `The association "${assocName}" does not exist for the resource.`,
+    message: `The association "${assocName}" does not exist for the resource.`
   })
 }
 
-export function generateInvalidAssociationPropertiesError(missingProperties = []) {
+export function generateInvalidAssociationPropertiesError (missingProperties = []) {
   return new JointStatusError({
     status: 400,
-    message: `The association action is invalid due to missing properties: "${missingProperties.join('", "')}"`,
+    message: `The association action is invalid due to missing properties: "${missingProperties.join('", "')}"`
   })
 }
 
-export function generateLookupFieldNotProvidedError() {
+export function generateLookupFieldNotProvidedError () {
   return new JointStatusError({
     status: 400,
-    message: 'A "lookup field" was either not defined or not provided.',
+    message: 'A "lookup field" was either not defined or not provided.'
   })
 }
 
-export function generateInvalidResourceCreationOperatorError() {
+export function generateInvalidResourceCreationOperatorError () {
   return new JointStatusError({
     status: 400,
     message: 'Unable to create a new resource using a lookup operator other ' +
-      `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}".`,
+      `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}".`
   })
 }
 
 // -------------------------------------------------------- Not Authorized (403)
 
-export function generateNotAuthorizedError() {
+export function generateNotAuthorizedError () {
   return new JointStatusError({
     status: 403,
-    message: 'You are not authorized to perform this action.',
+    message: 'You are not authorized to perform this action.'
   })
 }
 
 // ------------------------------------------------------------- Not Found (404)
 
-export function generateResourceNotFoundError(resourceName = '') {
+export function generateResourceNotFoundError (resourceName = '') {
   return new JointStatusError({
     status: 404,
-    message: `The requested "${resourceName}" was not found.`,
+    message: `The requested "${resourceName}" was not found.`
   })
 }
 
-export function generateAssociatedItemDoesNotExistError(resourceName = '') {
+export function generateAssociatedItemDoesNotExistError (resourceName = '') {
   return new JointStatusError({
     status: 404,
-    message: `The requested "${resourceName}" does exist for the requested resource.`,
+    message: `The requested "${resourceName}" does exist for the requested resource.`
   })
 }
 
-export function generateAssociatedItemsDoNotExistError(resourceName = '') {
+export function generateAssociatedItemsDoNotExistError (resourceName = '') {
   return new JointStatusError({
     status: 404,
-    message: `No instances of "${resourceName}" exist for the requested resource.`,
+    message: `No instances of "${resourceName}" exist for the requested resource.`
   })
 }
 
 // ------------------------------------------- General System / 3rd-party (500+)
 
-export function generateThirdPartyError(error) {
+export function generateThirdPartyError (error) {
   return new JointStatusError({
     status: error.status || 500,
-    message: 'A system error was encountered.',
+    message: 'A system error was encountered.'
   })
 }
 
 // ---------------------------------------------------------------------- Custom
 
-export function generateCustomError(message = '', status = 500) {
+export function generateCustomError (message = '', status = 500) {
   return new JointStatusError({
     status,
-    message,
+    message
   })
 }

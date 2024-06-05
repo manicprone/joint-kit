@@ -1,5 +1,5 @@
 export default {
-  serialize(error, config, indentation, depth, refs, printer) {
+  serialize (error, config, indentation, depth, refs, printer) {
     const { name, status, message } = error
 
     return `${printer(
@@ -7,12 +7,12 @@ export default {
       config,
       indentation,
       depth,
-      refs,
+      refs
     )}`
   },
-  test(val) {
+  test (val) {
     // FIXME: update linter to support optional chaining syntax
     // return val instanceof Error && val.name?.startsWith('Joint')
     return val instanceof Error && val.name && val.name.startsWith('Joint')
-  },
+  }
 }

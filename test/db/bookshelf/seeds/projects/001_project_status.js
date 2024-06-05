@@ -7,29 +7,29 @@ const seeds = [
     code: 2,
     alias: 'talking',
     display_name: 'Talking',
-    description: null,
+    description: null
   },
   {
     code: 3,
     alias: 'pending',
     display_name: 'Pending',
-    description: null,
+    description: null
   },
   {
     code: 4,
     alias: 'started',
     display_name: 'Started',
-    description: null,
+    description: null
   },
   {
     code: 5,
     alias: 'completed',
     display_name: 'Completed',
-    description: null,
-  },
+    description: null
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   const time = moment().utc()
 
   return Promise.all(seeds.map((data) => {
@@ -38,7 +38,7 @@ exports.seed = function seed(knex) {
     return knex(tableName).insert({
       ...data,
       created_at: timestamp,
-      updated_at: timestamp,
+      updated_at: timestamp
     })
   }))
 }

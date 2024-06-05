@@ -14,9 +14,9 @@ module.exports = {
         fields: [
           { name: 'label', type: 'String', required: true },
           { name: 'key', type: 'String', required: true },
-          { name: 'created_by', type: 'Number' },
-        ],
-      },
+          { name: 'created_by', type: 'Number' }
+        ]
+      }
     },
     {
       name: 'updateSoftwareTag',
@@ -25,9 +25,9 @@ module.exports = {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true, lookupOr: true },
           { name: 'key', type: 'String', requiredOr: true, lookupOr: true },
-          { name: 'label', type: 'String' },
-        ],
-      },
+          { name: 'label', type: 'String' }
+        ]
+      }
     },
     {
       name: 'getSoftwareTag',
@@ -35,16 +35,16 @@ module.exports = {
       spec: {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'key', type: 'String', requiredOr: true },
-        ],
-      },
+          { name: 'key', type: 'String', requiredOr: true }
+        ]
+      }
     },
     {
       name: 'getSoftwareTags',
       action: 'getItems',
       spec: {
-        defaultOrderBy: 'label',
-      },
+        defaultOrderBy: 'label'
+      }
     },
     {
       name: 'deleteSoftwareTag',
@@ -52,9 +52,9 @@ module.exports = {
       spec: {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'key', type: 'String', requiredOr: true },
-        ],
-      },
-    },
-  ],
+          { name: 'key', type: 'String', requiredOr: true }
+        ]
+      }
+    }
+  ]
 }

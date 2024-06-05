@@ -6,6 +6,6 @@ export default defineConfig({
     include: ['test/scenarios/**/*.spec.js'],
     forceRerunTriggers: ['src/**/*.js'],
     fileParallelism: false,
-    passWithNoTests: true,
-  },
+    passWithNoTests: true
+  }
 })

@@ -4,7 +4,7 @@ import * as CoreUtils from '../../core/core-utils'
 
 const namespace = 'JOINT'
 
-export default function registerModel(joint, modelDef = {}, modelName, debug = false) {
+export default function registerModel (joint, modelDef = {}, modelName, debug = false) {
   const bookshelf = joint.service
   let registryEntry = null
   let assocMap = {}
@@ -107,7 +107,7 @@ export default function registerModel(joint, modelDef = {}, modelName, debug = f
         tableName,
         idAttribute,
         hasTimestamps,
-        ...assocHooks,
+        ...assocHooks
       })
 
       // Add to bookshelf registry...

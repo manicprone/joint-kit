@@ -117,7 +117,7 @@ describe('BOOKSHELF-UTILS', function () {
         id: 1,
         user_id: 4,
         name: 'Project Apathy',
-        status_code: 5,
+        status_code: 5
       }
       itemData.relations = {
         profile: {
@@ -130,8 +130,8 @@ describe('BOOKSHELF-UTILS', function () {
             tagline: 'I don\'t have habits, I have algorithms.',
             description: null,
             is_default: true,
-            is_live: false,
-          },
+            is_live: false
+          }
         },
         user: {
           id: 4,
@@ -140,8 +140,8 @@ describe('BOOKSHELF-UTILS', function () {
             username: 'the_manic_edge',
             external_id: '304',
             email: 'the-manic-edge@demo.com',
-            display_name: 'The Manic Edge',
-          },
+            display_name: 'The Manic Edge'
+          }
         },
         team: {
           id: 27,
@@ -150,8 +150,8 @@ describe('BOOKSHELF-UTILS', function () {
             name: 'The Coalition',
             slug: 'the-coalition',
             email: 'team@the-coalition.org',
-            member_count: 5,
-          },
+            member_count: 5
+          }
         },
         techConceptTags: {
           length: 5,
@@ -160,25 +160,25 @@ describe('BOOKSHELF-UTILS', function () {
             { id: 2, attributes: { id: 2, label: 'Machine Learning', key: 'machine-learning', created_by: 1 } },
             { id: 3, attributes: { id: 3, label: 'Blockchain', key: 'blockchain', created_by: 1 } },
             { id: 4, attributes: { id: 4, label: 'Crypto Currency', key: 'crypto-currency', created_by: 8 } },
-            { id: 5, attributes: { id: 5, label: 'Big Data', key: 'big-data', created_by: 9 } },
-          ],
+            { id: 5, attributes: { id: 5, label: 'Big Data', key: 'big-data', created_by: 9 } }
+          ]
         },
         codingLanguageTags: {
           length: 3,
           models: [
             { id: 1, attributes: { id: 1, label: 'Java', key: 'java' } },
             { id: 2, attributes: { id: 2, label: '.NET', key: 'dot-net' } },
-            { id: 3, attributes: { id: 3, label: 'JavaScript', key: 'javascript' } },
-          ],
+            { id: 3, attributes: { id: 3, label: 'JavaScript', key: 'javascript' } }
+          ]
         },
         softwareTags: {
           length: 3,
           models: [
             { id: 1, attributes: { id: 1, label: 'Vue', key: 'vue', created_by: 1 } },
             { id: 2, attributes: { id: 2, label: 'React', key: 'react', created_by: 4 } },
-            { id: 3, attributes: { id: 3, label: 'Express', key: 'express', created_by: 7 } },
-          ],
-        },
+            { id: 3, attributes: { id: 3, label: 'Express', key: 'express', created_by: 7 } }
+          ]
+        }
       }
     })
 
@@ -200,8 +200,8 @@ describe('BOOKSHELF-UTILS', function () {
           softwareTags: '*', // toMany relation, wildcard (all) cols
           user: 'username', // toOne relation, single col
           profile: ['title', 'tagline', 'is_live'], // toOne relation, multiple explicit cols
-          team: '*', // toOne relation, wildcard (all) cols
-        },
+          team: '*' // toOne relation, wildcard (all) cols
+        }
       }
 
       BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect)
@@ -219,8 +219,8 @@ describe('BOOKSHELF-UTILS', function () {
           softwareTags: '*', // toMany relation, wildcard (all) cols
           user: 'username', // toOne relation, single col
           profile: ['title', 'tagline', 'is_live'], // toOne relation, multiple explicit cols
-          team: '*', // toOne relation, wildcard (all) cols
-        },
+          team: '*' // toOne relation, wildcard (all) cols
+        }
       }
 
       BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, keepAsRelations)

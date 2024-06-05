@@ -36,14 +36,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       'hasAssociatedItem',
       'getAllAssociatedItems',
       'removeAssociatedItems',
-      'removeAllAssociatedItems',
+      'removeAllAssociatedItems'
     ])('%s()', (associationFn) => {
       const isAllFn = associationFn.includes('All')
 
       test.each([
         ['missing main', '"spec.main"', specFixtures.noMain],
         ['missing association', '"spec.association", "spec.association.name"', specFixtures.noAsso],
-        ['missing association.name', '"spec.association.name"', specFixtures.noAssoName],
+        ['missing association.name', '"spec.association.name"', specFixtures.noAssoName]
       ])('when the spec is %s it throws an error (400) that lists %s', async (_, props, theSpec) => {
         try {
           await projectApp[associationFn](theSpec, inputFixtures.normal)
@@ -60,8 +60,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         filterNotNull([
           ['missing main', '"input.main"', inputFixtures.noMain],
           // the All methods allows missing input.association
-          !isAllFn ? ['missing association', '"input.association"', inputFixtures.noAsso] : null,
-        ]),
+          !isAllFn ? ['missing association', '"input.association"', inputFixtures.noAsso] : null
+        ])
       )('when the input is %s it throws an error (400) that lists %s', async (_, props, theInput) => {
         try {
           await projectApp[associationFn](specFixtures.normal, theInput)
@@ -80,8 +80,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           // the All methods doesn't care about association names
           !isAllFn
             ? ['association name does not exist', 'The association "alienTags" does not exist for the resource.', specFixtures.assoNameNotExist]
-            : null,
-        ]),
+            : null
+        ])
       )("when the spec's %s it throws an error (400)", async (_, errMsg, theSpec) => {
         try {
           await projectApp[associationFn](theSpec, inputFixtures.normal)
@@ -103,8 +103,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
             : null,
           associationFn === 'hasAssociatedItem'
             ? ['association resource does not exist', 'The requested "CodingLanguageTag" was not found.', inputFixtures.assoNotExist]
-            : null,
-        ]),
+            : null
+        ])
       )("when the input's %s it throws an error (404)", async (_, errMsg, theInput) => {
         try {
           await projectApp[associationFn](specFixtures.normal, theInput)
@@ -122,8 +122,8 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           ['main missing requiredOr fields', 'Missing required fields: at least one of => ("id", "alias")', inputFixtures.mainBad],
           !isAllFn
             ? ['assoc missing requiredOr fields', 'Missing required fields: at least one of => ("id", "key")', inputFixtures.assoBad]
-            : null,
-        ]),
+            : null
+        ])
       )("when the input's %s it throws an error (400)", async (_, errMsg, theInput) => {
         try {
           await projectApp[associationFn](specFixtures.normal, theInput)
@@ -167,15 +167,15 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 1 } },
         association: {
           fields: {
-            id: 10, // html
-          },
-        },
+            id: 10 // html
+          }
+        }
       }
 
       // Validate expected initial state
       const data = await projectApp.getAllAssociatedItems(
         specFixtures.normal,
-        { main: { fields: { id: 1 } } },
+        { main: { fields: { id: 1 } } }
       )
 
       expect(data.relatedData).toMatchSnapshot({ parentAttributes: objectWithTimestamps })
@@ -201,7 +201,6 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       expect.assertions(11)
     })
 
-
     it('should accept multiple ids', async () => {
       const spec = specFixtures.normal
       const associationName = spec.association.name
@@ -212,9 +211,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 3 } },
         association: {
           fields: {
-            id: [1, 2, 9, 10], // java, jsp, xslt, html
-          },
-        },
+            id: [1, 2, 9, 10] // java, jsp, xslt, html
+          }
+        }
       }
 
       // ----------------------------
@@ -224,7 +223,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       // Validate expected initial state
       const data = await projectApp.getAllAssociatedItems(
         specFixtures.normal,
-        { main: { fields: { id: 3 } } },
+        { main: { fields: { id: 3 } } }
       )
 
       expect(data.relatedData).toMatchSnapshot({ parentAttributes: objectWithTimestamps })
@@ -260,29 +259,29 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
           modelName: 'Project',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'alias', type: 'String', requiredOr: true },
-          ],
+            { name: 'alias', type: 'String', requiredOr: true }
+          ]
         },
         association: {
           name: associationName,
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
+            { name: 'key', type: 'String', requiredOr: true }
+          ]
+        }
       }
 
       const input = {
         main: {
           fields: {
-            id: mainID,
-          },
+            id: mainID
+          }
         },
         association: {
           fields: {
-            id: 3, // javascript
-          },
-        },
+            id: 3 // javascript
+          }
+        }
       }
 
       // const specForGet = {
@@ -318,19 +317,19 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const input = {
         main: {
           fields: {
-            id: mainID,
-          },
+            id: mainID
+          }
         },
         association: {
           fields: {
-            id: 7, // ruby
-          },
-        },
+            id: 7 // ruby
+          }
+        }
       }
 
       const payloads = await Promise.all([
         projectAppJsonApi.addAssociatedItems(spec, input),
-        projectAppJsonApi.addAssociatedItems(spec, input, 'json-api'),
+        projectAppJsonApi.addAssociatedItems(spec, input, 'json-api')
       ])
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop
@@ -359,9 +358,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 3 } },
         association: {
           fields: {
-            id: 9, // xslt
-          },
-        },
+            id: 9 // xslt
+          }
+        }
       }
 
       await expect(projectApp.hasAssociatedItem(specFixtures.normal, input))
@@ -380,9 +379,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 2 } },
         association: {
           fields: {
-            id: 1, // java
-          },
-        },
+            id: 1 // java
+          }
+        }
       }
 
       const data = await projectApp.hasAssociatedItem(specFixtures.normal, input)
@@ -404,14 +403,14 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 2 } },
         association: {
           fields: {
-            id: 1, // java
-          },
-        },
+            id: 1 // java
+          }
+        }
       }
 
       const payloads = await Promise.all([
         projectAppJsonApi.hasAssociatedItem(spec, input),
-        projectApp.hasAssociatedItem(spec, input, 'json-api'),
+        projectApp.hasAssociatedItem(spec, input, 'json-api')
       ])
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop
@@ -453,7 +452,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       const payloads = await Promise.all([
         projectAppJsonApi.getAllAssociatedItems(spec, input),
-        projectApp.getAllAssociatedItems(spec, input, 'json-api'),
+        projectApp.getAllAssociatedItems(spec, input, 'json-api')
       ])
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop
@@ -501,9 +500,9 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
         main: { fields: { id: 2 } },
         association: {
           fields: {
-            key: ['java', 'jsp', 'xslt'], // 1, 2, 9
-          },
-        },
+            key: ['java', 'jsp', 'xslt'] // 1, 2, 9
+          }
+        }
       }
 
       const data = await projectApp.removeAssociatedItems(spec, input)
@@ -523,7 +522,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const spec = specFixtures.normal
       const input = {
         main: { fields: { id: 4 } },
-        association: { fields: { id: 1 } }, // java
+        association: { fields: { id: 1 } } // java
       }
       const associationName = spec.association.name
 
@@ -544,12 +543,12 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
       const spec = specFixtures.normal
       const input = {
         main: { fields: { id: 1 } },
-        association: { fields: { id: 1 } }, // java
+        association: { fields: { id: 1 } } // java
       }
 
       const payloads = await Promise.all([
         projectAppJsonApi.removeAssociatedItems(spec, input),
-        projectApp.removeAssociatedItems(spec, input, 'json-api'),
+        projectApp.removeAssociatedItems(spec, input, 'json-api')
       ])
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop
@@ -607,7 +606,7 @@ describe('ASSOCIATION ACTIONS [bookshelf]', () => {
 
       const payloads = await Promise.all([
         projectAppJsonApi.removeAllAssociatedItems(spec, input),
-        projectApp.removeAllAssociatedItems(spec, input, 'json-api'),
+        projectApp.removeAllAssociatedItems(spec, input, 'json-api')
       ])
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop

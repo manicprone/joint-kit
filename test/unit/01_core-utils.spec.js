@@ -18,7 +18,7 @@ describe('CORE-UTILS', () => {
         data: [],
         fauxLogic: () => {
           return null
-        },
+        }
       }
       expect(CoreUtils.determineServiceKeyFromService(service)).toBeNull()
     })

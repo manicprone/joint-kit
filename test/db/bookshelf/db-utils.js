@@ -40,5 +40,5 @@ const resetDB = async (seeds, debug) => {
 module.exports = {
   setupDB,
   closeDB,
-  resetDB,
+  resetDB
 }

@@ -1,7 +1,7 @@
 const tableNameTags = 'tags'
 const tableNameProfileTagsRef = 'profile_tags_ref'
 
-exports.up = function up(knex) {
+exports.up = function up (knex) {
   return Promise.all([
     // knex.schema.createTableIfNotExists('blog_posts', (table) => {
     //   table.increments();
@@ -31,7 +31,7 @@ exports.up = function up(knex) {
         table.integer('tag_id').notNullable().unsigned().references('tags.id')
         table.timestamps()
       })
-    }),
+    })
     // knex.schema.createTableIfNotExists('blog_post_tags_ref', (table) => {
     //   table.increments();
     //   table.integer('post_id').notNullable().unsigned().references('blog_posts.id');
@@ -41,13 +41,13 @@ exports.up = function up(knex) {
   ])
 }
 
-exports.down = function down(knex) {
+exports.down = function down (knex) {
   return Promise.all([
     // knex.schema.dropTableIfExists('blog_post_tags_ref'),
-    knex.schema.dropTableIfExists(tableNameProfileTagsRef),
+    knex.schema.dropTableIfExists(tableNameProfileTagsRef)
   ]).then(() => {
     return Promise.all([
-      knex.schema.dropTableIfExists(tableNameTags),
+      knex.schema.dropTableIfExists(tableNameTags)
       // knex.schema.dropTableIfExists('blog_posts'),
     ])
   })

@@ -7,5 +7,5 @@ import userInfo from './methodConfigs/user-info'
 
 module.exports = [
   user,
-  userInfo,
+  userInfo
 ]

@@ -19,9 +19,9 @@ module.exports = {
           { name: 'first_name', type: 'String' },
           { name: 'last_name', type: 'String' },
           { name: 'preferred_locale', type: 'String' },
-          { name: 'avatar_url', type: 'String' },
-        ],
-      },
+          { name: 'avatar_url', type: 'String' }
+        ]
+      }
     },
     {
       name: 'updateUser',
@@ -35,9 +35,9 @@ module.exports = {
           { name: 'first_name', type: 'String' },
           { name: 'last_name', type: 'String' },
           { name: 'preferred_locale', type: 'String' },
-          { name: 'avatar_url', type: 'String' },
-        ],
-      },
+          { name: 'avatar_url', type: 'String' }
+        ]
+      }
     },
     {
       name: 'markLogin',
@@ -45,9 +45,9 @@ module.exports = {
       spec: {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
-          { name: 'last_login_at', type: 'String', locked: true, defaultValue: '% now %' },
-        ],
-      },
+          { name: 'last_login_at', type: 'String', locked: true, defaultValue: '% now %' }
+        ]
+      }
     },
     {
       name: 'getUser',
@@ -56,23 +56,23 @@ module.exports = {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
           { name: 'username', type: 'String', requiredOr: true },
-          { name: 'external_id', type: 'String', requiredOr: true },
+          { name: 'external_id', type: 'String', requiredOr: true }
         ],
-        fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
+        fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url']
         // forceLoadDirect: ['roles:name'],
-      },
+      }
     },
     {
       name: 'getUsers',
       action: 'getItems',
       spec: {
         fields: [
-          { name: 'preferred_locale', type: 'String' },
+          { name: 'preferred_locale', type: 'String' }
         ],
         fieldsToReturn: ['id', 'username', 'display_name', 'avatar_url'],
-        defaultOrderBy: '-created_at,username',
+        defaultOrderBy: '-created_at,username'
         // forceLoadDirect: ['roles:name'],
-      },
+      }
     },
     {
       name: 'deleteUser',
@@ -81,9 +81,9 @@ module.exports = {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
           { name: 'username', type: 'String', requiredOr: true },
-          { name: 'external_id', type: 'String', requiredOr: true },
-        ],
-      },
-    },
-  ],
+          { name: 'external_id', type: 'String', requiredOr: true }
+        ]
+      }
+    }
+  ]
 }

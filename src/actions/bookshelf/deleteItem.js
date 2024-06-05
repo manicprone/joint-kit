@@ -9,7 +9,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function deleteItem(joint, spec = {}, input = {}, output) {
+export default async function deleteItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -24,7 +24,7 @@ export default async function deleteItem(joint, spec = {}, input = {}, output) {
   })
 }
 
-async function performDeleteItem(joint, spec = {}, input = {}, output) {
+async function performDeleteItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
@@ -57,7 +57,7 @@ async function performDeleteItem(joint, spec = {}, input = {}, output) {
   return doAction(joint, modelName, specFields, specAuth, null, inputFields, authContext, trx, output)
 } // END - performDeleteItem
 
-async function doLookupThenAction(joint, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
+async function doLookupThenAction (joint, lookupFieldData, modelName, specFields, specAuth, inputFields, authContext, trx, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const getItemOpts = { require: true }
   if (trx) getItemOpts.transacting = trx
@@ -75,13 +75,12 @@ async function doLookupThenAction(joint, lookupFieldData, modelName, specFields,
     const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
 
     return doAction(joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'deleteItem', modelName)
   }
 } // END - doLookupThenAction
 
-async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
+async function doAction (joint, modelName, specFields, specAuth, ownerCreds, inputFields, authContext, trx, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
 
   // Respect auth...
@@ -105,7 +104,7 @@ async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inpu
         const hasInput = objectUtils.has(inputFields, fieldName)
         const matchStrategy = objectUtils.get(inputFields,
           `${fieldName}.matchStrategy`,
-          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
         )
         if (hasInput) {
           BookshelfUtils.appendWhereClause(queryBuilder, fieldName, inputFields[fieldName].value, matchStrategy)
@@ -121,7 +120,6 @@ async function doAction(joint, modelName, specFields, specAuth, ownerCreds, inpu
     // Delete item...
     const data = await bookshelf.model(modelName).query(queryOpts).destroy(actionOpts)
     return handleDataResponse(joint, modelName, data, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'deleteItem', modelName)
   }

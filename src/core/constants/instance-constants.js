@@ -42,5 +42,5 @@ export default {
   REGISTRY_SPEC_BY_METHOD: 'specByMethod',
 
   // ------------------------------- Generated Router
-  ROUTER: 'router',
+  ROUTER: 'router'
 }

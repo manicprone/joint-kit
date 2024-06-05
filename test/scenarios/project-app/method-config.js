@@ -17,5 +17,5 @@ module.exports = [
   projectContributor,
   codingLanguageTag,
   softwareTag,
-  techConceptTag,
+  techConceptTag
 ]

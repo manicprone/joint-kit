@@ -13,7 +13,7 @@ module.exports = {
       spec: {
         fields: [
           { name: 'name', type: 'String', required: true },
-          { name: 'alias', type: 'String' /* , defaultValue: '% slugify(name) %' */},
+          { name: 'alias', type: 'String' /* , defaultValue: '% slugify(name) %' */ },
           { name: 'image_url', type: 'String' },
           { name: 'location', type: 'String' },
           { name: 'brief_description', type: 'String' },
@@ -22,9 +22,9 @@ module.exports = {
           { name: 'status_code', type: 'Number' },
           { name: 'started_at', type: 'String' },
           { name: 'finished_at', type: 'String' },
-          { name: 'created_by', type: 'Number' },
-        ],
-      },
+          { name: 'created_by', type: 'Number' }
+        ]
+      }
     },
     {
       name: 'updateProject',
@@ -41,9 +41,9 @@ module.exports = {
           { name: 'is_internal', type: 'Boolean' },
           { name: 'status_code', type: 'Number' },
           { name: 'started_at', type: 'String' },
-          { name: 'finished_at', type: 'String' },
-        ],
-      },
+          { name: 'finished_at', type: 'String' }
+        ]
+      }
     },
     {
       name: 'getProject',
@@ -51,19 +51,19 @@ module.exports = {
       spec: {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'alias', type: 'String', requiredOr: true },
-        ],
-      },
+          { name: 'alias', type: 'String', requiredOr: true }
+        ]
+      }
     },
     {
       name: 'getProjectWithAllRefs',
       action: 'getItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', required: true },
+          { name: 'id', type: 'Number', required: true }
         ],
-        forceLoadDirect: ['coding_language_tags:{id,key}'],
-      },
+        forceLoadDirect: ['coding_language_tags:{id,key}']
+      }
     },
     {
       name: 'getProjects',
@@ -71,10 +71,10 @@ module.exports = {
       spec: {
         fields: [
           { name: 'status_code', type: 'Number' },
-          { name: 'is_internal', type: 'Boolean' },
+          { name: 'is_internal', type: 'Boolean' }
         ],
-        defaultOrderBy: 'name,-updated_at',
-      },
+        defaultOrderBy: 'name,-updated_at'
+      }
     },
     {
       name: 'deleteProject',
@@ -82,9 +82,9 @@ module.exports = {
       spec: {
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'alias', type: 'String', requiredOr: true },
-        ],
-      },
+          { name: 'alias', type: 'String', requiredOr: true }
+        ]
+      }
     },
 
     // -------------------------------------------------------------------------
@@ -97,17 +97,17 @@ module.exports = {
         main: {
           modelName: 'Project',
           fields: [
-            { name: 'id', type: 'Number', required: true },
-          ],
+            { name: 'id', type: 'Number', required: true }
+          ]
         },
         association: {
           name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      },
+            { name: 'key', type: 'String', requiredOr: true }
+          ]
+        }
+      }
     },
     {
       name: 'getAllCodingLanguageTags',
@@ -116,13 +116,13 @@ module.exports = {
         main: {
           modelName: 'Project',
           fields: [
-            { name: 'id', type: 'Number', required: true },
-          ],
+            { name: 'id', type: 'Number', required: true }
+          ]
         },
         association: {
-          name: 'coding_language_tags',
-        },
-      },
+          name: 'coding_language_tags'
+        }
+      }
     },
     {
       name: 'detachCodingLanguageTags',
@@ -131,17 +131,17 @@ module.exports = {
         main: {
           modelName: 'Project',
           fields: [
-            { name: 'id', type: 'Number', required: true },
-          ],
+            { name: 'id', type: 'Number', required: true }
+          ]
         },
         association: {
           name: 'coding_language_tags',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'key', type: 'String', requiredOr: true },
-          ],
-        },
-      },
+            { name: 'key', type: 'String', requiredOr: true }
+          ]
+        }
+      }
     },
     {
       name: 'detachAllCodingLanguageTags',
@@ -150,13 +150,13 @@ module.exports = {
         main: {
           modelName: 'Project',
           fields: [
-            { name: 'id', type: 'Number', required: true },
-          ],
+            { name: 'id', type: 'Number', required: true }
+          ]
         },
         association: {
-          name: 'coding_language_tags',
-        },
-      },
-    },
-  ],
+          name: 'coding_language_tags'
+        }
+      }
+    }
+  ]
 }

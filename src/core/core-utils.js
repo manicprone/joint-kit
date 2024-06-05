@@ -3,7 +3,7 @@
 // serviceKey. If a service instance is not provided, or is not recognized, the
 // function returns null.
 // -----------------------------------------------------------------------------
-export function determineServiceKeyFromService(service) {
+export function determineServiceKeyFromService (service) {
   let serviceKey = null
 
   if (service) {
@@ -18,7 +18,7 @@ export function determineServiceKeyFromService(service) {
 // serverKey. If a server instance is not provided, or is not recognized, the
 // function returns null.
 // -----------------------------------------------------------------------------
-export function determineServerKeyFromServer(server) {
+export function determineServerKeyFromServer (server) {
   let serverKey = null
 
   if (server) {
@@ -61,7 +61,7 @@ export function determineServerKeyFromServer(server) {
 //   targetField: 'id',
 // }
 // -----------------------------------------------------------------------------
-export function parseAssociationPath(path = '') {
+export function parseAssociationPath (path = '') {
   let info = null
 
   const pathParts = path.replace(/\s+/g, '').split('=>')
@@ -85,10 +85,10 @@ export function parseAssociationPath(path = '') {
         info = {
           sourceField,
           through: {
-            modelName: thruFromModel, fromField: thruFromParts[1], toField: thruToParts[1],
+            modelName: thruFromModel, fromField: thruFromParts[1], toField: thruToParts[1]
           },
           targetModelName: targetParts[0],
-          targetField: targetParts[1],
+          targetField: targetParts[1]
         }
       }
     }
@@ -102,7 +102,7 @@ export function parseAssociationPath(path = '') {
       info = {
         sourceField,
         targetModelName: targetParts[0],
-        targetField: targetParts[1],
+        targetField: targetParts[1]
       }
     }
   } // end-if-else (pathParts.length === 4)

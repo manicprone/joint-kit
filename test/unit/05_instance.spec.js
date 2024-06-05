@@ -26,7 +26,7 @@ describe('JOINT', () => {
         data: [],
         fauxLogic: () => {
           return null
-        },
+        }
       }
 
       expect(() => new Joint({ service: fauxService }))
@@ -143,7 +143,7 @@ describe('JOINT', () => {
     it('should recognize the express server instance', () => {
       const joint = new Joint({
         service: bookshelf,
-        server: express,
+        server: express
       })
 
       expect(joint.serverKey).toBe('express')
@@ -152,13 +152,13 @@ describe('JOINT', () => {
     it('should successfully build an express router via route config', () => {
       const projectApp = new Joint({
         service: bookshelf,
-        server: express,
+        server: express
       })
       projectApp.generate({
         modelConfig: projectAppModels,
         methodConfig: projectAppMethods,
         routeConfig: projectAppRoutes,
-        log: false,
+        log: false
       })
 
       expect(projectApp.info().api).toBe(true)

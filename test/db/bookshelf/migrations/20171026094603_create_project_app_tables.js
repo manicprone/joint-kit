@@ -8,7 +8,7 @@ const tableNameProjectSoftwareTagsRef = 'project_software_tags_ref'
 const tableNameProjectCodingLanguageTagsRef = 'project_coding_language_tags_ref'
 const tableNameProjectTechConceptsTagsRef = 'project_tech_concepts_tags_ref'
 
-exports.up = function up(knex) {
+exports.up = function up (knex) {
   return Promise.all([
     knex.schema.hasTable(tableNameProjectStatus).then((exists) => {
       if (exists) return false
@@ -108,25 +108,25 @@ exports.up = function up(knex) {
         table.integer('tag_id').notNullable().unsigned().references('tags_tech_concepts.id')
         table.timestamps()
       })
-    }),
+    })
   ])
 }
 
-exports.down = function down(knex) {
+exports.down = function down (knex) {
   return Promise.all([
     knex.schema.dropTableIfExists(tableNameProjectTechConceptsTagsRef),
     knex.schema.dropTableIfExists(tableNameProjectCodingLanguageTagsRef),
     knex.schema.dropTableIfExists(tableNameProjectSoftwareTagsRef),
-    knex.schema.dropTableIfExists(tableNameProjectContributorsRef),
+    knex.schema.dropTableIfExists(tableNameProjectContributorsRef)
   ]).then(() => {
     return Promise.all([
       knex.schema.dropTableIfExists(tableNameProjectTagsTechConcepts),
       knex.schema.dropTableIfExists(tableNameProjectTagsCodingLanguages),
       knex.schema.dropTableIfExists(tableNameProjectTagsSoftware),
-      knex.schema.dropTableIfExists(tableNameProjects),
+      knex.schema.dropTableIfExists(tableNameProjects)
     ]).then(() => {
       return Promise.all([
-        knex.schema.dropTableIfExists(tableNameProjectStatus),
+        knex.schema.dropTableIfExists(tableNameProjectStatus)
       ])
     })
   })

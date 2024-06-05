@@ -8,7 +8,7 @@ export default defineConfig({
     fileParallelism: false,
     passWithNoTests: true,
     snapshotSerializers: [
-      './test/serializers/joint-error-serializer',
-    ],
-  },
+      './test/serializers/joint-error-serializer'
+    ]
+  }
 })

@@ -2,7 +2,7 @@ const tableNameAppRegistry = 'app_registry'
 const tableNameAppContent = 'app_content'
 const tableNameAppSettings = 'app_settings'
 
-exports.up = function up(knex) {
+exports.up = function up (knex) {
   return Promise.all([
     knex.schema.hasTable(tableNameAppRegistry).then((exists) => {
       if (exists) return false
@@ -32,14 +32,14 @@ exports.up = function up(knex) {
         table.jsonb('data').nullable()
         table.timestamps()
       })
-    }),
+    })
   ])
 }
 
-exports.down = function down(knex) {
+exports.down = function down (knex) {
   return Promise.all([
     knex.schema.dropTableIfExists(tableNameAppRegistry),
     knex.schema.dropTableIfExists(tableNameAppContent),
-    knex.schema.dropTableIfExists(tableNameAppSettings),
+    knex.schema.dropTableIfExists(tableNameAppSettings)
   ])
 }

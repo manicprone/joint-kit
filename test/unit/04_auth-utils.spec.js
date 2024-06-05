@@ -9,8 +9,8 @@ describe('AUTH-UTILS', () => {
     it('should return the expected authContext package, in a server-side request scenario', () => {
       const mockJoint = {
         settings: {
-          auth: {},
-        },
+          auth: {}
+        }
       }
 
       const context = {
@@ -20,7 +20,7 @@ describe('AUTH-UTILS', () => {
         username: 'moderator-blogger',
         display_name: 'Moderator Blogger',
         roles: ['moderator', 'blogger'],
-        profile_ids: [5, 7, 9],
+        profile_ids: [5, 7, 9]
       }
 
       expect(AuthUtils.prepareAuthContext(mockJoint, context))
@@ -31,9 +31,9 @@ describe('AUTH-UTILS', () => {
       const mockJoint = {
         settings: {
           auth: {
-            sessionNameForUser: 'joint_user',
-          },
-        },
+            sessionNameForUser: 'joint_user'
+          }
+        }
       }
 
       const mockSessionInfo = {
@@ -43,15 +43,15 @@ describe('AUTH-UTILS', () => {
         username: 'moderator-blogger',
         display_name: 'Moderator Blogger',
         roles: ['moderator', 'blogger'],
-        profile_ids: [5, 7, 9],
+        profile_ids: [5, 7, 9]
       }
 
       const mockRequest = {
         method: 'POST',
         originalUrl: '/api/blog/post/7/unpublish',
         session: {
-          joint_user: mockSessionInfo,
-        },
+          joint_user: mockSessionInfo
+        }
       }
 
       expect(AuthUtils.prepareAuthContext(mockJoint, mockRequest)).toMatchInlineSnapshot(`
@@ -94,7 +94,7 @@ describe('AUTH-UTILS', () => {
         avatar_url: 'http://insane.avatars.com/a7fc83f9-201e-490f-8bdf-58b56a647eb3.png',
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
-        default_profile_status_id: 3,
+        default_profile_status_id: 3
       }
 
       const ownerToCheck = 'me'
@@ -114,7 +114,7 @@ describe('AUTH-UTILS', () => {
         avatar_url: 'http://insane.avatars.com/a7fc83f9-201e-490f-8bdf-58b56a647eb3.png',
         roles: ['moderator', 'blogger'],
         profile_ids: [5, 7, 9],
-        default_profile_status_id: 3,
+        default_profile_status_id: 3
       }
 
       const ownerToCheck = 'me'

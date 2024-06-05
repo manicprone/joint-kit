@@ -28,7 +28,7 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
       modelConfig: blogAppModels,
       methodConfig: blogAppMethods,
       routeConfig: blogAppRoutes,
-      log: false,
+      log: false
     })
 
     // Run express server with configured router...
@@ -41,7 +41,6 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
   // Resource: User
   // ---------------------------------------------------------------------------
   describe('User', () => {
-
     // -----------------
     // Route: GET /users
     // -----------------
@@ -63,14 +62,14 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(data).to.have.length(10)
             expect(meta).to.have.keys(['total_items'])
             expect(meta).to.contain({
-              total_items: 10,
+              total_items: 10
             })
 
             const firstItem = data[0]
             expect(firstItem).to.have.property('attributes')
             expect(firstItem).to.contain({
               type: 'User',
-              id: 10,
+              id: 10
             })
           })
       })
@@ -95,7 +94,7 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(meta).to.contain({
               total_items: 10,
               skip,
-              limit,
+              limit
             })
           })
       })
@@ -120,11 +119,11 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(resBody).to.have.keys(['data'])
             expect(data).to.contain({
               type: 'User',
-              id: userID,
+              id: userID
             })
             expect(data.attributes).to.contain({
               display_name: 'Supa Admin',
-              username: 'super-admin',
+              username: 'super-admin'
             })
           })
       })
@@ -144,10 +143,10 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
             expect(resBody).to.have.keys(['data', 'included'])
             expect(data).to.contain({
               type: 'User',
-              id: userID,
+              id: userID
             })
             expect(data.attributes).to.contain({
-              username: 'ricksanchez',
+              username: 'ricksanchez'
             })
             expect(data.relationships).to.have.keys([assocName])
           })
@@ -170,16 +169,15 @@ describe.skip('CUSTOM ROUTER SIMULATION [express]', () => {
 
             expect(data).to.contain({
               type: 'User',
-              id: userID,
+              id: userID
             })
 
             expect(data.attributes)
               .to.contain({
-                info: 'EdgeCaser',
+                info: 'EdgeCaser'
               })
           })
       })
     }) // END - GET /user/:id
-
   }) // END - User
 })

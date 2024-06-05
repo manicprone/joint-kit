@@ -9,7 +9,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function upsertItem(joint, spec = {}, input = {}, output) {
+export default async function upsertItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -24,7 +24,7 @@ export default async function upsertItem(joint, spec = {}, input = {}, output) {
   })
 }
 
-async function performUpsertItem(joint, spec = {}, input = {}, output) {
+async function performUpsertItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
@@ -73,8 +73,8 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
 
       if (!isLocked && !isLookup && (hasInput || hasDefault)) {
         upsertData[fieldName] = (hasInput)
-            ? inputFields[fieldName].value
-            : defaultValue
+          ? inputFields[fieldName].value
+          : defaultValue
       } else if (isLocked && !isLookup && hasDefault) {
         upsertData[fieldName] = defaultValue
       }
@@ -108,7 +108,6 @@ async function performUpsertItem(joint, spec = {}, input = {}, output) {
 
     // Return data...
     return handleDataResponse(joint, modelName, data, output)
-
   } catch (error) {
     // If item not found, create it...
     if (error.message && error.message === 'EmptyResponse') {

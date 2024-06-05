@@ -6,56 +6,56 @@ const seeds = [
   {
     id: 1,
     label: 'Java',
-    key: 'java',
+    key: 'java'
   },
   {
     id: 2,
     label: 'JSP',
-    key: 'jsp',
+    key: 'jsp'
   },
   {
     id: 3,
     label: 'JavaScript',
-    key: 'javascript',
+    key: 'javascript'
   },
   {
     id: 4,
     label: 'CoffeeScript',
-    key: 'coffee-script',
+    key: 'coffee-script'
   },
   {
     id: 5,
     label: 'TypeScript',
-    key: 'type-script',
+    key: 'type-script'
   },
   {
     id: 6,
     label: 'Python',
-    key: 'python',
+    key: 'python'
   },
   {
     id: 7,
     label: 'Ruby',
-    key: 'ruby',
+    key: 'ruby'
   },
   {
     id: 8,
     label: 'PHP',
-    key: 'php',
+    key: 'php'
   },
   {
     id: 9,
     label: 'XSLT',
-    key: 'xslt',
+    key: 'xslt'
   },
   {
     id: 10,
     label: 'HTML',
-    key: 'html',
-  },
+    key: 'html'
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -65,7 +65,7 @@ exports.seed = function seed(knex) {
       return knex(tableName).insert({
         ...data,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })

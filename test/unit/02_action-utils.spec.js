@@ -16,20 +16,20 @@ describe('ACTION-UTILS', () => {
         { name: 'profile_id', type: 'Number', required: true },
         { name: 'title', type: 'String', required: true },
         { name: 'category', type: 'String', required: true },
-        { name: 'summary', type: 'String' },
+        { name: 'summary', type: 'String' }
       ]
 
       const fieldData = {
         profile_id: 1,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
       expect(result).toEqual({
         satisfied: false,
         missing: {
-          all: ['user_id', 'category'],
-        },
+          all: ['user_id', 'category']
+        }
       })
     })
 
@@ -38,20 +38,20 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
-        { name: 'display_name', type: 'String', requiredOr: false },
+        { name: 'display_name', type: 'String', requiredOr: false }
       ]
 
       const fieldData = {
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
       expect(result).toEqual({
         satisfied: false,
         missing: {
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
     })
 
@@ -60,13 +60,13 @@ describe('ACTION-UTILS', () => {
         { name: 'profile_id', type: 'Number' },
         { name: 'title', type: 'String', required: false },
         { name: 'summary', type: 'String', required: false },
-        { name: 'keywords', type: 'String', requiredOr: false },
+        { name: 'keywords', type: 'String', requiredOr: false }
       ]
 
       const fieldData = {
         profile_id: 1,
         title: 'My First Post',
-        improper_field: 'I will not be processed',
+        improper_field: 'I will not be processed'
       }
 
       const nullSpec = ActionUtils.checkRequiredFields(null, fieldData)
@@ -89,14 +89,14 @@ describe('ACTION-UTILS', () => {
         { name: 'title', type: 'String', required: true },
         { name: 'category', type: 'String', required: true },
         { name: 'summary', type: 'String', required: false },
-        { name: 'keywords', type: 'String' },
+        { name: 'keywords', type: 'String' }
       ]
 
       const fieldData = {
         profile_id: 1,
         status_id: 0,
         title: 'My First Post',
-        category: 'Transhumanism',
+        category: 'Transhumanism'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
@@ -108,40 +108,40 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
-        { name: 'display_name', type: 'String', requiredOr: false },
+        { name: 'display_name', type: 'String', requiredOr: false }
       ]
       const fieldSpecBothTypes = [
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
         { name: 'display_name', type: 'String', requiredOr: false },
-        { name: 'external_id', type: 'Number', required: true },
+        { name: 'external_id', type: 'Number', required: true }
       ]
 
       const fieldData01 = {
         id: 1,
         email: 'the-thrilla@fantasmo.com',
         display_name: 'The Thrilla',
-        external_id: '10000',
+        external_id: '10000'
       }
       const fieldData02 = {
         username: 'the-thrilla',
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
       const fieldData03 = {
         email: 'the-thrilla@fantasmo.com',
         display_name: 'The Thrilla',
-        external_id: '10000',
+        external_id: '10000'
       }
       const fieldData04 = {
         id: 1,
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
       const fieldData05 = {
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
 
       const testCase01 = ActionUtils.checkRequiredFields(fieldSpecRequiredOrOnly, fieldData01)
@@ -154,8 +154,8 @@ describe('ACTION-UTILS', () => {
       expect(testCase03).toEqual({
         satisfied: false,
         missing: {
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
 
       const testCase04 = ActionUtils.checkRequiredFields(fieldSpecBothTypes, fieldData01)
@@ -165,8 +165,8 @@ describe('ACTION-UTILS', () => {
       expect(testCase05).toEqual({
         satisfied: false,
         missing: {
-          all: ['external_id'],
-        },
+          all: ['external_id']
+        }
       })
 
       const testCase06 = ActionUtils.checkRequiredFields(fieldSpecBothTypes, fieldData05)
@@ -174,8 +174,8 @@ describe('ACTION-UTILS', () => {
         satisfied: false,
         missing: {
           all: ['external_id'],
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
     })
   }) // END - checkRequiredFields
@@ -190,12 +190,12 @@ describe('ACTION-UTILS', () => {
         { name: 'external_id', type: 'String', lookupOr: false },
         { name: 'slug', type: 'String', lookupOr: false },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
         id: 1,
-        slug: 'post-001',
+        slug: 'post-001'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
@@ -207,18 +207,18 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', required: true, lookup: true },
         { name: 'slug', type: 'String' },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
       const fieldSpecLookupOr = [
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'external_id', type: 'String', lookupOr: true },
         { name: 'slug', type: 'String' },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup, fieldData))
@@ -233,21 +233,21 @@ describe('ACTION-UTILS', () => {
         { name: 'key', type: 'String', lookup: true },
         { name: 'full_version', type: 'Boolean', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
         id: 333,
         key: 'omega',
         full_version: true,
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
         .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
           key: { value: 'omega', matchStrategy: 'exact' },
-          full_version: { value: true, matchStrategy: 'exact' },
+          full_version: { value: true, matchStrategy: 'exact' }
         })
     })
 
@@ -256,12 +256,12 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'external_id', type: 'String', lookupOr: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldDataWithSecondOr = {
         external_id: 'external-id-333',
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldDataWithSecondOr))
@@ -272,23 +272,23 @@ describe('ACTION-UTILS', () => {
       const fieldSpecLookup01 = [
         { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
       const fieldSpecLookup02 = [
         { name: 'id', type: 'Number', lookup: true },
         { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldDataNoKey = {
         id: 333,
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
       const fieldDataWithKey = {
         id: 333,
         key: 'beta',
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup01, fieldDataNoKey))
@@ -296,12 +296,12 @@ describe('ACTION-UTILS', () => {
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataNoKey))
         .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
-          key: { value: 'alpha', matchStrategy: 'exact' },
+          key: { value: 'alpha', matchStrategy: 'exact' }
         })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataWithKey))
         .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
-          key: { value: 'beta', matchStrategy: 'exact' },
+          key: { value: 'beta', matchStrategy: 'exact' }
         })
     })
 
@@ -310,11 +310,11 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'slug', type: 'String', defaultValue: 'item-011', lookupOr: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
@@ -335,7 +335,7 @@ describe('ACTION-UTILS', () => {
       const fieldData = {
         profile_id: 1,
         user_id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       expect(ActionUtils.parseOwnerCreds(authSpecNoCreds, fieldData)).toEqual({})
@@ -347,7 +347,7 @@ describe('ACTION-UTILS', () => {
       authSpec[ACTION.SPEC_AUTH_OWNER_CREDS] = ['user_id', 'profile_id']
 
       const fieldData = {
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       expect(ActionUtils.parseOwnerCreds(authSpec, fieldData)).toEqual({})
@@ -360,7 +360,7 @@ describe('ACTION-UTILS', () => {
       const fieldData = {
         profile_id: 1,
         user_id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       expect(ActionUtils.parseOwnerCreds(authSpec, fieldData)).toMatchInlineSnapshot(`
@@ -372,17 +372,17 @@ describe('ACTION-UTILS', () => {
 
     it('should support field transformation when arrow notation is used on the spec', () => {
       const authSpecNoSpaces = {
-        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id=>user_id', 'profile_id'],
+        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id=>user_id', 'profile_id']
       }
 
       const authSpecWithSpaces = {
-        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id =>  user_id', 'profile_id'],
+        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id =>  user_id', 'profile_id']
       }
 
       const fieldData = {
         profile_id: 1,
         id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       expect(ActionUtils.parseOwnerCreds(authSpecNoSpaces, fieldData))
@@ -409,8 +409,8 @@ describe('ACTION-UTILS', () => {
       expect(parsed).toEqual({
         associations: ['viewCount'],
         colMappings: {
-          viewCount: 'count',
-        },
+          viewCount: 'count'
+        }
       })
     })
 
@@ -423,8 +423,8 @@ describe('ACTION-UTILS', () => {
         associations: ['roles', 'viewCount'],
         colMappings: {
           roles: 'key',
-          viewCount: 'count',
-        },
+          viewCount: 'count'
+        }
       })
     })
 
@@ -439,8 +439,8 @@ describe('ACTION-UTILS', () => {
           roles: 'name',
           viewCount: 'count',
           profile: ['name', 'is_default'],
-          user: '*',
-        },
+          user: '*'
+        }
       })
     })
   }) // END - parseLoadDirect
@@ -452,7 +452,7 @@ describe('ACTION-UTILS', () => {
     it('should return null when a "defaultValue" parameter is not provided', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       expect(ActionUtils.processDefaultValue(fieldData)).toBeNull()
@@ -461,7 +461,7 @@ describe('ACTION-UTILS', () => {
     it('should return the original "defaultValue" for standard scenarios', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const stringValue = 'standard-value'
@@ -485,7 +485,7 @@ describe('ACTION-UTILS', () => {
     it('should support the "now" operator', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const nowOperator = '% now %'
@@ -497,7 +497,7 @@ describe('ACTION-UTILS', () => {
     it('should support the transformation operators (camelCase, kebabCase, snakeCase, pascalCase)', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const camelCase = '% camelCase(title) %'
@@ -530,10 +530,10 @@ describe('ACTION-UTILS', () => {
   // ---------------------------
   describe('normalizeFieldSpec', () => {
     const fieldSpecInput = [
-        { name: 'user_id', type: 'Number' },
-        { name: 'username', type: 'String', operators: ['contains', 'exact'] },
-        { name: 'display_name' },
-        { type: 'Number' },
+      { name: 'user_id', type: 'Number' },
+      { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+      { name: 'display_name' },
+      { type: 'Number' }
     ]
 
     it('should normalize spec field from the input', () => {
@@ -541,7 +541,7 @@ describe('ACTION-UTILS', () => {
       expect(fieldSpec).toEqual([
         { name: 'user_id', type: 'Number', operators: ['exact'] },
         { name: 'username', type: 'String', operators: ['contains', 'exact'] },
-        { name: 'display_name', type: 'String', operators: ['exact'] },
+        { name: 'display_name', type: 'String', operators: ['exact'] }
       ])
     })
 
@@ -604,7 +604,7 @@ describe('ACTION-UTILS', () => {
         { name: 'is_awesome', type: 'Boolean' },
         { name: 'is_typical', type: 'Boolean' },
         { name: 'is_unknown', type: 'Boolean' },
-        { name: 'is_simple', type: 'Boolean' },
+        { name: 'is_simple', type: 'Boolean' }
       ]
 
       const fieldData = {
@@ -617,7 +617,7 @@ describe('ACTION-UTILS', () => {
         is_typical: 'false',
         is_unknown: 'FALSE',
         is_simple: 0,
-        notRelated: 'I am ignored',
+        notRelated: 'I am ignored'
       }
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
@@ -631,7 +631,7 @@ describe('ACTION-UTILS', () => {
         is_awesome: { value: true, matchStrategy: 'exact' },
         is_typical: { value: false, matchStrategy: 'exact' },
         is_unknown: { value: false, matchStrategy: 'exact' },
-        is_simple: { value: false, matchStrategy: 'exact' },
+        is_simple: { value: false, matchStrategy: 'exact' }
       })
     })
 
@@ -642,7 +642,7 @@ describe('ACTION-UTILS', () => {
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
       expect(preparedFieldData).toEqual({
-        username: { value: 'ed', matchStrategy: 'exact' },
+        username: { value: 'ed', matchStrategy: 'exact' }
       })
     })
 
@@ -653,7 +653,7 @@ describe('ACTION-UTILS', () => {
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
       expect(preparedFieldData).toEqual({
-        username: { value: 'ed', matchStrategy: 'contains' },
+        username: { value: 'ed', matchStrategy: 'contains' }
       })
     })
 

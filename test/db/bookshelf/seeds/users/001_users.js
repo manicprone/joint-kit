@@ -12,7 +12,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: 'en-US',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: 'en-US',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: 'en-GB',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 4,
@@ -45,7 +45,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: 'en-US',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 5,
@@ -56,7 +56,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: 'en-US',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 6,
@@ -67,7 +67,7 @@ const seeds = [
     first_name: null,
     last_name: null,
     preferred_locale: null,
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 7,
@@ -79,7 +79,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
-    father_user_id: 8,
+    father_user_id: 8
   },
   {
     id: 8,
@@ -90,7 +90,7 @@ const seeds = [
     first_name: 'Jerry',
     last_name: 'Smith',
     preferred_locale: 'en-US',
-    avatar_url: null,
+    avatar_url: null
   },
   {
     id: 9,
@@ -102,7 +102,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
-    father_user_id: 6,
+    father_user_id: 6
   },
   {
     id: 10,
@@ -114,7 +114,7 @@ const seeds = [
     last_name: 'Smith',
     preferred_locale: 'en-US',
     avatar_url: null,
-    father_user_id: 8,
+    father_user_id: 8
   },
   {
     id: 11,
@@ -125,11 +125,11 @@ const seeds = [
     first_name: "Z'araq",
     last_name: null,
     preferred_locale: 'zaralianen-EXT',
-    avatar_url: null,
-  },
+    avatar_url: null
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -140,7 +140,7 @@ exports.seed = function seed(knex) {
         ...data,
         last_login_at: timestamp,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })

@@ -67,14 +67,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const inputNoAppID = {
           fields: {
-            data: appContent,
-          },
+            data: appContent
+          }
         }
 
         const inputNoData = {
           fields: {
-            app_id: appID,
-          },
+            app_id: appID
+          }
         }
 
         // No required lookup fields
@@ -83,7 +83,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required field: "app_id"',
+            message: 'Missing required field: "app_id"'
           })
 
         // No required data fields
@@ -92,7 +92,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required field: "data"',
+            message: 'Missing required field: "data"'
           })
       })
 
@@ -103,17 +103,17 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           trending: {
             men: 'pleather-jackets',
             women: 'faux-cotton-socks',
-            kids: 'serial-killer-pillows',
+            kids: 'serial-killer-pillows'
           },
-          discountBreakpoints: ['20%', '30%', '50%'],
+          discountBreakpoints: ['20%', '30%', '50%']
         }
 
         const input = {
           fields: {
             app_id: appID,
             key,
-            data: appContent,
-          },
+            data: appContent
+          }
         }
 
         const created = await appMgmt.method.AppContent.saveContent(input)
@@ -134,16 +134,16 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           trending: {
             men: 'hats',
             women: 'belts',
-            kids: 'mobile-phone-accessories',
+            kids: 'mobile-phone-accessories'
           },
-          newBrands: ['twisted-kids', 'forlorn', 'girl-in-the-rain'],
+          newBrands: ['twisted-kids', 'forlorn', 'girl-in-the-rain']
         }
 
         const input = {
           fields: {
             app_id: appID,
-            data: appContent,
-          },
+            data: appContent
+          }
         }
 
         const created = await appMgmt.method.AppContent.saveContent(input)
@@ -165,30 +165,30 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const contentWinterPromo = {
           trending: {
             men: 'mascara',
-            women: 'faux-cotton-socks',
+            women: 'faux-cotton-socks'
           },
-          discountBreakpoints: ['10%', '20%', '30%', '35%', '40%'],
+          discountBreakpoints: ['10%', '20%', '30%', '35%', '40%']
         }
         const contentDefault = {
           trending: {
             men: 'ascots',
-            kids: 'fidget spinners with sharp blades',
+            kids: 'fidget spinners with sharp blades'
           },
-          newBrands: ['the-darkest-path', 'total-vanity'],
+          newBrands: ['the-darkest-path', 'total-vanity']
         }
 
         const inputWithKey = {
           fields: {
             app_id: appID,
             key,
-            data: contentWinterPromo,
-          },
+            data: contentWinterPromo
+          }
         }
         const inputNoKey = {
           fields: {
             app_id: appID,
-            data: contentDefault,
-          },
+            data: contentDefault
+          }
         }
 
         const withKey = appMgmt.method.AppContent.saveContent(inputWithKey)
@@ -235,8 +235,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       it('should return an error (400) when required lookup fields are not provided', async () => {
         const input = {
           fields: {
-            ignored_field: 'give-me-everything',
-          },
+            ignored_field: 'give-me-everything'
+          }
         }
 
         // No required lookup fields
@@ -245,7 +245,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required field: "app_id"',
+            message: 'Missing required field: "app_id"'
           })
       })
 
@@ -256,8 +256,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const input = {
           fields: {
             app_id: appID,
-            key,
-          },
+            key
+          }
         }
 
         return appMgmt.method.AppContent.getContent(input)
@@ -277,8 +277,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const input = {
           fields: {
-            app_id: appID,
-          },
+            app_id: appID
+          }
         }
 
         return appMgmt.method.AppContent.getContent(input)
@@ -293,14 +293,12 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           })
       })
     }) // END - AppContent.getContent
-
   }) // END - AppContent
 
   // ---------------------------------------------------------------------------
   // Resource: User (blog-app)
   // ---------------------------------------------------------------------------
   describe('User', () => {
-
     // -------------------------------------------------------------------------
     // Method: createUser
     // -------------------------------------------------------------------------
@@ -327,8 +325,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const input = {
           fields: {
             email,
-            display_name: displayName,
-          },
+            display_name: displayName
+          }
         }
 
         // Missing required field
@@ -337,7 +335,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required field: "username"',
+            message: 'Missing required field: "username"'
           })
       })
 
@@ -346,8 +344,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const input = {
           fields: {
-            username,
-          },
+            username
+          }
         }
 
         return blogApp.method.User.createUser(input)
@@ -355,7 +353,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             expect(data)
               .to.have.property('attributes')
               .that.contains({
-                username,
+                username
               })
           })
       })
@@ -379,8 +377,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             first_name: firstName,
             last_name: lastName,
             preferred_locale: preferredLocale,
-            avatar_url: avatarURL,
-          },
+            avatar_url: avatarURL
+          }
         }
 
         return blogApp.method.User.createUser(input)
@@ -395,7 +393,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 first_name: firstName,
                 last_name: lastName,
                 preferred_locale: preferredLocale,
-                avatar_url: avatarURL,
+                avatar_url: avatarURL
               })
           })
       })
@@ -426,8 +424,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const input = {
           fields: {
             identifier: 4,
-            display_name: displayName,
-          },
+            display_name: displayName
+          }
         }
 
         // Missing required field
@@ -436,7 +434,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required field: "id"',
+            message: 'Missing required field: "id"'
           })
       })
 
@@ -447,8 +445,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const input = {
           fields: {
             id: userID,
-            display_name: displayName,
-          },
+            display_name: displayName
+          }
         }
 
         // Resource does not exist
@@ -457,7 +455,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 404,
-            message: 'The requested "User" was not found.',
+            message: 'The requested "User" was not found.'
           })
       })
 
@@ -468,8 +466,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         const input = {
           fields: {
             id: userID,
-            display_name: displayName,
-          },
+            display_name: displayName
+          }
         }
 
         return blogApp.method.User.updateUser(input)
@@ -481,7 +479,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 username: 'the_manic_edge',
                 external_id: '304',
                 email: 'the-manic-edge@demo.com',
-                display_name: displayName,
+                display_name: displayName
               })
           })
       })
@@ -507,8 +505,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
             first_name: firstName,
             last_name: lastName,
             preferred_locale: preferredLocale,
-            avatar_url: avatarURL,
-          },
+            avatar_url: avatarURL
+          }
         }
 
         return blogApp.method.User.updateUser(input)
@@ -524,7 +522,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
                 first_name: firstName,
                 last_name: lastName,
                 preferred_locale: preferredLocale,
-                avatar_url: avatarURL,
+                avatar_url: avatarURL
               })
           })
       })
@@ -548,8 +546,8 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       it('should return an error (400) when none of the requiredOr fields are provided', async () => {
         const input = {
           fields: {
-            identifier: 4,
-          },
+            identifier: 4
+          }
         }
 
         // Missing all requiredOr fields
@@ -558,7 +556,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 400,
-            message: 'Missing required fields: at least one of => ("id", "username", "external_id")',
+            message: 'Missing required fields: at least one of => ("id", "username", "external_id")'
           })
       })
 
@@ -569,20 +567,20 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const inputWithID = {
           fields: {
-            id: userID,
-          },
+            id: userID
+          }
         }
 
         const inputWithUsername = {
           fields: {
-            username,
-          },
+            username
+          }
         }
 
         const inputWithExternalID = {
           fields: {
-            external_id: externalID,
-          },
+            external_id: externalID
+          }
         }
 
         // Using id
@@ -591,7 +589,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 404,
-            message: 'The requested "User" was not found.',
+            message: 'The requested "User" was not found.'
           })
 
         // Using username
@@ -600,7 +598,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 404,
-            message: 'The requested "User" was not found.',
+            message: 'The requested "User" was not found.'
           })
 
         // Using external_id
@@ -609,7 +607,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           .and.to.contain({
             name: 'JointStatusError',
             status: 404,
-            message: 'The requested "User" was not found.',
+            message: 'The requested "User" was not found.'
           })
       })
 
@@ -621,20 +619,20 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const inputWithID = {
           fields: {
-            id: userID,
-          },
+            id: userID
+          }
         }
 
         const inputWithUsername = {
           fields: {
-            username,
-          },
+            username
+          }
         }
 
         const inputWithExternalID = {
           fields: {
-            external_id: externalID,
-          },
+            external_id: externalID
+          }
         }
 
         const viaID = blogApp.method.User.getUser(inputWithID)
@@ -644,7 +642,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                display_name: displayName,
+                display_name: displayName
               })
 
             expect(data.attributes).to.have.property('avatar_url')
@@ -659,7 +657,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                display_name: displayName,
+                display_name: displayName
               })
 
             expect(data.attributes).to.have.property('avatar_url')
@@ -674,7 +672,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
               .that.contains({
                 id: userID,
                 username,
-                display_name: displayName,
+                display_name: displayName
               })
 
             expect(data.attributes).to.have.property('avatar_url')
@@ -685,7 +683,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         return Promise.all([
           viaID,
           viaUsername,
-          viaExternalID,
+          viaExternalID
         ])
       })
     }) // END - User.getUser
@@ -734,21 +732,21 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
       it('should return the filtered set of users when an accepted field is provided', async () => {
         const data = await blogApp.method.User.getUsers({
           fields: {
-            preferred_locale: 'en-US',
+            preferred_locale: 'en-US'
           },
-          fieldSet: 'withPreferredLocale',
+          fieldSet: 'withPreferredLocale'
         })
 
         data.models.forEach((model) => {
-         // matches `fieldsToReturn.withPreferredLocale`
-         expect(model).to.have.nested.property('attributes.id')
-         expect(model).to.have.nested.property('attributes.username')
-         expect(model).to.have.nested.property('attributes.preferred_locale', 'en-US')
+          // matches `fieldsToReturn.withPreferredLocale`
+          expect(model).to.have.nested.property('attributes.id')
+          expect(model).to.have.nested.property('attributes.username')
+          expect(model).to.have.nested.property('attributes.preferred_locale', 'en-US')
 
-         // fields not in `fieldsToReturn`
-         expect(model).to.not.have.nested.property('attributes.display_name')
-         expect(model).to.not.have.nested.property('attributes.avatar_url')
-         expect(model).to.not.have.nested.property('attributes.created_at')
+          // fields not in `fieldsToReturn`
+          expect(model).to.not.have.nested.property('attributes.display_name')
+          expect(model).to.not.have.nested.property('attributes.avatar_url')
+          expect(model).to.not.have.nested.property('attributes.created_at')
         })
 
         expect(data).to.have.lengthOf(8)
@@ -778,9 +776,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // -------------------------------------------------------------------------
     describe.skip('User.deleteUser', () => {
       before(() => resetDB(['users']))
-
     }) // END - User.deleteUser
-
   }) // END - User
 
   // ---------------------------------------------------------------------------
@@ -810,7 +806,5 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // -------------------------------------------------------------------------
     describe.skip('Project.createProject', () => {
     }) // END - Project.createProject
-
   }) // END - Project
-
 })

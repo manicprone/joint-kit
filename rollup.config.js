@@ -4,23 +4,22 @@ import commonjs from 'rollup-plugin-commonjs'
 import json from 'rollup-plugin-json'
 import uglify from 'rollup-plugin-uglify'
 
-
 export default {
   input: 'src/index.js',
   output: {
     file: 'dist/lib.js',
-    format: 'cjs',
+    format: 'cjs'
   },
   plugins: [
     resolve(),
     babel({
       runtimeHelpers: true,
-      exclude: 'node_modules/**',
+      exclude: 'node_modules/**'
     }),
     commonjs({
-      include: 'node_modules/**',
+      include: 'node_modules/**'
     }),
     json(),
-    uglify(),
-  ],
+    uglify()
+  ]
 }

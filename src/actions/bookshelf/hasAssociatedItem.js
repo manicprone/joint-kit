@@ -7,7 +7,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function hasAssociatedItem(joint, spec = {}, input = {}, output) {
+export default async function hasAssociatedItem (joint, spec = {}, input = {}, output) {
   const specMain = spec[ACTION.RESOURCE_MAIN]
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
@@ -63,7 +63,6 @@ export default async function hasAssociatedItem(joint, spec = {}, input = {}, ou
 
     // Otherwise, reject with a 404...
     return Promise.reject(StatusErrors.generateAssociatedItemDoesNotExistError(modelNameAssoc))
-
   } catch (error) {
     return handleErrorResponse(error, 'hasAssociatedItem', modelNameMain, assocName)
   }

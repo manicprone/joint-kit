@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, test } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
@@ -28,7 +28,7 @@ const allColsUser = [
   'last_login_at',
   'created_at',
   'updated_at',
-  'father_user_id',
+  'father_user_id'
 ]
 
 // -----------------------------------------------------------------------------
@@ -62,9 +62,9 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       settings: {
         auth: {
           debugBuild: false,
-          debugCheck: false,
-        },
-      },
+          debugCheck: false
+        }
+      }
     })
     blogApp.generate({ modelConfig: blogAppModels, log: false })
 
@@ -83,20 +83,20 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       'upsertItem',
       'updateItem',
       'getItem',
-      'deleteItem',
+      'deleteItem'
     ])('%s()', (fn) => {
       it('should return an error (400) when the specified model does not exist', async () => {
         const spec = {
           modelName: 'Alien',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'slug', type: 'Number', requiredOr: true },
-          ],
+            { name: 'slug', type: 'Number', requiredOr: true }
+          ]
         }
         const input = {
           fields: {
-            id: 1,
-          },
+            id: 1
+          }
         }
 
         // createItem
@@ -110,13 +110,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           modelName: 'User',
           fields: [
             { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'external_id', type: 'String', requiredOr: true },
-          ],
+            { name: 'external_id', type: 'String', requiredOr: true }
+          ]
         }
         const input01 = {
           fields: {
-            identifier: 1,
-          },
+            identifier: 1
+          }
         }
 
         const spec02 = {
@@ -126,14 +126,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             { name: 'display_name', type: 'String', requiredOr: false },
             { name: 'email', type: 'String', required: false },
             { name: 'avatar_url', type: 'String', defaultValue: '//extradimensional.org/avatars/human/random' },
-            { name: 'is_intelligent', type: 'Boolean', defaultValue: false },
-          ],
+            { name: 'is_intelligent', type: 'Boolean', defaultValue: false }
+          ]
         }
         const input02 = {
           fields: {
             display_name: 'Jimbo',
-            email: 'jimbo@mail.com',
-          },
+            email: 'jimbo@mail.com'
+          }
         }
 
         await expect(projectApp[fn](spec01, input01))
@@ -149,18 +149,18 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         const spec = {
           modelName: 'Profile',
           fields: [
-            { name: 'user_id', type: 'Number' },
+            { name: 'user_id', type: 'Number' }
           ],
           auth: {
             rules: { owner: 'me' },
-            ownerCreds: ['id => profile_ids', 'user_id'],
-          },
+            ownerCreds: ['id => profile_ids', 'user_id']
+          }
         }
         const input = {
           fields: {
-            title: 'How to Blow Up Every Morning',
+            title: 'How to Blow Up Every Morning'
           },
-          authContext: {},
+          authContext: {}
         }
 
         await expect(blogApp.createItem(spec, input))
@@ -168,7 +168,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           .toThrowErrorMatchingSnapshot()
       })
     })
-
   }) // END - standard error scenarios
 
   describe('semantic error reporting', async () => {
@@ -176,28 +175,28 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       [
         'missing one "required" field',
         { status_code: 0, this_thing: 'reality' },
-        'Missing required field: "user_id"',
+        'Missing required field: "user_id"'
       ],
       [
         'missing two "required" fields',
         { this_thing: 'reality', that_thing: 'fiction' },
-        'Missing required fields: all of => ("user_id", "status_code")',
+        'Missing required fields: all of => ("user_id", "status_code")'
       ],
       [
         'missing any "requiredOr" fields',
         { user_id: 333, status_code: 0 },
-        'Missing required fields: at least one of => ("this_thing", "that_thing")',
+        'Missing required fields: at least one of => ("this_thing", "that_thing")'
       ],
       [
         'missing one "required" field and any "requiredOr" fields',
         { status_code: 0 },
-        'Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")',
+        'Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")'
       ],
       [
         'missing two "required" fields and any "requiredOr" fields',
         {},
-        'Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")',
-      ],
+        'Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")'
+      ]
     ])('scenario %s', async (_, input, expected) => {
       const spec = {
         modelName: 'Project',
@@ -205,15 +204,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           { name: 'user_id', type: 'Number', required: true },
           { name: 'status_code', type: 'Number', required: true },
           { name: 'this_thing', type: 'String', requiredOr: true },
-          { name: 'that_thing', type: 'String', requiredOr: true },
-        ],
+          { name: 'that_thing', type: 'String', requiredOr: true }
+        ]
       }
 
       const promise = projectApp.createItem(spec, { fields: { ...input } })
       await expect(promise).rejects.toThrow()
 
-      try { await promise }
-      catch (error) {
+      try { await promise } catch (error) {
         expect(error.message).toBe(expected)
       }
 
@@ -724,7 +722,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   //    expect(updated).has.nested.property('attributes.name').that.contains('er')
   //    expect(updated).has.nested.property('attributes.alias').that.equals('updated-alias')
   //  })
-
 
   //  it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
   //    const id = 1
@@ -2257,7 +2254,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   //    })
   //  })
 
-
   //  it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, () => {
   //    const userContext = {
   //      is_logged_in: true,
@@ -2332,5 +2328,4 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   //    return Promise.all([globalLevel, methodLevel])
   //  })
   // }) // END - deleteItem
-
 })

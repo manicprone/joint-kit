@@ -7,7 +7,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function removeAssociatedItems(joint, spec = {}, input = {}, output) {
+export default async function removeAssociatedItems (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -22,7 +22,7 @@ export default async function removeAssociatedItems(joint, spec = {}, input = {}
   })
 }
 
-async function performRemoveAssociatedItems(joint, spec = {}, input = {}, output) {
+async function performRemoveAssociatedItems (joint, spec = {}, input = {}, output) {
   const specMain = spec[ACTION.RESOURCE_MAIN]
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
@@ -74,7 +74,6 @@ async function performRemoveAssociatedItems(joint, spec = {}, input = {}, output
 
     // Return data...
     return handleDataResponse(joint, modelNameMain, main, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'removeAssociatedItems', modelNameMain, assocName)
   }

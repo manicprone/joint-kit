@@ -18,7 +18,7 @@ const seeds = [
     status_code: 4,
     started_at: '2016-07-30T11:20+08:00',
     finished_at: '2016-08-02T21:33+08:00',
-    created_by: null,
+    created_by: null
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const seeds = [
     status_code: 5,
     started_at: null,
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
   {
     id: 3,
@@ -46,7 +46,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-03-10',
     finished_at: '2017-03-29',
-    created_by: null,
+    created_by: null
   },
   {
     id: 4,
@@ -60,7 +60,7 @@ const seeds = [
     status_code: 3,
     started_at: null,
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
 
   // ---------------------------------------------------------------------------
@@ -79,7 +79,7 @@ const seeds = [
     status_code: 4,
     started_at: '2017-01-01',
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
   {
     id: 6,
@@ -93,7 +93,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-03-10',
     finished_at: '2017-03-29',
-    created_by: null,
+    created_by: null
   },
   {
     id: 7,
@@ -107,7 +107,7 @@ const seeds = [
     status_code: 3,
     started_at: null,
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
   {
     id: 8,
@@ -121,7 +121,7 @@ const seeds = [
     status_code: 3,
     started_at: null,
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
   {
     id: 9,
@@ -135,7 +135,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-06-02',
     finished_at: '2017-08-01',
-    created_by: null,
+    created_by: null
   },
   {
     id: 10,
@@ -149,7 +149,7 @@ const seeds = [
     status_code: 4,
     started_at: '2017-08-22',
     finished_at: null,
-    created_by: null,
+    created_by: null
   },
   {
     id: 11,
@@ -163,7 +163,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-09-03',
     finished_at: '2017-11-25',
-    created_by: null,
+    created_by: null
   },
   {
     id: 12,
@@ -177,7 +177,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-09-18',
     finished_at: '2017-09-22',
-    created_by: null,
+    created_by: null
   },
   {
     id: 13,
@@ -191,7 +191,7 @@ const seeds = [
     status_code: 5,
     started_at: '2017-10-01',
     finished_at: '2017-10-09',
-    created_by: null,
+    created_by: null
   },
   {
     id: 14,
@@ -205,11 +205,11 @@ const seeds = [
     status_code: 4,
     started_at: '2017-11-17',
     finished_at: null,
-    created_by: null,
-  },
+    created_by: null
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -219,7 +219,7 @@ exports.seed = function seed(knex) {
       return knex(tableName).insert({
         ...data,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })
