@@ -1,0 +1,204 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > AppContent > AppContent.saveContent (testing upsertItem) > should update an existing package of data according to the spec defintion 1`] = `
+{
+  "app_id": "trendy-boutique",
+  "created_at": Any<Date>,
+  "data": "{"trending":{"men":"mascara","women":"faux-cotton-socks"},"discountBreakpoints":["10%","20%","30%","35%","40%"]}",
+  "id": 1,
+  "key": "winter-promo",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > AppContent > AppContent.saveContent (testing upsertItem) > should update an existing package of data according to the spec defintion 2`] = `
+{
+  "discountBreakpoints": [
+    "10%",
+    "20%",
+    "30%",
+    "35%",
+    "40%",
+  ],
+  "trending": {
+    "men": "mascara",
+    "women": "faux-cotton-socks",
+  },
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > AppContent > AppContent.saveContent (testing upsertItem) > should update an existing package of data according to the spec defintion 3`] = `
+{
+  "app_id": "trendy-boutique",
+  "created_at": Any<Date>,
+  "data": "{"trending":{"men":"ascots","kids":"fidget spinners with sharp blades"},"newBrands":["the-darkest-path","total-vanity"]}",
+  "id": 2,
+  "key": "default",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > AppContent > AppContent.saveContent (testing upsertItem) > should update an existing package of data according to the spec defintion 4`] = `
+{
+  "newBrands": [
+    "the-darkest-path",
+    "total-vanity",
+  ],
+  "trending": {
+    "kids": "fidget spinners with sharp blades",
+    "men": "ascots",
+  },
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 1`] = `
+{
+  "created_at": Any<Date>,
+  "id": 11,
+  "username": "zaraq",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 2`] = `
+{
+  "created_at": Any<Date>,
+  "id": 10,
+  "username": "summersmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 3`] = `
+{
+  "created_at": Any<Date>,
+  "id": 9,
+  "username": "bethsmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 4`] = `
+{
+  "created_at": Any<Date>,
+  "id": 8,
+  "username": "jerrysmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 5`] = `
+{
+  "created_at": Any<Date>,
+  "id": 7,
+  "username": "mortysmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 6`] = `
+{
+  "created_at": Any<Date>,
+  "id": 6,
+  "username": "ricksanchez",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 7`] = `
+{
+  "created_at": Any<Date>,
+  "id": 5,
+  "username": "segmented",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 8`] = `
+{
+  "created_at": Any<Date>,
+  "id": 4,
+  "username": "the_manic_edge",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 9`] = `
+{
+  "created_at": Any<Date>,
+  "id": 3,
+  "username": "hotmod",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 10`] = `
+{
+  "created_at": Any<Date>,
+  "id": 2,
+  "username": "admin",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return all users in the order defined by the spec, when no fields are provided 11`] = `
+{
+  "created_at": Any<Date>,
+  "id": 1,
+  "username": "super-admin",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 1`] = `
+{
+  "id": 10,
+  "preferred_locale": "en-US",
+  "username": "summersmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 2`] = `
+{
+  "id": 9,
+  "preferred_locale": "en-US",
+  "username": "bethsmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 3`] = `
+{
+  "id": 8,
+  "preferred_locale": "en-US",
+  "username": "jerrysmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 4`] = `
+{
+  "id": 7,
+  "preferred_locale": "en-US",
+  "username": "mortysmith",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 5`] = `
+{
+  "id": 5,
+  "preferred_locale": "en-US",
+  "username": "segmented",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 6`] = `
+{
+  "id": 4,
+  "preferred_locale": "en-US",
+  "username": "the_manic_edge",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 7`] = `
+{
+  "id": 2,
+  "preferred_locale": "en-US",
+  "username": "admin",
+}
+`;
+
+exports[`CUSTOM METHOD SIMULATION [bookshelf] > User > User.getUsers > should return the filtered set of users when an accepted field is provided 8`] = `
+{
+  "id": 1,
+  "preferred_locale": "en-US",
+  "username": "super-admin",
+}
+`;

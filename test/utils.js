@@ -1,5 +1,7 @@
 import { expect } from 'vitest'
-import { filter } from 'lodash/fp'
+import { filter, map } from 'lodash/fp'
+
+export const mapAttrs = map('attributes')
 
 export const objectWithTimestamps = {
   created_at: expect.any(Date),

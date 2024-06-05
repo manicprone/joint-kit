@@ -1,3 +1,4 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
@@ -6,21 +7,16 @@ import projectAppModels from '../../../scenarios/project-app/model-config'
 import projectAppMethods from '../../../scenarios/project-app/method-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
 import blogAppMethods from '../../../scenarios/blog-app/method-config'
-
-const chai = require('chai')
-const expect = require('chai').expect
-const chaiAsPromised = require('chai-as-promised')
-const bookshelf = require('../../../db/bookshelf/service')
-const { resetDB } = require('../../../db/bookshelf/db-utils')
-
-chai.use(chaiAsPromised)
+import bookshelf from '../../../db/bookshelf/service'
+import { resetDB } from '../../../db/bookshelf/db-utils'
+import { mapAttrs, objectWithTimestamps } from '../../../utils'
 
 let appMgmt = null
 let projectApp = null
 let blogApp = null
 
 describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
-  before(() => {
+  beforeAll(() => {
     // --------
     // App Mgmt
     // --------
@@ -44,7 +40,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   // Resource: AppContent (app-mgmt)
   // ---------------------------------------------------------------------------
   describe('AppContent', () => {
-    before(() => resetDB())
+    beforeAll(() => resetDB())
 
     // -------------------------------------------------------------------------
     // Method: saveContent
@@ -79,21 +75,25 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // No required lookup fields
         await expect(appMgmt.method.AppContent.saveContent(inputNoAppID))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required field: "app_id"'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required field: "app_id"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
 
         // No required data fields
         await expect(appMgmt.method.AppContent.saveContent(inputNoData))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required field: "data"'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required field: "data"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
       })
 
       it('should save a new package of data for a matching pair of provided fields', async () => {
@@ -118,14 +118,31 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const created = await appMgmt.method.AppContent.saveContent(input)
 
-        expect(created.attributes.id).to.equal(1)
-        expect(created.attributes.app_id).to.equal(appID)
-        expect(created.attributes.key).to.equal(key)
+        expect(created.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "app_id": "trendy-boutique",
+            "created_at": Any<Date>,
+            "data": "{"trending":{"men":"pleather-jackets","women":"faux-cotton-socks","kids":"serial-killer-pillows"},"discountBreakpoints":["20%","30%","50%"]}",
+            "id": 1,
+            "key": "winter-promo",
+            "updated_at": Any<Date>,
+          }
+        `)
 
-        const contentJSON = JSON.parse(created.attributes.data)
-        expect(contentJSON.trending.men).to.equal('pleather-jackets')
-        expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
-        expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(3)
+        expect(JSON.parse(created.attributes.data)).toMatchInlineSnapshot(`
+          {
+            "discountBreakpoints": [
+              "20%",
+              "30%",
+              "50%",
+            ],
+            "trending": {
+              "kids": "serial-killer-pillows",
+              "men": "pleather-jackets",
+              "women": "faux-cotton-socks",
+            },
+          }
+        `)
       })
 
       it(`should save a new package of data with a provided lookup field and leveraging the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" of another lookup field to satisfy the lookup requirement`, async () => {
@@ -148,17 +165,34 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         const created = await appMgmt.method.AppContent.saveContent(input)
 
-        expect(created.attributes.id).to.equal(1)
-        expect(created.attributes.app_id).to.equal(appID)
-        expect(created.attributes.key).to.equal('default')
+        expect(created.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "app_id": "trendy-boutique",
+            "created_at": Any<Date>,
+            "data": "{"trending":{"men":"hats","women":"belts","kids":"mobile-phone-accessories"},"newBrands":["twisted-kids","forlorn","girl-in-the-rain"]}",
+            "id": 1,
+            "key": "default",
+            "updated_at": Any<Date>,
+          }
+        `)
 
-        const contentJSON = JSON.parse(created.attributes.data)
-        expect(contentJSON.trending.men).to.equal('hats')
-        expect(contentJSON.trending.women).to.equal('belts')
-        expect(contentJSON.newBrands).to.be.an('array').that.has.length(3)
+        expect(JSON.parse(created.attributes.data)).toMatchInlineSnapshot(`
+          {
+            "newBrands": [
+              "twisted-kids",
+              "forlorn",
+              "girl-in-the-rain",
+            ],
+            "trending": {
+              "kids": "mobile-phone-accessories",
+              "men": "hats",
+              "women": "belts",
+            },
+          }
+        `)
       })
 
-      it('should update an existing package of data according to the spec defintion', () => {
+      it('should update an existing package of data according to the spec defintion', async () => {
         const appID = 'trendy-boutique'
         const key = 'winter-promo'
 
@@ -191,31 +225,19 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        const withKey = appMgmt.method.AppContent.saveContent(inputWithKey)
-          .then((data) => {
-            expect(data.attributes.id).to.equal(1)
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal(key)
+        const payloads = await Promise.all([
+          appMgmt.method.AppContent.saveContent(inputWithKey),
+          appMgmt.method.AppContent.saveContent(inputNoKey)
+        ])
 
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.trending.men).to.equal('mascara')
-            expect(contentJSON.trending.women).to.equal('faux-cotton-socks')
-            expect(contentJSON.discountBreakpoints).to.be.an('array').that.has.length(5)
-          })
+        // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+        // https://github.com/jestjs/jest/issues/9079
+        payloads.forEach((data) => {
+          expect(data.attributes).toMatchSnapshot(objectWithTimestamps)
+          expect(JSON.parse(data.attributes.data)).toMatchSnapshot()
+        })
 
-        const defaultKey = appMgmt.method.AppContent.saveContent(inputNoKey)
-          .then((data) => {
-            expect(data.attributes.id).to.equal(2)
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal('default')
-
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.trending.men).to.equal('ascots')
-            expect(contentJSON.trending.kids).to.equal('fidget spinners with sharp blades')
-            expect(contentJSON.newBrands).to.be.an('array').that.has.length(2)
-          })
-
-        return Promise.all([withKey, defaultKey])
+        expect.assertions(4)
       })
     }) // END - AppContent.saveContent
 
@@ -230,7 +252,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe('AppContent.getContent', () => {
-      before(() => resetDB(['app-content']))
+      beforeAll(() => resetDB(['app-content']))
 
       it('should return an error (400) when required lookup fields are not provided', async () => {
         const input = {
@@ -241,15 +263,17 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // No required lookup fields
         await expect(appMgmt.method.AppContent.getContent(input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required field: "app_id"'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required field: "app_id"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
       })
 
-      it('should retrieve the requested package of data for a matching pair of provided fields', () => {
+      it('should retrieve the requested package of data for a matching pair of provided fields', async () => {
         const appID = 'app-001'
         const key = 'v1.0'
 
@@ -260,19 +284,35 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return appMgmt.method.AppContent.getContent(input)
-          .then((data) => {
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal(key)
+        const data = await appMgmt.method.AppContent.getContent(input)
+        expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "app_id": "app-001",
+            "created_at": Any<Date>,
+            "data": "{ "items_per_page": 25, "is_activated": true, "modules": ["a", "b", "c", "x", "y", "z"] }",
+            "id": 2,
+            "key": "v1.0",
+            "updated_at": Any<Date>,
+          }
+        `)
 
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.items_per_page).to.equal(25)
-            expect(contentJSON.is_activated).to.equal(true)
-            expect(contentJSON.modules).to.be.an('array').that.has.length(6)
-          })
+        expect(JSON.parse(data.attributes.data)).toMatchInlineSnapshot(`
+          {
+            "is_activated": true,
+            "items_per_page": 25,
+            "modules": [
+              "a",
+              "b",
+              "c",
+              "x",
+              "y",
+              "z",
+            ],
+          }
+        `)
       })
 
-      it(`should retrieve the default package of data for a provided lookup field, using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" to satisfy the lookup`, () => {
+      it(`should retrieve the default package of data for a provided lookup field, using the defined "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" to satisfy the lookup`, async () => {
         const appID = 'app-001'
 
         const input = {
@@ -281,16 +321,29 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return appMgmt.method.AppContent.getContent(input)
-          .then((data) => {
-            expect(data.attributes.app_id).to.equal(appID)
-            expect(data.attributes.key).to.equal('default')
+        const data = await appMgmt.method.AppContent.getContent(input)
+        expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "app_id": "app-001",
+            "created_at": Any<Date>,
+            "data": "{ "items_per_page": 50, "is_activated": false, "modules": ["a", "b", "c"] }",
+            "id": 1,
+            "key": "default",
+            "updated_at": Any<Date>,
+          }
+        `)
 
-            const contentJSON = JSON.parse(data.attributes.data)
-            expect(contentJSON.items_per_page).to.equal(50)
-            expect(contentJSON.is_activated).to.equal(false)
-            expect(contentJSON.modules).to.be.an('array').that.has.length(3)
-          })
+        expect(JSON.parse(data.attributes.data)).toMatchInlineSnapshot(`
+          {
+            "is_activated": false,
+            "items_per_page": 50,
+            "modules": [
+              "a",
+              "b",
+              "c",
+            ],
+          }
+        `)
       })
     }) // END - AppContent.getContent
   }) // END - AppContent
@@ -316,7 +369,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe('User.createUser', () => {
-      before(() => resetDB())
+      beforeAll(() => resetDB())
 
       it('should return an error (400) when the required field is not provided', async () => {
         const email = 'mastablasta@mail.com'
@@ -331,15 +384,17 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // Missing required field
         await expect(blogApp.method.User.createUser(input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required field: "username"'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required field: "username"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
       })
 
-      it('should create a user when the required field is provided', () => {
+      it('should create a user when the required field is provided', async () => {
         const username = 'mastablasta'
 
         const input = {
@@ -348,17 +403,27 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return blogApp.method.User.createUser(input)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                username
-              })
-          })
+        const data = await blogApp.method.User.createUser(input)
+        expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "avatar_url": null,
+            "created_at": Any<Date>,
+            "display_name": null,
+            "email": null,
+            "external_id": null,
+            "father_user_id": null,
+            "first_name": null,
+            "id": 1,
+            "last_login_at": null,
+            "last_name": null,
+            "preferred_locale": null,
+            "updated_at": Any<Date>,
+            "username": "mastablasta",
+          }
+        `)
       })
 
-      it('should support all accepted fields in the spec', () => {
+      it('should support all accepted fields in the spec', async () => {
         const username = 'the_edge_case'
         const externalID = '333.011'
         const email = 'the_edge_case@mail.com'
@@ -381,21 +446,24 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return blogApp.method.User.createUser(input)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                username,
-                external_id: externalID,
-                email,
-                display_name: displayName,
-                first_name: firstName,
-                last_name: lastName,
-                preferred_locale: preferredLocale,
-                avatar_url: avatarURL
-              })
-          })
+        const data = await blogApp.method.User.createUser(input)
+        expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+          {
+            "avatar_url": "//edgy.org/profile/333.011/avatar.png",
+            "created_at": Any<Date>,
+            "display_name": "The Edge Case",
+            "email": "the_edge_case@mail.com",
+            "external_id": "333.011",
+            "father_user_id": null,
+            "first_name": "Edge",
+            "id": 2,
+            "last_login_at": null,
+            "last_name": "Case",
+            "preferred_locale": "zh-CN",
+            "updated_at": Any<Date>,
+            "username": "the_edge_case",
+          }
+        `)
       })
     }) // END - User.createUser
 
@@ -416,7 +484,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe('User.updateUser', () => {
-      before(() => resetDB(['users']))
+      beforeAll(() => resetDB(['users']))
 
       it('should return an error (400) when the required field is not provided', async () => {
         const displayName = 'Updated Name'
@@ -430,12 +498,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // Missing required field
         await expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required field: "id"'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required field: "id"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
       })
 
       it('should return an error (404) when the requested user does not exist', async () => {
@@ -451,15 +521,17 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // Resource does not exist
         await expect(blogApp.method.User.updateUser(input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 404,
-            message: 'The requested "User" was not found.'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "The requested "User" was not found.",
+              "name": "JointStatusError",
+              "status": 404,
+            }
+          `)
       })
 
-      it('should update an existing user for a single field', () => {
+      it('should update an existing user for a single field', async () => {
         const userID = 4
         const displayName = 'Updated Name'
 
@@ -470,21 +542,32 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return blogApp.method.User.updateUser(input)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                id: userID,
-                username: 'the_manic_edge',
-                external_id: '304',
-                email: 'the-manic-edge@demo.com',
-                display_name: displayName
-              })
-          })
+        const data = await blogApp.method.User.updateUser(input)
+        expect(data.attributes).toMatchInlineSnapshot({
+          ...objectWithTimestamps,
+          // TODO: confirm if this is an expected behaviour to not return Date type.
+          //       If this is going to be changed, must check for existing usages for compatibility.
+          last_login_at: expect.any(String)
+        }, `
+          {
+            "avatar_url": null,
+            "created_at": Any<Date>,
+            "display_name": "Updated Name",
+            "email": "the-manic-edge@demo.com",
+            "external_id": "304",
+            "father_user_id": null,
+            "first_name": null,
+            "id": 4,
+            "last_login_at": Any<String>,
+            "last_name": null,
+            "preferred_locale": "en-US",
+            "updated_at": Any<Date>,
+            "username": "the_manic_edge",
+          }
+        `)
       })
 
-      it('should support all accepted fields in the spec', () => {
+      it('should support all accepted fields in the spec', async () => {
         const userID = 4
         const username = 'updated_username'
         const externalID = 'I will not be updated'
@@ -509,22 +592,29 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        return blogApp.method.User.updateUser(input)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                id: userID,
-                username,
-                external_id: '304',
-                email,
-                display_name: displayName,
-                first_name: firstName,
-                last_name: lastName,
-                preferred_locale: preferredLocale,
-                avatar_url: avatarURL
-              })
-          })
+        const data = await blogApp.method.User.updateUser(input)
+        expect(data.attributes).toMatchInlineSnapshot({
+          ...objectWithTimestamps,
+          // TODO: confirm if this is an expected behaviour to not return Date type.
+          //       If this is going to be changed, must check for existing usages for compatibility.
+          last_login_at: expect.any(String)
+        }, `
+          {
+            "avatar_url": "https://updated_avatar.jpg",
+            "created_at": Any<Date>,
+            "display_name": "Updated Display Name",
+            "email": "updated_email",
+            "external_id": "304",
+            "father_user_id": null,
+            "first_name": "The New First",
+            "id": 4,
+            "last_login_at": Any<String>,
+            "last_name": "The New Last",
+            "preferred_locale": "zh-CN",
+            "updated_at": Any<Date>,
+            "username": "updated_username",
+          }
+        `)
       })
     }) // END - User.updateUser
 
@@ -541,7 +631,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe('User.getUser', () => {
-      before(() => resetDB(['users']))
+      beforeAll(() => resetDB(['users']))
 
       it('should return an error (400) when none of the requiredOr fields are provided', async () => {
         const input = {
@@ -552,12 +642,14 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // Missing all requiredOr fields
         await expect(blogApp.method.User.getUser(input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Missing required fields: at least one of => ("id", "username", "external_id")'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "Missing required fields: at least one of => ("id", "username", "external_id")",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
       })
 
       it('should return an error (404) when the requested user does not exist', async () => {
@@ -585,37 +677,42 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
 
         // Using id
         await expect(blogApp.method.User.getUser(inputWithID))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 404,
-            message: 'The requested "User" was not found.'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "The requested "User" was not found.",
+              "name": "JointStatusError",
+              "status": 404,
+            }
+          `)
 
         // Using username
         await expect(blogApp.method.User.getUser(inputWithUsername))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 404,
-            message: 'The requested "User" was not found.'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "The requested "User" was not found.",
+              "name": "JointStatusError",
+              "status": 404,
+            }
+          `)
 
         // Using external_id
         await expect(blogApp.method.User.getUser(inputWithExternalID))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 404,
-            message: 'The requested "User" was not found.'
-          })
+          .rejects
+          .toMatchInlineSnapshot(`
+            {
+              "message": "The requested "User" was not found.",
+              "name": "JointStatusError",
+              "status": 404,
+            }
+          `)
       })
 
-      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`, () => {
+      it(`should return only the fields specified by the "${ACTION.SPEC_FIELDS_TO_RETURN}" option`, async () => {
         const userID = 5
         const username = 'segmented'
         const externalID = '305'
-        const displayName = 'Segmented'
 
         const inputWithID = {
           fields: {
@@ -635,58 +732,28 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           }
         }
 
-        const viaID = blogApp.method.User.getUser(inputWithID)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                id: userID,
-                username,
-                display_name: displayName
-              })
-
-            expect(data.attributes).to.have.property('avatar_url')
-            expect(data.attributes).to.not.have.property('email')
-            expect(data.attributes).to.not.have.property('external_id')
-          })
-
-        const viaUsername = blogApp.method.User.getUser(inputWithUsername)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                id: userID,
-                username,
-                display_name: displayName
-              })
-
-            expect(data.attributes).to.have.property('avatar_url')
-            expect(data.attributes).to.not.have.property('email')
-            expect(data.attributes).to.not.have.property('external_id')
-          })
-
-        const viaExternalID = blogApp.method.User.getUser(inputWithExternalID)
-          .then((data) => {
-            expect(data)
-              .to.have.property('attributes')
-              .that.contains({
-                id: userID,
-                username,
-                display_name: displayName
-              })
-
-            expect(data.attributes).to.have.property('avatar_url')
-            expect(data.attributes).to.not.have.property('email')
-            expect(data.attributes).to.not.have.property('external_id')
-          })
-
-        return Promise.all([
-          viaID,
-          viaUsername,
-          viaExternalID
+        const payloads = await Promise.all([
+          blogApp.method.User.getUser(inputWithID),
+          blogApp.method.User.getUser(inputWithUsername),
+          blogApp.method.User.getUser(inputWithExternalID)
         ])
-      })
-    }) // END - User.getUser
+
+        // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+        // https://github.com/jestjs/jest/issues/9079
+        payloads.forEach((data) => {
+          expect(data.attributes).toMatchInlineSnapshot(`
+            {
+              "avatar_url": null,
+              "display_name": "Segmented",
+              "id": 5,
+              "username": "segmented",
+            }
+          `)
+        })
+
+        expect.assertions(3)
+      })//
+    }) /// / END - User.getUser
 
     // -------------------------------------------------------------------------
     // Method: getUsers
@@ -704,29 +771,24 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe('User.getUsers', () => {
-      before(() => resetDB(['users']))
+      beforeAll(() => resetDB(['users']))
 
       it('should return all users in the order defined by the spec, when no fields are provided', async () => {
         const data = await blogApp.method.User.getUsers({ fieldSet: 'withCreatedAt' })
 
+        expect(data).toHaveLength(11)
         data.models.forEach((model, index) => {
-          // matches `fieldsToReturn.withCreatedAt`
-          expect(model).to.have.nested.property('attributes.id')
-          expect(model).to.have.nested.property('attributes.username')
-          expect(model).to.have.nested.property('attributes.created_at')
-
-          // fields not in `fieldsToReturn`
-          expect(model).to.not.have.nested.property('attributes.display_name')
-          expect(model).to.not.have.nested.property('attributes.avatar_url')
+          expect(model.attributes).toMatchSnapshot({ created_at: expect.any(Date) })
 
           // test created_at is in desecending order
           if (index > 0) {
             const previousModel = data.models[index - 1]
-            expect(model.attributes.created_at).to.be.below(previousModel.attributes.created_at)
+            expect(model.attributes.created_at.getTime())
+              .toBeLessThan(previousModel.attributes.created_at.getTime())
           }
         })
 
-        expect(data).to.have.lengthOf(11)
+        expect.assertions(22)
       })
 
       it('should return the filtered set of users when an accepted field is provided', async () => {
@@ -737,29 +799,33 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
           fieldSet: 'withPreferredLocale'
         })
 
+        expect(data).toHaveLength(8)
         data.models.forEach((model) => {
-          // matches `fieldsToReturn.withPreferredLocale`
-          expect(model).to.have.nested.property('attributes.id')
-          expect(model).to.have.nested.property('attributes.username')
-          expect(model).to.have.nested.property('attributes.preferred_locale', 'en-US')
-
-          // fields not in `fieldsToReturn`
-          expect(model).to.not.have.nested.property('attributes.display_name')
-          expect(model).to.not.have.nested.property('attributes.avatar_url')
-          expect(model).to.not.have.nested.property('attributes.created_at')
+          expect(model.attributes).toMatchSnapshot()
         })
 
-        expect(data).to.have.lengthOf(8)
+        expect.assertions(9)
       })
 
       it('should return the filtered set of users when a ".contains" string query is provided', async () => {
         const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
 
-        data.models.forEach((model) => {
-          expect(model).to.have.nested.property('attributes.username').that.have.string('ed')
-        })
-
-        expect(data).to.have.lengthOf(2)
+        expect(mapAttrs(data.models)).toMatchInlineSnapshot(`
+          [
+            {
+              "avatar_url": null,
+              "display_name": "Segmented",
+              "id": 5,
+              "username": "segmented",
+            },
+            {
+              "avatar_url": null,
+              "display_name": "The Manic Edge",
+              "id": 4,
+              "username": "the_manic_edge",
+            },
+          ]
+        `)
       })
     }) // END - User.getUsers
 
@@ -775,7 +841,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     // },
     // -------------------------------------------------------------------------
     describe.skip('User.deleteUser', () => {
-      before(() => resetDB(['users']))
+      beforeAll(() => resetDB(['users']))
     }) // END - User.deleteUser
   }) // END - User
 
@@ -783,7 +849,7 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
   // Resource: Project (project-app)
   // ---------------------------------------------------------------------------
   describe('Project', () => {
-    before(() => resetDB())
+    beforeAll(() => resetDB())
 
     // -------------------------------------------------------------------------
     // Method: createProject
