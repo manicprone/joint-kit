@@ -23,6 +23,21 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
     appMgmt = new Joint({ service: bookshelf })
     appMgmt.generate({ modelConfig: appMgmtModels, methodConfig: appMgmtMethods, log: false })
 
+    // TODO: Investigate:
+    //
+    //       The blogAppModels was updated to be generated successfully. Prior
+    //       to that, blogApp.generate() without projectApp.generate() throws
+    //       an error because the "UserRole" model is not defined in the
+    //       registry before User's "toMany" association is defined.
+    //
+    //       But, in this beforeAll() block it didn't throw, it seems it was
+    //       because of the UserRole being defined in the projectApp. Since the
+    //       bookshelf instance is shared between Joint instances, it worked.
+    //       But, it seems error-prone when a model defined in a Joint instance
+    //       got creeped into another Joint instance.
+    //
+    //       To be confirmed if this is an expected behaviour.
+
     // -----------
     // Project App
     // -----------

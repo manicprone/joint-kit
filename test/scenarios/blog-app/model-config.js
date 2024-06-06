@@ -4,6 +4,19 @@
 // -----------------------------
 
 module.exports = [
+  // Extra info supplementing the identity of a user
+  {
+    name: 'UserInfo',
+    tableName: 'user_info',
+    timestamps: { created: 'created_at', updated: 'updated_at' }
+  },
+
+  // The reference that maps a role to a user
+  {
+    name: 'UserRole',
+    tableName: 'user_roles_ref',
+    timestamps: { created: 'created_at', updated: 'updated_at' }
+  },
 
   // The user information (for managing identity and permissions)
   {
@@ -32,24 +45,10 @@ module.exports = [
     tableName: 'user_credentials'
   },
 
-  // Extra info supplementing the identity of a user
-  {
-    name: 'UserInfo',
-    tableName: 'user_info',
-    timestamps: { created: 'created_at', updated: 'updated_at' }
-  },
-
   // A user role
   {
     name: 'Role',
     tableName: 'roles',
-    timestamps: { created: 'created_at', updated: 'updated_at' }
-  },
-
-  // The reference that maps a role to a user
-  {
-    name: 'UserRole',
-    tableName: 'user_roles_ref',
     timestamps: { created: 'created_at', updated: 'updated_at' }
   },
 

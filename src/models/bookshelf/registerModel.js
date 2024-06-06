@@ -1,4 +1,5 @@
 import objectUtils from '../../utils/object-utils'
+import JointError from '../../core/errors/JointError'
 // import MODEL from '../../core/constants/model-config-constants';
 import * as CoreUtils from '../../core/core-utils'
 
@@ -78,8 +79,18 @@ export default function registerModel (joint, modelDef = {}, modelName, debug = 
               if (info.through) {
                 const assocMethod = 'belongsToMany'
 
-                // TODO: Throw error if through Model is not defined !!!
                 const throughModel = bookshelf.model(info.through.modelName)
+
+                if (!throughModel) {
+                  throw new JointError({
+                    message:
+                      'The specified "through" association' +
+                      `"${info.through.modelName}" of "${modelName}" was not` +
+                      'found in the registry.\n\n' +
+                      'Perhaps it was defined after the "toMany" association?'
+                  })
+                }
+
                 const throughTableName = throughModel.prototype.tableName
                 assocHooks[assocName] = function () {
                   return this[assocMethod](info.targetModelName, throughTableName, info.through.fromField, info.through.toField, info.sourceField, info.targetField)
