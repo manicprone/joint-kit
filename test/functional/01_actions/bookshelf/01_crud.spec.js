@@ -1,4 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { omit } from 'lodash/fp'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
@@ -8,6 +9,9 @@ import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
 import { objectWithTimestamps } from '../../../utils'
 import { specFixtures, inputFixtures } from './01_crud.fixtures'
+
+// remove bookshelf internal fields
+const omitInternalFields = omit(['attributes', '_previousAttributes', 'changed'])
 
 let appMgmt = null
 let appMgmtJsonApi = null
@@ -38,6 +42,9 @@ const allColsUser = [
 // -----------------------------------------------------------------------------
 describe('CRUD ACTIONS [bookshelf]', () => {
   beforeAll(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
+
     // --------
     // App Mgmt
     // --------
@@ -73,6 +80,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     blogAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' })
     blogAppJsonApi.generate({ modelConfig: blogAppModels, log: false })
   })
+
+  beforeEach(async () => {
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => { vi.useRealTimers() })
 
   // ---------------------------------------------------------------------------
   // standard error scenarios
@@ -642,7 +655,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       })
     })
 
-    it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
+    it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, async () => {
       const id = 4
       const valueToTransform = 'test This guy'
 
@@ -663,17 +676,25 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: { id, full_description: valueToTransform }
       }
 
-      return projectApp.updateItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            alias: 'testThisGuy', // camel case
-            location: 'test-this-guy', // kebab case
-            name: 'test_this_guy', // snake case
-            brief_description: 'TestThisGuy' // pascal case
-          })
-          expect(data.attributes.started_at).to.have.length(20)
-        })
+      const data = await projectApp.updateItem(spec, input)
+      expect(omitInternalFields(data.attributes)).toMatchInlineSnapshot(`
+        {
+          "alias": "testThisGuy",
+          "brief_description": "TestThisGuy",
+          "created_at": 2024-01-01T00:20:00.000Z,
+          "created_by": null,
+          "finished_at": null,
+          "full_description": "test This guy",
+          "id": 4,
+          "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+          "is_internal": 1,
+          "location": "test-this-guy",
+          "name": "test_this_guy",
+          "started_at": "2024-01-01T00:00:00Z",
+          "status_code": 3,
+          "updated_at": 2024-01-01T00:00:00.000Z,
+        }
+      `)
     })
 
     it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the looked-up item data`, async () => {
@@ -709,21 +730,21 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       }
 
       const data = await blogApp.updateItem(spec, input)
-      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
-       {
-         "avatar_url": null,
-         "created_at": Any<Date>,
-         "description": null,
-         "id": 1,
-         "is_default": 1,
-         "is_live": 1,
-         "slug": "functional-fanatic",
-         "tagline": "I don't have habits, I have algorithms.",
-         "title": "A New Title for a New Day",
-         "updated_at": Any<Date>,
-         "user_id": 4,
-       }
-     `)
+      expect(data.attributes).toMatchInlineSnapshot(`
+        {
+          "avatar_url": null,
+          "created_at": 2024-01-01T00:05:00.000Z,
+          "description": null,
+          "id": 1,
+          "is_default": 1,
+          "is_live": 1,
+          "slug": "functional-fanatic",
+          "tagline": "I don't have habits, I have algorithms.",
+          "title": "A New Title for a New Day",
+          "updated_at": 2024-01-01T00:00:00.000Z,
+          "user_id": 4,
+        }
+      `)
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', async () => {

@@ -92,6 +92,7 @@ describe('JOINT', () => {
           "createItem",
           "upsertItem",
           "updateItem",
+          "updateMany",
           "getItem",
           "getItems",
           "deleteItem",
