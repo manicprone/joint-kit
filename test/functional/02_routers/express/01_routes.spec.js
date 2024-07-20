@@ -11,7 +11,7 @@ import { resetDB } from '../../../db/bookshelf/db-utils'
 let app
 let blogApp = null
 
-describe.only('CUSTOM ROUTER SIMULATION [express]', async () => {
+describe('CUSTOM ROUTER SIMULATION [express]', async () => {
   beforeAll(() => {
     // --------
     // Blog App

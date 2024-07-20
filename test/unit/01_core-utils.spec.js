@@ -69,7 +69,7 @@ describe('CORE-UTILS', () => {
       expect(CoreUtils.parseAssociationPath(path)).toBeNull()
     })
 
-    it.only('should parse a valid "direct" path string', () => {
+    it('should parse a valid "direct" path string', () => {
       // Expected format...
       const pathNoModelOnSource = 'profile_id => Profile.id'
       const infoNoModelOnSource = CoreUtils.parseAssociationPath(pathNoModelOnSource)

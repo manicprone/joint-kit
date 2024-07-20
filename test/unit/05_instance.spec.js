@@ -17,7 +17,13 @@ describe('JOINT', () => {
   describe('constructor (general)', () => {
     it('should throw an error when a service instance is not provided', () => {
       expect(() => new Joint())
-        .toThrowErrorMatchingInlineSnapshot('[JointError: A service must be configured to use Joint.]')
+        .toThrowErrorMatchingInlineSnapshot(`
+          {
+            "message": "A service must be configured to use Joint.",
+            "name": "JointError",
+            "status": undefined,
+          }
+        `)
     })
 
     it('should throw an error when an unrecognized or unsupported service is provided', () => {
@@ -30,14 +36,26 @@ describe('JOINT', () => {
       }
 
       expect(() => new Joint({ service: fauxService }))
-        .toThrowErrorMatchingInlineSnapshot('[JointError: The provided service is either not recognized or not supported by Joint.]')
+        .toThrowErrorMatchingInlineSnapshot(`
+          {
+            "message": "The provided service is either not recognized or not supported by Joint.",
+            "name": "JointError",
+            "status": undefined,
+          }
+        `)
     })
 
     it('should be bundled correctly for shared use', async () => {
       const joint = new JointDist({ service: bookshelf })
 
       expect(joint.getItems({ modelName: 'DurianCandy' }, {})).rejects
-        .toThrowErrorMatchingInlineSnapshot('[JointStatusError: The model "DurianCandy" is not recognized.]')
+        .toThrowErrorMatchingInlineSnapshot(`
+        {
+          "message": "The model "DurianCandy" is not recognized.",
+          "name": "JointStatusError",
+          "status": 400,
+        }
+      `)
     })
   }) // END - constructor
 
