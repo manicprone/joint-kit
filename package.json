@@ -12,6 +12,7 @@
   "engines": {
     "node": ">=15.14.0 <16.0.0 || >=16.20.1 <17.0.0 || >=20.9.0"
   },
+  "packageManager": "yarn@4.5.0",
   "scripts": {
     "build": "cross-env NODE_ENV=build rollup -c",
     "prepublish": "npm run build",
