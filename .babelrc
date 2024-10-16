@@ -1,17 +1,26 @@
 {
   "ignore": [
-    "dist",
+    "dist"
+  ],
+  "presets": [
+    ["@babel/env", {
+      "modules": false,
+      "targets": {
+        "node": "current"
+      }
+    }]
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-runtime", {
+      "regenerator": true,
+      "helpers": true,
+      "useESModules": false
+    }]
   ],
   "env": {
     "test": {
       "presets": ["@babel/env"],
-      "plugins": ["@babel/plugin-transform-runtime"],
-    },
-    "build": {
-      "presets": [
-        ["@babel/env", { "modules": false }],
-      ],
-      "plugins": ["@babel/plugin-transform-runtime"],
-    },
-  },
+      "plugins": ["@babel/plugin-transform-runtime"]
+    }
+  }
 }

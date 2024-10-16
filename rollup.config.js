@@ -1,25 +1,24 @@
-import resolve from 'rollup-plugin-node-resolve'
-import babel from 'rollup-plugin-babel'
-import commonjs from 'rollup-plugin-commonjs'
-import json from 'rollup-plugin-json'
-import uglify from 'rollup-plugin-uglify'
+const babel = require('@rollup/plugin-babel')
+const commonjs = require('@rollup/plugin-commonjs')
+const resolve = require('@rollup/plugin-node-resolve')
+const terser = require('@rollup/plugin-terser')
 
-export default {
+module.exports = {
   input: 'src/index.js',
   output: {
     file: 'dist/lib.js',
-    format: 'cjs'
+    format: 'cjs',
+    sourcemap: true
   },
   plugins: [
     resolve(),
+    commonjs(),
     babel({
-      runtimeHelpers: true,
-      exclude: 'node_modules/**'
+      babelHelpers: 'runtime',
+      exclude: 'node_modules/**',
+      babelrc: true
     }),
-    commonjs({
-      include: 'node_modules/**'
-    }),
-    json(),
-    uglify()
-  ]
+    terser()
+  ],
+  external: [/@babel\/runtime/]
 }
