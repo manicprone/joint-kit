@@ -53,7 +53,6 @@ const debugCheck = false // TODO: Determine from instance !!!
 //                            session info (AND).
 // -----------------------------------------------------------------------------
 
-
 // TODO: Fix the "owner / delegateRole" protection logic !!!
 //       -----------------------------------------------------------------------
 //       Remove delegateRole, extend "owner" to support more string values:
@@ -99,7 +98,7 @@ const debugCheck = false // TODO: Determine from instance !!!
 //   request_headers: <request_headers>,
 // }
 // -----------------------------------------------------------------------------
-export function prepareAuthContext(joint, context) {
+export function prepareAuthContext (joint, context) {
   const bundle = {}
 
   const authSettings = objectUtils.get(joint, 'settings.auth', {})
@@ -154,7 +153,7 @@ export function prepareAuthContext(joint, context) {
 // Include the authContext passed to the action, the rules from the spec, and
 // optionally an "ownerCreds" object.
 // -----------------------------------------------------------------------------
-export function isAllowed(authContext = {}, authRules = {}, ownerCreds = {}) {
+export function isAllowed (authContext = {}, authRules = {}, ownerCreds = {}) {
   let result = false
 
   // const requestHeaders = authContext.request_headers;
@@ -214,7 +213,7 @@ export function isAllowed(authContext = {}, authRules = {}, ownerCreds = {}) {
   return result
 }
 
-export function isAllowedOwner(ownerToCheck, ownerCreds, userContext) {
+export function isAllowedOwner (ownerToCheck, ownerCreds, userContext) {
   let result = false
 
   if (debugCheck) {
@@ -249,7 +248,7 @@ export function isAllowedOwner(ownerToCheck, ownerCreds, userContext) {
   return result
 }
 
-export function isAllowedRole(roleToCheck, userContext) {
+export function isAllowedRole (roleToCheck, userContext) {
   let result = false
 
   if (debugCheck) {
@@ -300,7 +299,7 @@ export function isAllowedRole(roleToCheck, userContext) {
 //   return result;
 // }
 
-export function isDeniedByAny(denyWhenAnyToCheck, userContext) {
+export function isDeniedByAny (denyWhenAnyToCheck, userContext) {
   let result = false
 
   if (debugCheck) {

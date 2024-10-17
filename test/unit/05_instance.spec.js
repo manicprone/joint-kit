@@ -1,4 +1,5 @@
-import chai from 'chai'
+import { describe, expect, it } from 'vitest'
+import { keys } from 'lodash/fp'
 import express from 'express'
 import Joint from '../../src'
 import JointDist from '../../dist/lib'
@@ -9,65 +10,20 @@ import projectAppRoutes from '../scenarios/project-app/route-config'
 import blogAppModels from '../scenarios/blog-app/model-config'
 import bookshelf from '../db/bookshelf/service'
 
-const expect = chai.expect
-
-// Values for expectation...
-const jointProps = [
-  'service',
-  'serviceKey',
-  'server',
-  'serverKey',
-  'output',
-  'settings',
-  'prepareAuthContext',
-  'transaction',
-  'hasGenerated',
-]
-const actionsBookshelf = [
-  'createItem',
-  'upsertItem',
-  'updateItem',
-  'getItem',
-  'getItems',
-  'deleteItem',
-  'addAssociatedItems',
-  'hasAssociatedItem',
-  'getAllAssociatedItems',
-  'removeAssociatedItems',
-  'removeAllAssociatedItems',
-]
-const modelNamesProjectApp = [
-  'User',
-  'UserInfo',
-  'Project',
-  'ProjectContributor',
-  'CodingLanguageTag',
-  'SoftwareTag',
-  'TechConceptTag',
-]
-const methodNamesUser = [
-  'createUser',
-  'updateUser',
-  'markLogin',
-  'getUser',
-  'getUsers',
-  'deleteUser',
-]
-
 describe('JOINT', () => {
   // ------------------------------
   // Testing: general instantiation
   // ------------------------------
   describe('constructor (general)', () => {
     it('should throw an error when a service instance is not provided', () => {
-      try {
-        new Joint()
-      }
-      catch (error) {
-        expect(error).to.have.keys('name', 'module', 'message')
-        expect(error.name).to.equal('JointError')
-        expect(error.message).to.equal('A service must be configured to use Joint.')
-      }
+      expect(() => new Joint())
+        .toThrowErrorMatchingInlineSnapshot(`
+          {
+            "message": "A service must be configured to use Joint.",
+            "name": "JointError",
+            "status": undefined,
+          }
+        `)
     })
 
     it('should throw an error when an unrecognized or unsupported service is provided', () => {
@@ -76,34 +32,30 @@ describe('JOINT', () => {
         data: [],
         fauxLogic: () => {
           return null
-        },
+        }
       }
 
-      try {
-        new Joint({ service: fauxService })
-      }
-      catch (error) {
-        expect(error).to.have.keys('name', 'module', 'message')
-        expect(error.name).to.equal('JointError')
-        expect(error.message).to.equal('The provided service is either not recognized or not supported by Joint.')
-      }
+      expect(() => new Joint({ service: fauxService }))
+        .toThrowErrorMatchingInlineSnapshot(`
+          {
+            "message": "The provided service is either not recognized or not supported by Joint.",
+            "name": "JointError",
+            "status": undefined,
+          }
+        `)
     })
 
     it('should be bundled correctly for shared use', async () => {
       const joint = new JointDist({ service: bookshelf })
 
-      // Instantiation...
-      const keys = jointProps.concat(actionsBookshelf)
-      expect(joint).to.have.keys(keys)
-      expect(joint.serviceKey).to.equal('bookshelf')
-
-      // Performing an action...
-      try {
-        await joint.getItems({ modelName: 'DurianCandy' }, {})
-      } catch (error) {
-        expect(error.status).to.equal(400)
-        expect(error.message).to.equal('The model "DurianCandy" is not recognized.')
-      }
+      expect(joint.getItems({ modelName: 'DurianCandy' }, {})).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        {
+          "message": "The model "DurianCandy" is not recognized.",
+          "name": "JointStatusError",
+          "status": 400,
+        }
+      `)
     })
   }) // END - constructor
 
@@ -125,10 +77,34 @@ describe('JOINT', () => {
   describe('service: bookshelf', () => {
     it('should load all implemented bookshelf actions', () => {
       const joint = new Joint({ service: bookshelf })
-      const keys = jointProps.concat(actionsBookshelf)
 
-      expect(joint).to.have.keys(keys)
-      expect(joint.serviceKey).to.equal('bookshelf')
+      expect(keys(joint)).toMatchInlineSnapshot(`
+        [
+          "service",
+          "serviceKey",
+          "server",
+          "serverKey",
+          "output",
+          "settings",
+          "hasGenerated",
+          "prepareAuthContext",
+          "transaction",
+          "createItem",
+          "upsertItem",
+          "updateItem",
+          "updateMany",
+          "getItem",
+          "getItems",
+          "deleteItem",
+          "addAssociatedItems",
+          "hasAssociatedItem",
+          "getAllAssociatedItems",
+          "removeAssociatedItems",
+          "removeAllAssociatedItems",
+        ]
+      `)
+
+      expect(joint.serviceKey).toBe('bookshelf')
     })
 
     // TODO - Fix the error handling here !!! This is a common issue that needs to be clear to the developer !!!
@@ -146,17 +122,36 @@ describe('JOINT', () => {
       const blogApp = new Joint({ service: bookshelf })
       blogApp.generate({ modelConfig: blogAppModels, log: false })
 
-      expect(appMgmt.info().models).to.have.length(3)
-      expect(projectApp.info().models).to.have.length(14)
-      expect(blogApp.info().models).to.have.length(6)
+      expect(appMgmt.info().models).toHaveLength(3)
+      expect(projectApp.info().models).toHaveLength(14)
+      expect(blogApp.info().models).toHaveLength(6)
     })
 
     it('should successfully register custom methods via method config', () => {
       const projectApp = new Joint({ service: bookshelf })
       projectApp.generate({ methodConfig: projectAppMethods, log: false })
 
-      expect(projectApp.method).to.have.keys(modelNamesProjectApp)
-      expect(projectApp.method.User).to.have.keys(methodNamesUser)
+      expect(keys(projectApp.method)).toMatchInlineSnapshot(`
+        [
+          "User",
+          "UserInfo",
+          "Project",
+          "ProjectContributor",
+          "CodingLanguageTag",
+          "SoftwareTag",
+          "TechConceptTag",
+        ]
+      `)
+      expect(keys(projectApp.method.User)).toMatchInlineSnapshot(`
+        [
+          "createUser",
+          "updateUser",
+          "markLogin",
+          "getUser",
+          "getUsers",
+          "deleteUser",
+        ]
+      `)
     })
   }) // END - service:bookshelf
 
@@ -167,27 +162,25 @@ describe('JOINT', () => {
     it('should recognize the express server instance', () => {
       const joint = new Joint({
         service: bookshelf,
-        server: express,
+        server: express
       })
-      const keys = jointProps.concat(actionsBookshelf)
 
-      expect(joint).to.have.keys(keys)
-      expect(joint.serverKey).to.equal('express')
+      expect(joint.serverKey).toBe('express')
     })
 
     it('should successfully build an express router via route config', () => {
       const projectApp = new Joint({
         service: bookshelf,
-        server: express,
+        server: express
       })
       projectApp.generate({
         modelConfig: projectAppModels,
         methodConfig: projectAppMethods,
         routeConfig: projectAppRoutes,
-        log: false,
+        log: false
       })
 
-      expect(projectApp.info().api).to.equal(true)
+      expect(projectApp.info().api).toBe(true)
     })
   }) // END - server:express
 })

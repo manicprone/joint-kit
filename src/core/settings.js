@@ -8,21 +8,21 @@ export default {
   // Model feature settings
   // ----------------------
   model: {
-    debugGenerate: false,
+    debugGenerate: false
   },
 
   // -----------------------
   // Method feature settings
   // -----------------------
   method: {
-    debugGenerate: false,
+    debugGenerate: false
   },
 
   // ----------------------
   // Route feature settings
   // ----------------------
   route: {
-    debugGenerate: false,
+    debugGenerate: false
   },
 
   // ----------------------
@@ -32,7 +32,7 @@ export default {
     attributeForRoles: 'roles',
     sessionNameForUser: 'joint_user',
     debugBuild: false,
-    debugCheck: false, // TODO: Add to auth-utils.isAllowed logic !!!
-  },
+    debugCheck: false // TODO: Add to auth-utils.isAllowed logic !!!
+  }
 
 }

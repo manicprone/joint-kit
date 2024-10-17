@@ -9,7 +9,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function getItems(joint, spec = {}, input = {}, output) {
+export default async function getItems (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
@@ -76,18 +76,18 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
   // Handle "loadDirect" option...
   const inputLoadDirectDef = input[ACTION.INPUT_LOAD_DIRECT] || []
   const loadDirectDef = (spec[ACTION.SPEC_FORCE_LOAD_DIRECT])
-      ? spec[ACTION.SPEC_FORCE_LOAD_DIRECT].concat(inputLoadDirectDef)
-      : inputLoadDirectDef
+    ? spec[ACTION.SPEC_FORCE_LOAD_DIRECT].concat(inputLoadDirectDef)
+    : inputLoadDirectDef
   const loadDirect = ActionUtils.parseLoadDirect(loadDirectDef)
   // Handle "associations" option...
   const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS] || []
   const assocs = (spec[ACTION.SPEC_FORCE_ASSOCIATIONS])
-      ? objectUtils.union(spec[ACTION.SPEC_FORCE_ASSOCIATIONS], inputAssocs)
-      : inputAssocs
+    ? objectUtils.union(spec[ACTION.SPEC_FORCE_ASSOCIATIONS], inputAssocs)
+    : inputAssocs
   // Combine...
   const allAssociations = (loadDirect.associations && loadDirect.associations.length > 0)
-      ? objectUtils.union(assocs, loadDirect.associations)
-      : assocs
+    ? objectUtils.union(assocs, loadDirect.associations)
+    : assocs
   if (allAssociations.length > 0) actionOpts.withRelated = allAssociations
 
   // Prepare query...
@@ -101,7 +101,7 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
         const hasInput = objectUtils.has(inputFields, fieldName)
         const matchStrategy = objectUtils.get(inputFields,
           `${fieldName}.matchStrategy`,
-          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT,
+          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
         )
         const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false)
 
@@ -128,7 +128,7 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
     // Get items...
     const data = (input.paginate)
       ? await model.query(queryOpts).fetchPage(actionOpts) // perform paginated request
-      : await model.query(queryOpts).fetchAll(actionOpts)  // return all items
+      : await model.query(queryOpts).fetchAll(actionOpts) // return all items
 
     // Handle loadDirect requests...
     if (loadDirect.associations) {
@@ -137,7 +137,6 @@ export default async function getItems(joint, spec = {}, input = {}, output) {
 
     // Return data...
     return handleDataResponse(joint, modelName, data, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'getItems', modelName, inputAssocs)
   }

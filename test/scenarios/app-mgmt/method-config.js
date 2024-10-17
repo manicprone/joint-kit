@@ -9,5 +9,5 @@ import appSettings from './methodConfigs/app-settings'
 module.exports = [
   appRegistry,
   appContent,
-  appSettings,
+  appSettings
 ]

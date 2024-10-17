@@ -7,5 +7,5 @@ export default {
   METHOD: 'method',
   PARSE_QUERY: 'query',
   PARSE_BODY: 'body',
-  STATUS_SUCCESS: 'successStatus',
+  STATUS_SUCCESS: 'successStatus'
 }

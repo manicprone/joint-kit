@@ -6,7 +6,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function getAllAssociatedItems(joint, spec = {}, input = {}, output) {
+export default async function getAllAssociatedItems (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -21,12 +21,12 @@ export default async function getAllAssociatedItems(joint, spec = {}, input = {}
   })
 }
 
-async function performGetAllAssociatedItems(joint, spec = {}, input = {}, output) {
+async function performGetAllAssociatedItems (joint, spec = {}, input = {}, output) {
   const specMain = spec[ACTION.RESOURCE_MAIN]
   const modelNameMain = (specMain) ? specMain[ACTION.SPEC_MODEL_NAME] : null
   const specAssoc = spec[ACTION.RESOURCE_ASSOCIATION]
   const assocName = (specAssoc) ? specAssoc[ACTION.SPEC_ASSOCIATION_NAME] : null
-  const inputMain = input[ACTION.RESOURCE_MAIN]
+  const inputMain = input[ACTION.RESOURCE_MAIN] ? { ...input[ACTION.RESOURCE_MAIN] } : null
   const trx = input[ACTION.INPUT_TRANSACTING]
 
   // Reject when required properties are not provided...
@@ -67,7 +67,6 @@ async function performGetAllAssociatedItems(joint, spec = {}, input = {}, output
 
     // Otherwise, return associated items...
     return handleDataResponse(joint, modelNameAssoc, assoc, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'getAllAssociatedItems', modelNameAssoc)
   }

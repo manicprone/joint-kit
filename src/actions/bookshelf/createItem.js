@@ -8,7 +8,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function createItem(joint, spec = {}, input = {}, output) {
+export default async function createItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -23,7 +23,7 @@ export default async function createItem(joint, spec = {}, input = {}, output) {
   })
 }
 
-async function performCreateItem(joint, spec = {}, input = {}, output) {
+async function performCreateItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = spec[ACTION.SPEC_FIELDS]
@@ -83,7 +83,6 @@ async function performCreateItem(joint, spec = {}, input = {}, output) {
     // Create item...
     const data = await model.forge(createData).save(null, actionOpts)
     return handleDataResponse(joint, modelName, data, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'createItem', modelName)
   }

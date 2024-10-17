@@ -1,7 +1,7 @@
 import * as StatusErrors from '../../../core/errors/status-errors'
 import toJsonApi from '../serializers/json-api'
 
-export function handleDataResponse(joint, modelName, data, output) {
+export function handleDataResponse (joint, modelName, data, output) {
   // Return data in requested format
   switch (output) {
     case 'json-api': return toJsonApi(modelName, data, joint)
@@ -9,7 +9,7 @@ export function handleDataResponse(joint, modelName, data, output) {
   }
 }
 
-export function handleErrorResponse(error, actionName = '', mainModelName = 'resource', assocs) {
+export function handleErrorResponse (error, actionName = '', mainModelName = 'resource', assocs) {
   if (error.name === 'JointStatusError') throw error // throw if already handled by Joint
   const message = error.message
 
@@ -28,7 +28,6 @@ export function handleErrorResponse(error, actionName = '', mainModelName = 'res
     } else if (assocs && assocs.length > 0 && message.includes(assocs)) {
       // Bad association request or configuration
       jointError = StatusErrors.generateAssociationNotRecognizedError(assocs)
-
     } else {
       // Bad main request or configuration
       let displayMessage = message

@@ -10,15 +10,15 @@ const knex = require('knex')({
   debug: false,
   client: 'sqlite3',
   connection: {
-    filename: './test/db/bookshelf/joint-kit.sqlite3',
+    filename: './test/db/bookshelf/joint-kit.sqlite3'
   },
   migrations: {
-    directory: './test/db/bookshelf/migrations',
+    directory: './test/db/bookshelf/migrations'
   },
   seeds: {
-    directory: './test/db/bookshelf/seeds',
+    directory: './test/db/bookshelf/seeds'
   },
-  useNullAsDefault: true,
+  useNullAsDefault: true
 })
 
 // Initialize bookshelf
@@ -28,13 +28,13 @@ const bookshelf = require('bookshelf')(knex)
 const Role = bookshelf.Model.extend({
   tableName: 'roles',
   idAttribute: 'id',
-  hasTimestamps: ['created_at', 'updated_at'],
+  hasTimestamps: ['created_at', 'updated_at']
 })
 
 const UserRole = bookshelf.Model.extend({
   tableName: 'user_roles_ref',
   idAttribute: 'id',
-  hasTimestamps: ['created_at', 'updated_at'],
+  hasTimestamps: ['created_at', 'updated_at']
 })
 
 bookshelf.model('Role', Role)

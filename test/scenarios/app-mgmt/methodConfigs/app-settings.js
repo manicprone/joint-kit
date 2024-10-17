@@ -15,10 +15,10 @@ module.exports = {
           { name: 'app_id', type: 'String', required: true, lookup: true },
           // { name: 'app_id', type: 'String', required: true, lookup: true },
           { name: 'data', type: 'JSON', required: true },
-          { name: 'key', type: 'String', required: true },
+          { name: 'key', type: 'String', required: true }
           // { name: 'key', type: 'String', defaultValue: 'default', lookup: true },
-        ],
-      },
+        ]
+      }
     },
     {
       name: 'getSettings',
@@ -26,10 +26,10 @@ module.exports = {
       spec: {
         fields: [
           { name: 'app_id', type: 'String', required: true },
-          { name: 'key', type: 'String', required: true },
+          { name: 'key', type: 'String', required: true }
           // { name: 'key', type: 'String', defaultValue: 'default' },
-        ],
-      },
-    },
-  ],
+        ]
+      }
+    }
+  ]
 }

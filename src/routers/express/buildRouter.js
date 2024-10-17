@@ -4,7 +4,7 @@ const debug = false
 const debugRequest = false
 const supportedMethods = ['get', 'post', 'put', 'patch', 'delete']
 
-export default function buildRouter(joint, routeDefs = [], log = true) {
+export default function buildRouter (joint, routeDefs = [], log = true) {
   const router = joint.server.Router()
 
   // Iterate through route definitions...
@@ -25,7 +25,7 @@ export default function buildRouter(joint, routeDefs = [], log = true) {
   return router
 } // END - buildRouter
 
-function addRoute(joint, router, uri, httpMethod, methodDef, log) {
+function addRoute (joint, router, uri, httpMethod, methodDef, log) {
   if (log) console.log(`${httpMethod.toUpperCase()} ${uri} => ${methodDef.method}`)
   if (debug) console.log('[JOINT] [addRoute] methodDef =>', methodDef)
 
@@ -38,7 +38,7 @@ function addRoute(joint, router, uri, httpMethod, methodDef, log) {
   } // end-switch
 }
 
-function generateRouteLogic(joint, methodDef) {
+function generateRouteLogic (joint, methodDef) {
   const methodParts = (methodDef.method) ? methodDef.method.split('.') : null
 
   if (methodParts.length === 2) {
@@ -103,11 +103,11 @@ function generateRouteLogic(joint, methodDef) {
   }
 }
 
-function handleDataResponse(data, res, status = 200) {
+function handleDataResponse (data, res, status = 200) {
   res.status(status).json(data)
 }
 
-function handleErrorResponse(error, res) {
+function handleErrorResponse (error, res) {
   const status = error.status || 500
   res.status(status).json(error)
 }

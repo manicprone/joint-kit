@@ -2,7 +2,7 @@ import objectUtils from '../../../utils/object-utils'
 import stringUtils from '../../../utils/string-utils'
 import ACTION from '../../../core/constants/action-constants'
 
-const debug_loadDirect = false
+const debugLoadDirect = false
 
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
@@ -11,7 +11,7 @@ const debug_loadDirect = false
 // The returned specification is an array in the format:
 // [{ col: 'updated_at', order: 'desc' }, { col: 'title', order: 'asc' }]
 // -----------------------------------------------------------------------------
-export function buildOrderBy(fieldValue) {
+export function buildOrderBy (fieldValue) {
   const orderBy = []
 
   if (fieldValue) {
@@ -39,7 +39,7 @@ export function buildOrderBy(fieldValue) {
 // -----------------------------------------------------------------------------
 // NOTE: This function mutates the data provided. There is no return value.
 // -----------------------------------------------------------------------------
-export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelations = []) {
+export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelations = []) {
   if (loadDirect.associations) {
     // Loop through all loadDirect requests, moving the specified column data to the item's base attributes...
     loadDirect.associations.forEach((relationName) => {
@@ -88,7 +88,7 @@ export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelatio
         }
       } // end-if (relationData)
 
-      if (debug_loadDirect) console.log(`[JOINT] [bookshelf-utils:loadRelationsToItemBase] load direct: ${relationName}:${colNames} => ${loadDirectData}`)
+      if (debugLoadDirect) console.log(`[JOINT] [bookshelf-utils:loadRelationsToItemBase] load direct: ${relationName}:${colNames} => ${loadDirectData}`)
 
       // Copy the column value to a base attribute (using the relation name as the property name)...
       if (loadDirectData) {
@@ -108,7 +108,7 @@ export function loadRelationsToItemBase(itemData, loadDirect = {}, keepAsRelatio
 // Append a where query to an existing query builder, respecting the type of
 // field value and its matchStrategy.
 // -----------------------------------------------------------------------------
-export function appendWhereClause(queryBuilder, fieldName, value, matchStrategy) {
+export function appendWhereClause (queryBuilder, fieldName, value, matchStrategy) {
   switch (matchStrategy) {
     case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
       if (Array.isArray(value)) queryBuilder.where(fieldName, 'IN', value)

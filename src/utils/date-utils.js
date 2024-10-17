@@ -1,9 +1,9 @@
 import moment from 'moment'
 
-function now() {
+function now () {
   return moment.utc().format()
 }
 
 export default {
-  now,
+  now
 }

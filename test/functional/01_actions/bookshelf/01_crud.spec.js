@@ -1,16 +1,17 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { omit } from 'lodash/fp'
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
+import bookshelf from '../../../db/bookshelf/service'
+import { resetDB } from '../../../db/bookshelf/db-utils'
+import { objectWithTimestamps } from '../../../utils'
+import { specFixtures, inputFixtures } from './01_crud.fixtures'
 
-const chai = require('chai')
-const expect = require('chai').expect
-const chaiAsPromised = require('chai-as-promised')
-const bookshelf = require('../../../db/bookshelf/service')
-const { resetDB } = require('../../../db/bookshelf/db-utils')
-
-chai.use(chaiAsPromised)
+// remove bookshelf internal fields
+const omitInternalFields = omit(['attributes', '_previousAttributes', 'changed'])
 
 let appMgmt = null
 let appMgmtJsonApi = null
@@ -33,14 +34,17 @@ const allColsUser = [
   'last_login_at',
   'created_at',
   'updated_at',
-  'father_user_id',
+  'father_user_id'
 ]
 
 // -----------------------------------------------------------------------------
 // BOOKSHELF ACTIONS (CRUD)
 // -----------------------------------------------------------------------------
 describe('CRUD ACTIONS [bookshelf]', () => {
-  before(() => {
+  beforeAll(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
+
     // --------
     // App Mgmt
     // --------
@@ -67,9 +71,9 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       settings: {
         auth: {
           debugBuild: false,
-          debugCheck: false,
-        },
-      },
+          debugCheck: false
+        }
+      }
     })
     blogApp.generate({ modelConfig: blogAppModels, log: false })
 
@@ -77,513 +81,209 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     blogAppJsonApi.generate({ modelConfig: blogAppModels, log: false })
   })
 
+  beforeEach(async () => {
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
+  })
+
+  afterAll(() => { vi.useRealTimers() })
+
   // ---------------------------------------------------------------------------
   // standard error scenarios
   // ---------------------------------------------------------------------------
   describe('standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem)', () => {
-    before(() => resetDB(['users', 'profiles', 'projects']))
+    beforeEach(() => resetDB(['users', 'profiles', 'projects']))
 
-    it('should return an error (400) when the specified model does not exist', async () => {
-      const spec = {
-        modelName: 'Alien',
-        fields: [
-          { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'slug', type: 'Number', requiredOr: true },
-        ],
-      }
-      const input = {
-        fields: {
-          id: 1,
-        },
-      }
+    describe.each([
+      'createItem',
+      'upsertItem',
+      'updateItem',
+      'getItem',
+      'deleteItem'
+    ])('%s()', (fn) => {
+      it('should return an error (400) when the specified model does not exist', async () => {
+        const spec = {
+          modelName: 'Alien',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'slug', type: 'Number', requiredOr: true }
+          ]
+        }
+        const input = {
+          fields: {
+            id: 1
+          }
+        }
 
-      // createItem
-      await expect(projectApp.createItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+        // createItem
+        await expect(projectApp[fn](spec, input))
+          .rejects
+          .toThrowErrorMatchingSnapshot('"[JointStatusError (400): The model "Alien" is not recognized.]"')
+      })
 
-      // upsertItem
-      await expect(projectApp.upsertItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+      it('should return an error (400) when a required field is not provided', async () => {
+        const spec01 = {
+          modelName: 'User',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'external_id', type: 'String', requiredOr: true }
+          ]
+        }
+        const input01 = {
+          fields: {
+            identifier: 1
+          }
+        }
 
-      // updateItem
-      await expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+        const spec02 = {
+          modelName: 'User',
+          fields: [
+            { name: 'external_id', type: 'String', required: true },
+            { name: 'display_name', type: 'String', requiredOr: false },
+            { name: 'email', type: 'String', required: false },
+            { name: 'avatar_url', type: 'String', defaultValue: '//extradimensional.org/avatars/human/random' },
+            { name: 'is_intelligent', type: 'Boolean', defaultValue: false }
+          ]
+        }
+        const input02 = {
+          fields: {
+            display_name: 'Jimbo',
+            email: 'jimbo@mail.com'
+          }
+        }
 
-      // getItem
-      await expect(projectApp.getItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+        await expect(projectApp[fn](spec01, input01))
+          .rejects
+          .toThrowErrorMatchingSnapshot()
 
-      // getItems
-      await expect(projectApp.getItems(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+        await expect(projectApp[fn](spec02, input02))
+          .rejects
+          .toThrowErrorMatchingSnapshot()
+      })
 
-      // deleteItem
-      await expect(projectApp.deleteItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
+      it('should return an error (403) when the authorization spec is not satisfied', async () => {
+        const spec = {
+          modelName: 'Profile',
+          fields: [
+            { name: 'user_id', type: 'Number' }
+          ],
+          auth: {
+            rules: { owner: 'me' },
+            ownerCreds: ['id => profile_ids', 'user_id']
+          }
+        }
+        const input = {
+          fields: {
+            title: 'How to Blow Up Every Morning'
+          },
+          authContext: {}
+        }
+
+        await expect(blogApp.createItem(spec, input))
+          .rejects
+          .toThrowErrorMatchingSnapshot()
+      })
     })
+  }) // END - standard error scenarios
 
-    it('should return an error (400) when a required field is not provided', async () => {
-      const spec01 = {
-        modelName: 'User',
-        fields: [
-          { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'external_id', type: 'String', requiredOr: true },
-        ],
-      }
-      const input01 = {
-        fields: {
-          identifier: 1,
-        },
-      }
-
-      const spec02 = {
-        modelName: 'User',
-        fields: [
-          { name: 'external_id', type: 'String', required: true },
-          { name: 'display_name', type: 'String', requiredOr: false },
-          { name: 'email', type: 'String', required: false },
-          { name: 'avatar_url', type: 'String', defaultValue: '//extradimensional.org/avatars/human/random' },
-          { name: 'is_intelligent', type: 'Boolean', defaultValue: false },
-        ],
-      }
-      const input02 = {
-        fields: {
-          display_name: 'Jimbo',
-          email: 'jimbo@mail.com',
-        },
-      }
-
-      // createItem
-      await expect(projectApp.createItem(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.createItem(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      // upsertItem
-      await expect(projectApp.upsertItem(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.upsertItem(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      // updateItem
-      await expect(projectApp.updateItem(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.updateItem(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      // getItem
-      await expect(projectApp.getItem(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.getItem(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      // getItems
-      await expect(projectApp.getItems(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.getItems(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      // deleteItem
-      await expect(projectApp.deleteItem(spec01, input01))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-
-      await expect(projectApp.deleteItem(spec02, input02))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-        })
-    })
-
-    it('should return an error (403) when the authorization spec is not satisfied', async () => {
-      const spec = {
-        modelName: 'Profile',
-        fields: [
-          { name: 'user_id', type: 'Number' },
-        ],
-        auth: {
-          rules: { owner: 'me' },
-          ownerCreds: ['id => profile_ids', 'user_id'],
-        },
-      }
-      const input = {
-        fields: {
-          title: 'How to Blow Up Every Morning',
-        },
-        authContext: {},
-      }
-
-      // With lookup field (for update/upsert)
-      const specForUpdate = {
-        modelName: 'Profile',
-        fields: [
-          { name: 'id', type: 'Number', required: true, lookup: true },
-        ],
-        auth: {
-          rules: { owner: 'me' },
-          ownerCreds: ['id => profile_ids', 'user_id'],
-        },
-      }
-      const inputForUpdate = {
-        fields: {
-          id: 1,
-        },
-        authContext: {},
-      }
-
-      // createItem
-      await expect(blogApp.createItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-
-      // upsertItem
-      await expect(blogApp.upsertItem(specForUpdate, inputForUpdate))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-
-      // updateItem
-      await expect(blogApp.updateItem(specForUpdate, inputForUpdate))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-
-      // getItem
-      await expect(blogApp.getItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-
-      // getItems
-      await expect(blogApp.getItems(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-
-      // deleteItem
-      await expect(blogApp.deleteItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 403,
-          message: 'You are not authorized to perform this action.',
-        })
-    })
-
-    it('should report on missing required fields in a semantic way', async () => {
+  describe('semantic error reporting', async () => {
+    it.each([
+      [
+        'missing one "required" field',
+        { status_code: 0, this_thing: 'reality' },
+        'Missing required field: "user_id"'
+      ],
+      [
+        'missing two "required" fields',
+        { this_thing: 'reality', that_thing: 'fiction' },
+        'Missing required fields: all of => ("user_id", "status_code")'
+      ],
+      [
+        'missing any "requiredOr" fields',
+        { user_id: 333, status_code: 0 },
+        'Missing required fields: at least one of => ("this_thing", "that_thing")'
+      ],
+      [
+        'missing one "required" field and any "requiredOr" fields',
+        { status_code: 0 },
+        'Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")'
+      ],
+      [
+        'missing two "required" fields and any "requiredOr" fields',
+        {},
+        'Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")'
+      ]
+    ])('scenario %s', async (_, input, expected) => {
       const spec = {
         modelName: 'Project',
         fields: [
           { name: 'user_id', type: 'Number', required: true },
           { name: 'status_code', type: 'Number', required: true },
           { name: 'this_thing', type: 'String', requiredOr: true },
-          { name: 'that_thing', type: 'String', requiredOr: true },
-        ],
-      }
-      const missingOneRequired = {
-        fields: {
-          status_code: 0,
-          this_thing: 'reality',
-        },
-      }
-      const missingTwoRequired = {
-        fields: {
-          this_thing: 'reality',
-          that_thing: 'fiction',
-        },
-      }
-      const missingRequiredOrs = {
-        fields: {
-          user_id: 333,
-          status_code: 0,
-        },
-      }
-      const missingOneRequiredAndRequiredOrs = {
-        fields: {
-          status_code: 0,
-        },
-      }
-      const missingTwoRequiredAndRequiredOrs = {
-        fields: {},
+          { name: 'that_thing', type: 'String', requiredOr: true }
+        ]
       }
 
-      // Case 01: Missing one "required" field
-      await expect(projectApp.createItem(spec, missingOneRequired))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          message: 'Missing required field: "user_id"',
-        })
+      const promise = projectApp.createItem(spec, { fields: { ...input } })
+      await expect(promise).rejects.toThrow()
 
-      // Case 02: Missing two "required" fields
-      await expect(projectApp.createItem(spec, missingTwoRequired))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          message: 'Missing required fields: all of => ("user_id", "status_code")',
-        })
+      try { await promise } catch (error) {
+        expect(error.message).toBe(expected)
+      }
 
-      // Case 03: Missing any "requiredOr" fields
-      await expect(projectApp.createItem(spec, missingRequiredOrs))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          message: 'Missing required fields: at least one of => ("this_thing", "that_thing")',
-        })
-
-      // Case 04: Missing one "required" field and any "requiredOr" fields
-      await expect(projectApp.createItem(spec, missingOneRequiredAndRequiredOrs))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          message: 'Missing required fields: "user_id" AND at least one of => ("this_thing", "that_thing")',
-        })
-
-      // Case 05: Missing two "required" fields and any "requiredOr" fields
-      await expect(projectApp.createItem(spec, missingTwoRequiredAndRequiredOrs))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          message: 'Missing required fields: all of => ("user_id", "status_code") AND at least one of => ("this_thing", "that_thing")',
-        })
+      expect.assertions(2)
     })
-  }) // END - standard error scenarios
+  })
 
   // ---------------------------------------------------------------------------
   // createItem
   // ---------------------------------------------------------------------------
   describe('createItem', async () => {
-    before(() => resetDB())
+    beforeEach(() => resetDB())
 
     it('should create a new resource item when the spec is satisfied', async () => {
-      // ----
-      // User
-      // ----
-      const specUser = {
-        modelName: 'User',
-        fields: [
-          { name: 'username', type: 'String', required: true },
-          { name: 'display_name', type: 'String' },
-        ],
-      }
-      const inputUser = {
-        fields: {
-          username: 'Blasta!',
-        },
-      }
+      const specUser = specFixtures.user
+      const specProfile = specFixtures.blogProfile
 
-      // -------
-      // Profile
-      // -------
-      const specProfile = {
-        modelName: 'Profile',
-        fields: [
-          { name: 'user_id', type: 'Number', required: true },
-          { name: 'title', type: 'String', required: true },
-          { name: 'is_live', type: 'Boolean', defaultValue: false },
-        ],
-      }
-      const inputProfile = {
-        fields: {
-          user_id: 1,
-          title: 'Days of Bore',
-        },
-      }
-
+      const inputUser = { fields: { username: 'Blasta!' } }
       const createUser = await blogApp.createItem(specUser, inputUser)
-      expect(createUser)
-        .to.have.property('attributes')
-        .that.contains({
-          id: 1,
-          username: inputUser.fields.username,
-        })
+      expect(createUser.attributes).toMatchSnapshot(objectWithTimestamps)
 
+      const inputProfile = { fields: { user_id: 1, title: 'Days of Bore' } }
       const createProfile = await blogApp.createItem(specProfile, inputProfile)
-      expect(createProfile)
-        .to.have.property('attributes')
-        .that.contains({
-          id: 1,
-          user_id: inputProfile.fields.user_id,
-          title: inputProfile.fields.title,
-          is_live: 0,
-        })
+      expect(createProfile.attributes).toMatchSnapshot(objectWithTimestamps)
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
-      const projectName = 'Project for Test'
-      const defaultAlias = 'alias-is-locked'
-      const alias = 'user-updated-alias'
+      const specNoDefaultValue = specFixtures.projectProfile
+      const specWithDefaultValue = specFixtures.projectProfileDefaultAlias('alias-is-locked')
 
-      const specNoDefaultValue = {
-        modelName: 'Project',
-        fields: [
-          { name: 'name', type: 'String', required: true },
-          { name: 'alias', type: 'String', locked: true },
-          { name: 'brief_description', type: 'String' },
-        ],
-      }
-      const specWithDefaultValue = {
-        modelName: 'Project',
-        fields: [
-          { name: 'name', type: 'String', required: true },
-          { name: 'alias', type: 'String', locked: true, defaultValue: defaultAlias },
-          { name: 'brief_description', type: 'String' },
-        ],
-      }
-
-      const input = {
-        fields: { name: projectName, alias },
-      }
+      const input = { fields: { name: 'Project for Test', alias: 'user-updated-alias' } }
 
       // If no "defaultValue" is provided, the field value does not get set...
       const noDefaultValue = await projectApp.createItem(specNoDefaultValue, input)
-      expect(noDefaultValue.attributes).to.contain({
-        name: projectName,
-        alias: null,
-      })
+      expect(noDefaultValue.attributes).toMatchSnapshot(objectWithTimestamps)
 
       const withDefaultValue = await projectApp.createItem(specWithDefaultValue, input)
-      expect(withDefaultValue.attributes).to.contain({
-        name: projectName,
-        alias: defaultAlias,
-      })
+      expect(withDefaultValue.attributes).toMatchSnapshot(objectWithTimestamps)
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const modelName = 'Project'
-      const projectName = 'The Storytold'
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const specProject = specFixtures.projectProject
+      const inputProject = { fields: { name: 'The Storytold' } }
 
-      const specProject = {
-        modelName,
-        fields: [
-          { name: 'name', type: 'String', required: true },
-        ],
-      }
-      const inputProject = {
-        fields: {
-          name: projectName,
-        },
-      }
+      const payloads = await Promise.all([
+        projectAppJsonApi.createItem(specProject, inputProject),
+        projectApp.createItem(specProject, inputProject, 'json-api')
+      ])
 
-      const globalLevel = projectAppJsonApi.createItem(specProject, inputProject)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              type: modelName,
-            })
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload).toHaveProperty('data.type', specProject.modelName)
+        expect(payload.data.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
 
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              name: projectName,
-            })
-        })
-
-      const methodLevel = projectApp.createItem(specProject, inputProject, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              type: modelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              name: projectName,
-            })
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(4)
     })
   }) // END - createItem
 
@@ -591,134 +291,121 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   // upsertItem
   // ---------------------------------------------------------------------------
   describe('upsertItem', () => {
-    before(() => resetDB())
+    beforeEach(() => resetDB())
 
     it('should return an error (400) when the input does not provide a "lookup field"', async () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', lookup: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      }
-
-      const settingsData = { a: true, b: false, c: 'string-value' }
-
-      const input = {
-        fields: { data: settingsData },
-      }
+      const spec = specFixtures.appMgmt.appSettingsAppIdNotRequired
+      const input = { fields: { data: {} } }
 
       await expect(appMgmt.upsertItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'A "lookup field" was either not defined or not provided.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+         {
+           "message": "A "lookup field" was either not defined or not provided.",
+           "name": "JointStatusError",
+           "status": 400,
+         }
+       `)
     })
 
-    it('should perform a create action when the resource does not exist', () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookup: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      }
+    it('should perform a create action when the resource does not exist', async () => {
+      const spec = specFixtures.appMgmt.appSettings
+      const input = inputFixtures.appMgmt.exact('app-12345')
 
-      const appID = 'app-12345'
-      const settingsData = { a: true, b: false, c: 'string-value' }
+      const data = await appMgmt.upsertItem(spec, input)
+      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+       {
+         "app_id": "app-12345",
+         "created_at": Any<Date>,
+         "data": "{"a":true,"b":false,"c":"string-value"}",
+         "id": 1,
+         "key": null,
+         "updated_at": Any<Date>,
+       }
+     `)
 
-      const input = {
-        fields: { app_id: appID, data: settingsData },
-      }
-
-      return appMgmt.upsertItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.id).to.equal(1)
-          expect(data.attributes.app_id).to.equal(appID)
-
-          const dataJSON = JSON.parse(data.attributes.data)
-          expect(dataJSON.c).to.equal('string-value')
-        })
+      const dataJSON = JSON.parse(data.attributes.data)
+      expect(dataJSON).toMatchInlineSnapshot(`
+       {
+         "a": true,
+         "b": false,
+         "c": "string-value",
+       }
+     `)
     })
 
     it(
-      `should throw an error if "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" other ` +
-      `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}" is used to ` +
-      'create a new resource',
-      async () => {
-        const spec = {
-          modelName: 'AppSettings',
-          fields: [
-            { name: 'app_id', type: 'String', required: true, lookup: true, operators: ['contains'] },
-            { name: 'data', type: 'JSON', required: true },
-          ],
-        }
+     `should throw an error if "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" other ` +
+     `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}" is used to ` +
+     'create a new resource',
+     async () => {
+       const spec = specFixtures.appMgmt.appSettingsOperatorContains
+       const input = {
+         fields: { 'app_id.contains': '999', data: { a: true, b: false, c: 'string-value' } }
+       }
 
-        const input = {
-          fields: { 'app_id.contains': '999', data: { a: true, b: false, c: 'string-value' } },
-        }
-
-        await expect(appMgmt.upsertItem(spec, input))
-          .to.eventually.be.rejected
-          .and.to.contain({
-            name: 'JointStatusError',
-            status: 400,
-            message: 'Unable to create a new resource using a lookup operator other than "exact".',
-          })
-      },
+       await expect(appMgmt.upsertItem(spec, input)).rejects.toMatchInlineSnapshot(`
+         {
+           "message": "Unable to create a new resource using a lookup operator other than "exact".",
+           "name": "JointStatusError",
+           "status": 400,
+         }
+       `)
+     }
     )
 
-    it('should perform an update action when the resource already exists', () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookup: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      }
+    it('should perform an update action when the resource already exists', async () => {
+      const spec = specFixtures.appMgmt.appSettings
+      const input = inputFixtures.appMgmt.exact('app-12345', { a: true, b: false, c: 'updated-string-value' })
 
-      const appID = 'app-12345'
-      const settingsData = { a: true, b: false, c: 'updated-string-value' }
+      const data = await appMgmt.upsertItem(spec, input)
+      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "app_id": "app-12345",
+          "created_at": Any<Date>,
+          "data": "{"a":true,"b":false,"c":"updated-string-value"}",
+          "id": 1,
+          "key": null,
+          "updated_at": Any<Date>,
+        }
+      `)
 
-      const input = {
-        fields: { app_id: appID, data: settingsData },
-      }
-
-      return appMgmt.upsertItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.id).to.equal(1)
-          expect(data.attributes.app_id).to.equal(appID)
-
-          const dataJSON = JSON.parse(data.attributes.data)
-          expect(dataJSON.c).to.equal('updated-string-value')
-        })
+      const dataJSON = JSON.parse(data.attributes.data)
+      expect(dataJSON).toMatchInlineSnapshot(`
+        {
+          "a": true,
+          "b": false,
+          "c": "updated-string-value",
+        }
+      `)
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and update the first resource matching the input`, async () => {
-      const spec = {
-        modelName: 'AppSettings',
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookup: true, operators: ['contains'] },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      }
+      const spec = specFixtures.appMgmt.appSettingsOperatorContains
+      const createInput = inputFixtures.appMgmt.exact('app-12345')
+      const input = inputFixtures.appMgmt.contains('app-12345', { a: true, b: false, c: 'updated-string-value' })
 
-      const appID = '12345'
-      const settingsData = { a: true, b: false, c: 'updated-string-value' }
+      await appMgmt.createItem(specFixtures.appMgmt.appSettings, createInput)
+      const data = await appMgmt.upsertItem(spec, input)
+      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "app_id": "app-12345",
+          "created_at": Any<Date>,
+          "data": "{"a":true,"b":false,"c":"updated-string-value"}",
+          "id": 1,
+          "key": null,
+          "updated_at": Any<Date>,
+        }
+      `)
 
-      const input = {
-        fields: { 'app_id.contains': appID, data: settingsData },
-      }
-
-      return appMgmt.upsertItem(spec, input)
-        .then((data) => {
-          expect(data.attributes.app_id).to.contain('12345')
-
-          const dataJSON = JSON.parse(data.attributes.data)
-          expect(dataJSON.c).to.equal('updated-string-value')
-        })
+      const dataJSON = JSON.parse(data.attributes.data)
+      expect(dataJSON).toMatchInlineSnapshot(`
+        {
+          "a": true,
+          "b": false,
+          "c": "updated-string-value",
+        }
+      `)
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
@@ -729,11 +416,11 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'Project',
         fields: [
           { name: 'name', type: 'String', required: true, lookup: true },
-          { name: 'alias', type: 'String', locked: true },
-        ],
+          { name: 'alias', type: 'String', locked: true }
+        ]
       }
       const inputNoDefaultValue = {
-        fields: { name: 'Project 1', alias },
+        fields: { name: 'Project 1', alias }
       }
 
       const specWithDefaultValue = {
@@ -741,96 +428,97 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'name', type: 'String', required: true, lookup: true },
           { name: 'alias', type: 'String', locked: true, defaultValue: defaultAlias },
-          { name: 'image_url', type: 'String' },
-        ],
+          { name: 'image_url', type: 'String' }
+        ]
       }
       const inputWithDefaultValue = {
-        fields: { name: 'Project 2', alias },
+        fields: { name: 'Project 2', alias }
       }
       const updateWithDefaultValue = {
-        fields: { name: 'Project 2', alias, image_url: '/img' },
+        fields: { name: 'Project 2', alias, image_url: '/img' }
       }
 
       // If no "defaultValue" is provided, the field value does not get set...
       const noDefaultValue = await projectApp.upsertItem(specNoDefaultValue, inputNoDefaultValue)
-      expect(noDefaultValue.attributes).to.contain({
-        id: 1,
-        name: 'Project 1',
-        alias: null,
-      })
+      expect(noDefaultValue.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "alias": null,
+          "brief_description": null,
+          "created_at": Any<Date>,
+          "created_by": null,
+          "finished_at": null,
+          "full_description": null,
+          "id": 1,
+          "image_url": null,
+          "is_internal": 0,
+          "location": null,
+          "name": "Project 1",
+          "started_at": null,
+          "status_code": null,
+          "updated_at": Any<Date>,
+        }
+      `)
 
       // On Create...
       const withDefaultValue = await projectApp.upsertItem(specWithDefaultValue, inputWithDefaultValue)
-      expect(withDefaultValue.attributes).to.contain({
-        id: 2,
-        name: 'Project 2',
-        alias: defaultAlias,
-      })
+      expect(withDefaultValue.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "alias": "alias-is-locked",
+          "brief_description": null,
+          "created_at": Any<Date>,
+          "created_by": null,
+          "finished_at": null,
+          "full_description": null,
+          "id": 2,
+          "image_url": null,
+          "is_internal": 0,
+          "location": null,
+          "name": "Project 2",
+          "started_at": null,
+          "status_code": null,
+          "updated_at": Any<Date>,
+        }
+      `)
 
       // On Update...
       const updated = await projectApp.upsertItem(specWithDefaultValue, updateWithDefaultValue)
-      expect(updated.attributes).to.contain({
-        id: 2,
-        name: 'Project 2',
-        alias: defaultAlias,
-        image_url: '/img',
-      })
+      expect(updated.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+        {
+          "alias": "alias-is-locked",
+          "brief_description": null,
+          "created_at": Any<Date>,
+          "created_by": null,
+          "finished_at": null,
+          "full_description": null,
+          "id": 2,
+          "image_url": "/img",
+          "is_internal": 0,
+          "location": null,
+          "name": "Project 2",
+          "started_at": null,
+          "status_code": null,
+          "updated_at": Any<Date>,
+        }
+      `)
     })
 
-    it('should return in JSON API shape when payload format is set to "json-api"', () => {
-      const modelName = 'AppSettings'
-      const appID = 'app-12345'
-      const settingsData = { a: true, b: false, c: 'another-string-value' }
+    it('should return in JSON API shape when payload format is set to "json-api"', async () => {
+      const spec = specFixtures.appMgmt.appSettings
+      const input = inputFixtures.appMgmt.exact('app-12345', { a: true, b: false, c: 'another-string-value' })
 
-      const spec = {
-        modelName,
-        fields: [
-          { name: 'app_id', type: 'String', required: true, lookup: true },
-          { name: 'data', type: 'JSON', required: true },
-        ],
-      }
+      const payloads = await Promise.all([
+        appMgmtJsonApi.upsertItem(spec, input),
+        appMgmt.upsertItem(spec, input, 'json-api')
+      ])
 
-      const input = {
-        fields: { app_id: appID, data: settingsData },
-      }
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
+      payloads.forEach((payload) => {
+        expect(payload).toHaveProperty('data.type', spec.modelName)
+        expect(payload.data.attributes).toMatchSnapshot(objectWithTimestamps)
+      })
 
-      const globalLevel = appMgmtJsonApi.upsertItem(spec, input)
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: 1,
-              type: modelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              app_id: appID,
-            })
-        })
-
-      const methodLevel = appMgmt.upsertItem(spec, input, 'json-api')
-        .then((payload) => {
-          // Top Level...
-          expect(payload).to.have.property('data')
-          expect(payload.data)
-            .to.contain({
-              id: 1,
-              type: modelName,
-            })
-
-          // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-          expect(payload.data.attributes)
-            .to.contain({
-              app_id: appID,
-            })
-        })
-
-      return Promise.all([globalLevel, methodLevel])
+      expect.assertions(4)
     })
   }) // END - upsertItem
 
@@ -838,7 +526,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   // updateItem
   // ---------------------------------------------------------------------------
   describe('updateItem', () => {
-    before(() => resetDB(['profiles', 'projects']))
+    beforeEach(() => resetDB(['profiles', 'projects']))
 
     it('should return an error (400) when the input does not provide a "lookup" field', async () => {
       const spec = {
@@ -846,22 +534,24 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
-          { name: 'brief_description', type: 'String' },
-        ],
+          { name: 'brief_description', type: 'String' }
+        ]
       }
       const input = {
         fields: {
-          name: 'Updated Name',
-        },
+          name: 'Updated Name'
+        }
       }
 
       await expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 400,
-          message: 'Missing required field: "id"',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+         {
+           "message": "Missing required field: "id"",
+           "name": "JointStatusError",
+           "status": 400,
+         }
+       `)
     })
 
     it('should return an error (404) when the requested resource is not found', async () => {
@@ -870,23 +560,25 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
-          { name: 'brief_description', type: 'String' },
-        ],
+          { name: 'brief_description', type: 'String' }
+        ]
       }
       const input = {
         fields: {
           id: 999,
-          name: 'Updated Name',
-        },
+          name: 'Updated Name'
+        }
       }
 
       await expect(projectApp.updateItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          name: 'JointStatusError',
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+         {
+           "message": "The requested "Project" was not found.",
+           "name": "JointStatusError",
+           "status": 404,
+         }
+       `)
     })
 
     it('should update the resource when the spec is satisfied', async () => {
@@ -895,14 +587,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
-          { name: 'brief_description', type: 'String' },
-        ],
+          { name: 'brief_description', type: 'String' }
+        ]
       }
 
       const id = 2
       const name = 'Updated Name'
       const input = {
-        fields: { id, name },
+        fields: { id, name }
       }
 
       // Perform update
@@ -910,7 +602,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       expect(updated.attributes).to.contain({
         id,
-        name,
+        name
       })
     })
 
@@ -919,15 +611,15 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'Project',
         fields: [
           { name: 'name', type: 'String', required: true, lookup: true, operators: ['contains'] },
-          { name: 'alias', type: 'String' },
-        ],
+          { name: 'alias', type: 'String' }
+        ]
       }
 
       const input = {
         fields: {
           'name.contains': 'er',
-          alias: 'updated-alias',
-        },
+          alias: 'updated-alias'
+        }
       }
 
       // Perform update
@@ -936,7 +628,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       expect(updated).has.nested.property('attributes.name').that.contains('er')
       expect(updated).has.nested.property('attributes.alias').that.equals('updated-alias')
     })
-
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
       const id = 1
@@ -947,12 +638,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String', locked: true },
-          { name: 'brief_description', type: 'String' },
-        ],
+          { name: 'brief_description', type: 'String' }
+        ]
       }
 
       const input = {
-        fields: { id, name, brief_description: 'new desc' },
+        fields: { id, name, brief_description: 'new desc' }
       }
 
       const updated = await projectApp.updateItem(specNoDefaultValue, input)
@@ -960,11 +651,11 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       expect(updated.attributes).to.contain({
         id,
         name: 'Mega-Seed Mini-Sythesizer',
-        brief_description: 'new desc',
+        brief_description: 'new desc'
       })
     })
 
-    it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, () => {
+    it(`should support dynamic values on the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" option (now, camelCase, kebabCase, snakeCase, pascalCase)`, async () => {
       const id = 4
       const valueToTransform = 'test This guy'
 
@@ -977,35 +668,43 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           { name: 'name', type: 'String', defaultValue: '% snakeCase(full_description) %' },
           { name: 'brief_description', type: 'String', defaultValue: '% pascalCase(full_description) %' },
           { name: 'started_at', type: 'String', defaultValue: '% now %' },
-          { name: 'full_description', type: 'String' },
-        ],
+          { name: 'full_description', type: 'String' }
+        ]
       }
 
       const input = {
-        fields: { id, full_description: valueToTransform },
+        fields: { id, full_description: valueToTransform }
       }
 
-      return projectApp.updateItem(spec, input)
-        .then((data) => {
-          expect(data.attributes).to.contain({
-            id,
-            alias: 'testThisGuy', // camel case
-            location: 'test-this-guy', // kebab case
-            name: 'test_this_guy', // snake case
-            brief_description: 'TestThisGuy', // pascal case
-          })
-          expect(data.attributes.started_at).to.have.length(20)
-        })
+      const data = await projectApp.updateItem(spec, input)
+      expect(omitInternalFields(data.attributes)).toMatchInlineSnapshot(`
+        {
+          "alias": "testThisGuy",
+          "brief_description": "TestThisGuy",
+          "created_at": 2024-01-01T00:20:00.000Z,
+          "created_by": null,
+          "finished_at": null,
+          "full_description": "test This guy",
+          "id": 4,
+          "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+          "is_internal": 1,
+          "location": "test-this-guy",
+          "name": "test_this_guy",
+          "started_at": "2024-01-01T00:00:00Z",
+          "status_code": 3,
+          "updated_at": 2024-01-01T00:00:00.000Z,
+        }
+      `)
     })
 
-    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the looked-up item data`, () => {
+    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the looked-up item data`, async () => {
       const userContext = {
         is_logged_in: true,
         id: 4,
         external_id: '304',
         username: 'the_manic_edge',
         roles: [],
-        profile_ids: [1, 2, 3],
+        profile_ids: [1, 2, 3]
       }
       const authContext = blogApp.prepareAuthContext(userContext)
 
@@ -1014,24 +713,38 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'title', type: 'String' },
-          { name: 'tagline', type: 'String' },
+          { name: 'tagline', type: 'String' }
         ],
         auth: {
           rules: { owner: 'me' },
-          ownerCreds: ['user_id => id'],
-        },
+          ownerCreds: ['user_id => id']
+        }
       }
 
       const input = {
         fields: {
           id: 1,
-          title: 'A New Title for a New Day',
+          title: 'A New Title for a New Day'
         },
-        authContext,
+        authContext
       }
 
-      return expect(blogApp.updateItem(spec, input))
-        .to.be.fulfilled
+      const data = await blogApp.updateItem(spec, input)
+      expect(data.attributes).toMatchInlineSnapshot(`
+        {
+          "avatar_url": null,
+          "created_at": 2024-01-01T00:05:00.000Z,
+          "description": null,
+          "id": 1,
+          "is_default": 1,
+          "is_live": 1,
+          "slug": "functional-fanatic",
+          "tagline": "I don't have habits, I have algorithms.",
+          "title": "A New Title for a New Day",
+          "updated_at": 2024-01-01T00:00:00.000Z,
+          "user_id": 4,
+        }
+      `)
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', async () => {
@@ -1044,12 +757,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' },
-          { name: 'brief_description', type: 'String' },
-        ],
+          { name: 'brief_description', type: 'String' }
+        ]
       }
 
       const input = {
-        fields: { id, name },
+        fields: { id, name }
       }
 
       // Globally set...
@@ -1059,13 +772,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       expect(globalLevel.data)
         .to.contain({
           id,
-          type: modelName,
+          type: modelName
         })
       // (Base Attributes)
       expect(globalLevel.data).to.have.property('attributes')
       expect(globalLevel.data.attributes)
         .to.contain({
-          name,
+          name
         })
 
       // Locally set...
@@ -1075,13 +788,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       expect(methodLevel.data)
         .to.contain({
           id,
-          type: modelName,
+          type: modelName
         })
       // (Base Attributes)
       expect(methodLevel.data).to.have.property('attributes')
       expect(methodLevel.data.attributes)
         .to.contain({
-          name,
+          name
         })
     })
   }) // END - updateItem
@@ -1090,7 +803,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   // getItem
   // ---------------------------------------------------------------------------
   describe('getItem', () => {
-    before(() => resetDB(['users', 'roles', 'profiles', 'app-content']))
+    beforeEach(() => resetDB(['users', 'roles', 'profiles', 'app-content']))
 
     it('should return the row according to the provided spec and input', async () => {
       const specUser = {
@@ -1099,13 +812,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           { name: 'id', type: 'Number', requiredOr: true },
           { name: 'external_id', type: 'String', requiredOr: true },
           { name: 'username', type: 'String' },
-          { name: 'email', type: 'String' },
-        ],
+          { name: 'email', type: 'String' }
+        ]
       }
       const inputUser = {
         fields: {
-          external_id: '301',
-        },
+          external_id: '301'
+        }
       }
 
       const getUser = await blogApp.getItem(specUser, inputUser)
@@ -1113,7 +826,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         .to.have.property('attributes')
         .that.contains({
           id: 1,
-          external_id: inputUser.fields.external_id,
+          external_id: inputUser.fields.external_id
         })
     })
 
@@ -1122,8 +835,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'User',
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'username', type: 'String', requiredOr: true, operators: ['contains'] },
-        ],
+          { name: 'username', type: 'String', requiredOr: true, operators: ['contains'] }
+        ]
       }
 
       await blogApp.getItem(specUser, { fields: { id: 1 } })
@@ -1153,19 +866,19 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'AppContent',
         fields: [
           { name: 'app_id', type: 'String', required: true },
-          { name: 'key', type: 'String', locked: true },
-        ],
+          { name: 'key', type: 'String', locked: true }
+        ]
       }
       const specWithDefaultValue = {
         modelName: 'AppContent',
         fields: [
           { name: 'app_id', type: 'String', required: true },
-          { name: 'key', type: 'String', locked: true, defaultValue: 'v1.0' },
-        ],
+          { name: 'key', type: 'String', locked: true, defaultValue: 'v1.0' }
+        ]
       }
 
       const input = {
-        fields: { app_id: appID, key },
+        fields: { app_id: appID, key }
       }
 
       // If no "defaultValue" is provided, the field will not be included in the request...
@@ -1173,7 +886,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         .then((data) => {
           expect(data.attributes).to.contain({
             app_id: appID,
-            key: 'default', // But, bookshelf returns the first created from the matches !!!
+            key: 'default' // But, bookshelf returns the first created from the matches !!!
           })
         })
 
@@ -1181,41 +894,55 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         .then((data) => {
           expect(data.attributes).to.contain({
             app_id: appID,
-            key: 'v1.0',
+            key: 'v1.0'
           })
         })
 
       return Promise.all([noDefaultValue, withDefaultValue])
     })
 
-    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the retrieved item data`, () => {
+    it(`should support an "${ACTION.SPEC_AUTH_OWNER_CREDS}" authorization from a field on the retrieved item data`, async () => {
       const userContext = {
         is_logged_in: true,
         user_id: 4,
         external_id: '304',
         username: 'the_manic_edge',
         roles: ['moderator', 'admin'],
-        profile_ids: [1, 2, 3],
+        profile_ids: [1, 2, 3]
       }
       const authContext = blogApp.prepareAuthContext(userContext)
 
       const spec = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', required: true },
+          { name: 'id', type: 'Number', required: true }
         ],
         auth: {
           rules: { owner: 'me' },
-          ownerCreds: ['user_id'],
-        },
+          ownerCreds: ['user_id']
+        }
       }
       const input = {
         fields: { id: 1 },
-        authContext,
+        authContext
       }
 
-      return expect(blogApp.getItem(spec, input))
-        .to.be.fulfilled
+      const data = await blogApp.getItem(spec, input)
+      expect(data.attributes).toMatchInlineSnapshot(objectWithTimestamps, `
+       {
+         "avatar_url": null,
+         "created_at": Any<Date>,
+         "description": null,
+         "id": 1,
+         "is_default": 1,
+         "is_live": 1,
+         "slug": "functional-fanatic",
+         "tagline": "I don't have habits, I have algorithms.",
+         "title": "Functional Fanatic",
+         "updated_at": Any<Date>,
+         "user_id": 4,
+       }
+     `)
     })
 
     it('should only return the field data that is permitted by the spec', () => {
@@ -1225,8 +952,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'slug', type: 'String', requiredOr: true },
-        ],
+          { name: 'slug', type: 'String', requiredOr: true }
+        ]
       }
 
       const specColsEmptyArray = Object.assign({}, specBase)
@@ -1237,8 +964,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       const input = {
         fields: {
-          id: 1,
-        },
+          id: 1
+        }
       }
 
       const getAllColsFromBase = blogApp.getItem(specBase, input)
@@ -1266,34 +993,34 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number', requiredOr: true },
-          { name: 'slug', type: 'String', requiredOr: true },
-        ],
+          { name: 'slug', type: 'String', requiredOr: true }
+        ]
       }
 
       const specColsWithDefault = Object.assign({}, specBase)
       specColsWithDefault.fieldsToReturn = {
         default: ['id', 'user_id', 'title', 'slug', 'tagline', 'description'],
         list: ['id', 'user_id', 'title'],
-        tagline: ['user_id', 'tagline'],
+        tagline: ['user_id', 'tagline']
       }
 
       const specColsWithoutDefault = Object.assign({}, specBase)
       specColsWithoutDefault.fieldsToReturn = {
         list: ['id', 'user_id', 'title'],
-        tagline: ['user_id', 'tagline'],
+        tagline: ['user_id', 'tagline']
       }
 
       const inputWithUndefinedSet = {
         fields: { id: 1 },
-        fieldSet: 'unknown',
+        fieldSet: 'unknown'
       }
       const inputWithDefaultSet = {
         fields: { id: 1 },
-        fieldSet: 'default',
+        fieldSet: 'default'
       }
       const inputWithListSet = {
         fields: { id: 1 },
-        fieldSet: 'list',
+        fieldSet: 'list'
       }
 
       const getAllColsWithBase = blogApp.getItem(specBase, inputWithListSet)
@@ -1326,7 +1053,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         getDefaultSetImplicitly,
         getAllColsWithUnknownSetAndNoDefault,
         getDefaultSetExplicitly,
-        getListSet,
+        getListSet
       ])
     })
 
@@ -1338,23 +1065,23 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const inputWithOneToOneAssoc = {
         fields: { id: 4 },
-        associations: [associationNameInfo], // One-to-One
+        associations: [associationNameInfo] // One-to-One
       }
       const inputWithOneToManyAssoc = {
         fields: { id: 4 },
-        associations: [associationNameProfiles], // One-to-Many
+        associations: [associationNameProfiles] // One-to-Many
       }
       const inputWithManyToManyAssoc = {
         fields: { id: 4 },
-        associations: [associationNameRoles], // Many-to-Many
+        associations: [associationNameRoles] // Many-to-Many
       }
       const inputWithoutAssoc = {
-        fields: { id: 1 },
+        fields: { id: 1 }
       }
 
       const withOneToOneAssoc = blogApp.getItem(spec, inputWithOneToOneAssoc)
@@ -1384,9 +1111,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       const withoutAssoc = blogApp.getItem(spec, inputWithoutAssoc)
         .then((data) => {
-          expect(data)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(data.relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([withOneToOneAssoc, withOneToManyAssoc, withManyToManyAssoc, withoutAssoc])
@@ -1396,12 +1121,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const inputWithOneToOneAssoc = {
         fields: { id: 8 },
-        associations: ['children'],
+        associations: ['children']
       }
 
       const jerry = await blogApp.getItem(spec, inputWithOneToOneAssoc)
@@ -1419,12 +1144,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'UserInfo',
         fields: [
-          { name: 'user_id', type: 'string', required: true },
-        ],
+          { name: 'user_id', type: 'string', required: true }
+        ]
       }
       const inputWithOneToOneAssoc = {
         fields: { user_id: 6 },
-        associations: ['children'],
+        associations: ['children']
       }
 
       const jerryUserInfo = await blogApp.getItem(spec, inputWithOneToOneAssoc)
@@ -1445,23 +1170,23 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
+          { name: 'id', type: 'Number', required: true }
         ],
-        forceAssociations: [associationNameInfo, associationNameProfiles],
+        forceAssociations: [associationNameInfo, associationNameProfiles]
       }
       const inputNoAssoc = {
-        fields: { id: 4 },
+        fields: { id: 4 }
       }
       const inputWithAssoc = {
         fields: { id: 4 },
-        associations: [associationNameProfiles, associationNameRoles],
+        associations: [associationNameProfiles, associationNameRoles]
       }
 
       const withoutInputAssoc = blogApp.getItem(spec, inputNoAssoc)
         .then((data) => {
           expect(data.relations).to.have.keys([
             associationNameInfo,
-            associationNameProfiles,
+            associationNameProfiles
           ])
         })
 
@@ -1470,7 +1195,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(data.relations).to.have.keys([
             associationNameInfo,
             associationNameProfiles,
-            associationNameRoles,
+            associationNameRoles
           ])
         })
 
@@ -1481,12 +1206,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const input = {
         fields: { id: 4 },
-        loadDirect: ['info:*', 'roles:{name,display_name}', 'profiles:slug'],
+        loadDirect: ['info:*', 'roles:{name,display_name}', 'profiles:slug']
       }
 
       const withLoadDirect = blogApp.getItem(spec, input)
@@ -1497,7 +1222,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               id: 1,
               user_id: 4,
               professional_title: 'EdgeCaser',
-              tagline: 'Catapult like impulse, infect like madness',
+              tagline: 'Catapult like impulse, infect like madness'
             })
           expect(data.attributes.info)
             .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at'])
@@ -1508,16 +1233,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               { name: 'admin', display_name: 'Admin' },
               { name: 'moderator', display_name: 'Moderator' },
               { name: 'developer', display_name: 'Developer' },
-              { name: 'blogger', display_name: 'Blogger' },
+              { name: 'blogger', display_name: 'Blogger' }
             ])
 
           expect(data.attributes)
             .to.have.property('profiles')
             .that.has.members(['functional-fanatic', 'heavy-synapse', 'a-life-organized'])
 
-          expect(data)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(data.relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([withLoadDirect])
@@ -1527,16 +1250,16 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
+          { name: 'id', type: 'Number', required: true }
         ],
-        forceLoadDirect: ['info:*', 'roles:{name,display_name}'],
+        forceLoadDirect: ['info:*', 'roles:{name,display_name}']
       }
       const inputNoLoadDirect = {
-        fields: { id: 4 },
+        fields: { id: 4 }
       }
       const inputWithLoadDirect = {
         fields: { id: 4 },
-        loadDirect: ['info:user_id', 'profiles:slug'],
+        loadDirect: ['info:user_id', 'profiles:slug']
       }
 
       const noInputLoadDirect = blogApp.getItem(spec, inputNoLoadDirect)
@@ -1547,7 +1270,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               id: 1,
               user_id: 4,
               professional_title: 'EdgeCaser',
-              tagline: 'Catapult like impulse, infect like madness',
+              tagline: 'Catapult like impulse, infect like madness'
             })
           expect(data.attributes.info)
             .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at'])
@@ -1558,12 +1281,10 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               { name: 'admin', display_name: 'Admin' },
               { name: 'moderator', display_name: 'Moderator' },
               { name: 'developer', display_name: 'Developer' },
-              { name: 'blogger', display_name: 'Blogger' },
+              { name: 'blogger', display_name: 'Blogger' }
             ])
 
-          expect(data)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(data.relations).toMatchInlineSnapshot('{}')
         })
 
       const withInputLoadDirect = blogApp.getItem(spec, inputWithLoadDirect)
@@ -1574,7 +1295,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               id: 1,
               user_id: 4,
               professional_title: 'EdgeCaser',
-              tagline: 'Catapult like impulse, infect like madness',
+              tagline: 'Catapult like impulse, infect like madness'
             })
           expect(data.attributes.info)
             .to.have.keys(['id', 'user_id', 'professional_title', 'tagline', 'description', 'created_at', 'updated_at'])
@@ -1585,16 +1306,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
               { name: 'admin', display_name: 'Admin' },
               { name: 'moderator', display_name: 'Moderator' },
               { name: 'developer', display_name: 'Developer' },
-              { name: 'blogger', display_name: 'Blogger' },
+              { name: 'blogger', display_name: 'Blogger' }
             ])
 
           expect(data.attributes)
             .to.have.property('profiles')
             .that.has.members(['functional-fanatic', 'heavy-synapse', 'a-life-organized'])
 
-          expect(data)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(data.relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([noInputLoadDirect, withInputLoadDirect])
@@ -1604,13 +1323,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const input = {
         fields: { id: 4 },
         associations: ['roles', 'profiles'],
-        loadDirect: ['profiles:slug', 'info:professional_title'],
+        loadDirect: ['profiles:slug', 'info:professional_title']
       }
 
       const withBoth = blogApp.getItem(spec, input)
@@ -1636,13 +1355,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const specUser = {
         modelName,
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const inputUser = {
         fields: { id: itemID },
         associations: ['profiles'],
-        loadDirect: ['roles:name'],
+        loadDirect: ['roles:name']
       }
 
       const globalLevel = blogAppJsonApi.getItem(specUser, inputUser)
@@ -1652,7 +1371,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.data)
             .to.contain({
               type: modelName,
-              id: itemID,
+              id: itemID
             })
 
           // Base Attributes...
@@ -1677,7 +1396,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.data)
             .to.contain({
               type: modelName,
-              id: itemID,
+              id: itemID
             })
 
           // Base Attributes...
@@ -1703,7 +1422,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   // getItems
   // ---------------------------------------------------------------------------
   describe('getItems', () => {
-    before(() => resetDB(['users', 'roles', 'profiles', 'projects']))
+    beforeEach(() => resetDB(['users', 'roles', 'profiles', 'projects']))
 
     it('should return all rows according to the provided spec and input', async () => {
       // ----
@@ -1711,7 +1430,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       // ----
       const specUser = {
         modelName: 'User',
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
       const inputUsers = {}
 
@@ -1723,25 +1442,25 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number' },
           { name: 'user_id', type: 'Number' },
-          { name: 'is_live', type: 'Boolean' },
+          { name: 'is_live', type: 'Boolean' }
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
       const inputAllProfiles = {}
       const inputLiveProfiles = {
         fields: {
-          is_live: true,
-        },
+          is_live: true
+        }
       }
       const inputNotLiveProfiles = {
         fields: {
-          is_live: false,
-        },
+          is_live: false
+        }
       }
       const inputExplicitSetOfProfiles = {
         fields: {
-          id: [1, 2, 4, 5, 6],
-        },
+          id: [1, 2, 4, 5, 6]
+        }
       }
 
       await blogApp.getItems(specUser, inputUsers)
@@ -1776,8 +1495,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           modelName: 'User',
           defaultOrderBy: '-created_at',
           fields: [
-            { name: 'username', type: 'String', operators: ['contains'] },
-          ],
+            { name: 'username', type: 'String', operators: ['contains'] }
+          ]
         }
 
         await blogApp.getItems(specUser, {})
@@ -1798,8 +1517,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         const specUser = {
           modelName: 'User',
           fields: [
-            { name: 'display_name', type: 'String', operators: ['contains'] },
-          ],
+            { name: 'display_name', type: 'String', operators: ['contains'] }
+          ]
         }
 
         const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'r' } })
@@ -1819,8 +1538,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         const specUser = {
           modelName: 'User',
           fields: [
-            { name: 'display_name', type: 'String', operators: ['contains'] },
-          ],
+            { name: 'display_name', type: 'String', operators: ['contains'] }
+          ]
         }
 
         const result = await blogApp.getItems(specUser, { fields: { 'display_name.contains': '\'' } })
@@ -1841,41 +1560,41 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         fields: [
           { name: 'id', type: 'Number' },
           { name: 'user_id', type: 'Number' },
-          { name: 'is_live', type: 'Boolean', locked: true },
+          { name: 'is_live', type: 'Boolean', locked: true }
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
       const specWithDefaultValue = {
         modelName: 'Profile',
         fields: [
           { name: 'id', type: 'Number' },
           { name: 'user_id', type: 'Number' },
-          { name: 'is_live', type: 'Boolean', locked: true, defaultValue: onlyLiveProfiles },
+          { name: 'is_live', type: 'Boolean', locked: true, defaultValue: onlyLiveProfiles }
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
       const specWithExplicitIDs = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', locked: true, defaultValue: [1, 2, 4] },
+          { name: 'id', type: 'Number', locked: true, defaultValue: [1, 2, 4] }
         ],
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
 
       const input = {
-        fields: { is_live: false },
+        fields: { is_live: false }
       }
 
       // If no "defaultValue" is provided, the field will not be included in the request...
       await blogApp.getItems(specNoDefaultValue, input)
-       .then((data) => {
-         expect(data.models).to.have.length(11)
-       })
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+        })
 
       await blogApp.getItems(specWithDefaultValue, input)
-       .then((data) => {
-         expect(data.models).to.have.length(7)
-       })
+        .then((data) => {
+          expect(data.models).to.have.length(7)
+        })
 
       await blogApp.getItems(specWithExplicitIDs, input)
         .then((data) => {
@@ -1883,10 +1602,10 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    it('should only return the field data that is permitted by the spec', () => {
+    it('should only return the field data that is permitted by the spec', async () => {
       const specBase = {
         modelName: 'User',
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
 
       const specColsSpecified = Object.assign({}, specBase)
@@ -1894,36 +1613,59 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       const input = {}
 
-      const getAllColsFromBase = blogApp.getItems(specBase, input)
-        .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(allColsUser)
-        })
+      const getAllColsFromBase = await blogApp.getItems(specBase, input)
+      expect(getAllColsFromBase.models[0].attributes).toMatchInlineSnapshot({
+        ...objectWithTimestamps,
+        // TODO: confirm if this is an expected behaviour to not return Date type.
+        //       If this is going to be changed, must check for existing usages for compatibility.
+        last_login_at: expect.any(String)
+      },
+        `
+          {
+            "avatar_url": null,
+            "created_at": Any<Date>,
+            "display_name": "Z'araq",
+            "email": "zarap@trendymail.org",
+            "external_id": "987",
+            "father_user_id": null,
+            "first_name": "Z'araq",
+            "id": 11,
+            "last_login_at": Any<String>,
+            "last_name": null,
+            "preferred_locale": "zaralianen-EXT",
+            "updated_at": Any<Date>,
+            "username": "zaraq",
+          }
+        `
+      )
 
-      const getSpecifiedCols = blogApp.getItems(specColsSpecified, input)
-        .then((data) => {
-          expect(data.models[0].attributes).to.have.keys(specColsSpecified.fieldsToReturn)
-        })
-
-      return Promise.all([getAllColsFromBase, getSpecifiedCols])
+      const getSpecifiedCols = await blogApp.getItems(specColsSpecified, input)
+      expect(getSpecifiedCols.models[0].attributes).toMatchInlineSnapshot(`
+        {
+          "display_name": "Z'araq",
+          "id": 11,
+          "username": "zaraq",
+        }
+      `)
     })
 
     it(`should support the "input.${ACTION.INPUT_FIELD_SET}" syntax, permitting various sets of returned field data`, () => {
       const specBase = {
         modelName: 'User',
-        defaultOrderBy: '-created_at',
+        defaultOrderBy: '-created_at'
       }
 
       const specColsWithDefault = Object.assign({}, specBase)
       specColsWithDefault.fieldsToReturn = {
         default: ['id', 'email', 'username', 'display_name', 'external_id'],
         list: ['id', 'username', 'display_name'],
-        avatar: ['display_name', 'avatar_url'],
+        avatar: ['display_name', 'avatar_url']
       }
 
       const specColsWithoutDefault = Object.assign({}, specBase)
       specColsWithoutDefault.fieldsToReturn = {
         list: ['id', 'username', 'display_name'],
-        avatar: ['display_name', 'avatar_url'],
+        avatar: ['display_name', 'avatar_url']
       }
 
       const inputWithUndefinedSet = { fieldSet: 'unknown' }
@@ -1960,17 +1702,17 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         getDefaultSetImplicitly,
         getAllColsWithUnknownSetAndNoDefault,
         getDefaultSetExplicitly,
-        getListSet,
+        getListSet
       ])
     })
 
     it(`should return association data when the "input.${ACTION.INPUT_ASSOCIATIONS}" property is used`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: 'updated_at',
+        defaultOrderBy: 'updated_at'
       }
       const inputWithAssoc = {
-        associations: ['info'],
+        associations: ['info']
       }
       const inputWithoutAssoc = {}
 
@@ -1987,15 +1729,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             .to.have.property('attributes')
             .that.contains({
               user_id: 4,
-              professional_title: 'EdgeCaser',
+              professional_title: 'EdgeCaser'
             })
         })
 
       const withoutAssoc = blogApp.getItems(spec, inputWithoutAssoc)
         .then((data) => {
-          expect(data.models[3])
-            .to.have.property('relations')
-            .that.is.empty
+          expect(data.models[3].relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([withAssoc, withoutAssoc])
@@ -2009,12 +1749,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         defaultOrderBy: 'updated_at',
-        forceAssociations: [associationNameInfo, associationNameProfiles],
+        forceAssociations: [associationNameInfo, associationNameProfiles]
       }
 
       const inputWithoutAssoc = {}
       const inputWithAssoc = {
-        associations: [associationNameProfiles, associationNameRoles],
+        associations: [associationNameProfiles, associationNameRoles]
       }
 
       const withoutInputAssoc = blogApp.getItems(spec, inputWithoutAssoc)
@@ -2023,7 +1763,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
           expect(fourthUser.relations).to.have.keys([
             associationNameInfo,
-            associationNameProfiles,
+            associationNameProfiles
           ])
         })
 
@@ -2034,7 +1774,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(fourthUser.relations).to.have.keys([
             associationNameInfo,
             associationNameProfiles,
-            associationNameRoles,
+            associationNameRoles
           ])
         })
 
@@ -2044,11 +1784,11 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     it(`should load association data directly to the base attributes when the "input.${ACTION.INPUT_LOAD_DIRECT}" property is used`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: 'updated_at',
+        defaultOrderBy: 'updated_at'
       }
 
       const input = {
-        loadDirect: ['info:professional_title', 'roles:name'],
+        loadDirect: ['info:professional_title', 'roles:name']
       }
 
       const withLoadDirect = blogApp.getItems(spec, input)
@@ -2062,9 +1802,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             .to.have.property('roles')
             .that.has.members(['transcendent', 'developer', 'blogger'])
 
-          expect(sixthUser)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(sixthUser.relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([withLoadDirect])
@@ -2074,12 +1812,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'User',
         defaultOrderBy: 'updated_at',
-        forceLoadDirect: ['info:professional_title'],
+        forceLoadDirect: ['info:professional_title']
       }
 
       const inputNoLoadDirect = {}
       const inputWithLoadDirect = {
-        loadDirect: ['info:*', 'roles:name'],
+        loadDirect: ['info:*', 'roles:name']
       }
 
       const noInputLoadDirect = blogApp.getItems(spec, inputNoLoadDirect)
@@ -2089,9 +1827,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(sixthUser.attributes)
             .to.contain({ info: 'Rickforcer' })
 
-          expect(sixthUser)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(sixthUser.relations).toMatchInlineSnapshot('{}')
         })
 
       const withInputLoadDirect = blogApp.getItems(spec, inputWithLoadDirect)
@@ -2105,9 +1841,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             .to.have.property('roles')
             .that.has.members(['transcendent', 'developer', 'blogger'])
 
-          expect(sixthUser)
-            .to.have.property('relations')
-            .that.is.empty
+          expect(sixthUser.relations).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([withInputLoadDirect, noInputLoadDirect])
@@ -2116,12 +1850,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     it(`should support the combined usage of "input.${ACTION.INPUT_ASSOCIATIONS}" and "input.${ACTION.INPUT_LOAD_DIRECT}" properties`, () => {
       const spec = {
         modelName: 'User',
-        defaultOrderBy: 'updated_at',
+        defaultOrderBy: 'updated_at'
       }
 
       const input = {
         associations: ['profiles'],
-        loadDirect: ['info:professional_title', 'roles:name'],
+        loadDirect: ['info:professional_title', 'roles:name']
       }
 
       const withBoth = blogApp.getItems(spec, input)
@@ -2145,25 +1879,25 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'is_internal', type: 'Boolean' },
+          { name: 'is_internal', type: 'Boolean' }
         ],
-        defaultOrderBy: 'created_at',
+        defaultOrderBy: 'created_at'
       }
       const inputFirstThree = {
         fields: { is_internal: false },
-        paginate: { skip: 0, limit: 3 },
+        paginate: { skip: 0, limit: 3 }
       }
       const inputSecondThree = {
         fields: { is_internal: false },
-        paginate: { skip: 3, limit: 3 },
+        paginate: { skip: 3, limit: 3 }
       }
       const inputThirdAndFourth = {
         fields: { is_internal: false },
-        paginate: { skip: 2, limit: 2 },
+        paginate: { skip: 2, limit: 2 }
       }
       const inputTheRest = {
         fields: { is_internal: false },
-        paginate: { skip: 6, limit: 99 },
+        paginate: { skip: 6, limit: 99 }
       }
 
       const firstThree = projectApp.getItems(specProject, inputFirstThree)
@@ -2205,13 +1939,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'is_internal', type: 'Boolean' },
+          { name: 'is_internal', type: 'Boolean' }
         ],
-        defaultOrderBy: 'created_at',
+        defaultOrderBy: 'created_at'
       }
       const inputProjects = {
         fields: { is_internal: false },
-        paginate: { skip: 9999, limit: 10 },
+        paginate: { skip: 9999, limit: 10 }
       }
 
       return projectApp.getItems(specProject, inputProjects)
@@ -2226,7 +1960,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       // -------
       const specProfile = {
         modelName: 'Profile',
-        defaultOrderBy: 'created_at',
+        defaultOrderBy: 'created_at'
       }
       const profilesDefaultOrder = {}
 
@@ -2236,16 +1970,16 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const specProject = {
         modelName: 'Project',
         fields: [
-          { name: 'is_internal', type: 'Boolean' },
+          { name: 'is_internal', type: 'Boolean' }
         ],
-        defaultOrderBy: 'created_at',
+        defaultOrderBy: 'created_at'
       }
       const projectsDefaultOrder = {
-        fields: { is_internal: false },
+        fields: { is_internal: false }
       }
       const projectsNameASC = {
         fields: { is_internal: false },
-        orderBy: 'name',
+        orderBy: 'name'
       }
 
       const getProfilesInDefaultOrder = blogApp.getItems(specProfile, profilesDefaultOrder)
@@ -2283,21 +2017,21 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         .then((data) => {
           expect(data.models).to.have.length(10)
           expect(data.models[0]).to.contain({ id: 12 }) // A
-          expect(data.models[1]).to.contain({ id: 5 })  // E
+          expect(data.models[1]).to.contain({ id: 5 }) // E
           expect(data.models[2]).to.contain({ id: 11 }) // H
-          expect(data.models[3]).to.contain({ id: 6 })  // J
+          expect(data.models[3]).to.contain({ id: 6 }) // J
           expect(data.models[4]).to.contain({ id: 14 }) // K
-          expect(data.models[5]).to.contain({ id: 9 })  // L
+          expect(data.models[5]).to.contain({ id: 9 }) // L
           expect(data.models[6]).to.contain({ id: 13 }) // N
-          expect(data.models[7]).to.contain({ id: 7 })  // P
+          expect(data.models[7]).to.contain({ id: 7 }) // P
           expect(data.models[8]).to.contain({ id: 10 }) // T
-          expect(data.models[9]).to.contain({ id: 8 })  // W
+          expect(data.models[9]).to.contain({ id: 8 }) // W
         })
 
       return Promise.all([
         getProfilesInDefaultOrder,
         getProjectsInDefaultOrder,
-        getProjectsInNameASC,
+        getProjectsInNameASC
       ])
     })
 
@@ -2306,13 +2040,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       const spec = {
         modelName,
-        defaultOrderBy: 'created_at',
+        defaultOrderBy: 'created_at'
       }
 
       const input = {
         loadDirect: ['roles:name'],
         associations: ['profiles'],
-        paginate: { skip: 3, limit: 3 },
+        paginate: { skip: 3, limit: 3 }
       }
 
       const globalLevel = blogAppJsonApi.getItems(spec, input)
@@ -2331,7 +2065,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             .to.contain({
               total_items: 11,
               skip: 3,
-              limit: 3,
+              limit: 3
             })
 
           // First Item....
@@ -2339,7 +2073,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(firstItem)
             .to.contain({
               type: modelName,
-              id: 4,
+              id: 4
             })
 
           expect(firstItem).to.have.property('attributes')
@@ -2367,7 +2101,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
             .to.contain({
               total_items: 11,
               skip: 3,
-              limit: 3,
+              limit: 3
             })
 
           // First Item....
@@ -2375,7 +2109,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(firstItem)
             .to.contain({
               type: modelName,
-              id: 4,
+              id: 4
             })
 
           expect(firstItem).to.have.property('attributes')
@@ -2401,56 +2135,62 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
       const input = {
         fields: {
-          id: 999,
-        },
+          id: 999
+        }
       }
 
       await expect(projectApp.deleteItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+         {
+           "message": "The requested "Project" was not found.",
+           "name": "JointStatusError",
+           "status": 404,
+         }
+       `)
     })
 
     it('should delete the resource when the spec is satisfied', async () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
 
       const input = {
         fields: {
-          id: 1,
-        },
+          id: 1
+        }
       }
 
       // Delete item
       const deleted = await projectApp.deleteItem(spec, input)
-      expect(deleted.attributes).to.be.empty
+      expect(deleted.attributes).toMatchInlineSnapshot('{}')
 
       // Ensure item has been deleted
       await expect(projectApp.getItem(spec, input))
-        .to.eventually.be.rejected
-        .and.to.contain({
-          status: 404,
-          message: 'The requested "Project" was not found.',
-        })
+        .rejects
+        .toMatchInlineSnapshot(`
+         {
+           "message": "The requested "Project" was not found.",
+           "name": "JointStatusError",
+           "status": 404,
+         }
+       `)
     })
 
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and delete all matches`, async () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'name', type: 'String', required: true, operators: ['contains'] },
-        ],
+          { name: 'name', type: 'String', required: true, operators: ['contains'] }
+        ]
       }
 
       const getItems = () => projectApp.getItems(spec, { fields: { 'name.contains': 'er' } })
@@ -2469,36 +2209,35 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       })
     })
 
-
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOOKUP}" option, to handle authorization from the retrieved item`, async () => {
       const userContext = {
         is_logged_in: true,
         id: 4,
         external_id: '304',
         username: 'the_manic_edge',
         roles: [],
-        profile_ids: [1, 2, 3],
+        profile_ids: [1, 2, 3]
       }
       const authContext = projectApp.prepareAuthContext(userContext)
 
       const spec = {
         modelName: 'Profile',
         fields: [
-          { name: 'id', type: 'Number', required: true, lookup: true },
+          { name: 'id', type: 'Number', required: true, lookup: true }
         ],
         auth: {
           rules: { owner: 'me' },
-          ownerCreds: ['user_id => id'],
-        },
+          ownerCreds: ['user_id => id']
+        }
       }
 
       const input = {
         fields: { id: 3 },
-        authContext,
+        authContext
       }
 
-      return expect(projectApp.deleteItem(spec, input))
-        .to.be.fulfilled
+      await expect(projectApp.deleteItem(spec, input))
+        .resolves.toMatchInlineSnapshot('{}')
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
@@ -2507,8 +2246,8 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName,
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
+          { name: 'id', type: 'Number', required: true }
+        ]
       }
 
       const globalLevel = projectAppJsonApi.deleteItem(spec, { fields: { id: 2 } })
@@ -2518,12 +2257,11 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.data)
             .to.contain({
               type: modelName,
-              id: null,
+              id: null
             })
 
           // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-            .that.is.empty
+          expect(payload.data.attributes).toMatchInlineSnapshot('{}')
         })
 
       const methodLevel = projectApp.deleteItem(spec, { fields: { id: 3 } }, 'json-api')
@@ -2533,16 +2271,14 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.data)
             .to.contain({
               type: modelName,
-              id: null,
+              id: null
             })
 
           // Base Attributes...
-          expect(payload.data).to.have.property('attributes')
-            .that.is.empty
+          expect(payload.data.attributes).toMatchInlineSnapshot('{}')
         })
 
       return Promise.all([globalLevel, methodLevel])
     })
   }) // END - deleteItem
-
 })

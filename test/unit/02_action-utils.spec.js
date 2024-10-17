@@ -1,8 +1,6 @@
-import chai from 'chai'
+import { describe, expect, it } from 'vitest'
 import * as ActionUtils from '../../src/actions/action-utils'
 import ACTION from '../../src/core/constants/action-constants'
-
-const expect = chai.expect
 
 // --------------------
 // LIBRARY action-utils
@@ -18,20 +16,20 @@ describe('ACTION-UTILS', () => {
         { name: 'profile_id', type: 'Number', required: true },
         { name: 'title', type: 'String', required: true },
         { name: 'category', type: 'String', required: true },
-        { name: 'summary', type: 'String' },
+        { name: 'summary', type: 'String' }
       ]
 
       const fieldData = {
         profile_id: 1,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         satisfied: false,
         missing: {
-          all: ['user_id', 'category'],
-        },
+          all: ['user_id', 'category']
+        }
       })
     })
 
@@ -40,20 +38,20 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
-        { name: 'display_name', type: 'String', requiredOr: false },
+        { name: 'display_name', type: 'String', requiredOr: false }
       ]
 
       const fieldData = {
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         satisfied: false,
         missing: {
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
     })
 
@@ -62,13 +60,13 @@ describe('ACTION-UTILS', () => {
         { name: 'profile_id', type: 'Number' },
         { name: 'title', type: 'String', required: false },
         { name: 'summary', type: 'String', required: false },
-        { name: 'keywords', type: 'String', requiredOr: false },
+        { name: 'keywords', type: 'String', requiredOr: false }
       ]
 
       const fieldData = {
         profile_id: 1,
         title: 'My First Post',
-        improper_field: 'I will not be processed',
+        improper_field: 'I will not be processed'
       }
 
       const nullSpec = ActionUtils.checkRequiredFields(null, fieldData)
@@ -77,11 +75,11 @@ describe('ACTION-UTILS', () => {
       const nullInput = ActionUtils.checkRequiredFields(fieldSpec, null)
       const emptyInput = ActionUtils.checkRequiredFields(fieldSpec, {})
 
-      expect(nullSpec).to.deep.equal({ satisfied: true })
-      expect(emptySpec).to.deep.equal({ satisfied: true })
-      expect(noRequiredSpec).to.deep.equal({ satisfied: true })
-      expect(nullInput).to.deep.equal({ satisfied: true })
-      expect(emptyInput).to.deep.equal({ satisfied: true })
+      expect(nullSpec).toEqual({ satisfied: true })
+      expect(emptySpec).toEqual({ satisfied: true })
+      expect(noRequiredSpec).toEqual({ satisfied: true })
+      expect(nullInput).toEqual({ satisfied: true })
+      expect(emptyInput).toEqual({ satisfied: true })
     })
 
     it(`should pass when the input satisfies the "${ACTION.SPEC_FIELDS_OPT_REQUIRED}" fields`, () => {
@@ -91,18 +89,18 @@ describe('ACTION-UTILS', () => {
         { name: 'title', type: 'String', required: true },
         { name: 'category', type: 'String', required: true },
         { name: 'summary', type: 'String', required: false },
-        { name: 'keywords', type: 'String' },
+        { name: 'keywords', type: 'String' }
       ]
 
       const fieldData = {
         profile_id: 1,
         status_id: 0,
         title: 'My First Post',
-        category: 'Transhumanism',
+        category: 'Transhumanism'
       }
 
       const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
-      expect(result).to.deep.equal({ satisfied: true })
+      expect(result).toEqual({ satisfied: true })
     })
 
     it(`should support the combined usage of "${ACTION.SPEC_FIELDS_OPT_REQUIRED_OR}" and "${ACTION.SPEC_FIELDS_OPT_REQUIRED}" fields`, () => {
@@ -110,74 +108,74 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
-        { name: 'display_name', type: 'String', requiredOr: false },
+        { name: 'display_name', type: 'String', requiredOr: false }
       ]
       const fieldSpecBothTypes = [
         { name: 'id', type: 'Number', requiredOr: true },
         { name: 'username', type: 'Number', requiredOr: true },
         { name: 'email', type: 'String' },
         { name: 'display_name', type: 'String', requiredOr: false },
-        { name: 'external_id', type: 'Number', required: true },
+        { name: 'external_id', type: 'Number', required: true }
       ]
 
       const fieldData01 = {
         id: 1,
         email: 'the-thrilla@fantasmo.com',
         display_name: 'The Thrilla',
-        external_id: '10000',
+        external_id: '10000'
       }
       const fieldData02 = {
         username: 'the-thrilla',
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
       const fieldData03 = {
         email: 'the-thrilla@fantasmo.com',
         display_name: 'The Thrilla',
-        external_id: '10000',
+        external_id: '10000'
       }
       const fieldData04 = {
         id: 1,
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
       const fieldData05 = {
         email: 'the-thrilla@fantasmo.com',
-        display_name: 'The Thrilla',
+        display_name: 'The Thrilla'
       }
 
       const testCase01 = ActionUtils.checkRequiredFields(fieldSpecRequiredOrOnly, fieldData01)
-      expect(testCase01).to.deep.equal({ satisfied: true })
+      expect(testCase01).toEqual({ satisfied: true })
 
       const testCase02 = ActionUtils.checkRequiredFields(fieldSpecRequiredOrOnly, fieldData02)
-      expect(testCase02).to.deep.equal({ satisfied: true })
+      expect(testCase02).toEqual({ satisfied: true })
 
       const testCase03 = ActionUtils.checkRequiredFields(fieldSpecRequiredOrOnly, fieldData03)
-      expect(testCase03).to.deep.equal({
+      expect(testCase03).toEqual({
         satisfied: false,
         missing: {
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
 
       const testCase04 = ActionUtils.checkRequiredFields(fieldSpecBothTypes, fieldData01)
-      expect(testCase04).to.deep.equal({ satisfied: true })
+      expect(testCase04).toEqual({ satisfied: true })
 
       const testCase05 = ActionUtils.checkRequiredFields(fieldSpecBothTypes, fieldData04)
-      expect(testCase05).to.deep.equal({
+      expect(testCase05).toEqual({
         satisfied: false,
         missing: {
-          all: ['external_id'],
-        },
+          all: ['external_id']
+        }
       })
 
       const testCase06 = ActionUtils.checkRequiredFields(fieldSpecBothTypes, fieldData05)
-      expect(testCase06).to.deep.equal({
+      expect(testCase06).toEqual({
         satisfied: false,
         missing: {
           all: ['external_id'],
-          oneOf: ['id', 'username'],
-        },
+          oneOf: ['id', 'username']
+        }
       })
     })
   }) // END - checkRequiredFields
@@ -192,16 +190,16 @@ describe('ACTION-UTILS', () => {
         { name: 'external_id', type: 'String', lookupOr: false },
         { name: 'slug', type: 'String', lookupOr: false },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
         id: 1,
-        slug: 'post-001',
+        slug: 'post-001'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.be.null
+        .toBeNull()
     })
 
     it('should return null when the input does not provide a matching lookup field data pair', () => {
@@ -209,24 +207,24 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', required: true, lookup: true },
         { name: 'slug', type: 'String' },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
       const fieldSpecLookupOr = [
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'external_id', type: 'String', lookupOr: true },
         { name: 'slug', type: 'String' },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup, fieldData))
-        .to.be.null
+        .toBeNull()
       expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldData))
-        .to.be.null
+        .toBeNull()
     })
 
     it('should return all required lookup fields', () => {
@@ -235,21 +233,21 @@ describe('ACTION-UTILS', () => {
         { name: 'key', type: 'String', lookup: true },
         { name: 'full_version', type: 'Boolean', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
         id: 333,
         key: 'omega',
         full_version: true,
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.deep.equal({
+        .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
           key: { value: 'omega', matchStrategy: 'exact' },
-          full_version: { value: true, matchStrategy: 'exact' },
+          full_version: { value: true, matchStrategy: 'exact' }
         })
     })
 
@@ -258,52 +256,52 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'external_id', type: 'String', lookupOr: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldDataWithSecondOr = {
         external_id: 'external-id-333',
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookupOr, fieldDataWithSecondOr))
-        .to.deep.equal({ external_id: { value: 'external-id-333', matchStrategy: 'exact' } })
+        .toEqual({ external_id: { value: 'external-id-333', matchStrategy: 'exact' } })
     })
 
     it(`should return the "${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" on a required lookup field, when the input does not provide the data`, () => {
       const fieldSpecLookup01 = [
         { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
       const fieldSpecLookup02 = [
         { name: 'id', type: 'Number', lookup: true },
         { name: 'key', type: 'String', defaultValue: 'alpha', lookup: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldDataNoKey = {
         id: 333,
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
       const fieldDataWithKey = {
         id: 333,
         key: 'beta',
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup01, fieldDataNoKey))
-        .to.deep.equal({ key: { value: 'alpha', matchStrategy: 'exact' } })
+        .toEqual({ key: { value: 'alpha', matchStrategy: 'exact' } })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataNoKey))
-        .to.deep.equal({
+        .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
-          key: { value: 'alpha', matchStrategy: 'exact' },
+          key: { value: 'alpha', matchStrategy: 'exact' }
         })
       expect(ActionUtils.getLookupFieldData(fieldSpecLookup02, fieldDataWithKey))
-        .to.deep.equal({
+        .toEqual({
           id: { value: 333, matchStrategy: 'exact' },
-          key: { value: 'beta', matchStrategy: 'exact' },
+          key: { value: 'beta', matchStrategy: 'exact' }
         })
     })
 
@@ -312,15 +310,15 @@ describe('ACTION-UTILS', () => {
         { name: 'id', type: 'Number', lookupOr: true },
         { name: 'slug', type: 'String', defaultValue: 'item-011', lookupOr: true },
         { name: 'title', type: 'String' },
-        { name: 'body', type: 'String' },
+        { name: 'body', type: 'String' }
       ]
 
       const fieldData = {
-        title: 'Updated Post Title',
+        title: 'Updated Post Title'
       }
 
       expect(ActionUtils.getLookupFieldData(fieldSpec, fieldData))
-        .to.be.null
+        .toBeNull()
     })
   }) // END - getLookupFieldData
 
@@ -337,13 +335,11 @@ describe('ACTION-UTILS', () => {
       const fieldData = {
         profile_id: 1,
         user_id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
-      expect(ActionUtils.parseOwnerCreds(authSpecNoCreds, fieldData))
-        .to.be.empty
-      expect(ActionUtils.parseOwnerCreds(authSpecEmptyCreds, fieldData))
-        .to.be.empty
+      expect(ActionUtils.parseOwnerCreds(authSpecNoCreds, fieldData)).toEqual({})
+      expect(ActionUtils.parseOwnerCreds(authSpecEmptyCreds, fieldData)).toEqual({})
     })
 
     it(`should return an empty object when the fieldData does not contain any of the fields described in the "${ACTION.SPEC_AUTH_OWNER_CREDS}" spec`, () => {
@@ -351,11 +347,10 @@ describe('ACTION-UTILS', () => {
       authSpec[ACTION.SPEC_AUTH_OWNER_CREDS] = ['user_id', 'profile_id']
 
       const fieldData = {
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
-      expect(ActionUtils.parseOwnerCreds(authSpec, fieldData))
-        .to.be.empty
+      expect(ActionUtils.parseOwnerCreds(authSpec, fieldData)).toEqual({})
     })
 
     it(`should return the first matching fieldData name/value pair as described by the "${ACTION.SPEC_AUTH_OWNER_CREDS}" spec`, () => {
@@ -365,31 +360,33 @@ describe('ACTION-UTILS', () => {
       const fieldData = {
         profile_id: 1,
         user_id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
-      expect(ActionUtils.parseOwnerCreds(authSpec, fieldData))
-        .to.contain({ user_id: 33 })
+      expect(ActionUtils.parseOwnerCreds(authSpec, fieldData)).toMatchInlineSnapshot(`
+        {
+          "user_id": 33,
+        }
+      `)
     })
 
     it('should support field transformation when arrow notation is used on the spec', () => {
-      const authSpecNoSpaces = {}
-      authSpecNoSpaces[ACTION.SPEC_AUTH_OWNER_CREDS] = ['id=>user_id', 'profile_id']
+      const authSpecNoSpaces = {
+        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id=>user_id', 'profile_id']
+      }
 
-      const authSpecWithSpaces = {}
-      authSpecWithSpaces[ACTION.SPEC_AUTH_OWNER_CREDS] = ['id =>  user_id', 'profile_id']
+      const authSpecWithSpaces = {
+        [ACTION.SPEC_AUTH_OWNER_CREDS]: ['id =>  user_id', 'profile_id']
+      }
 
       const fieldData = {
         profile_id: 1,
         id: 33,
-        title: 'My First Post',
+        title: 'My First Post'
       }
 
-      const parsedNoSpaces = ActionUtils.parseOwnerCreds(authSpecNoSpaces, fieldData)
-      const parsedWithSpaces = ActionUtils.parseOwnerCreds(authSpecWithSpaces, fieldData)
-
-      expect(parsedNoSpaces).to.contain({ user_id: 33 })
-      expect(parsedWithSpaces).to.contain({ user_id: 33 })
+      expect(ActionUtils.parseOwnerCreds(authSpecNoSpaces, fieldData))
+        .toEqual(ActionUtils.parseOwnerCreds(authSpecWithSpaces, fieldData))
     })
   }) // END - parseOwnerCreds
 
@@ -400,8 +397,8 @@ describe('ACTION-UTILS', () => {
     it('should return an empty object when the provided data is empty or null', () => {
       const data = []
 
-      expect(ActionUtils.parseLoadDirect(data)).to.be.an('object').and.to.be.empty
-      expect(ActionUtils.parseLoadDirect()).to.be.an('object').and.to.be.empty
+      expect(ActionUtils.parseLoadDirect(data)).toEqual({})
+      expect(ActionUtils.parseLoadDirect()).toEqual({})
     })
 
     it('should ignore association entries that do not specify a column mapping', () => {
@@ -409,11 +406,11 @@ describe('ACTION-UTILS', () => {
 
       const parsed = ActionUtils.parseLoadDirect(data)
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         associations: ['viewCount'],
         colMappings: {
-          viewCount: 'count',
-        },
+          viewCount: 'count'
+        }
       })
     })
 
@@ -422,12 +419,12 @@ describe('ACTION-UTILS', () => {
 
       const parsed = ActionUtils.parseLoadDirect(data)
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         associations: ['roles', 'viewCount'],
         colMappings: {
           roles: 'key',
-          viewCount: 'count',
-        },
+          viewCount: 'count'
+        }
       })
     })
 
@@ -436,14 +433,14 @@ describe('ACTION-UTILS', () => {
 
       const parsed = ActionUtils.parseLoadDirect(data)
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         associations: ['roles', 'viewCount', 'profile', 'user'],
         colMappings: {
           roles: 'name',
           viewCount: 'count',
           profile: ['name', 'is_default'],
-          user: '*',
-        },
+          user: '*'
+        }
       })
     })
   }) // END - parseLoadDirect
@@ -455,16 +452,16 @@ describe('ACTION-UTILS', () => {
     it('should return null when a "defaultValue" parameter is not provided', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
-      expect(ActionUtils.processDefaultValue(fieldData)).to.be.null
+      expect(ActionUtils.processDefaultValue(fieldData)).toBeNull()
     })
 
     it('should return the original "defaultValue" for standard scenarios', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const stringValue = 'standard-value'
@@ -474,33 +471,33 @@ describe('ACTION-UTILS', () => {
       const nullValue = null
 
       expect(ActionUtils.processDefaultValue(fieldData, stringValue))
-        .to.equal(stringValue)
+        .toEqual(stringValue)
       expect(ActionUtils.processDefaultValue(fieldData, booleanFalseValue))
-        .to.equal(booleanFalseValue)
+        .toEqual(booleanFalseValue)
       expect(ActionUtils.processDefaultValue(fieldData, booleanTrueValue))
-        .to.equal(booleanTrueValue)
+        .toEqual(booleanTrueValue)
       expect(ActionUtils.processDefaultValue(fieldData, numberValue))
-        .to.equal(numberValue)
+        .toEqual(numberValue)
       expect(ActionUtils.processDefaultValue(fieldData, nullValue))
-        .to.equal(nullValue)
+        .toEqual(nullValue)
     })
 
     it('should support the "now" operator', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const nowOperator = '% now %'
 
       expect(ActionUtils.processDefaultValue(fieldData, nowOperator))
-        .to.have.length(20)
+        .toHaveLength(20)
     })
 
     it('should support the transformation operators (camelCase, kebabCase, snakeCase, pascalCase)', () => {
       const fieldData = {
         title: 'The Very First',
-        alias: 'alias-from-input',
+        alias: 'alias-from-input'
       }
 
       const camelCase = '% camelCase(title) %'
@@ -513,18 +510,18 @@ describe('ACTION-UTILS', () => {
       const absentField = '% unknownOp(description) %'
 
       expect(ActionUtils.processDefaultValue(fieldData, camelCase))
-        .to.equal('theVeryFirst')
+        .toBe('theVeryFirst')
       expect(ActionUtils.processDefaultValue(fieldData, kebabCase))
-        .to.equal('the-very-first')
+        .toBe('the-very-first')
       expect(ActionUtils.processDefaultValue(fieldData, snakeCase))
-        .to.equal('the_very_first')
+        .toBe('the_very_first')
       expect(ActionUtils.processDefaultValue(fieldData, pascalCase))
-        .to.equal('TheVeryFirst')
+        .toBe('TheVeryFirst')
 
       expect(ActionUtils.processDefaultValue(fieldData, unknownOp))
-        .to.be.null
+        .toBeNull()
       expect(ActionUtils.processDefaultValue(fieldData, absentField))
-        .to.be.null
+        .toBeNull()
     })
   }) // END - processDefaultValue
 
@@ -533,29 +530,29 @@ describe('ACTION-UTILS', () => {
   // ---------------------------
   describe('normalizeFieldSpec', () => {
     const fieldSpecInput = [
-        { name: 'user_id', type: 'Number' },
-        { name: 'username', type: 'String', operators: ['contains', 'exact'] },
-        { name: 'display_name' },
-        { type: 'Number' },
+      { name: 'user_id', type: 'Number' },
+      { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+      { name: 'display_name' },
+      { type: 'Number' }
     ]
 
     it('should normalize spec field from the input', () => {
       const fieldSpec = ActionUtils.normalizeFieldSpec(fieldSpecInput)
-      expect(fieldSpec).to.deep.equal([
+      expect(fieldSpec).toEqual([
         { name: 'user_id', type: 'Number', operators: ['exact'] },
         { name: 'username', type: 'String', operators: ['contains', 'exact'] },
-        { name: 'display_name', type: 'String', operators: ['exact'] },
+        { name: 'display_name', type: 'String', operators: ['exact'] }
       ])
     })
 
     it('should accept nullish input', () => {
-      expect(ActionUtils.normalizeFieldSpec()).to.deep.equal([])
-      expect(ActionUtils.normalizeFieldSpec(null)).to.deep.equal([])
+      expect(ActionUtils.normalizeFieldSpec()).toEqual([])
+      expect(ActionUtils.normalizeFieldSpec(null)).toEqual([])
     })
 
     it('should be idempotent', () => {
       expect(ActionUtils.normalizeFieldSpec(ActionUtils.normalizeFieldSpec(fieldSpecInput)))
-        .to.deep.equal(ActionUtils.normalizeFieldSpec(fieldSpecInput))
+        .toEqual(ActionUtils.normalizeFieldSpec(fieldSpecInput))
     })
   }) // END - normalizeFieldSpec
 
@@ -568,20 +565,28 @@ describe('ACTION-UTILS', () => {
     it('should normalize field data from the input', () => {
       const fieldData = ActionUtils.normalizeFieldData(fieldDataInput)
 
-      expect(fieldData).to.deep.equal({
-        user_id: { value: 1, matchStrategy: 'exact' },
-        username: { value: 'ed', matchStrategy: 'contains' },
-      })
+      expect(fieldData).toMatchInlineSnapshot(`
+        {
+          "user_id": {
+            "matchStrategy": "exact",
+            "value": 1,
+          },
+          "username": {
+            "matchStrategy": "contains",
+            "value": "ed",
+          },
+        }
+      `)
     })
 
     it('should accept nullish input', () => {
-      expect(ActionUtils.normalizeFieldData()).to.deep.equal({})
-      expect(ActionUtils.normalizeFieldData(null)).to.deep.equal({})
+      expect(ActionUtils.normalizeFieldData()).toEqual({})
+      expect(ActionUtils.normalizeFieldData(null)).toEqual({})
     })
 
     it('should be idempotent', () => {
       expect(ActionUtils.normalizeFieldData(ActionUtils.normalizeFieldData(fieldDataInput)))
-        .to.deep.equal(ActionUtils.normalizeFieldData(fieldDataInput))
+        .toEqual(ActionUtils.normalizeFieldData(fieldDataInput))
     })
   }) // END - normalizeFieldData
 
@@ -599,7 +604,7 @@ describe('ACTION-UTILS', () => {
         { name: 'is_awesome', type: 'Boolean' },
         { name: 'is_typical', type: 'Boolean' },
         { name: 'is_unknown', type: 'Boolean' },
-        { name: 'is_simple', type: 'Boolean' },
+        { name: 'is_simple', type: 'Boolean' }
       ]
 
       const fieldData = {
@@ -612,12 +617,12 @@ describe('ACTION-UTILS', () => {
         is_typical: 'false',
         is_unknown: 'FALSE',
         is_simple: 0,
-        notRelated: 'I am ignored',
+        notRelated: 'I am ignored'
       }
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
-      expect(preparedFieldData).to.deep.equal({
+      expect(preparedFieldData).toEqual({
         user_id: { value: 1, matchStrategy: 'exact' },
         item_id: { value: [2, 3, 5, 8], matchStrategy: 'exact' },
         title: { value: '123', matchStrategy: 'exact' },
@@ -626,7 +631,7 @@ describe('ACTION-UTILS', () => {
         is_awesome: { value: true, matchStrategy: 'exact' },
         is_typical: { value: false, matchStrategy: 'exact' },
         is_unknown: { value: false, matchStrategy: 'exact' },
-        is_simple: { value: false, matchStrategy: 'exact' },
+        is_simple: { value: false, matchStrategy: 'exact' }
       })
     })
 
@@ -636,8 +641,8 @@ describe('ACTION-UTILS', () => {
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
-      expect(preparedFieldData).to.deep.equal({
-        username: { value: 'ed', matchStrategy: 'exact' },
+      expect(preparedFieldData).toEqual({
+        username: { value: 'ed', matchStrategy: 'exact' }
       })
     })
 
@@ -647,8 +652,8 @@ describe('ACTION-UTILS', () => {
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
 
-      expect(preparedFieldData).to.deep.equal({
-        username: { value: 'ed', matchStrategy: 'contains' },
+      expect(preparedFieldData).toEqual({
+        username: { value: 'ed', matchStrategy: 'contains' }
       })
     })
 
@@ -656,14 +661,16 @@ describe('ACTION-UTILS', () => {
       const fieldSpec = [{ name: 'username', type: 'String' }]
       const fieldData = { 'username.contains': 'ed' }
 
-      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData)).to.throw(/not allowed/)
+      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
+        .toThrowErrorMatchingInlineSnapshot('[Error: Operator "contains" is not allowed on field "username". Check that it is whitelisted on the field spec with "operators"]')
     })
 
     it('should throw error if a "contains" operator is used on a non-string field', () => {
       const fieldSpec = [{ name: 'user_id', type: 'Number', operators: ['contains'] }]
       const fieldData = { 'user_id.contains': '10' }
 
-      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData)).to.throw(/can only be applied to a string value/)
+      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
+        .toThrowErrorMatchingInlineSnapshot('[Error: "contains" operator can only be applied to a string value.]')
     })
   }) // END - prepareFieldData
 })

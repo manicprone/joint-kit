@@ -9,7 +9,7 @@ import * as ActionsBookshelf from './actions/bookshelf'
 import trxBookshelf from './actions/bookshelf/transaction'
 
 export default class Joint {
-  constructor(options = {}) {
+  constructor (options = {}) {
     // Load options...
     this.service = objectUtils.get(options, 'service', null)
     this.serviceKey = CoreUtils.determineServiceKeyFromService(this.service)
@@ -63,22 +63,22 @@ export default class Joint {
     }
   } // END - constructor
 
-  setOutput(format) {
+  setOutput (format) {
     this.output = format
   }
 
-  setServer(server) {
+  setServer (server) {
     this.server = server
     this.serverKey = CoreUtils.determineServerKeyFromServer(this.server)
   }
 
-  updateSettings(settings) {
+  updateSettings (settings) {
     Object.assign(this.settings, settings)
     // TODO: Need to update / rebuild the "prepareAuthContext" function !!!
   }
 
   // TODO: Merge configs, to support continuous invocations !!!
-  generate(options) {
+  generate (options) {
     // Parse options...
     this.modelConfig = objectUtils.get(options, 'modelConfig', null)
     this.methodConfig = objectUtils.get(options, 'methodConfig', null)
@@ -112,7 +112,7 @@ export default class Joint {
     this.hasGenerated = true
   } // END - generate
 
-  info() {
+  info () {
     const modelNames = (this.model) ? Object.keys(this.model) : null
     const isApiEnabled = (this.router) ? true : false // eslint-disable-line no-unneeded-ternary
 
@@ -127,8 +127,8 @@ export default class Joint {
       configs: {
         model: this.modelConfig,
         method: this.methodConfig,
-        route: this.routeConfig,
-      },
+        route: this.routeConfig
+      }
     }
 
     return info

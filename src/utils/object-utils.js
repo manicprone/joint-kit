@@ -9,5 +9,5 @@ export default {
   isEmpty: lodashLang.isEmpty,
   cloneDeep: lodashLang.cloneDeep,
   union: lodashArray.union,
-  includes: lodashCollection.includes,
+  includes: lodashCollection.includes
 }

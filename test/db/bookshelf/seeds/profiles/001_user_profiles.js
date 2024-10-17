@@ -1,4 +1,4 @@
-import moment from 'moment'
+const moment = require('moment')
 
 const tableName = 'user_profiles'
 
@@ -14,7 +14,7 @@ const seeds = [
     tagline: 'I don\'t have habits, I have algorithms.',
     description: null,
     is_default: true,
-    is_live: true,
+    is_live: true
   },
   {
     id: 2,
@@ -24,7 +24,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: false,
-    is_live: false,
+    is_live: false
   },
   {
     id: 3,
@@ -34,7 +34,7 @@ const seeds = [
     tagline: 'Documents of obsessive compulsiveness.',
     description: null,
     is_default: false,
-    is_live: true,
+    is_live: true
   },
 
   // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ const seeds = [
     tagline: 'Is someone talking?',
     description: null,
     is_default: false,
-    is_live: true,
+    is_live: true
   },
   {
     id: 5,
@@ -58,7 +58,7 @@ const seeds = [
     tagline: 'A fluffy life in the clouds.',
     description: null,
     is_default: true,
-    is_live: true,
+    is_live: true
   },
 
   // ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: true,
-    is_live: true,
+    is_live: true
   },
 
   // ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: true,
-    is_live: true,
+    is_live: true
   },
 
   // ---------------------------------------------------------------------------
@@ -100,7 +100,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: false,
-    is_live: false,
+    is_live: false
   },
   {
     id: 9,
@@ -110,7 +110,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: false,
-    is_live: false,
+    is_live: false
   },
   {
     id: 10,
@@ -120,7 +120,7 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: false,
-    is_live: false,
+    is_live: false
   },
   {
     id: 11,
@@ -130,11 +130,11 @@ const seeds = [
     tagline: '',
     description: null,
     is_default: true,
-    is_live: true,
-  },
+    is_live: true
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -144,7 +144,7 @@ exports.seed = function seed(knex) {
       return knex(tableName).insert({
         ...data,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })

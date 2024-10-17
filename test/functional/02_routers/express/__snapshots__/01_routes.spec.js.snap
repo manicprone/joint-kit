@@ -1,0 +1,209 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /user/:id > should load association data directly to the base attributes when the "load" parameter is used 1`] = `
+{
+  "data": {
+    "attributes": {
+      "avatar_url": null,
+      "display_name": "The Manic Edge",
+      "info": "EdgeCaser",
+      "username": "the_manic_edge",
+    },
+    "id": 4,
+    "type": "User",
+  },
+}
+`;
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /user/:id > should return (200) with the requested user 1`] = `
+{
+  "data": {
+    "attributes": {
+      "avatar_url": null,
+      "display_name": "Supa Admin",
+      "username": "super-admin",
+    },
+    "id": 1,
+    "type": "User",
+  },
+}
+`;
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /user/:id > should return associations when the "with" parameter is used 1`] = `
+{
+  "attributes": {
+    "avatar_url": null,
+    "display_name": "Rick",
+    "username": "ricksanchez",
+  },
+  "id": 6,
+  "relationships": {
+    "info": {
+      "data": {
+        "id": 3,
+        "type": "UserInfo",
+      },
+    },
+  },
+  "type": "User",
+}
+`;
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /user/:id > should return associations when the "with" parameter is used 2`] = `
+{
+  "created_at": Any<String>,
+  "description": null,
+  "professional_title": "Rickforcer",
+  "tagline": "The Rickiest",
+  "updated_at": Any<String>,
+  "user_id": 6,
+}
+`;
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /users > should return (200) with the requested collection of users 1`] = `
+{
+  "data": [
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Z'araq",
+        "username": "zaraq",
+      },
+      "id": 11,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Summer",
+        "username": "summersmith",
+      },
+      "id": 10,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Beth",
+        "username": "bethsmith",
+      },
+      "id": 9,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Jerry",
+        "username": "jerrysmith",
+      },
+      "id": 8,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Morty",
+        "username": "mortysmith",
+      },
+      "id": 7,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Rick",
+        "username": "ricksanchez",
+      },
+      "id": 6,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Segmented",
+        "username": "segmented",
+      },
+      "id": 5,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "The Manic Edge",
+        "username": "the_manic_edge",
+      },
+      "id": 4,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Hot Mod",
+        "username": "hotmod",
+      },
+      "id": 3,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Admin",
+        "username": "admin",
+      },
+      "id": 2,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Supa Admin",
+        "username": "super-admin",
+      },
+      "id": 1,
+      "type": "User",
+    },
+  ],
+  "meta": {
+    "total_items": 11,
+  },
+}
+`;
+
+exports[`CUSTOM ROUTER SIMULATION [express] > User > GET /users > should support paginated requests when the "skip" and "limit" parameters are used 1`] = `
+{
+  "data": [
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Z'araq",
+        "username": "zaraq",
+      },
+      "id": 11,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Summer",
+        "username": "summersmith",
+      },
+      "id": 10,
+      "type": "User",
+    },
+    {
+      "attributes": {
+        "avatar_url": null,
+        "display_name": "Beth",
+        "username": "bethsmith",
+      },
+      "id": 9,
+      "type": "User",
+    },
+  ],
+  "meta": {
+    "limit": 3,
+    "skip": 0,
+    "total_items": 11,
+  },
+}
+`;

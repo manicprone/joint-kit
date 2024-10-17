@@ -1,7 +1,7 @@
 import objectUtils from '../../utils/object-utils'
 
 export default class JointError extends Error {
-  constructor(data) {
+  constructor (data) {
     super()
     this.name = 'JointError'
     this.module = objectUtils.get(data, 'module', null)

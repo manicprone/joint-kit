@@ -22,6 +22,6 @@ export default {
   ASSOCIATIONS: 'associations',
   ASSOCIATIONS_TYPE: 'type',
   ASSOCIATIONS_PATH: 'path',
-  ASSOCIATIONS_ORDER_BY: 'orderBy',
+  ASSOCIATIONS_ORDER_BY: 'orderBy'
 
 }

@@ -1,0 +1,249 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "alias": "mega-seed-mini-sythesizer",
+  "brief_description": null,
+  "cid": "c16",
+  "created_at": 2024-01-01T00:05:00.000Z,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": null,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": null,
+  "name": "Mega-Seed Mini-Sythesizer",
+  "relations": {},
+  "started_at": "2016-07-30T11:20+08:00",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:05:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "cid": "c17",
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Doppelgänger Finder",
+  "relations": {},
+  "started_at": "2017-03-10",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape when payload format is set to "json-api" 3`] = `
+{
+  "alias": "mega-seed-mini-sythesizer",
+  "brief_description": null,
+  "cid": "c19",
+  "created_at": 2024-01-01T00:05:00.000Z,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": null,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": null,
+  "name": "Mega-Seed Mini-Sythesizer",
+  "relations": {},
+  "started_at": "2016-07-30T11:20+08:00",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:05:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape when payload format is set to "json-api" 4`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "cid": "c20",
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Doppelgänger Finder",
+  "relations": {},
+  "started_at": "2017-03-10",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values on the "defaultValue" option (now, camelCase, kebabCase, snakeCase, pascalCase) 1`] = `
+{
+  "alias": "testThisGuy",
+  "brief_description": "TestThisGuy",
+  "cid": "c9",
+  "created_at": 2024-01-01T00:05:00.000Z,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": "test This guy",
+  "id": 1,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": "test-this-guy",
+  "name": "test_this_guy",
+  "relations": {},
+  "started_at": "2024-01-02T00:00:00Z",
+  "status_code": 4,
+  "updated_at": 2024-01-01T00:05:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values on the "defaultValue" option (now, camelCase, kebabCase, snakeCase, pascalCase) 2`] = `
+{
+  "alias": "testThisGuy",
+  "brief_description": "TestThisGuy",
+  "cid": "c10",
+  "created_at": 2024-01-01T00:10:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": "test This guy",
+  "id": 2,
+  "image_url": "https://everydayaboverubies.files.wordpress.com/2011/11/jar_of_pickles_cb101311.jpg",
+  "is_internal": 1,
+  "location": "test-this-guy",
+  "name": "test_this_guy",
+  "relations": {},
+  "started_at": "2024-01-02T00:00:00Z",
+  "status_code": 5,
+  "updated_at": 2024-01-01T00:10:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values on the "defaultValue" option (now, camelCase, kebabCase, snakeCase, pascalCase) 3`] = `
+{
+  "alias": "testThisGuy",
+  "brief_description": "TestThisGuy",
+  "cid": "c11",
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": "test This guy",
+  "id": 3,
+  "image_url": null,
+  "is_internal": 1,
+  "location": "test-this-guy",
+  "name": "test_this_guy",
+  "relations": {},
+  "started_at": "2024-01-02T00:00:00Z",
+  "status_code": 5,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values on the "defaultValue" option (now, camelCase, kebabCase, snakeCase, pascalCase) 4`] = `
+{
+  "alias": "testThisGuy",
+  "brief_description": "TestThisGuy",
+  "cid": "c12",
+  "created_at": 2024-01-01T00:20:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": "test This guy",
+  "id": 4,
+  "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+  "is_internal": 1,
+  "location": "test-this-guy",
+  "name": "test_this_guy",
+  "relations": {},
+  "started_at": "2024-01-02T00:00:00Z",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:20:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option and update all resources matching the input 1`] = `
+{
+  "alias": "mega-seed-mini-sythesizer",
+  "brief_description": null,
+  "cid": "c6",
+  "created_at": 2024-01-01T00:05:00.000Z,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": null,
+  "id": 1,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": null,
+  "name": "Mega-Seed Mini-Sythesizer",
+  "relations": {},
+  "started_at": "2016-07-30T11:20+08:00",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:05:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option and update all resources matching the input 2`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "cid": "c7",
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "id": 3,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Doppelgänger Finder",
+  "relations": {},
+  "started_at": "2017-03-10",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should update the resource when the spec is satisfied 1`] = `
+{
+  "alias": "turn-myself-into-a-pickle",
+  "brief_description": "Turn myself into a pickle.",
+  "cid": "c3",
+  "created_at": 2024-01-01T00:10:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 2,
+  "image_url": "https://everydayaboverubies.files.wordpress.com/2011/11/jar_of_pickles_cb101311.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Updated Name",
+  "relations": {},
+  "started_at": null,
+  "status_code": 5,
+  "updated_at": 2024-01-01T00:10:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should update the resource when the spec is satisfied 2`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "cid": "c4",
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "id": 3,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Updated Name",
+  "relations": {},
+  "started_at": "2017-03-10",
+  "status_code": 5,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;

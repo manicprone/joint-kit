@@ -1,4 +1,4 @@
-import moment from 'moment'
+const moment = require('moment')
 
 const tableName = 'user_info'
 
@@ -11,7 +11,7 @@ const seeds = [
     user_id: 4,
     professional_title: 'EdgeCaser',
     tagline: 'Catapult like impulse, infect like madness',
-    description: null,
+    description: null
   },
 
   // ----------------------------
@@ -22,7 +22,7 @@ const seeds = [
     user_id: 5,
     professional_title: 'Divergent Thinker',
     tagline: 'History favors the impetus of the author',
-    description: null,
+    description: null
   },
 
   // ------------------------------
@@ -33,7 +33,7 @@ const seeds = [
     user_id: 6,
     professional_title: 'Rickforcer',
     tagline: 'The Rickiest',
-    description: null,
+    description: null
   },
 
   // -----------------------------
@@ -44,7 +44,7 @@ const seeds = [
     user_id: 7,
     professional_title: 'Afterthought',
     tagline: 'Umm.',
-    description: null,
+    description: null
   },
 
   // -----------------------------
@@ -55,11 +55,11 @@ const seeds = [
     user_id: 9,
     professional_title: 'Space Beth',
     tagline: 'Defying dimensions, one adventure at a time.',
-    description: null,
-  },
+    description: null
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -69,7 +69,7 @@ exports.seed = function seed(knex) {
       return knex(tableName).insert({
         ...data,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })

@@ -2,7 +2,7 @@ import objectUtils from '../../../utils/object-utils'
 
 const debug = false
 
-export default function serialize(type, data, joint) {
+export default function serialize (type, data, joint) {
   let json = {}
 
   if (data) {
@@ -38,7 +38,7 @@ export default function serialize(type, data, joint) {
   return json
 }
 
-function buildItemPackage(type, data, relationHash, joint) {
+function buildItemPackage (type, data, relationHash, joint) {
   const itemPackage = {}
 
   itemPackage.data = buildItemData(type, data, relationHash, joint)
@@ -46,7 +46,7 @@ function buildItemPackage(type, data, relationHash, joint) {
   return itemPackage
 }
 
-function buildCollectionPackage(type, data, relationHash, joint) {
+function buildCollectionPackage (type, data, relationHash, joint) {
   const collectionPackage = {}
   collectionPackage.data = []
   collectionPackage.meta = {}
@@ -75,7 +75,7 @@ function buildCollectionPackage(type, data, relationHash, joint) {
   return collectionPackage
 }
 
-function buildItemData(type, itemData, relationHash, joint) {
+function buildItemData (type, itemData, relationHash, joint) {
   const item = {}
 
   // Set type...
@@ -109,9 +109,9 @@ function buildItemData(type, itemData, relationHash, joint) {
         // --------------------------
         const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
         const relationItemData = buildItemData(relationDataType,
-                                               relationData,
-                                               relationHash,
-                                               joint)
+          relationData,
+          relationHash,
+          joint)
 
         // Set type and ID on base item...
         item.relationships[relationName].data = {}
@@ -129,14 +129,14 @@ function buildItemData(type, itemData, relationHash, joint) {
           relationData.models.forEach((relationItem) => {
             const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
             const relationItemData = buildItemData(relationDataType,
-                                                   relationItem,
-                                                   relationHash,
-                                                   joint)
+              relationItem,
+              relationHash,
+              joint)
 
             // Set type and ID on base item array...
             item.relationships[relationName].data.push({
               type: relationItemData.type,
-              id: relationItemData.id,
+              id: relationItemData.id
             })
 
             // Add relation item data to hash...
@@ -152,17 +152,17 @@ function buildItemData(type, itemData, relationHash, joint) {
   return item
 }
 
-function buildPaginationInfo(paginationData) {
+function buildPaginationInfo (paginationData) {
   const info = {
     total_items: paginationData.rowCount,
     skip: paginationData.offset,
-    limit: paginationData.limit,
+    limit: paginationData.limit
   }
 
   return info
 }
 
-function buildFilterInfo(type, filterData, joint) {
+function buildFilterInfo (type, filterData, joint) {
   const info = []
 
   filterData.forEach((filter) => {
@@ -172,7 +172,7 @@ function buildFilterInfo(type, filterData, joint) {
   return info
 }
 
-function processRelationItemData(relationItemData, relationHash) {
+function processRelationItemData (relationItemData, relationHash) {
   if (!relationHash[relationItemData.type]) {
     relationHash[relationItemData.type] = {} // eslint-disable-line no-param-reassign
   }
@@ -180,7 +180,7 @@ function processRelationItemData(relationItemData, relationHash) {
   if (!hashEntry[relationItemData.id]) hashEntry[relationItemData.id] = relationItemData
 }
 
-function resolveDataTypeFromRelationData(relationData, joint) {
+function resolveDataTypeFromRelationData (relationData, joint) {
   let type = 'unknown'
 
   const tableName = relationData.relatedData.targetTableName

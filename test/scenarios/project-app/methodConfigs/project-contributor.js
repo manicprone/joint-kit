@@ -17,9 +17,9 @@ module.exports = {
           { name: 'contributor_role', type: 'String' },
           { name: 'is_active_contributor', type: 'Boolean', defaultValue: true },
           { name: 'started_at', type: 'String' },
-          { name: 'finished_at', type: 'String' },
-        ],
-      },
+          { name: 'finished_at', type: 'String' }
+        ]
+      }
     },
     {
       name: 'updateRef',
@@ -30,18 +30,18 @@ module.exports = {
           { name: 'contributor_role', type: 'String' },
           { name: 'is_active_contributor', type: 'Boolean' },
           { name: 'started_at', type: 'String' },
-          { name: 'finished_at', type: 'String' },
-        ],
-      },
+          { name: 'finished_at', type: 'String' }
+        ]
+      }
     },
     {
       name: 'getRef',
       action: 'getItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
-      },
+          { name: 'id', type: 'Number', required: true }
+        ]
+      }
     },
     {
       name: 'getRefs',
@@ -49,19 +49,19 @@ module.exports = {
       spec: {
         fields: [
           { name: 'project_id', type: 'Number' },
-          { name: 'is_active_contributor', type: 'Boolean' },
+          { name: 'is_active_contributor', type: 'Boolean' }
         ],
-        defaultOrderBy: '-created_at',
-      },
+        defaultOrderBy: '-created_at'
+      }
     },
     {
       name: 'deleteRef',
       action: 'deleteItem',
       spec: {
         fields: [
-          { name: 'id', type: 'Number', required: true },
-        ],
-      },
-    },
-  ],
+          { name: 'id', type: 'Number', required: true }
+        ]
+      }
+    }
+  ]
 }

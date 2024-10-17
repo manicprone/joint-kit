@@ -1,4 +1,4 @@
-import moment from 'moment'
+const moment = require('moment')
 
 const tableName = 'app_content'
 
@@ -10,19 +10,19 @@ const seeds = [
     id: 1,
     app_id: 'app-001',
     key: 'default',
-    data: '{ "items_per_page": 50, "is_activated": false, "modules": ["a", "b", "c"] }',
+    data: '{ "items_per_page": 50, "is_activated": false, "modules": ["a", "b", "c"] }'
   },
   {
     id: 2,
     app_id: 'app-001',
     key: 'v1.0',
-    data: '{ "items_per_page": 25, "is_activated": true, "modules": ["a", "b", "c", "x", "y", "z"] }',
+    data: '{ "items_per_page": 25, "is_activated": true, "modules": ["a", "b", "c", "x", "y", "z"] }'
   },
   {
     id: 3,
     app_id: 'app-001',
     key: 'v2.0',
-    data: '{ "items_per_page": 100, "is_activated": true, "modules": ["d", "e", "f", "g"] }',
+    data: '{ "items_per_page": 100, "is_activated": true, "modules": ["d", "e", "f", "g"] }'
   },
 
   // ---------------------------------------------------------------------------
@@ -32,17 +32,17 @@ const seeds = [
     id: 4,
     app_id: 'app-002',
     key: 'default',
-    data: '{ "title": "The Standard", "is_activated": false, "modules": ["one", "two", "three"] }',
+    data: '{ "title": "The Standard", "is_activated": false, "modules": ["one", "two", "three"] }'
   },
   {
     id: 5,
     app_id: 'app-002',
     key: 'advanced',
-    data: '{ "title": "The Advanced", "is_activated": true, "modules": ["six", "seven", "eight", "nine", "ten"] }',
-  },
+    data: '{ "title": "The Advanced", "is_activated": true, "modules": ["six", "seven", "eight", "nine", "ten"] }'
+  }
 ]
 
-exports.seed = function seed(knex) {
+exports.seed = function seed (knex) {
   return knex(tableName).del().then(() => {
     const time = moment().utc()
 
@@ -52,7 +52,7 @@ exports.seed = function seed(knex) {
       return knex(tableName).insert({
         ...data,
         created_at: timestamp,
-        updated_at: timestamp,
+        updated_at: timestamp
       })
     }))
   })

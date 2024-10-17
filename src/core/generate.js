@@ -6,13 +6,13 @@ import MODEL from './constants/model-config-constants'
 import METHOD from './constants/method-config-constants'
 
 const namespace = 'JOINT'
-const debug_registerModels = false
-const debug_registerMethods = false
+const debugRegisterModels = false
+const debugRegisterMethods = false
 
 // -----------------------------------------------------------------------------
 // Register models from service...
 // -----------------------------------------------------------------------------
-export function registerModelsFromService(joint, log = true) {
+export function registerModelsFromService (joint, log = true) {
   if (log) {
     console.log('----------------------------------------------------')
     console.log('Loading resource models from service')
@@ -27,7 +27,7 @@ export function registerModelsFromService(joint, log = true) {
 // -----------------------------------------------------------------------------
 // Register models from model config...
 // -----------------------------------------------------------------------------
-export function registerModels(joint, log = true) {
+export function registerModels (joint, log = true) {
   const serviceKey = joint.serviceKey
   const modelDefs = joint.modelConfig
 
@@ -66,23 +66,21 @@ export function registerModels(joint, log = true) {
       if (!joint.model[modelName]) {
         if (log) console.log(`${modelName}`)
 
-        if (debug_registerModels) {
+        if (debugRegisterModels) {
           console.log(`[${namespace}] generate:registerModels => (modelDef)`)
           console.log(modelDef)
           console.log('')
         }
 
-        const { modelObject, assocMap } = registerModel(joint, modelDef, modelName, debug_registerModels)
+        const { modelObject, assocMap } = registerModel(joint, modelDef, modelName, debugRegisterModels)
         joint.model[modelName] = modelObject
         joint.modelByTable[modelDef.tableName] = modelObject
         joint.modelNameByTable[modelDef.tableName] = modelName
         if (!objectUtils.isEmpty(assocMap)) joint.modelNameOfAssoc[modelName] = assocMap
-
       } else if (log) {
         console.log(`${modelName} (already registered)`)
       }
     })
-
   } else if (log) {
     console.log('no models configured')
   }
@@ -96,7 +94,7 @@ export function registerModels(joint, log = true) {
 // TODO: Do not register methods, if the modelName does not exist !?!?!?
 //       (At least, report a warning in the log)
 // -----------------------------------------------------------------------------
-export function registerMethods(joint, log = true) {
+export function registerMethods (joint, log = true) {
   const resources = joint.methodConfig
 
   // Prepare method registries...
@@ -128,7 +126,7 @@ export function registerMethods(joint, log = true) {
           const methodSpec = methodDef.spec
           methodSpec[METHOD.MODEL_NAME] = modelNameForResource
 
-          if (debug_registerMethods) {
+          if (debugRegisterMethods) {
             console.log(`[${namespace}] ============================================ [DEBUG]`)
             console.log(methodDef)
             console.log('=============================================================')
@@ -155,7 +153,7 @@ export function registerMethods(joint, log = true) {
   if (log) console.log('')
 } // END - registerMethods
 
-function generateMethod(joint, action, spec) {
+function generateMethod (joint, action, spec) {
   if (!objectUtils.has(joint, action)) return null
 
   return function (input) { return joint[action](spec, input) }
@@ -164,7 +162,7 @@ function generateMethod(joint, action, spec) {
 // -----------------------------------------------------------------------------
 // Build router from route config...
 // -----------------------------------------------------------------------------
-export function buildRouter(joint, log = true) {
+export function buildRouter (joint, log = true) {
   const serverKey = joint.serverKey
   const server = joint.server
   const routeDefs = joint.routeConfig

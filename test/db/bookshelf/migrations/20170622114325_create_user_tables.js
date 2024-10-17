@@ -5,7 +5,7 @@ const tableNameRoles = 'roles'
 const tableNameUserRolesRef = 'user_roles_ref'
 const tableNameUserProfiles = 'user_profiles'
 
-exports.up = function up(knex) {
+exports.up = function up (knex) {
   return Promise.all([
     knex.schema.hasTable(tableNameUsers).then((exists) => {
       if (exists) return false
@@ -78,20 +78,20 @@ exports.up = function up(knex) {
         table.boolean('is_live').notNullable().defaultTo(false)
         table.timestamps()
       })
-    }),
+    })
   ])
 }
 
-exports.down = function down(knex) {
+exports.down = function down (knex) {
   return Promise.all([
     knex.schema.dropTableIfExists(tableNameUserProfiles),
     knex.schema.dropTableIfExists(tableNameUserRolesRef),
     knex.schema.dropTableIfExists(tableNameUserCredentials),
-    knex.schema.dropTableIfExists(tableNameUserInfo),
+    knex.schema.dropTableIfExists(tableNameUserInfo)
   ]).then(() => {
     return Promise.all([
       knex.schema.dropTableIfExists(tableNameRoles),
-      knex.schema.dropTableIfExists(tableNameUsers),
+      knex.schema.dropTableIfExists(tableNameUsers)
     ])
   })
 }

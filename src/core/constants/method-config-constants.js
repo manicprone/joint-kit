@@ -10,5 +10,5 @@ export default {
   METHOD_SET: 'methods',
   NAME: 'name',
   ACTION: 'action',
-  SPEC: 'spec',
+  SPEC: 'spec'
 }

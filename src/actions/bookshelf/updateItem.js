@@ -9,7 +9,7 @@ import { handleDataResponse, handleErrorResponse } from './handlers/response-han
 
 const debug = false
 
-export default async function updateItem(joint, spec = {}, input = {}, output) {
+export default async function updateItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const trx = input[ACTION.INPUT_TRANSACTING]
 
@@ -24,7 +24,7 @@ export default async function updateItem(joint, spec = {}, input = {}, output) {
   })
 }
 
-async function performUpdateItem(joint, spec = {}, input = {}, output) {
+async function performUpdateItem (joint, spec = {}, input = {}, output) {
   const bookshelf = joint[INSTANCE.PROP_SERVICE]
   const modelName = spec[ACTION.SPEC_MODEL_NAME]
   const specFields = ActionUtils.normalizeFieldSpec(spec[ACTION.SPEC_FIELDS])
@@ -93,8 +93,8 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
 
         if (!isLocked && !isLookup && (hasInput || hasDefault)) {
           updates[fieldName] = (hasInput)
-              ? inputFields[fieldName].value
-              : defaultValue
+            ? inputFields[fieldName].value
+            : defaultValue
         } else if (isLocked && !isLookup && hasDefault) {
           updates[fieldName] = defaultValue
         }
@@ -109,7 +109,6 @@ async function performUpdateItem(joint, spec = {}, input = {}, output) {
 
     // Return data...
     return handleDataResponse(joint, modelName, data, output)
-
   } catch (error) {
     return handleErrorResponse(error, 'updateItem', modelName)
   }

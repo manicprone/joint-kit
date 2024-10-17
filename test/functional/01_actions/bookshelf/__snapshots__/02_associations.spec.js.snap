@@ -1,0 +1,837 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 1`] = `
+{
+  "foreignKey": "project_id",
+  "foreignKeyTarget": "id",
+  "joinTableName": "project_coding_language_tags_ref",
+  "otherKey": "tag_id",
+  "otherKeyTarget": "id",
+  "parentAttributes": {
+    "alias": "doppelganger-finder",
+    "brief_description": null,
+    "created_at": Any<Date>,
+    "created_by": null,
+    "finished_at": "2017-03-29",
+    "full_description": null,
+    "id": 3,
+    "image_url": null,
+    "is_internal": 1,
+    "location": null,
+    "name": "Doppelgänger Finder",
+    "started_at": "2017-03-10",
+    "status_code": 5,
+    "updated_at": Any<Date>,
+  },
+  "parentFk": 3,
+  "parentId": 3,
+  "parentIdAttribute": "id",
+  "parentTableName": "projects",
+  "target": [Function],
+  "targetIdAttribute": "id",
+  "targetTableName": "tags_coding_languages",
+  "type": "belongsToMany",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 6,
+  "key": "python",
+  "label": "Python",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 3`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "id": 3,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Doppelgänger Finder",
+  "started_at": "2017-03-10",
+  "status_code": 5,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 4`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 1,
+  "key": "java",
+  "label": "Java",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 5`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 2,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 6`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 6,
+  "key": "python",
+  "label": "Python",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 7`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 9,
+  "key": "xslt",
+  "label": "XSLT",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should accept multiple ids 8`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 10,
+  "key": "html",
+  "label": "HTML",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 1`] = `
+{
+  "foreignKey": "project_id",
+  "foreignKeyTarget": "id",
+  "joinTableName": "project_coding_language_tags_ref",
+  "otherKey": "tag_id",
+  "otherKeyTarget": "id",
+  "parentAttributes": {
+    "alias": "mega-seed-mini-sythesizer",
+    "brief_description": null,
+    "created_at": Any<Date>,
+    "created_by": null,
+    "finished_at": "2016-08-02T21:33+08:00",
+    "full_description": null,
+    "id": 1,
+    "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+    "is_internal": 1,
+    "location": null,
+    "name": "Mega-Seed Mini-Sythesizer",
+    "started_at": "2016-07-30T11:20+08:00",
+    "status_code": 4,
+    "updated_at": Any<Date>,
+  },
+  "parentFk": 1,
+  "parentId": 1,
+  "parentIdAttribute": "id",
+  "parentTableName": "projects",
+  "target": [Function],
+  "targetIdAttribute": "id",
+  "targetTableName": "tags_coding_languages",
+  "type": "belongsToMany",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 1,
+  "key": "java",
+  "label": "Java",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 3`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 2,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 4`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 3,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 5`] = `
+{
+  "alias": "mega-seed-mini-sythesizer",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": null,
+  "id": 1,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": null,
+  "name": "Mega-Seed Mini-Sythesizer",
+  "started_at": "2016-07-30T11:20+08:00",
+  "status_code": 4,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 6`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 1,
+  "key": "java",
+  "label": "Java",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 7`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 2,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 8`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 3,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should associate a resource when the spec is satisfied 9`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 10,
+  "key": "html",
+  "label": "HTML",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "attributes": {
+    "alias": "blue-dreamsicles",
+    "brief_description": null,
+    "created_at": Any<Date>,
+    "created_by": null,
+    "finished_at": null,
+    "full_description": null,
+    "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+    "is_internal": 1,
+    "location": null,
+    "name": "Blue Dreamsicles",
+    "started_at": null,
+    "status_code": 3,
+    "updated_at": Any<Date>,
+  },
+  "id": 4,
+  "relationships": {
+    "coding_language_tags": {
+      "data": [
+        {
+          "id": 3,
+          "type": "CodingLanguageTag",
+        },
+        {
+          "id": 4,
+          "type": "CodingLanguageTag",
+        },
+        {
+          "id": 7,
+          "type": "CodingLanguageTag",
+        },
+      ],
+    },
+  },
+  "type": "Project",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "javascript",
+    "label": "JavaScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 3,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 3`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "coffee-script",
+    "label": "CoffeeScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 4,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 4`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "ruby",
+    "label": "Ruby",
+    "updated_at": Any<Date>,
+  },
+  "id": 7,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 5`] = `
+{
+  "attributes": {
+    "alias": "blue-dreamsicles",
+    "brief_description": null,
+    "created_at": Any<Date>,
+    "created_by": null,
+    "finished_at": null,
+    "full_description": null,
+    "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+    "is_internal": 1,
+    "location": null,
+    "name": "Blue Dreamsicles",
+    "started_at": null,
+    "status_code": 3,
+    "updated_at": Any<Date>,
+  },
+  "id": 4,
+  "relationships": {
+    "coding_language_tags": {
+      "data": [
+        {
+          "id": 3,
+          "type": "CodingLanguageTag",
+        },
+        {
+          "id": 4,
+          "type": "CodingLanguageTag",
+        },
+        {
+          "id": 7,
+          "type": "CodingLanguageTag",
+        },
+        {
+          "id": 7,
+          "type": "CodingLanguageTag",
+        },
+      ],
+    },
+  },
+  "type": "Project",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 6`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "javascript",
+    "label": "JavaScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 3,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 7`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "coffee-script",
+    "label": "CoffeeScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 4,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > addAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 8`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "ruby",
+    "label": "Ruby",
+    "updated_at": Any<Date>,
+  },
+  "id": 7,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return all instances of the associated resource, when the association exists 1`] = `
+{
+  "foreignKey": "project_id",
+  "foreignKeyTarget": "id",
+  "joinTableName": "project_coding_language_tags_ref",
+  "otherKey": "tag_id",
+  "otherKeyTarget": "id",
+  "parentAttributes": {
+    "alias": "mega-seed-mini-sythesizer",
+    "brief_description": null,
+    "created_at": Any<Date>,
+    "created_by": null,
+    "finished_at": "2016-08-02T21:33+08:00",
+    "full_description": null,
+    "id": 1,
+    "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+    "is_internal": 1,
+    "location": null,
+    "name": "Mega-Seed Mini-Sythesizer",
+    "started_at": "2016-07-30T11:20+08:00",
+    "status_code": 4,
+    "updated_at": Any<Date>,
+  },
+  "parentFk": 1,
+  "parentId": 1,
+  "parentIdAttribute": "id",
+  "parentTableName": "projects",
+  "target": [Function],
+  "targetIdAttribute": "id",
+  "targetTableName": "tags_coding_languages",
+  "type": "belongsToMany",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return all instances of the associated resource, when the association exists 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 1,
+  "key": "java",
+  "label": "Java",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return all instances of the associated resource, when the association exists 3`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 2,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return all instances of the associated resource, when the association exists 4`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 3,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "java",
+    "label": "Java",
+    "updated_at": Any<Date>,
+  },
+  "id": 1,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "jsp",
+    "label": "JSP",
+    "updated_at": Any<Date>,
+  },
+  "id": 2,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 3`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "javascript",
+    "label": "JavaScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 3,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 4`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "java",
+    "label": "Java",
+    "updated_at": Any<Date>,
+  },
+  "id": 1,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 5`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "jsp",
+    "label": "JSP",
+    "updated_at": Any<Date>,
+  },
+  "id": 2,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > getAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 6`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "javascript",
+    "label": "JavaScript",
+    "updated_at": Any<Date>,
+  },
+  "id": 3,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > hasAssociatedItem > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "java",
+    "label": "Java",
+    "updated_at": Any<Date>,
+  },
+  "id": 1,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > hasAssociatedItem > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "attributes": {
+    "created_at": Any<Date>,
+    "created_by": null,
+    "key": "java",
+    "label": "Java",
+    "updated_at": Any<Date>,
+  },
+  "id": 1,
+  "type": "CodingLanguageTag",
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAllAssociatedItems > should remove the associations from the main resource, and return the affected main resource 1`] = `
+{
+  "alias": "turn-myself-into-a-pickle",
+  "brief_description": "Turn myself into a pickle.",
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 2,
+  "image_url": "https://everydayaboverubies.files.wordpress.com/2011/11/jar_of_pickles_cb101311.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Turn Myself into a Pickle",
+  "started_at": null,
+  "status_code": 5,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "coding_language_tags": {
+    "data": [],
+  },
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAllAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "coding_language_tags": {
+    "data": [],
+  },
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAllAssociatedItems > should succeed and return the unaffected main resource, if the associations did not exist 1`] = `
+{
+  "alias": "project-001",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 5,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "E - Project 001",
+  "started_at": "2017-01-01",
+  "status_code": 4,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should accept multiple keys 1`] = `
+{
+  "alias": "turn-myself-into-a-pickle",
+  "brief_description": "Turn myself into a pickle.",
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 2,
+  "image_url": "https://everydayaboverubies.files.wordpress.com/2011/11/jar_of_pickles_cb101311.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Turn Myself into a Pickle",
+  "started_at": null,
+  "status_code": 5,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should accept multiple keys 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 10,
+  "key": "html",
+  "label": "HTML",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should remove the association from the main resource, and return the affected main resource 1`] = `
+{
+  "alias": "mega-seed-mini-sythesizer",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": "2016-08-02T21:33+08:00",
+  "full_description": null,
+  "id": 1,
+  "image_url": "http://vignette4.wikia.nocookie.net/rickandmorty/images/e/e8/Speed_Mega_Seed.png/revision/latest",
+  "is_internal": 1,
+  "location": null,
+  "name": "Mega-Seed Mini-Sythesizer",
+  "started_at": "2016-07-30T11:20+08:00",
+  "status_code": 4,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should remove the association from the main resource, and return the affected main resource 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 2,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should remove the association from the main resource, and return the affected main resource 3`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 3,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "coding_language_tags": {
+    "data": [
+      {
+        "id": 2,
+        "type": "CodingLanguageTag",
+      },
+      {
+        "id": 3,
+        "type": "CodingLanguageTag",
+      },
+    ],
+  },
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 3`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 4`] = `
+{
+  "coding_language_tags": {
+    "data": [
+      {
+        "id": 2,
+        "type": "CodingLanguageTag",
+      },
+      {
+        "id": 3,
+        "type": "CodingLanguageTag",
+      },
+    ],
+  },
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 5`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "key": "jsp",
+  "label": "JSP",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should return in JSON API shape when payload format is set to "json-api" 6`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should succeed and return the unaffected main resource, if the association did not exist 1`] = `
+{
+  "alias": "blue-dreamsicles",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 4,
+  "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Blue Dreamsicles",
+  "started_at": null,
+  "status_code": 3,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should succeed and return the unaffected main resource, if the association did not exist 2`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 3,
+  "key": "javascript",
+  "label": "JavaScript",
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`ASSOCIATION ACTIONS [bookshelf] > removeAssociatedItems > should succeed and return the unaffected main resource, if the association did not exist 3`] = `
+{
+  "created_at": Any<Date>,
+  "created_by": null,
+  "id": 4,
+  "key": "coffee-script",
+  "label": "CoffeeScript",
+  "updated_at": Any<Date>,
+}
+`;
