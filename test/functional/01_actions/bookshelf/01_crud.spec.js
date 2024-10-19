@@ -1489,7 +1489,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option`, async () => {
+    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option:`, async () => {
       it('should respect the option and apply fiter accordingly', async () => {
         const specUser = {
           modelName: 'User',
@@ -1513,7 +1513,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           })
       })
 
-      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should filter in a case-insensitive manner`, async () => {
+      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should filter in a case-insensitive manner`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
@@ -1534,7 +1534,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
       })
 
-      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should allow filtering special characters`, async () => {
+      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should allow filtering special characters`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
@@ -2032,6 +2032,136 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         getProfilesInDefaultOrder,
         getProjectsInDefaultOrder,
         getProjectsInNameASC
+      ])
+    })
+
+    it('should support ordering the results by a column of an association', () => {
+      // ----
+      // User
+      // ----
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'preferred_locale', type: 'String' }
+        ],
+        defaultOrderBy: 'created_at'
+      }
+      const usersInfoProTitleASC = {
+        fields: {},
+        orderBy: 'info.professional_title',
+        associations: ['info']
+      }
+      const usersInfoWithoutAssocProTitleAndUsernameASC = {
+        fields: {},
+        orderBy: 'info.professional_title,username'
+      }
+      const usersInfoWithoutAssocProTitleASC = {
+        fields: {},
+        orderBy: 'info.professional_title'
+      }
+      const usersInfoProTitleDSC = {
+        fields: {},
+        orderBy: '-info.professional_title',
+        associations: ['info']
+      }
+      const usersBadOrderByDSC = {
+        fields: {},
+        orderBy: '-fake.professional_title'
+      }
+
+      // Ordered by association field ASC (nulls always at the end)
+      const getUsersAsInfoProTitleASC = projectApp.getItems(specUser, usersInfoProTitleASC)
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+          const userInfoResults = data.models.map(it => it.relations.info)
+          expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Afterthought' }) // mortysmith
+          expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Divergent Thinker' }) // segmented
+          expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' }) // the_manic_edge
+          expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Rickforcer' }) // ricksanchez
+          expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Space Beth' }) // bethsmith
+          expect(userInfoResults[5].attributes).toEqual({})
+          expect(userInfoResults[6].attributes).toEqual({})
+          expect(userInfoResults[7].attributes).toEqual({})
+          expect(userInfoResults[8].attributes).toEqual({})
+          expect(userInfoResults[9].attributes).toEqual({})
+          expect(userInfoResults[10].attributes).toEqual({})
+        })
+
+      // Ordered by association field first, then main resource field
+      const getUsersWithoutAssocAsInfoProTitleAndUsernameASC = projectApp.getItems(specUser, usersInfoWithoutAssocProTitleAndUsernameASC)
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+          expect(data.models[0].attributes).to.contain({ username: 'mortysmith' })
+          expect(data.models[1].attributes).to.contain({ username: 'segmented' })
+          expect(data.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+          expect(data.models[3].attributes).to.contain({ username: 'ricksanchez' })
+          expect(data.models[4].attributes).to.contain({ username: 'bethsmith' })
+          expect(data.models[5].attributes).to.contain({ username: 'admin' }) // ---- The rest are default sorted by their "username"
+          expect(data.models[6].attributes).to.contain({ username: 'hotmod' })
+          expect(data.models[7].attributes).to.contain({ username: 'jerrysmith' })
+          expect(data.models[8].attributes).to.contain({ username: 'summersmith' })
+          expect(data.models[9].attributes).to.contain({ username: 'super-admin' })
+          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
+        })
+
+      // Ordered by association field, without including the association (per the request)
+      const getUsersWithoutAssocAsInfoProTitleASC = projectApp.getItems(specUser, usersInfoWithoutAssocProTitleASC)
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+          expect(data.models[0].attributes).to.contain({ username: 'mortysmith' })
+          expect(data.models[1].attributes).to.contain({ username: 'segmented' })
+          expect(data.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+          expect(data.models[3].attributes).to.contain({ username: 'ricksanchez' })
+          expect(data.models[4].attributes).to.contain({ username: 'bethsmith' })
+          expect(data.models[5].attributes).to.contain({ username: 'super-admin' }) // ---- The rest are default sorted by their "id"
+          expect(data.models[6].attributes).to.contain({ username: 'admin' })
+          expect(data.models[7].attributes).to.contain({ username: 'hotmod' })
+          expect(data.models[8].attributes).to.contain({ username: 'jerrysmith' })
+          expect(data.models[9].attributes).to.contain({ username: 'summersmith' })
+          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
+        })
+
+      // Ordered by associated field DESC (nulls always at the end)
+      const getUsersAsInfoProTitleDSC = projectApp.getItems(specUser, usersInfoProTitleDSC)
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+          const userInfoResults = data.models.map(it => it.relations.info)
+          expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Space Beth' })
+          expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Rickforcer' })
+          expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' })
+          expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Divergent Thinker' })
+          expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Afterthought' })
+          expect(userInfoResults[5].attributes).toEqual({})
+          expect(userInfoResults[6].attributes).toEqual({})
+          expect(userInfoResults[7].attributes).toEqual({})
+          expect(userInfoResults[8].attributes).toEqual({})
+          expect(userInfoResults[9].attributes).toEqual({})
+          expect(userInfoResults[10].attributes).toEqual({})
+        })
+
+      // A non-existent association name is skipped (leaving the ordering to other arguments or default sort)
+      const getUsersAsBadOrderByDSC = projectApp.getItems(specUser, usersBadOrderByDSC)
+        .then((data) => {
+          expect(data.models).to.have.length(11)
+          expect(data.models[0].attributes).to.contain({ username: 'super-admin' }) // ---- Default sorted by their "id"
+          expect(data.models[1].attributes).to.contain({ username: 'admin' })
+          expect(data.models[2].attributes).to.contain({ username: 'hotmod' })
+          expect(data.models[3].attributes).to.contain({ username: 'the_manic_edge' })
+          expect(data.models[4].attributes).to.contain({ username: 'segmented' })
+          expect(data.models[5].attributes).to.contain({ username: 'ricksanchez' })
+          expect(data.models[6].attributes).to.contain({ username: 'mortysmith' })
+          expect(data.models[7].attributes).to.contain({ username: 'jerrysmith' })
+          expect(data.models[8].attributes).to.contain({ username: 'bethsmith' })
+          expect(data.models[9].attributes).to.contain({ username: 'summersmith' })
+          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
+        })
+
+      return Promise.all([
+        getUsersAsInfoProTitleASC,
+        getUsersWithoutAssocAsInfoProTitleAndUsernameASC,
+        getUsersWithoutAssocAsInfoProTitleASC,
+        getUsersAsInfoProTitleDSC,
+        getUsersAsBadOrderByDSC
       ])
     })
 

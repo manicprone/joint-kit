@@ -1,8 +1,11 @@
+/* eslint-disable array-callback-return */
 import objectUtils from '../../../utils/object-utils'
 import stringUtils from '../../../utils/string-utils'
 import ACTION from '../../../core/constants/action-constants'
+import * as CoreUtils from '../../../core/core-utils'
 
 const debugLoadDirect = false
+const debugOrderBy = false
 
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
@@ -123,4 +126,56 @@ export function appendWhereClause (queryBuilder, fieldName, value, matchStrategy
     default:
       throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
   }
+}
+
+// -----------------------------------------------------------------------------
+// Accepts the "orderBy" API field value to apply the appropriate
+// "queryBuilder.orderBy" logic.
+//
+// The function requires including:
+// joint        - The joint instance
+// queryBuilder - The queryBuilder instance
+// modelName    - The model name of the main resource
+// -----------------------------------------------------------------------------
+// This logic is supports ordering by columns of associations (via dot
+// notation). If the association is not defined on the source model, the orderBy
+// argument is ignored.
+//
+// NOTE: NULLS are always returned last in both ASC and DESC orders.
+// -----------------------------------------------------------------------------
+export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue) {
+  const orderBy = buildOrderBy(fieldValue)
+
+  orderBy.map(orderOpt => {
+    // Support column from association
+    if (orderOpt.col.includes('.')) {
+      const parts = orderOpt.col.split('.')
+      const assocName = parts[0]
+      const colName = parts[1]
+      const assocModelName = (joint.modelNameOfAssoc[modelName]) ? joint.modelNameOfAssoc[modelName][assocName] : null
+
+      if (assocModelName) {
+        // Obtain model config info to build raw query
+        const mainTableName = joint.model[modelName].prototype.tableName
+        const assocTableName = joint.model[assocModelName].prototype.tableName
+        const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
+        const assocConfig = mainModelConfig.associations[assocName]
+
+        // Include column from association in select statement and perform join with orderBy clause
+        if (assocConfig) {
+          const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
+          queryBuilder
+            .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+            .select(`${mainTableName}.*`, `${assocTableName}.${colName}`)
+            .orderByRaw(`${assocTableName}.${colName} IS NULL, ${assocTableName}.${colName} ${orderOpt.order}`)
+        }
+      } else {
+        if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" does not exist for model "${modelName}"`)
+      }
+
+    // Support column from main model
+    } else {
+      queryBuilder.orderBy(orderOpt.col, orderOpt.order)
+    }
+  })
 }
