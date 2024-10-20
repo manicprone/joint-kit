@@ -3,54 +3,73 @@ import objectUtils from '../../../utils/object-utils'
 const debug = false
 
 // -----------------------------------------------------------------------------
-// Serializer for JSON API Spec output format.
+// Serializer for "flattened" output format.
 //
-// See: https://jsonapi.org
+// NOTE: The resource model type is set as "type".
 // -----------------------------------------------------------------------------
 export default function serialize (type, data, joint) {
   let json = {}
 
   if (data) {
-    if (debug === true) console.log(`[Serializer] Serialize ${type} data to JSON API Spec =>`, data)
+    if (debug) console.log(`[Serializer] Serialize ${type} data to flattened format =>`, data)
 
-    // Create relation hash, to manage relationship data...
-    const relationHash = {}
-
-    // Build data package...
+    // Build data package
     const packageType = (data.attributes) ? 'item' : 'collection'
     if (packageType === 'item') {
-      json = buildItemPackage(type, data, relationHash, joint)
+      json = buildItemPackage(type, data, joint)
     } else {
-      json = buildCollectionPackage(type, data, relationHash, joint)
+      // json = buildCollectionPackage(type, data, joint)
     }
-
-    // Build included package (for relationship data)...
-    if (!objectUtils.isEmpty(relationHash)) {
-      json.included = []
-
-      if (debug === true) console.log('[Serializer] relationHash =>', relationHash)
-
-      // Loop through hash, and populate the included array...
-      Object.keys(relationHash).forEach((dataType) => {
-        Object.keys(relationHash[dataType]).forEach((itemID) => {
-          const includedItemData = relationHash[dataType][itemID]
-          json.included.push(includedItemData)
-        })
-      })
-    }
-  } // end-if (data)
+  }
 
   return json
 }
 
-function buildItemPackage (type, data, relationHash, joint) {
+// export default function serialize (type, data, joint) {
+//   let json = {}
+//
+//   if (data) {
+//     if (debug === true) console.log(`[Serializer] ${type} data =>`, data)
+//
+//     // Create relation hash, to manage relationship data...
+//     const relationHash = {}
+//
+//     // Build data package...
+//     const packageType = (data.attributes) ? 'item' : 'collection'
+//     if (packageType === 'item') {
+//       json = buildItemPackage(type, data, relationHash, joint)
+//     } else {
+//       json = buildCollectionPackage(type, data, relationHash, joint)
+//     }
+//
+//     // Build included package (for relationship data)...
+//     if (!objectUtils.isEmpty(relationHash)) {
+//       json.included = []
+//
+//       if (debug === true) console.log('[Serializer] relationHash =>', relationHash)
+//
+//       // Loop through hash, and populate the included array...
+//       Object.keys(relationHash).forEach((dataType) => {
+//         Object.keys(relationHash[dataType]).forEach((itemID) => {
+//           const includedItemData = relationHash[dataType][itemID]
+//           json.included.push(includedItemData)
+//         })
+//       })
+//     }
+//   } // end-if (data)
+//
+//   return json
+// }
+
+function buildItemPackage (type, data, joint) {
   const itemPackage = {}
 
-  itemPackage.data = buildItemData(type, data, relationHash, joint)
+  itemPackage.data = buildItemData(type, data, joint)
 
   return itemPackage
 }
 
+/* TO BE COMPLETED
 function buildCollectionPackage (type, data, relationHash, joint) {
   const collectionPackage = {}
   collectionPackage.data = []
@@ -79,84 +98,62 @@ function buildCollectionPackage (type, data, relationHash, joint) {
 
   return collectionPackage
 }
+*/
 
-function buildItemData (type, itemData, relationHash, joint) {
-  const item = {}
+function buildItemData (type, itemData, joint) {
+  // Extract attributes and relations
+  const { attributes, relations } = itemData
 
-  // Set type...
-  item.type = type
-
-  // Set ID and base attributes...
-  const attrs = objectUtils.get(itemData, 'attributes', {})
-  item.id = (itemData.id) ? itemData.id : null
-  item.attributes = attrs
-  if (attrs.id) {
-    delete item.attributes.id
+  // Apply base attributes
+  const item = {
+    type,
+    ...attributes
   }
 
-  // Handle relations...
-  const relations = itemData.relations
+  // Handle relations
   if (!objectUtils.isEmpty(relations)) {
-    item.relationships = {}
+    // console.log('[DEVING] relations =>', relations)
 
     Object.keys(relations).forEach((relationName) => {
       const relationData = relations[relationName]
       const relationType = relationData.relatedData.type
 
-      if (debug === true) console.log(`[Serializer] handling relation => ${relationName} (${relationType})`)
+      // console.log(`[DEVING] Serializing "${relationName}" association =>`, relationData)
+      // console.log('')
+      // console.log('')
 
-      // Initiate relationships object...
-      item.relationships[relationName] = {}
+      if (debug) console.log(`[Serializer] handling relation: ${relationName} (${relationType})`)
 
       if (relationType === 'belongsTo' || relationType === 'hasOne') {
-        // --------------------------
-        // Handle 1-1 relationship...
-        // --------------------------
+        // -----------------------
+        // Handle 1-1 relationship
+        // -----------------------
         const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
-        const relationItemData = buildItemData(relationDataType,
-          relationData,
-          relationHash,
-          joint)
+        const relationItemData = buildItemData(relationDataType, relationData, joint)
 
-        // Set type and ID on base item...
-        item.relationships[relationName].data = {}
-        item.relationships[relationName].data.type = relationItemData.type
-        item.relationships[relationName].data.id = relationItemData.id
-
-        // Add relation item data to hash...
-        processRelationItemData(relationItemData, relationHash)
+        // Add to item
+        item[relationName] = relationItemData
       } else if (relationType === 'hasMany' || relationType === 'belongsToMany') {
-        // -----------------------------
-        // Handle 1-many relationship...
-        // -----------------------------
-        item.relationships[relationName].data = []
+        // --------------------------
+        // Handle 1-many relationship
+        // --------------------------
         if (relationData.models && Array.isArray(relationData.models) && relationData.models.length > 0) {
-          relationData.models.forEach((relationItem) => {
+          // Add to item
+          item[relationName] = relationData.models.map(relationItem => {
             const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
-            const relationItemData = buildItemData(relationDataType,
-              relationItem,
-              relationHash,
-              joint)
-
-            // Set type and ID on base item array...
-            item.relationships[relationName].data.push({
-              type: relationItemData.type,
-              id: relationItemData.id
-            })
-
-            // Add relation item data to hash...
-            processRelationItemData(relationItemData, relationHash)
+            return buildItemData(relationDataType, relationItem, joint)
           })
         }
       } else {
-        throw new Error(`Unrecognized relationship ${relationType}.`)
+        throw new Error(`[Serializer] Unrecognized relationship ${relationType}.`)
       } // end-if-else-if (relationType === 'hasMany' && relationType === 'belongsToMany')
     })
-  } // end-if (!objectUtils.isEmpty(relations))
+  }
 
   return item
 }
 
+/* TO BE COMPLETED
 function buildPaginationInfo (paginationData) {
   const info = {
     total_items: paginationData.rowCount,
@@ -176,7 +173,9 @@ function buildFilterInfo (type, filterData, joint) {
 
   return info
 }
+*/
 
+/* TO BE COMPLETED
 function processRelationItemData (relationItemData, relationHash) {
   if (!relationHash[relationItemData.type]) {
     relationHash[relationItemData.type] = {} // eslint-disable-line no-param-reassign
@@ -184,6 +183,7 @@ function processRelationItemData (relationItemData, relationHash) {
   const hashEntry = relationHash[relationItemData.type]
   if (!hashEntry[relationItemData.id]) hashEntry[relationItemData.id] = relationItemData
 }
+*/
 
 function resolveDataTypeFromRelationData (relationData, joint) {
   let type = 'unknown'
