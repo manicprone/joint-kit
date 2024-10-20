@@ -1389,7 +1389,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.included[0]).to.contain({ type: 'Profile' })
         })
 
-      const methodLevel = blogAppJsonApi.getItem(specUser, inputUser, 'json-api')
+      const methodLevel = blogApp.getItem(specUser, inputUser, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
