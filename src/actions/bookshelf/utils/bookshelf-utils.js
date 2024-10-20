@@ -161,8 +161,16 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
         const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
         const assocConfig = mainModelConfig.associations[assocName]
 
-        // Include column from association in select statement and perform join with orderBy clause
-        if (assocConfig) {
+        if (!assocConfig) {
+          // Skip is association name does not exist on the model
+          if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" does not exist for model "${modelName}".`)
+          return // eslint-disable-line no-useless-return
+        } else if (assocConfig.type !== 'toOne') {
+          // Skip if association is not "toOne" (i.e. it is a "many" relationsip)
+          if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" is not of type "toOne".`)
+          return // eslint-disable-line no-useless-return
+        } else {
+          // Include column from association in select statement and perform join with orderBy clause
           const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
           queryBuilder
             .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
