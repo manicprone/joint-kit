@@ -65,10 +65,9 @@ function buildItemData (type, itemData, joint) {
   const { attributes, relations } = itemData
 
   // Apply base attributes
-  const item = {
-    type,
-    ...attributes
-  }
+  const item = (itemData.id)
+    ? { type, ...attributes }
+    : {}
 
   // Handle relations
   if (!objectUtils.isEmpty(relations)) {
@@ -97,6 +96,9 @@ function buildItemData (type, itemData, joint) {
             const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
             return buildItemData(relationDataType, relationItem, joint)
           })
+        } else {
+          // Add empty array
+          item[relationName] = []
         }
       } else {
         throw new Error(`[Serializer] Unrecognized relationship ${relationType}.`)

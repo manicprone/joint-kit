@@ -399,7 +399,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
 
       const payload = await projectAppJsonApi.getItems(specUser, inputUser)
 
-      // Top level keys: "data" and "meta"
+      // Top level keys: "data", "included", and "meta"
       const topLevelKeys = ['data', 'included', 'meta']
       expect(Object.keys(payload).sort()).toEqual(topLevelKeys)
 
@@ -723,6 +723,179 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           "username": "segmented",
         }
       `)
+    })
+
+    it('should return an empty "toOne" assocation when a record does not exist', async () => {
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'username', type: 'String' }
+        ],
+        defaultOrderBy: 'username'
+      }
+      const inputUser = {
+        fields: {
+          username: 'admin' // does not have an "info" record
+        },
+        associations: ['info']
+      }
+
+      const payload = await projectAppFlat.getItems(specUser, inputUser)
+
+      // Top level keys: "data" and "meta"
+      const topLevelKeys = ['data', 'meta']
+      expect(Object.keys(payload).sort()).toEqual(topLevelKeys)
+
+      // Data items
+      expect(payload.data).to.be.an('array')
+      expect(payload.data).toHaveLength(1)
+
+      // Empty association
+      expect(payload.data[0].info).toEqual({})
+
+      // Meta info
+      expect(payload.meta).toEqual(
+        {
+          total_items: 1
+        }
+      )
+    })
+
+    it('should return an empty "toMany" assocation when records do not exist', async () => {
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'username', type: 'String' }
+        ],
+        defaultOrderBy: 'username'
+      }
+      const inputUser = {
+        fields: {
+          username: 'admin' // does not have any "profile" records
+        },
+        associations: ['profiles']
+      }
+
+      const payload = await projectAppFlat.getItems(specUser, inputUser)
+
+      // Top level keys: "data" and "meta"
+      const topLevelKeys = ['data', 'meta']
+      expect(Object.keys(payload).sort()).toEqual(topLevelKeys)
+
+      // Data items
+      expect(payload.data).to.be.an('array')
+      expect(payload.data).toHaveLength(1)
+
+      // Empty association array
+      expect(payload.data[0].profiles).toEqual([])
+
+      // Meta info
+      expect(payload.meta).toEqual(
+        {
+          total_items: 1
+        }
+      )
+    })
+
+    it('should return a paginated collection in flattened shape with included associations', async () => {
+      const specUser = {
+        modelName: 'User',
+        defaultOrderBy: 'username'
+      }
+      const inputUser = {
+        paginate: { skip: 1, limit: 4 }, // only 2 "info" records exist
+        associations: ['info', 'profiles']
+      }
+
+      const payload = await projectAppFlat.getItems(specUser, inputUser)
+
+      // Top level keys: "data" and "meta"
+      const topLevelKeys = ['data', 'meta']
+      expect(Object.keys(payload).sort()).toEqual(topLevelKeys)
+
+      // Data items with associations
+      expect(payload.data).to.be.an('array')
+      expect(payload.data).toHaveLength(4)
+
+      // bethsmith (with info record and no profiles)
+      expect(payload.data[0].username).toEqual('bethsmith')
+      expect(payload.data[0].id).toEqual(9)
+      expect(payload.data[0].info).toMatchInlineSnapshot({
+        created_at: expect.any(Date),
+        updated_at: expect.any(Date)
+      }, `
+        {
+          "created_at": Any<ClockDate>,
+          "description": null,
+          "id": 5,
+          "professional_title": "Space Beth",
+          "tagline": "Defying dimensions, one adventure at a time.",
+          "type": "UserInfo",
+          "updated_at": Any<ClockDate>,
+          "user_id": 9,
+        }
+      `)
+      expect(payload.data[0].profiles).toEqual([]) // no profiles
+
+      // hotmod (with no info record and no profiles)
+      expect(payload.data[1].username).toEqual('hotmod')
+      expect(payload.data[1].id).toEqual(3)
+      expect(payload.data[1].info).toEqual({}) // no info record
+      expect(payload.data[1].profiles).toEqual([]) // no profiles
+
+      // jerrysmith (with no info record and 4 profiles)
+      expect(payload.data[2].username).toEqual('jerrysmith')
+      expect(payload.data[2].id).toEqual(8)
+      expect(payload.data[2].info).toEqual({}) // no info record
+      expect(payload.data[2].profiles).toHaveLength(4) // 4 profiles
+
+      // mortysmith (with info record and 1 profile)
+      expect(payload.data[3].username).toEqual('mortysmith')
+      expect(payload.data[3].id).toEqual(7)
+      expect(payload.data[3].info).toMatchInlineSnapshot({
+        created_at: expect.any(Date),
+        updated_at: expect.any(Date)
+      }, `
+        {
+          "created_at": Any<ClockDate>,
+          "description": null,
+          "id": 4,
+          "professional_title": "Afterthought",
+          "tagline": "Umm.",
+          "type": "UserInfo",
+          "updated_at": Any<ClockDate>,
+          "user_id": 7,
+        }
+      `)
+      expect(payload.data[3].profiles).toHaveLength(1) // 1 profile
+      expect(payload.data[3].profiles[0]).toMatchInlineSnapshot({
+        created_at: expect.any(Date),
+        updated_at: expect.any(Date)
+      }, `
+        {
+          "avatar_url": null,
+          "created_at": Any<ClockDate>,
+          "description": null,
+          "id": 7,
+          "is_default": 1,
+          "is_live": 1,
+          "slug": "the-morty-page",
+          "tagline": "",
+          "title": "The Morty Page",
+          "type": "Profile",
+          "updated_at": Any<ClockDate>,
+          "user_id": 7,
+        }
+      `)
+
+      // Meta info
+      expect(payload.meta).toEqual(
+        {
+          total_items: 11,
+          limit: 4,
+          skip: 1
+        }
+      )
     })
   })
 })
