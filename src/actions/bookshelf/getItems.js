@@ -20,21 +20,21 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING]
   const authContext = input[ACTION.INPUT_AUTH_CONTEXT]
 
-  // Reject if model does not exist...
+  // Reject if model does not exist
   const model = bookshelf.model(modelName)
   if (!model) {
     if (debug) console.log(`[JOINT] [action:getItems] The model "${modelName}" is not recognized`)
     return Promise.reject(StatusErrors.generateModelNotRecognizedError(modelName))
   }
 
-  // Reject when required fields are not provided...
+  // Reject when required fields are not provided
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
   if (!requiredFieldCheck.satisfied) {
     if (debug) console.log('[JOINT] [action:getItems] Action has missing required fields:', requiredFieldCheck.missing)
     return Promise.reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing))
   }
 
-  // Respect auth...
+  // Respect auth
   if (authRules) {
     const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, inputFields)
     if (!AuthUtils.isAllowed(authContext, authRules, ownerCreds)) {
@@ -42,27 +42,27 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
     }
   } // end-if (authRules)
 
-  // Prepare action options...
+  // Prepare action options
   const actionOpts = {}
   if (trx) actionOpts.transacting = trx
 
-  // Restrict columns to return with payload...
+  // Restrict columns to return with payload
   if (returnColsDef) {
-    // If a single set (array) is defined, honor the setting...
+    // If a single set (array) is defined, honor the setting
     if (Array.isArray(returnColsDef)) {
       actionOpts.columns = returnColsDef
 
-    // Otherwise, try to honor the set requested by the input...
+    // Otherwise, try to honor the set requested by the input
     } else if (input[ACTION.INPUT_FIELD_SET] && objectUtils.has(returnColsDef, input[ACTION.INPUT_FIELD_SET])) {
       actionOpts.columns = returnColsDef[input[ACTION.INPUT_FIELD_SET]]
 
-    // If the input does not declare a set, check for a "default" set...
+    // If the input does not declare a set, check for a "default" set
     } else if (returnColsDef.default && Array.isArray(returnColsDef.default)) {
       actionOpts.columns = returnColsDef.default
     }
   } // end-if (returnColsDef)
 
-  // Set pagination options, if requested...
+  // Set pagination options, if requested
   if (input.paginate) {
     const skip = objectUtils.get(input.paginate, ACTION.INPUT_PAGINATE_SKIP, ACTION.DEFAULT_VALUE_PAGINATE_SKIP)
     const limit = objectUtils.get(input.paginate, ACTION.INPUT_PAGINATE_LIMIT, ACTION.DEFAULT_VALUE_PAGINATE_LIMIT)
@@ -70,29 +70,29 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
     actionOpts.limit = limit
   }
 
-  // -------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Include associations (associations & loadDirect will be combined)
-  // -------------------------------------------------------------------------
-  // Handle "loadDirect" option...
+  // ---------------------------------------------------------------------------
+  // Handle "loadDirect" option
   const inputLoadDirectDef = input[ACTION.INPUT_LOAD_DIRECT] || []
   const loadDirectDef = (spec[ACTION.SPEC_FORCE_LOAD_DIRECT])
     ? spec[ACTION.SPEC_FORCE_LOAD_DIRECT].concat(inputLoadDirectDef)
     : inputLoadDirectDef
   const loadDirect = ActionUtils.parseLoadDirect(loadDirectDef)
-  // Handle "associations" option...
+  // Handle "associations" option
   const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS] || []
   const assocs = (spec[ACTION.SPEC_FORCE_ASSOCIATIONS])
     ? objectUtils.union(spec[ACTION.SPEC_FORCE_ASSOCIATIONS], inputAssocs)
     : inputAssocs
-  // Combine...
+  // Combine
   const allAssociations = (loadDirect.associations && loadDirect.associations.length > 0)
     ? objectUtils.union(assocs, loadDirect.associations)
     : assocs
   if (allAssociations.length > 0) actionOpts.withRelated = allAssociations
 
-  // Prepare query...
+  // Prepare query
   const queryOpts = (queryBuilder) => {
-    // Build where clause...
+    // Build where clause
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name
@@ -114,28 +114,30 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)
 
-    // Set orderBy options...
+    // Set orderBy options
     const defaultOrderBy = objectUtils.get(spec, ACTION.SPEC_DEFAULT_ORDER_BY, null)
     const requestedOrderBy = objectUtils.get(input, ACTION.INPUT_ORDER_BY, null)
     const orderByOpts = requestedOrderBy || defaultOrderBy
-    if (orderByOpts) {
-      const orderBy = BookshelfUtils.buildOrderBy(orderByOpts)
-      orderBy.map(orderOpt => queryBuilder.orderBy(orderOpt.col, orderOpt.order))
-    }
+    if (orderByOpts) BookshelfUtils.appendOrderByClause(joint, queryBuilder, modelName, orderByOpts)
+  }
+
+  if (debug) {
+    const sqlOutput = model.query(queryOpts).query().toSQL().toNative()
+    console.log('[JOINT] [action:getItems] Core SQL to perform ==>', sqlOutput)
   }
 
   try {
-    // Get items...
+    // Get items
     const data = (input.paginate)
       ? await model.query(queryOpts).fetchPage(actionOpts) // perform paginated request
       : await model.query(queryOpts).fetchAll(actionOpts) // return all items
 
-    // Handle loadDirect requests...
+    // Handle loadDirect requests
     if (loadDirect.associations) {
       data.models.forEach(itemData => BookshelfUtils.loadRelationsToItemBase(itemData, loadDirect, input.associations))
     }
 
-    // Return data...
+    // Return data
     return handleDataResponse(joint, modelName, data, output)
   } catch (error) {
     return handleErrorResponse(error, 'getItems', modelName, inputAssocs)

@@ -201,7 +201,8 @@ export function parseOwnerCreds (authSpec = {}, combinedFieldData = {}) {
   return creds
 }
 
-// ----------------------------------------------------------------------------- Looks at the provided loadDirect spec defintion, and parses out the info
+// -----------------------------------------------------------------------------
+// Looks at the provided loadDirect spec defintion, and parses out the info
 // needed to perform the loadDirect action on resource association data.
 // -----------------------------------------------------------------------------
 // e.g.
