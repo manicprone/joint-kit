@@ -2035,7 +2035,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       ])
     })
 
-    it('should support ordering the results by a column of an association', () => {
+    it('should support ordering the results by a column of an association', async () => {
       // ----
       // User
       // ----
@@ -2074,117 +2074,96 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       }
 
       // Ordered by association field ASC (nulls always at the end)
-      const getUsersAsInfoProTitleASC = projectApp.getItems(specUser, usersInfoProTitleASC)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          const userInfoResults = data.models.map(it => it.relations.info)
-          expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Afterthought' }) // mortysmith
-          expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Divergent Thinker' }) // segmented
-          expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' }) // the_manic_edge
-          expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Rickforcer' }) // ricksanchez
-          expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Space Beth' }) // bethsmith
-          expect(userInfoResults[5].attributes).toEqual({})
-          expect(userInfoResults[6].attributes).toEqual({})
-          expect(userInfoResults[7].attributes).toEqual({})
-          expect(userInfoResults[8].attributes).toEqual({})
-          expect(userInfoResults[9].attributes).toEqual({})
-          expect(userInfoResults[10].attributes).toEqual({})
-        })
+      const getUsersAsInfoProTitleASC = await projectApp.getItems(specUser, usersInfoProTitleASC)
+      expect(getUsersAsInfoProTitleASC.models).to.have.length(11)
+      const userInfoResults = getUsersAsInfoProTitleASC.models.map(it => it.relations.info)
+      expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Afterthought' }) // mortysmith
+      expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Divergent Thinker' }) // segmented
+      expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' }) // the_manic_edge
+      expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Rickforcer' }) // ricksanchez
+      expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Space Beth' }) // bethsmith
+      expect(userInfoResults[5].attributes).toEqual({})
+      expect(userInfoResults[6].attributes).toEqual({})
+      expect(userInfoResults[7].attributes).toEqual({})
+      expect(userInfoResults[8].attributes).toEqual({})
+      expect(userInfoResults[9].attributes).toEqual({})
+      expect(userInfoResults[10].attributes).toEqual({})
 
       // Ordered by association field first, then main resource field
-      const getUsersWithoutAssocAsInfoProTitleAndUsernameASC = projectApp.getItems(specUser, usersInfoWithoutAssocProTitleAndUsernameASC)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          expect(data.models[0].attributes).to.contain({ username: 'mortysmith' })
-          expect(data.models[1].attributes).to.contain({ username: 'segmented' })
-          expect(data.models[2].attributes).to.contain({ username: 'the_manic_edge' })
-          expect(data.models[3].attributes).to.contain({ username: 'ricksanchez' })
-          expect(data.models[4].attributes).to.contain({ username: 'bethsmith' })
-          expect(data.models[5].attributes).to.contain({ username: 'admin' }) // ---- The rest are default sorted by their "username" ASC
-          expect(data.models[6].attributes).to.contain({ username: 'hotmod' })
-          expect(data.models[7].attributes).to.contain({ username: 'jerrysmith' })
-          expect(data.models[8].attributes).to.contain({ username: 'summersmith' })
-          expect(data.models[9].attributes).to.contain({ username: 'super-admin' })
-          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
-        })
+      const getUsersWithoutAssocAsInfoProTitleAndUsernameASC = await projectApp.getItems(specUser, usersInfoWithoutAssocProTitleAndUsernameASC)
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models).to.have.length(11)
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[0].attributes).to.contain({ username: 'mortysmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[1].attributes).to.contain({ username: 'segmented' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[3].attributes).to.contain({ username: 'ricksanchez' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[4].attributes).to.contain({ username: 'bethsmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[5].attributes).to.contain({ username: 'admin' }) // ---- The rest are default sorted by their "username" ASC
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[6].attributes).to.contain({ username: 'hotmod' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[7].attributes).to.contain({ username: 'jerrysmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[8].attributes).to.contain({ username: 'summersmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[9].attributes).to.contain({ username: 'super-admin' })
+      expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[10].attributes).to.contain({ username: 'zaraq' })
 
       // Ordered by association field, without including the association (per the request)
-      const getUsersWithoutAssocAsInfoProTitleASC = projectApp.getItems(specUser, usersInfoWithoutAssocProTitleASC)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          expect(data.models[0].attributes).to.contain({ username: 'mortysmith' })
-          expect(data.models[1].attributes).to.contain({ username: 'segmented' })
-          expect(data.models[2].attributes).to.contain({ username: 'the_manic_edge' })
-          expect(data.models[3].attributes).to.contain({ username: 'ricksanchez' })
-          expect(data.models[4].attributes).to.contain({ username: 'bethsmith' })
-          expect(data.models[5].attributes).to.contain({ username: 'super-admin' }) // ---- The rest are default sorted by their "id"
-          expect(data.models[6].attributes).to.contain({ username: 'admin' })
-          expect(data.models[7].attributes).to.contain({ username: 'hotmod' })
-          expect(data.models[8].attributes).to.contain({ username: 'jerrysmith' })
-          expect(data.models[9].attributes).to.contain({ username: 'summersmith' })
-          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
-        })
+      const getUsersWithoutAssocAsInfoProTitleASC = await projectApp.getItems(specUser, usersInfoWithoutAssocProTitleASC)
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models).to.have.length(11)
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[0].attributes).to.contain({ username: 'mortysmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[1].attributes).to.contain({ username: 'segmented' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[3].attributes).to.contain({ username: 'ricksanchez' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[4].attributes).to.contain({ username: 'bethsmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[5].attributes).to.contain({ username: 'super-admin' }) // ---- The rest are default sorted by their "id"
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[6].attributes).to.contain({ username: 'admin' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[7].attributes).to.contain({ username: 'hotmod' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[8].attributes).to.contain({ username: 'jerrysmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[9].attributes).to.contain({ username: 'summersmith' })
+      expect(getUsersWithoutAssocAsInfoProTitleASC.models[10].attributes).to.contain({ username: 'zaraq' })
 
       // Ordered by associated field DESC (nulls always at the end)
-      const getUsersAsInfoProTitleDSC = projectApp.getItems(specUser, usersInfoProTitleDSC)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          const userInfoResults = data.models.map(it => it.relations.info)
-          expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Space Beth' })
-          expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Rickforcer' })
-          expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' })
-          expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Divergent Thinker' })
-          expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Afterthought' })
-          expect(userInfoResults[5].attributes).toEqual({})
-          expect(userInfoResults[6].attributes).toEqual({})
-          expect(userInfoResults[7].attributes).toEqual({})
-          expect(userInfoResults[8].attributes).toEqual({})
-          expect(userInfoResults[9].attributes).toEqual({})
-          expect(userInfoResults[10].attributes).toEqual({})
-        })
+      const getUsersAsInfoProTitleDSC = await projectApp.getItems(specUser, usersInfoProTitleDSC)
+      expect(getUsersAsInfoProTitleDSC.models).to.have.length(11)
+      const userInfoResults2 = getUsersAsInfoProTitleDSC.models.map(it => it.relations.info)
+      expect(userInfoResults2[0].attributes).to.contain({ professional_title: 'Space Beth' })
+      expect(userInfoResults2[1].attributes).to.contain({ professional_title: 'Rickforcer' })
+      expect(userInfoResults2[2].attributes).to.contain({ professional_title: 'EdgeCaser' })
+      expect(userInfoResults2[3].attributes).to.contain({ professional_title: 'Divergent Thinker' })
+      expect(userInfoResults2[4].attributes).to.contain({ professional_title: 'Afterthought' })
+      expect(userInfoResults2[5].attributes).toEqual({})
+      expect(userInfoResults2[6].attributes).toEqual({})
+      expect(userInfoResults2[7].attributes).toEqual({})
+      expect(userInfoResults2[8].attributes).toEqual({})
+      expect(userInfoResults2[9].attributes).toEqual({})
+      expect(userInfoResults2[10].attributes).toEqual({})
 
       // A non-existent association name is skipped (leaving the ordering to other arguments or default sort)
-      const getUsersAsBadOrderByDSC = projectApp.getItems(specUser, usersBadOrderByDSC)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          expect(data.models[0].attributes).to.contain({ username: 'super-admin' }) // ---- Default sorted by their "id"
-          expect(data.models[1].attributes).to.contain({ username: 'admin' })
-          expect(data.models[2].attributes).to.contain({ username: 'hotmod' })
-          expect(data.models[3].attributes).to.contain({ username: 'the_manic_edge' })
-          expect(data.models[4].attributes).to.contain({ username: 'segmented' })
-          expect(data.models[5].attributes).to.contain({ username: 'ricksanchez' })
-          expect(data.models[6].attributes).to.contain({ username: 'mortysmith' })
-          expect(data.models[7].attributes).to.contain({ username: 'jerrysmith' })
-          expect(data.models[8].attributes).to.contain({ username: 'bethsmith' })
-          expect(data.models[9].attributes).to.contain({ username: 'summersmith' })
-          expect(data.models[10].attributes).to.contain({ username: 'zaraq' })
-        })
+      const getUsersAsBadOrderByDSC = await projectApp.getItems(specUser, usersBadOrderByDSC)
+      expect(getUsersAsBadOrderByDSC.models).to.have.length(11)
+      expect(getUsersAsBadOrderByDSC.models[0].attributes).to.contain({ username: 'super-admin' }) // ---- Default sorted by their "id"
+      expect(getUsersAsBadOrderByDSC.models[1].attributes).to.contain({ username: 'admin' })
+      expect(getUsersAsBadOrderByDSC.models[2].attributes).to.contain({ username: 'hotmod' })
+      expect(getUsersAsBadOrderByDSC.models[3].attributes).to.contain({ username: 'the_manic_edge' })
+      expect(getUsersAsBadOrderByDSC.models[4].attributes).to.contain({ username: 'segmented' })
+      expect(getUsersAsBadOrderByDSC.models[5].attributes).to.contain({ username: 'ricksanchez' })
+      expect(getUsersAsBadOrderByDSC.models[6].attributes).to.contain({ username: 'mortysmith' })
+      expect(getUsersAsBadOrderByDSC.models[7].attributes).to.contain({ username: 'jerrysmith' })
+      expect(getUsersAsBadOrderByDSC.models[8].attributes).to.contain({ username: 'bethsmith' })
+      expect(getUsersAsBadOrderByDSC.models[9].attributes).to.contain({ username: 'summersmith' })
+      expect(getUsersAsBadOrderByDSC.models[10].attributes).to.contain({ username: 'zaraq' })
 
       // A toMany association type is skipped (leaving the ordering to other arguments or default sort)
-      const getUsersWithToManyAssoc = projectApp.getItems(specUser, usersWithToManyAssoc)
-        .then((data) => {
-          expect(data.models).to.have.length(11)
-          expect(data.models[0].attributes).to.contain({ username: 'zaraq' }) // ---- Sorted by "username" DSC
-          expect(data.models[1].attributes).to.contain({ username: 'the_manic_edge' })
-          expect(data.models[2].attributes).to.contain({ username: 'super-admin' })
-          expect(data.models[3].attributes).to.contain({ username: 'summersmith' })
-          expect(data.models[4].attributes).to.contain({ username: 'segmented' })
-          expect(data.models[5].attributes).to.contain({ username: 'ricksanchez' })
-          expect(data.models[6].attributes).to.contain({ username: 'mortysmith' })
-          expect(data.models[7].attributes).to.contain({ username: 'jerrysmith' })
-          expect(data.models[8].attributes).to.contain({ username: 'hotmod' })
-          expect(data.models[9].attributes).to.contain({ username: 'bethsmith' })
-          expect(data.models[10].attributes).to.contain({ username: 'admin' })
-        })
-
-      return Promise.all([
-        getUsersAsInfoProTitleASC,
-        getUsersWithoutAssocAsInfoProTitleAndUsernameASC,
-        getUsersWithoutAssocAsInfoProTitleASC,
-        getUsersAsInfoProTitleDSC,
-        getUsersAsBadOrderByDSC,
-        getUsersWithToManyAssoc
-      ])
+      const getUsersWithToManyAssoc = await projectApp.getItems(specUser, usersWithToManyAssoc)
+      expect(getUsersWithToManyAssoc.models).to.have.length(11)
+      expect(getUsersWithToManyAssoc.models[0].attributes).to.contain({ username: 'zaraq' }) // ---- Sorted by "username" DSC
+      expect(getUsersWithToManyAssoc.models[1].attributes).to.contain({ username: 'the_manic_edge' })
+      expect(getUsersWithToManyAssoc.models[2].attributes).to.contain({ username: 'super-admin' })
+      expect(getUsersWithToManyAssoc.models[3].attributes).to.contain({ username: 'summersmith' })
+      expect(getUsersWithToManyAssoc.models[4].attributes).to.contain({ username: 'segmented' })
+      expect(getUsersWithToManyAssoc.models[5].attributes).to.contain({ username: 'ricksanchez' })
+      expect(getUsersWithToManyAssoc.models[6].attributes).to.contain({ username: 'mortysmith' })
+      expect(getUsersWithToManyAssoc.models[7].attributes).to.contain({ username: 'jerrysmith' })
+      expect(getUsersWithToManyAssoc.models[8].attributes).to.contain({ username: 'hotmod' })
+      expect(getUsersWithToManyAssoc.models[9].attributes).to.contain({ username: 'bethsmith' })
+      expect(getUsersWithToManyAssoc.models[10].attributes).to.contain({ username: 'admin' })
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {

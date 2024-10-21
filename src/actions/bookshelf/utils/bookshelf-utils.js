@@ -1,4 +1,3 @@
-/* eslint-disable array-callback-return */
 import objectUtils from '../../../utils/object-utils'
 import stringUtils from '../../../utils/string-utils'
 import ACTION from '../../../core/constants/action-constants'
@@ -137,16 +136,18 @@ export function appendWhereClause (queryBuilder, fieldName, value, matchStrategy
 // queryBuilder - The queryBuilder instance
 // modelName    - The model name of the main resource
 // -----------------------------------------------------------------------------
-// This logic is supports ordering by columns of associations (via dot
+// This logic supports ordering by columns of associations (via dot
 // notation). If the association is not defined on the source model, the orderBy
 // argument is ignored.
 //
-// NOTE: NULLS are always returned last in both ASC and DESC orders.
+// NOTES:
+// + Only supports a depth of 1 (i.e. <association>.<field>).
+// + NULLS are always returned last in both ASC and DESC orders.
 // -----------------------------------------------------------------------------
 export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue) {
   const orderBy = buildOrderBy(fieldValue)
 
-  orderBy.map(orderOpt => {
+  orderBy.forEach(orderOpt => {
     // Support column from association
     if (orderOpt.col.includes('.')) {
       const parts = orderOpt.col.split('.')
@@ -164,11 +165,9 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
         if (!assocConfig) {
           // Skip is association name does not exist on the model
           if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" does not exist for model "${modelName}".`)
-          return // eslint-disable-line no-useless-return
         } else if (assocConfig.type !== 'toOne') {
           // Skip if association is not "toOne" (i.e. it is a "many" relationsip)
           if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" is not of type "toOne".`)
-          return // eslint-disable-line no-useless-return
         } else {
           // Include column from association in select statement and perform join with orderBy clause
           const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
