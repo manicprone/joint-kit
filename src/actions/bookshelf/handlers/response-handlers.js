@@ -1,10 +1,12 @@
 import * as StatusErrors from '../../../core/errors/status-errors'
 import toJsonApi from '../serializers/json-api'
+import toFlat from '../serializers/flat'
 
 export function handleDataResponse (joint, modelName, data, output) {
   // Return data in requested format
   switch (output) {
     case 'json-api': return toJsonApi(modelName, data, joint)
+    case 'flat': return toFlat(modelName, data, joint)
     default: return data
   }
 }

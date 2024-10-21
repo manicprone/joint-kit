@@ -2,11 +2,16 @@ import objectUtils from '../../../utils/object-utils'
 
 const debug = false
 
+// -----------------------------------------------------------------------------
+// Serializer for JSON API Spec output format.
+//
+// See: https://jsonapi.org
+// -----------------------------------------------------------------------------
 export default function serialize (type, data, joint) {
   let json = {}
 
   if (data) {
-    if (debug === true) console.log(`[Serializer] ${type} data =>`, data)
+    if (debug === true) console.log(`[Serializer] Serialize ${type} data to JSON API Spec =>`, data)
 
     // Create relation hash, to manage relationship data...
     const relationHash = {}
@@ -98,7 +103,7 @@ function buildItemData (type, itemData, relationHash, joint) {
       const relationData = relations[relationName]
       const relationType = relationData.relatedData.type
 
-      if (debug === true) console.log(`[Serializer] handling relation => ${relationName} (${relationType})`)
+      if (debug === true) console.log(`[Serializer] handling relation: ${relationName} (${relationType})`)
 
       // Initiate relationships object...
       item.relationships[relationName] = {}
@@ -108,18 +113,17 @@ function buildItemData (type, itemData, relationHash, joint) {
         // Handle 1-1 relationship...
         // --------------------------
         const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
-        const relationItemData = buildItemData(relationDataType,
-          relationData,
-          relationHash,
-          joint)
+        const relationItemData = buildItemData(relationDataType, relationData, relationHash, joint)
 
-        // Set type and ID on base item...
-        item.relationships[relationName].data = {}
-        item.relationships[relationName].data.type = relationItemData.type
-        item.relationships[relationName].data.id = relationItemData.id
+        if (relationItemData.id) {
+          // Set type and ID on base item...
+          item.relationships[relationName].data = {}
+          item.relationships[relationName].data.type = relationItemData.type
+          item.relationships[relationName].data.id = relationItemData.id
 
-        // Add relation item data to hash...
-        processRelationItemData(relationItemData, relationHash)
+          // Add relation item data to hash...
+          processRelationItemData(relationItemData, relationHash)
+        }
       } else if (relationType === 'hasMany' || relationType === 'belongsToMany') {
         // -----------------------------
         // Handle 1-many relationship...
