@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   test: {
+    // reporters: ['verbose'],
     include: ['test/**/*.spec.js'],
     forceRerunTriggers: ['src/**/*.js'],
     coverage: {

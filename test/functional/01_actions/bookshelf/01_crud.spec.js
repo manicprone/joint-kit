@@ -1389,7 +1389,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           expect(payload.included[0]).to.contain({ type: 'Profile' })
         })
 
-      const methodLevel = blogAppJsonApi.getItem(specUser, inputUser, 'json-api')
+      const methodLevel = blogApp.getItem(specUser, inputUser, 'json-api')
         .then((payload) => {
           // Top Level...
           expect(payload).to.have.property('data')
@@ -1489,7 +1489,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option`, async () => {
+    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option:`, async () => {
       it('should respect the option and apply fiter accordingly', async () => {
         const specUser = {
           modelName: 'User',
@@ -1513,7 +1513,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
           })
       })
 
-      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should filter in a case-insensitive manner`, async () => {
+      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should filter in a case-insensitive manner`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
@@ -1534,7 +1534,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
       })
 
-      it(`"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator should allow filtering special characters`, async () => {
+      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should allow filtering special characters`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
@@ -2033,6 +2033,144 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         getProjectsInDefaultOrder,
         getProjectsInNameASC
       ])
+    })
+
+    describe('should support ordering the results by association fields:', async () => {
+      it('supports both "toOne" and "toMany" types alongside main resource fields', async () => {
+        // ----
+        // User
+        // ----
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'preferred_locale', type: 'String' }
+          ],
+          defaultOrderBy: 'created_at'
+        }
+        const usersInfoProTitleASC = {
+          fields: {},
+          orderBy: 'info.professional_title',
+          associations: ['info']
+        }
+        const usersInfoWithoutAssocProTitleAndUsernameASC = {
+          fields: {},
+          orderBy: 'info.professional_title,username'
+        }
+        const usersInfoWithoutAssocProTitleASC = {
+          fields: {},
+          orderBy: 'info.professional_title'
+        }
+        const usersInfoProTitleDSC = {
+          fields: {},
+          orderBy: '-info.professional_title',
+          associations: ['info']
+        }
+
+        // Ordered by association field ASC (nulls always at the end)
+        const getUsersAsInfoProTitleASC = await projectApp.getItems(specUser, usersInfoProTitleASC)
+        expect(getUsersAsInfoProTitleASC.models).to.have.length(11)
+        const userInfoResults = getUsersAsInfoProTitleASC.models.map(it => it.relations.info)
+        expect(userInfoResults[0].attributes).to.contain({ professional_title: 'Afterthought' }) // mortysmith
+        expect(userInfoResults[1].attributes).to.contain({ professional_title: 'Divergent Thinker' }) // segmented
+        expect(userInfoResults[2].attributes).to.contain({ professional_title: 'EdgeCaser' }) // the_manic_edge
+        expect(userInfoResults[3].attributes).to.contain({ professional_title: 'Rickforcer' }) // ricksanchez
+        expect(userInfoResults[4].attributes).to.contain({ professional_title: 'Space Beth' }) // bethsmith
+        expect(userInfoResults[5].attributes).toEqual({})
+        expect(userInfoResults[6].attributes).toEqual({})
+        expect(userInfoResults[7].attributes).toEqual({})
+        expect(userInfoResults[8].attributes).toEqual({})
+        expect(userInfoResults[9].attributes).toEqual({})
+        expect(userInfoResults[10].attributes).toEqual({})
+
+        // Ordered by association field first, then main resource field
+        const getUsersWithoutAssocAsInfoProTitleAndUsernameASC = await projectApp.getItems(specUser, usersInfoWithoutAssocProTitleAndUsernameASC)
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models).to.have.length(11)
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[0].attributes).to.contain({ username: 'mortysmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[1].attributes).to.contain({ username: 'segmented' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[3].attributes).to.contain({ username: 'ricksanchez' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[4].attributes).to.contain({ username: 'bethsmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[5].attributes).to.contain({ username: 'admin' }) // ---- The rest are default sorted by their "username" ASC
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[6].attributes).to.contain({ username: 'hotmod' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[7].attributes).to.contain({ username: 'jerrysmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[8].attributes).to.contain({ username: 'summersmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[9].attributes).to.contain({ username: 'super-admin' })
+        expect(getUsersWithoutAssocAsInfoProTitleAndUsernameASC.models[10].attributes).to.contain({ username: 'zaraq' })
+
+        // Ordered by association field, without including the association (per the request)
+        const getUsersWithoutAssocAsInfoProTitleASC = await projectApp.getItems(specUser, usersInfoWithoutAssocProTitleASC)
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models).to.have.length(11)
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[0].attributes).to.contain({ username: 'mortysmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[1].attributes).to.contain({ username: 'segmented' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[2].attributes).to.contain({ username: 'the_manic_edge' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[3].attributes).to.contain({ username: 'ricksanchez' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[4].attributes).to.contain({ username: 'bethsmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[5].attributes).to.contain({ username: 'super-admin' }) // ---- The rest are default sorted by their "id"
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[6].attributes).to.contain({ username: 'admin' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[7].attributes).to.contain({ username: 'hotmod' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[8].attributes).to.contain({ username: 'jerrysmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[9].attributes).to.contain({ username: 'summersmith' })
+        expect(getUsersWithoutAssocAsInfoProTitleASC.models[10].attributes).to.contain({ username: 'zaraq' })
+
+        // Ordered by associated field DESC (nulls always at the end)
+        const getUsersAsInfoProTitleDSC = await projectApp.getItems(specUser, usersInfoProTitleDSC)
+        expect(getUsersAsInfoProTitleDSC.models).to.have.length(11)
+        const userInfoResults2 = getUsersAsInfoProTitleDSC.models.map(it => it.relations.info)
+        expect(userInfoResults2[0].attributes).to.contain({ professional_title: 'Space Beth' })
+        expect(userInfoResults2[1].attributes).to.contain({ professional_title: 'Rickforcer' })
+        expect(userInfoResults2[2].attributes).to.contain({ professional_title: 'EdgeCaser' })
+        expect(userInfoResults2[3].attributes).to.contain({ professional_title: 'Divergent Thinker' })
+        expect(userInfoResults2[4].attributes).to.contain({ professional_title: 'Afterthought' })
+        expect(userInfoResults2[5].attributes).toEqual({})
+        expect(userInfoResults2[6].attributes).toEqual({})
+        expect(userInfoResults2[7].attributes).toEqual({})
+        expect(userInfoResults2[8].attributes).toEqual({})
+        expect(userInfoResults2[9].attributes).toEqual({})
+        expect(userInfoResults2[10].attributes).toEqual({})
+      })
+
+      it(`should return an error (400) if the "${ACTION.INPUT_ORDER_BY}" arguments are invalid`, async () => {
+        // ----
+        // User
+        // ----
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'preferred_locale', type: 'String' }
+          ],
+          defaultOrderBy: 'created_at'
+        }
+        const usersInvalidAssoc = {
+          fields: {},
+          orderBy: '-fake.professional_title'
+        }
+        const usersWithToManyAssoc = {
+          fields: {},
+          orderBy: 'profiles.title,-username'
+        }
+
+        // An invalid association name
+        await expect(projectApp.getItems(specUser, usersInvalidAssoc))
+          .rejects
+          .toThrowErrorMatchingInlineSnapshot(`
+            {
+              "message": "Failed to build orderBy clause due to issues:\n\tThe orderBy argument "fake.professional_title" is invalid as the association "fake" does not exist for model "User"",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
+
+        // A "toMany" association type
+        await expect(projectApp.getItems(specUser, usersWithToManyAssoc))
+          .rejects
+          .toThrowErrorMatchingInlineSnapshot(`
+            {
+              "message": "Failed to build orderBy clause due to issues:\n\tThe orderBy argument "profiles.title" is invalid because the association "profiles" is not of type "toOne".",
+              "name": "JointStatusError",
+              "status": 400,
+            }
+          `)
+      })
     })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
