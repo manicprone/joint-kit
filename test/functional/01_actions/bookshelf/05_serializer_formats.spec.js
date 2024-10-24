@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
-// import { omit } from 'lodash/fp'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import bookshelf from '../../../db/bookshelf/service'
