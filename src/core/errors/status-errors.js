@@ -79,6 +79,13 @@ export function generateInvalidResourceCreationOperatorError () {
   })
 }
 
+export function generateInvalidOrderByInputError (issues = []) {
+  return new JointStatusError({
+    status: 400,
+    message: 'Failed to build orderBy clause due to issues:\n\t' + issues.map(it => it[1]).join('\n\t')
+  })
+}
+
 // -------------------------------------------------------- Not Authorized (403)
 
 export function generateNotAuthorizedError () {

@@ -8,21 +8,13 @@ const debug = false
 // NOTE: The resource model type is set as "type".
 // -----------------------------------------------------------------------------
 export default function serialize (type, data, joint) {
-  let json = {}
+  if (debug) console.log(`[Serializer] Serialize ${type} data to flattened format =>`, data)
 
-  if (data) {
-    if (debug) console.log(`[Serializer] Serialize ${type} data to flattened format =>`, data)
-
-    // Build data package
-    const packageType = (data.attributes) ? 'item' : 'collection'
-    if (packageType === 'item') {
-      json = buildItemPackage(type, data, joint)
-    } else {
-      json = buildCollectionPackage(type, data, joint)
-    }
-  }
-
-  return json
+  return !data
+    ? {}
+    : data.attributes
+      ? buildItemPackage(type, data, joint)
+      : buildCollectionPackage(type, data, joint)
 }
 
 function buildItemPackage (type, data, joint) {

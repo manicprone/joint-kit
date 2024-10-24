@@ -1,10 +1,10 @@
 import objectUtils from '../../../utils/object-utils'
 import stringUtils from '../../../utils/string-utils'
 import ACTION from '../../../core/constants/action-constants'
+import * as StatusErrors from '../../../core/errors/status-errors'
 import * as CoreUtils from '../../../core/core-utils'
 
 const debugLoadDirect = false
-const debugOrderBy = false
 
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
@@ -137,52 +137,59 @@ export function appendWhereClause (queryBuilder, fieldName, value, matchStrategy
 // modelName    - The model name of the main resource
 // -----------------------------------------------------------------------------
 // This logic supports ordering by columns of associations (via dot
-// notation). If the association is not defined on the source model, the orderBy
-// argument is ignored.
+// notation). If the association is not defined on the source model, an error
+// is thrown.
 //
 // NOTES:
 // + Only supports a depth of 1 (i.e. <association>.<field>).
 // + NULLS are always returned last in both ASC and DESC orders.
 // -----------------------------------------------------------------------------
 export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue) {
-  const orderBy = buildOrderBy(fieldValue)
+  // Iterate orderBy arguments
+  const results = buildOrderBy(fieldValue).map(orderOpt => {
+    // Support column from main model
+    if (!orderOpt.col.includes('.')) {
+      return [true, (_queryBuilder) => _queryBuilder.orderBy(orderOpt.col, orderOpt.order)]
 
-  orderBy.forEach(orderOpt => {
     // Support column from association
-    if (orderOpt.col.includes('.')) {
+    } else {
       const parts = orderOpt.col.split('.')
       const assocName = parts[0]
       const colName = parts[1]
       const assocModelName = (joint.modelNameOfAssoc[modelName]) ? joint.modelNameOfAssoc[modelName][assocName] : null
 
-      if (assocModelName) {
-        // Obtain model config info to build raw query
-        const mainTableName = joint.model[modelName].prototype.tableName
-        const assocTableName = joint.model[assocModelName].prototype.tableName
-        const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
-        const assocConfig = mainModelConfig.associations[assocName]
-
-        if (!assocConfig) {
-          // Skip is association name does not exist on the model
-          if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" does not exist for model "${modelName}".`)
-        } else if (assocConfig.type !== 'toOne') {
-          // Skip if association is not "toOne" (i.e. it is a "many" relationsip)
-          if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" is not of type "toOne".`)
-        } else {
-          // Include column from association in select statement and perform join with orderBy clause
-          const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
-          queryBuilder
-            .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-            .select(`${mainTableName}.*`, `${assocTableName}.${colName}`)
-            .orderByRaw(`${assocTableName}.${colName} IS NULL, ${assocTableName}.${colName} ${orderOpt.order}`)
-        }
-      } else {
-        if (debugOrderBy) console.warn(`[JOINT] The orderBy argument "${assocName}.${colName}" is being ignored because the assoctiation "${assocName}" does not exist for model "${modelName}"`)
+      // Record error if association name is not recognized
+      if (!assocModelName) {
+        return [false, `The orderBy argument "${assocName}.${colName}" is invalid as the association "${assocName}" does not exist for model "${modelName}"`]
       }
 
-    // Support column from main model
-    } else {
-      queryBuilder.orderBy(orderOpt.col, orderOpt.order)
+      // Obtain model config info to build raw query
+      const mainTableName = joint.model[modelName].prototype.tableName
+      const assocTableName = joint.model[assocModelName].prototype.tableName
+      const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
+      const assocConfig = mainModelConfig.associations[assocName]
+
+      // Record error if association is not "toOne" (i.e. it is a "toMany" relationsip)
+      if (assocConfig.type !== 'toOne') {
+        return [false, `The orderBy argument "${assocName}.${colName}" is invalid because the association "${assocName}" is not of type "toOne".`]
+      }
+
+      // Include column from association in select statement and perform join with orderBy clause
+      const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
+      return [true, (_queryBuilder) => _queryBuilder
+        .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+        .select(`${mainTableName}.*`, `${assocTableName}.${colName}`)
+        .orderByRaw(`${assocTableName}.${colName} IS NULL, ${assocTableName}.${colName} ${orderOpt.order}`)
+      ]
     }
   })
+
+  // Throw error for any recorded issues
+  const failures = results.filter(it => !it[0])
+  if (failures.length > 0) {
+    throw StatusErrors.generateInvalidOrderByInputError(failures)
+  }
+
+  // Apply orderBy logic
+  results.forEach(it => it[1](queryBuilder))
 }
