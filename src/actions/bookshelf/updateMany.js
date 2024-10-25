@@ -60,7 +60,7 @@ async function performUpdateMany (joint, spec = {}, input = {}, output) {
     // Get items to perform the update action...
     const resources = await model.query((queryBuilder) => {
       Object.entries(lookupFieldData).forEach(([key, field]) => {
-        BookshelfUtils.appendWhereClause(queryBuilder, key, field.value, field.matchStrategy)
+        BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, key, field.value, field.matchStrategy)
       })
     }).fetchAll({ transacting: trx })
 

@@ -110,17 +110,18 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 // Append a where query to an existing query builder, respecting the type of
 // field value and its matchStrategy.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (queryBuilder, fieldName, value, matchStrategy) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, matchStrategy) {
+  const mainTableName = joint.model[modelName].prototype.tableName
   switch (matchStrategy) {
     case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
-      if (Array.isArray(value)) queryBuilder.where(fieldName, 'IN', value)
-      else queryBuilder.where(fieldName, '=', value)
+      if (Array.isArray(value)) queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
+      else queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
       break
     case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
       // Case insensitive LIKE query
       // Note that case-sensitivity of LIKE differs per DBMS, comparing always
       // with lowercase is potentially slower but more portable.
-      queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [fieldName, `%${value.toLowerCase()}%`])
+      queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${value.toLowerCase()}%`])
       break
     default:
       throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
