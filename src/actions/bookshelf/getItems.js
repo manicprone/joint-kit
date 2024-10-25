@@ -23,14 +23,12 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
   // Reject if model does not exist
   const model = bookshelf.model(modelName)
   if (!model) {
-    if (debug) console.log(`[JOINT] [action:getItems] The model "${modelName}" is not recognized`)
     return Promise.reject(StatusErrors.generateModelNotRecognizedError(modelName))
   }
 
   // Reject when required fields are not provided
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
   if (!requiredFieldCheck.satisfied) {
-    if (debug) console.log('[JOINT] [action:getItems] Action has missing required fields:', requiredFieldCheck.missing)
     return Promise.reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing))
   }
 
@@ -107,9 +105,9 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
 
         if (!isLocked && (hasInput || hasDefault)) {
           const inputValue = (hasInput) ? inputFields[fieldName].value : defaultValue
-          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, inputValue, matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue, matchStrategy)
         } else if (isLocked && hasDefault) {
-          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, defaultValue, matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue, matchStrategy)
         }
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)

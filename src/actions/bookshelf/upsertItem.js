@@ -86,7 +86,7 @@ async function performUpsertItem (joint, spec = {}, input = {}, output) {
     const resource = await model.query((queryBuilder) => {
       Object.entries(lookupFieldData)
         .forEach(([fieldName, field]) => {
-          BookshelfUtils.appendWhereClause(queryBuilder, fieldName, field.value, field.matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, field.value, field.matchStrategy)
         })
     }).fetch(actionOpts)
 
