@@ -1,12 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
+import projectAppMethods from '../../../scenarios/project-app/method-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
 
 let projectApp = null
 let projectAppJsonApi = null
 let projectAppFlat = null
+let projectAppMethodConfig = null
 
 // -----------------------------------------------------------------------------
 // SERIALIZER FORMATS [bookshelf]
@@ -27,6 +29,9 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
 
     projectAppFlat = new Joint({ service: bookshelf, output: 'flat' })
     projectAppFlat.generate({ modelConfig: projectAppModels, log: false })
+
+    projectAppMethodConfig = new Joint({ service: bookshelf })
+    projectAppMethodConfig.generate({ modelConfig: projectAppModels, methodConfig: projectAppMethods, log: false })
   })
 
   beforeEach(async () => {
@@ -895,6 +900,71 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           skip: 1
         }
       )
+    })
+  })
+
+  describe('per method config request', () => {
+    it('should support on-the-fly switching of format per method request', async () => {
+      // Native
+      const payloadNative = await projectAppMethodConfig.method.User.getUser({
+        fields: {
+          username: 'ricksanchez'
+        }
+      })
+
+      // JSON API
+      const payloadJsonApi = await projectAppMethodConfig.method.User.getUser({
+        fields: {
+          username: 'ricksanchez'
+        }
+      }, 'json-api')
+
+      // Flat
+      const payloadFlat = await projectAppMethodConfig.method.User.getUser({
+        fields: {
+          username: 'ricksanchez'
+        }
+      }, 'flat')
+
+      // Native response
+      const topLevelKeysNative = ['_knex', '_previousAttributes', 'attributes', 'changed', 'cid', 'id', 'relations']
+      expect(Object.keys(payloadNative).sort()).toEqual(topLevelKeysNative)
+      expect(payloadNative.attributes).toMatchInlineSnapshot(`
+        {
+          "avatar_url": null,
+          "display_name": "Rick",
+          "id": 6,
+          "username": "ricksanchez",
+        }
+      `)
+
+      // JSON API response
+      const topLevelKeysJsonApi = ['data']
+      expect(Object.keys(payloadJsonApi).sort()).toEqual(topLevelKeysJsonApi)
+      expect(payloadJsonApi.data).toMatchInlineSnapshot(`
+        {
+          "attributes": {
+            "avatar_url": null,
+            "display_name": "Rick",
+            "username": "ricksanchez",
+          },
+          "id": 6,
+          "type": "User",
+        }
+      `)
+
+      // Flat response
+      const topLevelKeysFlat = ['data']
+      expect(Object.keys(payloadFlat).sort()).toEqual(topLevelKeysFlat)
+      expect(payloadFlat.data).toMatchInlineSnapshot(`
+        {
+          "avatar_url": null,
+          "display_name": "Rick",
+          "id": 6,
+          "type": "User",
+          "username": "ricksanchez",
+        }
+      `)
     })
   })
 })
