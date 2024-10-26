@@ -156,7 +156,7 @@ export function registerMethods (joint, log = true) {
 function generateMethod (joint, action, spec) {
   if (!objectUtils.has(joint, action)) return null
 
-  return function (input) { return joint[action](spec, input) }
+  return function (input, output) { return joint[action](spec, input, output) }
 } // END - generateMethod
 
 // -----------------------------------------------------------------------------
@@ -175,11 +175,11 @@ export function buildRouter (joint, log = true) {
 
   // Exit if a server instance is not loaded or is not recognized/supported...
   if (!server) {
-    const message = 'A server must be configured to generate a Joint router.'
+    const message = 'A server must be configured to generate a joint router.'
     throw new JointError({ message })
   }
   if (!serverKey) {
-    const message = 'Could not generate a router. The provided server is either not recognized or not supported by Joint.'
+    const message = 'Could not generate a router. The provided server is either not recognized or not supported by joint-kit.'
     throw new JointError({ message })
   }
 
