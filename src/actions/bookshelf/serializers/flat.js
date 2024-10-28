@@ -5,7 +5,7 @@ const debug = false
 // -----------------------------------------------------------------------------
 // Serializer for "flattened" output format.
 //
-// NOTE: The resource model type is set as "type".
+// NOTE: The resource model type is set as "_model".
 // -----------------------------------------------------------------------------
 export default function serialize (type, data, joint) {
   if (debug) console.log(`[Serializer] Serialize ${type} data to flattened format =>`, data)
@@ -58,7 +58,7 @@ function buildItemData (type, itemData, joint) {
 
   // Apply base attributes
   const item = (itemData.id)
-    ? { type, ...attributes }
+    ? { _model: type, ...attributes }
     : {}
 
   // Handle relations

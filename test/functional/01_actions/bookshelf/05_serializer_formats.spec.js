@@ -457,6 +457,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
       }, `
         {
           "data": {
+            "_model": "User",
             "avatar_url": null,
             "created_at": Any<ClockDate>,
             "display_name": "Rick",
@@ -468,7 +469,6 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
             "last_login_at": Any<String>,
             "last_name": null,
             "preferred_locale": null,
-            "type": "User",
             "updated_at": Any<ClockDate>,
             "username": "ricksanchez",
           },
@@ -516,6 +516,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
       }, `
         {
           "data": {
+            "_model": "User",
             "avatar_url": null,
             "created_at": Any<ClockDate>,
             "display_name": "Segmented",
@@ -525,12 +526,12 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
             "first_name": null,
             "id": 5,
             "info": {
+              "_model": "UserInfo",
               "created_at": Any<ClockDate>,
               "description": null,
               "id": 2,
               "professional_title": "Divergent Thinker",
               "tagline": "History favors the impetus of the author",
-              "type": "UserInfo",
               "updated_at": Any<ClockDate>,
               "user_id": 5,
             },
@@ -539,6 +540,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
             "preferred_locale": "en-US",
             "profiles": [
               {
+                "_model": "Profile",
                 "avatar_url": null,
                 "created_at": Any<ClockDate>,
                 "description": null,
@@ -548,11 +550,11 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
                 "slug": null,
                 "tagline": "Is someone talking?",
                 "title": "Blipped Out",
-                "type": "Profile",
                 "updated_at": Any<ClockDate>,
                 "user_id": 5,
               },
               {
+                "_model": "Profile",
                 "avatar_url": null,
                 "created_at": Any<ClockDate>,
                 "description": null,
@@ -562,12 +564,10 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
                 "slug": "the-bearable-lightness-of-disconnection",
                 "tagline": "A fluffy life in the clouds.",
                 "title": "The Bearable Lightness of Disconnection",
-                "type": "Profile",
                 "updated_at": Any<ClockDate>,
                 "user_id": 5,
               },
             ],
-            "type": "User",
             "updated_at": Any<ClockDate>,
             "username": "segmented",
           },
@@ -606,6 +606,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
         last_login_at: expect.any(String)
       }, `
         {
+          "_model": "User",
           "avatar_url": null,
           "created_at": Any<ClockDate>,
           "display_name": "Rick",
@@ -617,7 +618,6 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           "last_login_at": Any<String>,
           "last_name": null,
           "preferred_locale": null,
-          "type": "User",
           "updated_at": Any<ClockDate>,
           "username": "ricksanchez",
         }
@@ -671,6 +671,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
         ]
       }, `
         {
+          "_model": "User",
           "avatar_url": null,
           "created_at": Any<ClockDate>,
           "display_name": "Segmented",
@@ -680,12 +681,12 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           "first_name": null,
           "id": 5,
           "info": {
+            "_model": "UserInfo",
             "created_at": Any<ClockDate>,
             "description": null,
             "id": 2,
             "professional_title": "Divergent Thinker",
             "tagline": "History favors the impetus of the author",
-            "type": "UserInfo",
             "updated_at": Any<ClockDate>,
             "user_id": 5,
           },
@@ -694,6 +695,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           "preferred_locale": "en-US",
           "profiles": [
             {
+              "_model": "Profile",
               "avatar_url": null,
               "created_at": Any<ClockDate>,
               "description": null,
@@ -703,11 +705,11 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
               "slug": null,
               "tagline": "Is someone talking?",
               "title": "Blipped Out",
-              "type": "Profile",
               "updated_at": Any<ClockDate>,
               "user_id": 5,
             },
             {
+              "_model": "Profile",
               "avatar_url": null,
               "created_at": Any<ClockDate>,
               "description": null,
@@ -717,12 +719,10 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
               "slug": "the-bearable-lightness-of-disconnection",
               "tagline": "A fluffy life in the clouds.",
               "title": "The Bearable Lightness of Disconnection",
-              "type": "Profile",
               "updated_at": Any<ClockDate>,
               "user_id": 5,
             },
           ],
-          "type": "User",
           "updated_at": Any<ClockDate>,
           "username": "segmented",
         }
@@ -829,12 +829,12 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
         updated_at: expect.any(Date)
       }, `
         {
+          "_model": "UserInfo",
           "created_at": Any<ClockDate>,
           "description": null,
           "id": 5,
           "professional_title": "Space Beth",
           "tagline": "Defying dimensions, one adventure at a time.",
-          "type": "UserInfo",
           "updated_at": Any<ClockDate>,
           "user_id": 9,
         }
@@ -861,12 +861,12 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
         updated_at: expect.any(Date)
       }, `
         {
+          "_model": "UserInfo",
           "created_at": Any<ClockDate>,
           "description": null,
           "id": 4,
           "professional_title": "Afterthought",
           "tagline": "Umm.",
-          "type": "UserInfo",
           "updated_at": Any<ClockDate>,
           "user_id": 7,
         }
@@ -877,6 +877,7 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
         updated_at: expect.any(Date)
       }, `
         {
+          "_model": "Profile",
           "avatar_url": null,
           "created_at": Any<ClockDate>,
           "description": null,
@@ -886,7 +887,6 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
           "slug": "the-morty-page",
           "tagline": "",
           "title": "The Morty Page",
-          "type": "Profile",
           "updated_at": Any<ClockDate>,
           "user_id": 7,
         }
@@ -958,10 +958,10 @@ describe('SERIALIZER FORMATS [bookshelf]', () => {
       expect(Object.keys(payloadFlat).sort()).toEqual(topLevelKeysFlat)
       expect(payloadFlat.data).toMatchInlineSnapshot(`
         {
+          "_model": "User",
           "avatar_url": null,
           "display_name": "Rick",
           "id": 6,
-          "type": "User",
           "username": "ricksanchez",
         }
       `)
