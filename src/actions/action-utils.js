@@ -485,10 +485,19 @@ function validateMatchStrategy (matchStrategy) {
 // Validates a matchStrategy is applicable to a type.
 // -----------------------------------------------------------------------------
 function validateMatchStrategyWithType (matchStrategy, type) {
-  if (matchStrategy === ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS && type !== 'String') {
-    throw new Error(
-      `"${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" operator ` +
-      'can only be applied to a string value.'
-    )
+  switch (matchStrategy) {
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
+      if (type !== 'String') {
+        throw new Error(
+          `"${matchStrategy}" operator can only be applied to a string value.`
+        )
+      }
+      break
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
+      // no validation needed
+      break
+    default:
+      throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
   }
 }

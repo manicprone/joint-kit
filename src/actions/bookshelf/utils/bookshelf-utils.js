@@ -123,6 +123,14 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
       // with lowercase is potentially slower but more portable.
       queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${value.toLowerCase()}%`])
       break
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
+      if (!Array.isArray(value)) {
+        throw new Error(`The "${matchStrategy}" operator can only be used with an array of string.`)
+      }
+
+      // NOT IN query
+      queryBuilder.whereRaw(`?? NOT IN (${value.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...value])
+      break
     default:
       throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
   }

@@ -531,7 +531,7 @@ describe('ACTION-UTILS', () => {
   describe('normalizeFieldSpec', () => {
     const fieldSpecInput = [
       { name: 'user_id', type: 'Number' },
-      { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+      { name: 'username', type: 'String', operators: ['contains', 'exact', 'not_in'] },
       { name: 'display_name' },
       { type: 'Number' }
     ]
@@ -540,7 +540,7 @@ describe('ACTION-UTILS', () => {
       const fieldSpec = ActionUtils.normalizeFieldSpec(fieldSpecInput)
       expect(fieldSpec).toEqual([
         { name: 'user_id', type: 'Number', operators: ['exact'] },
-        { name: 'username', type: 'String', operators: ['contains', 'exact'] },
+        { name: 'username', type: 'String', operators: ['contains', 'exact', 'not_in'] },
         { name: 'display_name', type: 'String', operators: ['exact'] }
       ])
     })
@@ -647,7 +647,7 @@ describe('ACTION-UTILS', () => {
     })
 
     it('should accept the operators that are whitelisted in the field spec', () => {
-      const fieldSpec = [{ name: 'username', type: 'String', operators: ['contains', 'exact'] }]
+      const fieldSpec = [{ name: 'username', type: 'String', operators: ['contains', 'exact', 'not_in'] }]
       const fieldData = { 'username.contains': 'ed' }
 
       const preparedFieldData = ActionUtils.prepareFieldData(fieldSpec, fieldData)
@@ -671,6 +671,14 @@ describe('ACTION-UTILS', () => {
 
       expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
         .toThrowErrorMatchingInlineSnapshot('[Error: "contains" operator can only be applied to a string value.]')
+    })
+
+    it('should throw error if a "not_in" operator is used on a non-string field', () => {
+      const fieldSpec = [{ name: 'user_id', type: 'Number', operators: ['not_in'] }]
+      const fieldData = { 'user_id.not_in': '10' }
+
+      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
+        .toThrowErrorMatchingInlineSnapshot('[Error: "not_in" operator can only be applied to a string value.]')
     })
   }) // END - prepareFieldData
 })

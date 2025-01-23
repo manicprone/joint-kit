@@ -9,7 +9,12 @@ import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
 
 // remove bookshelf internal fields
-const omitInternalFields = omit(['attributes', '_previousAttributes', 'changed'])
+const omitInternalFields = omit([
+  'attributes',
+  '_previousAttributes',
+  'changed',
+  'cid'
+])
 
 let appMgmt = null
 let appMgmtJsonApi = null
@@ -67,7 +72,9 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     await resetDB(['profiles', 'projects'])
   })
 
-  afterAll(() => { vi.useRealTimers() })
+  afterAll(() => {
+    vi.useRealTimers()
+  })
 
   describe('updateMany', () => {
     it('should return an error (400) when the input does not provide a "lookup" field', async () => {
@@ -85,8 +92,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         }
       }
 
-      await expect(projectApp.updateMany(spec, input))
-        .rejects
+      await expect(projectApp.updateMany(spec, input)).rejects
         .toMatchInlineSnapshot(`
          {
            "message": "Missing required field: "id"",
@@ -120,7 +126,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'is_internal', type: 'Boolean', required: true, lookup: true },
+          {
+            name: 'is_internal',
+            type: 'Boolean',
+            required: true,
+            lookup: true
+          },
           { name: 'status_code', type: 'Number', required: true, lookup: true },
           { name: 'name', type: 'String' }
         ]
@@ -141,11 +152,17 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       })
     })
 
-    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and update all resources matching the input`, async () => {
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option with "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" and update all resources matching the input`, async () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'name', type: 'String', required: true, lookup: true, operators: ['contains'] },
+          {
+            name: 'name',
+            type: 'String',
+            required: true,
+            lookup: true,
+            operators: ['contains']
+          },
           { name: 'status_code', type: 'Number' }
         ]
       }
@@ -164,6 +181,41 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       // Due to a bug with property matchers in array the snapshot tested must be done in a loop
       // https://github.com/jestjs/jest/issues/9079
+      updated.models.sort((a, b) => a.attributes.id - b.attributes.id).forEach((item) => {
+        expect(item).toHaveProperty('attributes.status_code', 3)
+        expect(omitInternalFields(item.attributes)).toMatchSnapshot()
+      })
+    })
+
+    it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option with "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" and update all resources matching the input`, async () => {
+      const spec = {
+        modelName: 'Project',
+        fields: [
+          {
+            name: 'alias',
+            type: 'String',
+            required: true,
+            lookup: true,
+            operators: ['not_in']
+          },
+          { name: 'status_code', type: 'Number' }
+        ]
+      }
+
+      const input = {
+        fields: {
+          'alias.not_in': ['mega-seed-mini-sythesizer', 'project-001', 'project-002'],
+          status_code: 3
+        }
+      }
+
+      // Perform update
+      const updated = await projectApp.updateMany(spec, input)
+
+      expect(updated.models).toHaveLength(11)
+
+      // Due to a bug with property matchers in array the snapshot tested must be done in a loop
+      // https://github.com/jestjs/jest/issues/9079
       updated.models.forEach((item) => {
         expect(item).toHaveProperty('attributes.status_code', 3)
         expect(omitInternalFields(item.attributes)).toMatchSnapshot()
@@ -175,11 +227,33 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'is_internal', type: 'Boolean', required: true, lookup: true },
-          { name: 'alias', type: 'String', locked: true, defaultValue: '% camelCase(full_description) %' },
-          { name: 'location', type: 'String', defaultValue: '% kebabCase(full_description) %' },
-          { name: 'name', type: 'String', defaultValue: '% snakeCase(full_description) %' },
-          { name: 'brief_description', type: 'String', defaultValue: '% pascalCase(full_description) %' },
+          {
+            name: 'is_internal',
+            type: 'Boolean',
+            required: true,
+            lookup: true
+          },
+          {
+            name: 'alias',
+            type: 'String',
+            locked: true,
+            defaultValue: '% camelCase(full_description) %'
+          },
+          {
+            name: 'location',
+            type: 'String',
+            defaultValue: '% kebabCase(full_description) %'
+          },
+          {
+            name: 'name',
+            type: 'String',
+            defaultValue: '% snakeCase(full_description) %'
+          },
+          {
+            name: 'brief_description',
+            type: 'String',
+            defaultValue: '% pascalCase(full_description) %'
+          },
           { name: 'started_at', type: 'String', defaultValue: '% now %' },
           { name: 'full_description', type: 'String' }
         ]
@@ -231,10 +305,10 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       const data = await blogApp.updateMany(spec, input)
       expect(data.models).toHaveLength(1)
-      expect(omitInternalFields(data.models[0].attributes)).toMatchInlineSnapshot(`
+      expect(omitInternalFields(data.models[0].attributes))
+        .toMatchInlineSnapshot(`
         {
           "avatar_url": null,
-          "cid": "c14",
           "created_at": 2024-01-01T00:05:00.000Z,
           "description": null,
           "id": 1,
@@ -254,7 +328,13 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       const spec = {
         modelName: 'Project',
         fields: [
-          { name: 'name', type: 'String', required: true, lookup: true, operators: ['contains'] },
+          {
+            name: 'name',
+            type: 'String',
+            required: true,
+            lookup: true,
+            operators: ['contains']
+          },
           { name: 'status_code', type: 'Number' }
         ]
       }
