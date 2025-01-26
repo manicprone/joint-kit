@@ -1607,6 +1607,29 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         expect(data.models).to.have.length(9)
       })
 
+      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" should be applicable to other field type than string`, async () => {
+        const specProject = {
+          modelName: 'Project',
+          defaultOrderBy: '-created_at',
+          fields: [
+            { name: 'status_code', type: 'Number', operators: ['not_in'] }
+          ]
+        }
+
+        await projectApp.getItems(specProject, {})
+          .then((data) => {
+            expect(data.models).to.have.length(14)
+          })
+
+        const data = await projectApp.getItems(specProject, { fields: { 'status_code.not_in': [3, 5] } })
+
+        data.models.forEach((model) => {
+          expect(model.attributes.status_code).to.not.equal(3)
+          expect(model.attributes.status_code).to.not.equal(5)
+        })
+        expect(data.models).to.have.length(4)
+      })
+
       it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" should NOT filter in a case-insensitive manner`, async () => {
         const specUser = {
           modelName: 'User',

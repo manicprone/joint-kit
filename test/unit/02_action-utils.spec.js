@@ -672,13 +672,5 @@ describe('ACTION-UTILS', () => {
       expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
         .toThrowErrorMatchingInlineSnapshot('[Error: "contains" operator can only be applied to a string value.]')
     })
-
-    it('should throw error if a "not_in" operator is used on a non-string field', () => {
-      const fieldSpec = [{ name: 'user_id', type: 'Number', operators: ['not_in'] }]
-      const fieldData = { 'user_id.not_in': '10' }
-
-      expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
-        .toThrowErrorMatchingInlineSnapshot('[Error: "not_in" operator can only be applied to a string value.]')
-    })
   }) // END - prepareFieldData
 })

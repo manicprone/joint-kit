@@ -487,7 +487,6 @@ function validateMatchStrategy (matchStrategy) {
 function validateMatchStrategyWithType (matchStrategy, type) {
   switch (matchStrategy) {
     case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
       if (type !== 'String') {
         throw new Error(
           `"${matchStrategy}" operator can only be applied to a string value.`
@@ -495,6 +494,7 @@ function validateMatchStrategyWithType (matchStrategy, type) {
       }
       break
     case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
+    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
       // no validation needed
       break
     default:
