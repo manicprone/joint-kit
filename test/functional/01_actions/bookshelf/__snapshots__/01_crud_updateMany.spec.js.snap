@@ -4,7 +4,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape
 {
   "alias": "mega-seed-mini-sythesizer",
   "brief_description": null,
-  "cid": "c16",
   "created_at": 2024-01-01T00:05:00.000Z,
   "created_by": null,
   "finished_at": "2016-08-02T21:33+08:00",
@@ -24,7 +23,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape
 {
   "alias": "doppelganger-finder",
   "brief_description": null,
-  "cid": "c17",
   "created_at": 2024-01-01T00:15:00.000Z,
   "created_by": null,
   "finished_at": "2017-03-29",
@@ -44,7 +42,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape
 {
   "alias": "mega-seed-mini-sythesizer",
   "brief_description": null,
-  "cid": "c19",
   "created_at": 2024-01-01T00:05:00.000Z,
   "created_by": null,
   "finished_at": "2016-08-02T21:33+08:00",
@@ -64,7 +61,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should return in JSON API shape
 {
   "alias": "doppelganger-finder",
   "brief_description": null,
-  "cid": "c20",
   "created_at": 2024-01-01T00:15:00.000Z,
   "created_by": null,
   "finished_at": "2017-03-29",
@@ -84,7 +80,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values o
 {
   "alias": "testThisGuy",
   "brief_description": "TestThisGuy",
-  "cid": "c9",
   "created_at": 2024-01-01T00:05:00.000Z,
   "created_by": null,
   "finished_at": "2016-08-02T21:33+08:00",
@@ -105,7 +100,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values o
 {
   "alias": "testThisGuy",
   "brief_description": "TestThisGuy",
-  "cid": "c10",
   "created_at": 2024-01-01T00:10:00.000Z,
   "created_by": null,
   "finished_at": null,
@@ -126,7 +120,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values o
 {
   "alias": "testThisGuy",
   "brief_description": "TestThisGuy",
-  "cid": "c11",
   "created_at": 2024-01-01T00:15:00.000Z,
   "created_by": null,
   "finished_at": "2017-03-29",
@@ -147,7 +140,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values o
 {
   "alias": "testThisGuy",
   "brief_description": "TestThisGuy",
-  "cid": "c12",
   "created_at": 2024-01-01T00:20:00.000Z,
   "created_by": null,
   "finished_at": null,
@@ -164,11 +156,10 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support dynamic values o
 }
 `;
 
-exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option and update all resources matching the input 1`] = `
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 1`] = `
 {
   "alias": "mega-seed-mini-sythesizer",
   "brief_description": null,
-  "cid": "c6",
   "created_at": 2024-01-01T00:05:00.000Z,
   "created_by": null,
   "finished_at": "2016-08-02T21:33+08:00",
@@ -185,11 +176,10 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" 
 }
 `;
 
-exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option and update all resources matching the input 2`] = `
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 2`] = `
 {
   "alias": "doppelganger-finder",
   "brief_description": null,
-  "cid": "c7",
   "created_at": 2024-01-01T00:15:00.000Z,
   "created_by": null,
   "finished_at": "2017-03-29",
@@ -206,11 +196,230 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" 
 }
 `;
 
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 3`] = `
+{
+  "alias": "turn-myself-into-a-pickle",
+  "brief_description": "Turn myself into a pickle.",
+  "created_at": 2024-01-01T00:10:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 2,
+  "image_url": "https://everydayaboverubies.files.wordpress.com/2011/11/jar_of_pickles_cb101311.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Turn Myself into a Pickle",
+  "relations": {},
+  "started_at": null,
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:10:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 4`] = `
+{
+  "alias": "doppelganger-finder",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:15:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-03-29",
+  "full_description": null,
+  "id": 3,
+  "image_url": null,
+  "is_internal": 1,
+  "location": null,
+  "name": "Doppelgänger Finder",
+  "relations": {},
+  "started_at": "2017-03-10",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:15:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 5`] = `
+{
+  "alias": "blue-dreamsicles",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:20:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 4,
+  "image_url": "https://i.pinimg.com/736x/53/2e/e1/532ee1735e657073f4063a2cbed4e7f1--jello-popsicles-aqua-blue.jpg",
+  "is_internal": 1,
+  "location": null,
+  "name": "Blue Dreamsicles",
+  "relations": {},
+  "started_at": null,
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:20:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 6`] = `
+{
+  "alias": "project-003",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:35:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 7,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "P - Project 003",
+  "relations": {},
+  "started_at": null,
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:35:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 7`] = `
+{
+  "alias": "project-004",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:40:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 8,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "W - Project 004",
+  "relations": {},
+  "started_at": null,
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:40:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 8`] = `
+{
+  "alias": "project-005",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:45:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-08-01",
+  "full_description": null,
+  "id": 9,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "L - Project 005",
+  "relations": {},
+  "started_at": "2017-06-02",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:45:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 9`] = `
+{
+  "alias": "project-006",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:50:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 10,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "T - Project 006",
+  "relations": {},
+  "started_at": "2017-08-22",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:50:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 10`] = `
+{
+  "alias": "project-007",
+  "brief_description": null,
+  "created_at": 2024-01-01T00:55:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-11-25",
+  "full_description": null,
+  "id": 11,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "H - Project 007",
+  "relations": {},
+  "started_at": "2017-09-03",
+  "status_code": 3,
+  "updated_at": 2024-01-01T00:55:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 11`] = `
+{
+  "alias": "project-008",
+  "brief_description": null,
+  "created_at": 2024-01-01T01:00:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-09-22",
+  "full_description": null,
+  "id": 12,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "A - Project 008",
+  "relations": {},
+  "started_at": "2017-09-18",
+  "status_code": 3,
+  "updated_at": 2024-01-01T01:00:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 12`] = `
+{
+  "alias": "project-009",
+  "brief_description": null,
+  "created_at": 2024-01-01T01:05:00.000Z,
+  "created_by": null,
+  "finished_at": "2017-10-09",
+  "full_description": null,
+  "id": 13,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "N - Project 009",
+  "relations": {},
+  "started_at": "2017-10-01",
+  "status_code": 3,
+  "updated_at": 2024-01-01T01:05:00.000Z,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > updateMany > should support the "operators" option with "contains" and update all resources matching the input 13`] = `
+{
+  "alias": "project-010",
+  "brief_description": null,
+  "created_at": 2024-01-01T01:10:00.000Z,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 14,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "K - Project 010",
+  "relations": {},
+  "started_at": "2017-11-17",
+  "status_code": 3,
+  "updated_at": 2024-01-01T01:10:00.000Z,
+}
+`;
+
 exports[`CRUD ACTIONS [bookshelf] > updateMany > should update the resource when the spec is satisfied 1`] = `
 {
   "alias": "turn-myself-into-a-pickle",
   "brief_description": "Turn myself into a pickle.",
-  "cid": "c3",
   "created_at": 2024-01-01T00:10:00.000Z,
   "created_by": null,
   "finished_at": null,
@@ -231,7 +440,6 @@ exports[`CRUD ACTIONS [bookshelf] > updateMany > should update the resource when
 {
   "alias": "doppelganger-finder",
   "brief_description": null,
-  "cid": "c4",
   "created_at": 2024-01-01T00:15:00.000Z,
   "created_by": null,
   "finished_at": "2017-03-29",
