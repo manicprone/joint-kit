@@ -20,6 +20,23 @@ let projectAppJsonApi = null
 let blogApp = null
 let blogAppJsonApi = null
 
+// Values for expectation
+const allColsUser = [
+  'id',
+  'external_id',
+  'email',
+  'username',
+  'display_name',
+  'first_name',
+  'last_name',
+  'preferred_locale',
+  'avatar_url',
+  'last_login_at',
+  'created_at',
+  'updated_at',
+  'father_user_id'
+]
+
 // -----------------------------------------------------------------------------
 // BOOKSHELF ACTIONS (CRUD)
 // -----------------------------------------------------------------------------
@@ -1436,7 +1453,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   }) // END - getItem
 
   // ---------------------------------------------------------------------------
-<<<<<<< HEAD
   // getItems
   // ---------------------------------------------------------------------------
   describe('getItems', () => {
@@ -2348,8 +2364,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
   }) // END - getItems
 
   // ---------------------------------------------------------------------------
-=======
->>>>>>> feat: Added support for interpreting "infinity" as a date value
   // deleteItem
   // ---------------------------------------------------------------------------
   describe('deleteItem', () => {

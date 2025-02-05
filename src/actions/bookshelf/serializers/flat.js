@@ -55,6 +55,7 @@ function buildCollectionPackage (type, data, joint) {
 function buildItemData (type, itemData, joint) {
   // Extract attributes and relations
   const { attributes, relations } = itemData
+  parseItemDataValues(attributes)
 
   // Apply base attributes
   const item = (itemData.id)
@@ -119,6 +120,21 @@ function buildFilterInfo (type, filterData, joint) {
   })
 
   return info
+}
+
+function parseItemDataValues (attributes = {}) {
+  for (const key in attributes) {
+    if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+      const value = attributes[key]
+
+      // Handle infinity dates
+      if (value === Infinity) {
+        attributes[key] = 'infinity'
+      } else if (value === -Infinity) {
+        attributes[key] = '-infinity'
+      }
+    }
+  }
 }
 
 function resolveDataTypeFromRelationData (relationData, joint) {

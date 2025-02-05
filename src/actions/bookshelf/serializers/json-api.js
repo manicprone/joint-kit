@@ -83,18 +83,17 @@ function buildCollectionPackage (type, data, relationHash, joint) {
 function buildItemData (type, itemData, relationHash, joint) {
   const item = {}
 
-  // Set type...
+  // Set type
   item.type = type
 
-  // Set ID and base attributes...
+  // Set ID and base attributes
   const attrs = objectUtils.get(itemData, 'attributes', {})
+  parseItemDataValues(attrs)
   item.id = (itemData.id) ? itemData.id : null
   item.attributes = attrs
-  if (attrs.id) {
-    delete item.attributes.id
-  }
+  if (attrs.id) delete item.attributes.id
 
-  // Handle relations...
+  // Handle relations
   const relations = itemData.relations
   if (!objectUtils.isEmpty(relations)) {
     item.relationships = {}
@@ -105,29 +104,29 @@ function buildItemData (type, itemData, relationHash, joint) {
 
       if (debug === true) console.log(`[Serializer] handling relation: ${relationName} (${relationType})`)
 
-      // Initiate relationships object...
+      // Initiate relationships object
       item.relationships[relationName] = {}
 
       if (relationType === 'belongsTo' || relationType === 'hasOne') {
-        // --------------------------
-        // Handle 1-1 relationship...
-        // --------------------------
+        // -----------------------
+        // Handle 1-1 relationship
+        // -----------------------
         const relationDataType = resolveDataTypeFromRelationData(relationData, joint)
         const relationItemData = buildItemData(relationDataType, relationData, relationHash, joint)
 
         if (relationItemData.id) {
-          // Set type and ID on base item...
+          // Set type and ID on base item
           item.relationships[relationName].data = {}
           item.relationships[relationName].data.type = relationItemData.type
           item.relationships[relationName].data.id = relationItemData.id
 
-          // Add relation item data to hash...
+          // Add relation item data to hash
           processRelationItemData(relationItemData, relationHash)
         }
       } else if (relationType === 'hasMany' || relationType === 'belongsToMany') {
-        // -----------------------------
-        // Handle 1-many relationship...
-        // -----------------------------
+        // --------------------------
+        // Handle 1-many relationship
+        // --------------------------
         item.relationships[relationName].data = []
         if (relationData.models && Array.isArray(relationData.models) && relationData.models.length > 0) {
           relationData.models.forEach((relationItem) => {
@@ -137,13 +136,13 @@ function buildItemData (type, itemData, relationHash, joint) {
               relationHash,
               joint)
 
-            // Set type and ID on base item array...
+            // Set type and ID on base item array
             item.relationships[relationName].data.push({
               type: relationItemData.type,
               id: relationItemData.id
             })
 
-            // Add relation item data to hash...
+            // Add relation item data to hash
             processRelationItemData(relationItemData, relationHash)
           })
         }
@@ -174,6 +173,21 @@ function buildFilterInfo (type, filterData, joint) {
   })
 
   return info
+}
+
+function parseItemDataValues (attributes = {}) {
+  for (const key in attributes) {
+    if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+      const value = attributes[key]
+
+      // Handle infinity dates
+      if (value === Infinity) {
+        attributes[key] = 'infinity'
+      } else if (value === -Infinity) {
+        attributes[key] = '-infinity'
+      }
+    }
+  }
 }
 
 function processRelationItemData (relationItemData, relationHash) {
