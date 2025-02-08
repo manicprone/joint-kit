@@ -1,0 +1,289 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should create a new resource item when the spec is satisfied 1`] = `
+{
+  "avatar_url": null,
+  "created_at": Any<Date>,
+  "display_name": null,
+  "email": null,
+  "external_id": null,
+  "father_user_id": null,
+  "first_name": null,
+  "id": 1,
+  "last_login_at": null,
+  "last_name": null,
+  "preferred_locale": null,
+  "updated_at": Any<Date>,
+  "username": "Blasta!",
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should create a new resource item when the spec is satisfied 2`] = `
+{
+  "avatar_url": null,
+  "created_at": Any<Date>,
+  "description": null,
+  "id": 1,
+  "is_default": 0,
+  "is_live": 0,
+  "slug": null,
+  "tagline": null,
+  "title": "Days of Bore",
+  "updated_at": Any<Date>,
+  "user_id": 1,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "alias": null,
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "The Storytold",
+  "started_at": null,
+  "status_code": null,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "alias": null,
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "The Storytold",
+  "started_at": null,
+  "status_code": null,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should support the "locked"/"defaultValue" pattern for system control of input 1`] = `
+{
+  "alias": null,
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 1,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "Project for Test",
+  "started_at": null,
+  "status_code": null,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > createItem > should support the "locked"/"defaultValue" pattern for system control of input 2`] = `
+{
+  "alias": "alias-is-locked",
+  "brief_description": null,
+  "created_at": Any<Date>,
+  "created_by": null,
+  "finished_at": null,
+  "full_description": null,
+  "id": 2,
+  "image_url": null,
+  "is_internal": 0,
+  "location": null,
+  "name": "Project for Test",
+  "started_at": null,
+  "status_code": null,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > createItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > deleteItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > getItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > updateItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when a required field is not provided 1`] = `
+{
+  "message": "Missing required fields: at least one of => ("id", "external_id")",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when a required field is not provided 2`] = `
+{
+  "message": "Missing required field: "external_id"",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (400) when the specified model does not exist > "[JointStatusError (400): The model "Alien" is not recognized.]" 1`] = `
+{
+  "message": "The model "Alien" is not recognized.",
+  "name": "JointStatusError",
+  "status": 400,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsertItem, updateItem, getItem, getItems, deleteItem) > upsertItem() > should return an error (403) when the authorization spec is not satisfied 1`] = `
+{
+  "message": "You are not authorized to perform this action.",
+  "name": "JointStatusError",
+  "status": 403,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > upsertItem > should return in JSON API shape when payload format is set to "json-api" 1`] = `
+{
+  "app_id": "app-12345",
+  "created_at": Any<Date>,
+  "data": "{"a":true,"b":false,"c":"another-string-value"}",
+  "key": null,
+  "updated_at": Any<Date>,
+}
+`;
+
+exports[`CRUD ACTIONS [bookshelf] > upsertItem > should return in JSON API shape when payload format is set to "json-api" 2`] = `
+{
+  "app_id": "app-12345",
+  "created_at": Any<Date>,
+  "data": "{"a":true,"b":false,"c":"another-string-value"}",
+  "key": null,
+  "updated_at": Any<Date>,
+}
+`;
