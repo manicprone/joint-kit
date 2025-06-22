@@ -885,7 +885,7 @@ describe('ACTION: getItems [bookshelf]', () => {
         const usersFilteredWithCI = {
           fields: {
             display_name: {
-              'contains-i': 'Ed'
+              containsI: 'Ed'
             }
           },
           orderBy: '-username'
