@@ -267,23 +267,3 @@ exports[`CRUD ACTIONS [bookshelf] > standard error scenarios (createItem, upsert
   "status": 403,
 }
 `;
-
-exports[`CRUD ACTIONS [bookshelf] > upsertItem > should return in JSON API shape when payload format is set to "json-api" 1`] = `
-{
-  "app_id": "app-12345",
-  "created_at": Any<Date>,
-  "data": "{"a":true,"b":false,"c":"another-string-value"}",
-  "key": null,
-  "updated_at": Any<Date>,
-}
-`;
-
-exports[`CRUD ACTIONS [bookshelf] > upsertItem > should return in JSON API shape when payload format is set to "json-api" 2`] = `
-{
-  "app_id": "app-12345",
-  "created_at": Any<Date>,
-  "data": "{"a":true,"b":false,"c":"another-string-value"}",
-  "key": null,
-  "updated_at": Any<Date>,
-}
-`;

@@ -115,10 +115,17 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
   // console.log(`[DEVING] APPEND WHERE CLAUSE -- ${modelName}.${fieldName} = `, value)
 
   // ---------------------------------------------------------------------------
+  // An array value is a "where in" clause
+  // ---------------------------------------------------------------------------
+  if (Array.isArray(value)) {
+    queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
+
+  // ---------------------------------------------------------------------------
   // An object value is an Advanced Query
   // ---------------------------------------------------------------------------
-  if (value !== null && typeof value === 'object') {
-    console.log('[DEVING] WHERE CLAUSE with ADVANCED QUERY:', value)
+  } else if (value !== null && typeof value === 'object') {
+    console.log(`[DEVING] WHERE CLAUSE with ADVANCED QUERY: ${fieldName}:`, value)
+
     for (const operator of Object.keys(value)) {
       switch (operator) {
         // TODO - Support an array of multiple values !!!
@@ -126,7 +133,7 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
         // Note that case-sensitivity of LIKE differs per DBMS, comparing always
         // with lowercase is potentially slower but more portable.
         case ACTION.INPUT_FIELD_QUERY_CONTAINS: {
-          console.log(`[DEVING] ${ACTION.INPUT_FIELD_QUERY_CONTAINS}:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
+          console.log(`[DEVING] Handling "${ACTION.INPUT_FIELD_QUERY_CONTAINS}" action on:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
 
           const valueForQuery = value[ACTION.INPUT_FIELD_QUERY_CONTAINS].toLowerCase()
           queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
@@ -134,7 +141,8 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
         }
         // Excludes (value must be an array)
         case ACTION.INPUT_FIELD_QUERY_EXCLUDES: {
-          console.log(`[DEVING] ${ACTION.INPUT_FIELD_QUERY_EXCLUDES}:`, value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])
+          console.log(`[DEVING] Handling "${ACTION.INPUT_FIELD_QUERY_EXCLUDES}" action on:`, value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])
+
           if (!Array.isArray(value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])) {
             throw new Error(`The "${ACTION.INPUT_FIELD_QUERY_EXCLUDES}" operator requires an array of strings.`)
           }
@@ -143,15 +151,11 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
           queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
           break
         }
+        default: {
+          console.log(`[DEVING] No action implemented for operator ${operator} on:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
+        }
       }
     }
-
-  // ---------------------------------------------------------------------------
-  // An array value is a "where in" clause
-  // ---------------------------------------------------------------------------
-  } else if (Array.isArray(value)) {
-    queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
-
   // ---------------------------------------------------------------------------
   // A primitive type is a direct match
   // ---------------------------------------------------------------------------

@@ -878,7 +878,7 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getUsersFiltered.data[1].username).toEqual('admin')
       })
 
-      it.only(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} property`, async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} property`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
