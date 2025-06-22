@@ -205,23 +205,14 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
   // ---------------------------------------------------------------------------
   } else {
     // Direct match on ASSOCIATION RESOURCE
-    if (fieldName.startsWith(ACTION.FIELD_PREFIX_ASSOCIATION)) {
-      const assocRef = fieldName.slice(ACTION.FIELD_PREFIX_ASSOCIATION.length)
-      const assocParts = (assocRef.length > 0) ? assocRef.split('.') : []
+    if (fieldName.indexOf('.') !== -1) {
+      const assocParts = fieldName.split('.')
       const assocName = (assocParts.length > 0) ? assocParts[0] : null
       const assocField = (assocParts.length > 1) ? assocParts[1] : null
-
       const assocModelName = (joint.modelNameOfAssoc[modelName]) ? joint.modelNameOfAssoc[modelName][assocName] : null
       const assocTableName = joint.model[assocModelName].prototype.tableName
       const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
       const assocConfig = mainModelConfig.associations[assocName]
-
-      // console.log('[DEVING] assocParts:', assocParts)
-      // console.log('[DEVING] assocName:', assocName)
-      // console.log('[DEVING] assocField:', assocField)
-      // console.log('[DEVING] assocModelName:', assocModelName)
-      // console.log('[DEVING] assocTableName:', assocTableName)
-      // console.log('[DEVING] assocConfig:', assocConfig)
 
       // Throw error if association name is not recognized
       if (!assocModelName) {
@@ -233,7 +224,7 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
         throw new Error(`The query argument "${assocName}.${assocField}" is invalid because the association "${assocName}" is not of type "toOne".`)
       }
 
-      console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on ASSOC RESOURCE: ${mainTableName}.${assocName} => ${assocField}:`, value)
+      // console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on ASSOC RESOURCE: ${mainTableName}.${assocName} => ${assocField}:`, value)
 
       const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
       // console.log('[DEVING] assocPathInfo:', assocPathInfo)

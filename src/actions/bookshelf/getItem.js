@@ -29,6 +29,7 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
 
   // Reject when required fields are not provided...
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
+
   if (!requiredFieldCheck.satisfied) {
     if (debug) console.log('[JOINT] [action:getItem] Action has missing required fields:', requiredFieldCheck.missing)
     return Promise.reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing))

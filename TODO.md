@@ -157,7 +157,7 @@ We also need to be able to support performing a search operation on associations
 ``` javascript
 joint.method.Org.getMany({
   fields: {
-    'assoc:customer.cust_id': { contains: '567' }
+    'customer.cust_id': { contains: '567' }
   }
 })
 ```
@@ -167,7 +167,7 @@ Hence, we must support:
 ``` javascript
 joint.method.Org.getOne({
   fields: {
-    'assoc:customer.cust_id': '1234567'
+    'customer.cust_id': '1234567'
   }
 })
 ```

@@ -640,27 +640,25 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       return Promise.all([withBoth])
     })
 
-    describe(`using the field prefix "${ACTION.FIELD_PREFIX_ASSOCIATION}" for querying association fields:`, async () => {
-      it('should return the requested item', async () => {
-        const specUser = {
-          modelName: 'User',
-          fields: [
-            { name: 'id', type: 'Number', requiredOr: true },
-            { name: 'username', type: 'String', requiredOr: true },
-            { name: 'assoc:info.professional_title', type: 'String', requiredOr: true }
-          ],
-          defaultOrderBy: 'username'
-        }
+    it('should support querying by association fields', async () => {
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'id', type: 'Number', requiredOr: true },
+          { name: 'username', type: 'String', requiredOr: true },
+          { name: 'info.professional_title', type: 'String', requiredOr: true }
+        ],
+        defaultOrderBy: 'username'
+      }
 
-        const userByProfessionalTitle = {
-          fields: {
-            'assoc:info.professional_title': 'Divergent Thinker'
-          }
+      const userByProfessionalTitle = {
+        fields: {
+          'info.professional_title': 'Divergent Thinker'
         }
+      }
 
-        const getUserByProfessionalTitle = await projectApp.getItem(specUser, userByProfessionalTitle, 'flat')
-        expect(getUserByProfessionalTitle.data.username).toEqual('segmented')
-      })
+      const getUserByProfessionalTitle = await projectApp.getItem(specUser, userByProfessionalTitle, 'flat')
+      expect(getUserByProfessionalTitle.data.username).toEqual('segmented')
     })
 
     // describe('using advanced queries with object notation on the input value:', async () => {

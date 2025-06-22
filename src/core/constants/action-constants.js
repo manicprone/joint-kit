@@ -10,9 +10,6 @@ export default {
   // Association Resource Wrapper
   RESOURCE_ASSOCIATION: 'association',
 
-  // The prefix for referencing an association field (spec or input)
-  FIELD_PREFIX_ASSOCIATION: 'assoc:',
-
   // ------------------------------- Spec Options
   // Resources
   SPEC_MODEL_NAME: 'modelName',

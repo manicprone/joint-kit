@@ -178,32 +178,6 @@ describe('ACTION-UTILS', () => {
         }
       })
     })
-
-    // TODO - DEVING !!!
-
-    // it(`should support the "${ACTION.FIELD_PREFIX_ASSOCIATION}" prefix for referencing an association field`, () => {
-    //   const fieldSpec = [
-    //     { name: 'name',  type: 'String' },
-    //     { name: 'org_type',  type: 'String', required: true },
-    //     { name: 'assoc:customer.cust_type',  type: 'String', required: true }
-    //   ]
-
-    //   const fieldData = {
-    //     'org_type': 'commerical',
-    //     // 'assoc:customer.cust_type': 'medical'
-    //   }
-
-    //   const result = ActionUtils.checkRequiredFields(fieldSpec, fieldData)
-
-    //   console.log('[DEVING] result is:', result)
-
-    //   expect(result).toEqual({
-    //     satisfied: false,
-    //     missing: {
-    //       all: ['assoc:customer.cust_type']
-    //     }
-    //   })
-    // })
   }) // END - checkRequiredFields
 
   // ---------------------------
