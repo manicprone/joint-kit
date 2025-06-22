@@ -2,7 +2,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
-import projectAppModels from '../../../scenarios/project-app/model-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
@@ -10,8 +9,6 @@ import { objectWithTimestamps } from '../../../utils'
 
 let appMgmt = null
 let appMgmtJsonApi = null
-let projectApp = null
-let projectAppJsonApi = null
 let blogApp = null
 let blogAppJsonApi = null
 
@@ -31,15 +28,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
     appMgmtJsonApi = new Joint({ service: bookshelf, output: 'json-api' })
     appMgmtJsonApi.generate({ modelConfig: appMgmtModels, log: false })
-
-    // -----------
-    // Project App
-    // -----------
-    projectApp = new Joint({ service: bookshelf })
-    projectApp.generate({ modelConfig: projectAppModels, log: false })
-
-    projectAppJsonApi = new Joint({ service: bookshelf, output: 'json-api' })
-    projectAppJsonApi.generate({ modelConfig: projectAppModels, log: false })
 
     // --------
     // Blog App
