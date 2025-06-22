@@ -823,6 +823,8 @@ describe('ACTION: getItems [bookshelf]', () => {
       })
     })
 
+    // TODO - Test multiple operators on a single query !!!
+
     describe('using advanced queries with object notation on the input value:', async () => {
       it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} property (for case sensitive)`, async () => {
         const specUser = {

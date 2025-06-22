@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import ACTION from '../../../../src/core/constants/action-constants'
 import Joint from '../../../../src'
 import appMgmtModels from '../../../scenarios/app-mgmt/model-config'
+import projectAppModels from '../../../scenarios/project-app/model-config'
 import blogAppModels from '../../../scenarios/blog-app/model-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
@@ -10,6 +11,7 @@ import { objectWithTimestamps } from '../../../utils'
 let appMgmt = null
 let appMgmtJsonApi = null
 let blogApp = null
+let projectApp = null
 let blogAppJsonApi = null
 
 // -----------------------------------------------------------------------------
@@ -28,6 +30,12 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
     appMgmtJsonApi = new Joint({ service: bookshelf, output: 'json-api' })
     appMgmtJsonApi.generate({ modelConfig: appMgmtModels, log: false })
+
+    // -----------
+    // Project App
+    // -----------
+    projectApp = new Joint({ service: bookshelf })
+    projectApp.generate({ modelConfig: projectAppModels, log: false })
 
     // --------
     // Blog App
@@ -631,6 +639,32 @@ describe('CRUD ACTIONS [bookshelf]', () => {
 
       return Promise.all([withBoth])
     })
+
+    describe(`using the field prefix "${ACTION.FIELD_PREFIX_ASSOCIATION}" for querying association fields:`, async () => {
+      it('should return the requested item', async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'id', type: 'Number', requiredOr: true },
+            { name: 'username', type: 'String', requiredOr: true },
+            { name: 'assoc:info.professional_title', type: 'String', requiredOr: true }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const userByProfessionalTitle = {
+          fields: {
+            'assoc:info.professional_title': 'Divergent Thinker'
+          }
+        }
+
+        const getUserByProfessionalTitle = await projectApp.getItem(specUser, userByProfessionalTitle, 'flat')
+        expect(getUserByProfessionalTitle.data.username).toEqual('segmented')
+      })
+    })
+
+    // describe('using advanced queries with object notation on the input value:', async () => {
+    // })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const modelName = 'User'

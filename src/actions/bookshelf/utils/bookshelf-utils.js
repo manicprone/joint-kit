@@ -125,7 +125,7 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
   // An object value is an Advanced Query
   // ---------------------------------------------------------------------------
   } else if (value !== null && typeof value === 'object') {
-    console.log(`[DEVING] WHERE CLAUSE with ADVANCED QUERY: ${fieldName}:`, value)
+    console.log(`[DEVING] WHERE CLAUSE with ADVANCED QUERY: ${mainTableName} => ${fieldName}:`, value)
 
     for (const operator of Object.keys(value)) {
       switch (operator) {
@@ -204,8 +204,50 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
   // A primitive type is a direct match
   // ---------------------------------------------------------------------------
   } else {
-    // Direct match
-    queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
+    // Direct match on ASSOCIATION RESOURCE
+    if (fieldName.startsWith(ACTION.FIELD_PREFIX_ASSOCIATION)) {
+      const assocRef = fieldName.slice(ACTION.FIELD_PREFIX_ASSOCIATION.length)
+      const assocParts = (assocRef.length > 0) ? assocRef.split('.') : []
+      const assocName = (assocParts.length > 0) ? assocParts[0] : null
+      const assocField = (assocParts.length > 1) ? assocParts[1] : null
+
+      const assocModelName = (joint.modelNameOfAssoc[modelName]) ? joint.modelNameOfAssoc[modelName][assocName] : null
+      const assocTableName = joint.model[assocModelName].prototype.tableName
+      const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
+      const assocConfig = mainModelConfig.associations[assocName]
+
+      // console.log('[DEVING] assocParts:', assocParts)
+      // console.log('[DEVING] assocName:', assocName)
+      // console.log('[DEVING] assocField:', assocField)
+      // console.log('[DEVING] assocModelName:', assocModelName)
+      // console.log('[DEVING] assocTableName:', assocTableName)
+      // console.log('[DEVING] assocConfig:', assocConfig)
+
+      // Throw error if association name is not recognized
+      if (!assocModelName) {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid as the association "${assocName}" does not exist for model "${modelName}"`)
+      }
+
+      // Throw error if association is not "toOne" (i.e. it is a "toMany" relationship)
+      if (assocConfig.type !== 'toOne') {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid because the association "${assocName}" is not of type "toOne".`)
+      }
+
+      console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on ASSOC RESOURCE: ${mainTableName}.${assocName} => ${assocField}:`, value)
+
+      const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
+      // console.log('[DEVING] assocPathInfo:', assocPathInfo)
+
+      queryBuilder
+        .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+        .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+        .where(`${assocTableName}.${assocField}`, '=', value)
+
+    // Direct match on MAIN RESOURCE
+    } else {
+      // console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on MAIN RESOURCE: ${mainTableName} => ${fieldName}:`, value)
+      queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
+    }
   }
 }
 
@@ -251,7 +293,7 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
       const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
       const assocConfig = mainModelConfig.associations[assocName]
 
-      // Record error if association is not "toOne" (i.e. it is a "toMany" relationsip)
+      // Record error if association is not "toOne" (i.e. it is a "toMany" relationship)
       if (assocConfig.type !== 'toOne') {
         return [false, `The orderBy argument "${assocName}.${colName}" is invalid because the association "${assocName}" is not of type "toOne".`]
       }
