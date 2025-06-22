@@ -140,27 +140,6 @@ describe('ACTION: getItems [bookshelf]', () => {
     // TODO - Re-create these tests with the new syntax !!!
 
     // describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option:`, async () => {
-    //   it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should filter in a case-insensitive manner`, async () => {
-    //     const specUser = {
-    //       modelName: 'User',
-    //       fields: [
-    //         { name: 'display_name', type: 'String', operators: ['contains'] }
-    //       ]
-    //     }
-
-    //     const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'r' } })
-    //     const upperCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'R' } })
-    //     const getAttrs = result => result.models.map(model => model.attributes)
-
-    //     lowerCaseResult.models.forEach((model) => {
-    //       expect(model).to.have.nested.property('attributes.display_name')
-    //         .that.match(/[rR]/)
-    //     })
-    //     expect(lowerCaseResult.models).to.have.length(5)
-
-    //     expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
-    //   })
-
     //   it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should allow filtering special characters`, async () => {
     //     const specUser = {
     //       modelName: 'User',
@@ -845,11 +824,12 @@ describe('ACTION: getItems [bookshelf]', () => {
     })
 
     describe('using advanced queries with object notation on the input value:', async () => {
-      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} property`, async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} property (for case sensitive)`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
-            { name: 'username', type: 'String' }
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
           ],
           defaultOrderBy: 'username'
         }
@@ -867,15 +847,52 @@ describe('ACTION: getItems [bookshelf]', () => {
           },
           orderBy: '-username'
         }
+        const usersFilteredWithCaseSensitivity = {
+          fields: {
+            display_name: {
+              contains: 'Ed'
+            }
+          },
+          orderBy: '-username'
+        }
 
         const getUsersDirectMatch = await projectApp.getItems(specUser, usersDirectMatch, 'flat')
         expect(getUsersDirectMatch.data).to.have.length(1)
         expect(getUsersDirectMatch.data[0].username).toEqual('admin')
 
-        const getUsersFiltered = await projectApp.getItems(specUser, usersFilteredByContains, 'flat')
-        expect(getUsersFiltered.data).to.have.length(2)
-        expect(getUsersFiltered.data[0].username).toEqual('super-admin')
-        expect(getUsersFiltered.data[1].username).toEqual('admin')
+        const getUsersFilteredByContains = await projectApp.getItems(specUser, usersFilteredByContains, 'flat')
+        expect(getUsersFilteredByContains.data).to.have.length(2)
+        expect(getUsersFilteredByContains.data[0].username).toEqual('super-admin')
+        expect(getUsersFilteredByContains.data[1].username).toEqual('admin')
+
+        const getUsersFilteredByCS = await projectApp.getItems(specUser, usersFilteredWithCaseSensitivity, 'flat')
+        expect(getUsersFilteredByCS.data).to.have.length(1)
+        expect(getUsersFilteredByCS.data[0].display_name).toEqual('The Manic Edge')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} property (for case insensitive)`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersFilteredWithCI = {
+          fields: {
+            display_name: {
+              'contains-i': 'Ed'
+            }
+          },
+          orderBy: '-username'
+        }
+
+        const getUsersFilteredByCI = await projectApp.getItems(specUser, usersFilteredWithCI, 'flat')
+        expect(getUsersFilteredByCI.data).to.have.length(2)
+        expect(getUsersFilteredByCI.data[0].display_name).toEqual('The Manic Edge')
+        expect(getUsersFilteredByCI.data[1].display_name).toEqual('Segmented')
       })
 
       it(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} property`, async () => {

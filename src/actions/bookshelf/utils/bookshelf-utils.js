@@ -112,7 +112,8 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value) {
   const mainTableName = joint.model[modelName].prototype.tableName
 
-  // console.log(`[DEVING] APPEND WHERE CLAUSE -- ${modelName}.${fieldName} = `, value)
+  // Detect dialect for query variations
+  const dialect = joint.service.knex?.client?.config?.client
 
   // ---------------------------------------------------------------------------
   // An array value is a "where in" clause
@@ -128,31 +129,74 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
     for (const operator of Object.keys(value)) {
       switch (operator) {
-        // TODO - Support an array of multiple values !!!
-        // Case insensitive LIKE query
-        // Note that case-sensitivity of LIKE differs per DBMS, comparing always
-        // with lowercase is potentially slower but more portable.
+        // OPERATOR: Contains (case sensitive)
         case ACTION.INPUT_FIELD_QUERY_CONTAINS: {
-          console.log(`[DEVING] Handling "${ACTION.INPUT_FIELD_QUERY_CONTAINS}" action on:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
+          console.log('[DEVING] Detected dialect:', dialect)
+          console.log(`[DEVING] Handling "${operator}" (case sensitive) action on:`, value[operator])
 
-          const valueForQuery = value[ACTION.INPUT_FIELD_QUERY_CONTAINS].toLowerCase()
+          const valueForQuery = value[operator]
+          if (dialect === 'sqlite3') {
+            const globValue = `*${valueForQuery}*` // use GLOB for case-sensitive matching
+            queryBuilder.whereRaw('?? GLOB ?', [`${mainTableName}.${fieldName}`, globValue])
+          } else if (dialect === 'mysql' || dialect === 'mysql2') {
+            queryBuilder.whereRaw('?? LIKE BINARY ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+          } else {
+            // default: Postgres, et al - LIKE defaults to case-sensitive matching
+            queryBuilder.whereRaw('?? LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+          }
+          break
+        }
+
+        // OPERATOR: Contains (case insensitive)
+        case ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE: {
+          console.log(`[DEVING] Handling "${operator}" (case insensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator].toLowerCase()
           queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
           break
         }
-        // Excludes (value must be an array)
-        case ACTION.INPUT_FIELD_QUERY_EXCLUDES: {
-          console.log(`[DEVING] Handling "${ACTION.INPUT_FIELD_QUERY_EXCLUDES}" action on:`, value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])
 
-          if (!Array.isArray(value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])) {
-            throw new Error(`The "${ACTION.INPUT_FIELD_QUERY_EXCLUDES}" operator requires an array of strings.`)
+        // OPERATOR: Starts With (case sensitive)
+        case ACTION.INPUT_FIELD_QUERY_STARTS_WITH: {
+          console.log(`[DEVING] Handling "${operator}" (case sensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator]
+          if (dialect === 'sqlite3') {
+            const globValue = `${valueForQuery}*` // use GLOB for case-sensitive matching
+            queryBuilder.whereRaw('?? GLOB ?', [`${mainTableName}.${fieldName}`, globValue])
+          } else if (dialect === 'mysql' || dialect === 'mysql2') {
+            queryBuilder.whereRaw('?? LIKE BINARY ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          } else {
+            // default: Postgres, et al - LIKE defaults to case-sensitive matching
+            queryBuilder.whereRaw('?? LIKE ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          }
+          break
+        }
+
+        // OPERATOR: Starts With (case insensitive)
+        case ACTION.INPUT_FIELD_QUERY_STARTS_WITH_INSENSITIVE: {
+          console.log(`[DEVING] Handling "${operator}" (case insensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator].toLowerCase()
+          queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          break
+        }
+
+        // OPERATOR: Excludes (value must be an array)
+        case ACTION.INPUT_FIELD_QUERY_EXCLUDES: {
+          console.log(`[DEVING] Handling "${operator}" action on:`, value[operator])
+
+          if (!Array.isArray(value[operator])) {
+            throw new Error(`The "${operator}" operator requires an array of strings.`)
           }
 
-          const valueForQuery = value[ACTION.INPUT_FIELD_QUERY_EXCLUDES]
+          const valueForQuery = value[operator]
           queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
           break
         }
+
         default: {
-          console.log(`[DEVING] No action implemented for operator ${operator} on:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
+          console.log(`[DEVING] No action implemented for operator ${operator} on:`, value[operator])
         }
       }
     }
