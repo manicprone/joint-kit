@@ -5,7 +5,7 @@ import Joint from '../../../../src'
 import projectAppModels from '../../../scenarios/project-app/model-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
-import { specFixtures, inputFixtures } from './02_associations.fixtures'
+import { specFixtures, inputFixtures } from './associations.fixtures'
 
 let projectApp = null
 let projectAppJsonApi = null
