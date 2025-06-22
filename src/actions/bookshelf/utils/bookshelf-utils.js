@@ -107,32 +107,57 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 }
 
 // -----------------------------------------------------------------------------
-// Append a where query to an existing query builder, respecting the type of
-// field value and its matchStrategy.
+// Append a where clause to an existing query, per the provided input data.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, matchStrategy) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value) {
   const mainTableName = joint.model[modelName].prototype.tableName
-  switch (matchStrategy) {
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
-      if (Array.isArray(value)) queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
-      else queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
-      break
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
-      // Case insensitive LIKE query
-      // Note that case-sensitivity of LIKE differs per DBMS, comparing always
-      // with lowercase is potentially slower but more portable.
-      queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${value.toLowerCase()}%`])
-      break
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
-      if (!Array.isArray(value)) {
-        throw new Error(`The "${matchStrategy}" operator can only be used with an array of string.`)
-      }
 
-      // NOT IN query
-      queryBuilder.whereRaw(`?? NOT IN (${value.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...value])
-      break
-    default:
-      throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
+  // console.log(`[DEVING] APPEND WHERE CLAUSE -- ${modelName}.${fieldName} = `, value)
+
+  // ---------------------------------------------------------------------------
+  // An object value is an Advanced Query
+  // ---------------------------------------------------------------------------
+  if (value !== null && typeof value === 'object') {
+    console.log('[DEVING] WHERE CLAUSE with ADVANCED QUERY:', value)
+    for (const operator of Object.keys(value)) {
+      switch (operator) {
+        // TODO - Support an array of multiple values !!!
+        // Case insensitive LIKE query
+        // Note that case-sensitivity of LIKE differs per DBMS, comparing always
+        // with lowercase is potentially slower but more portable.
+        case ACTION.INPUT_FIELD_QUERY_CONTAINS: {
+          console.log(`[DEVING] ${ACTION.INPUT_FIELD_QUERY_CONTAINS}:`, value[ACTION.INPUT_FIELD_QUERY_CONTAINS])
+
+          const valueForQuery = value[ACTION.INPUT_FIELD_QUERY_CONTAINS].toLowerCase()
+          queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+          break
+        }
+        // Excludes (value must be an array)
+        case ACTION.INPUT_FIELD_QUERY_EXCLUDES: {
+          console.log(`[DEVING] ${ACTION.INPUT_FIELD_QUERY_EXCLUDES}:`, value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])
+          if (!Array.isArray(value[ACTION.INPUT_FIELD_QUERY_EXCLUDES])) {
+            throw new Error(`The "${ACTION.INPUT_FIELD_QUERY_EXCLUDES}" operator requires an array of strings.`)
+          }
+
+          const valueForQuery = value[ACTION.INPUT_FIELD_QUERY_EXCLUDES]
+          queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
+          break
+        }
+      }
+    }
+
+  // ---------------------------------------------------------------------------
+  // An array value is a "where in" clause
+  // ---------------------------------------------------------------------------
+  } else if (Array.isArray(value)) {
+    queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
+
+  // ---------------------------------------------------------------------------
+  // A primitive type is a direct match
+  // ---------------------------------------------------------------------------
+  } else {
+    // Direct match
+    queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
   }
 }
 

@@ -82,19 +82,15 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
         const hasDefault = objectUtils.has(fieldSpec, ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE)
         const defaultValue = (hasDefault) ? ActionUtils.processDefaultValue(inputFields, fieldSpec[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE]) : null
         const hasInput = objectUtils.has(inputFields, fieldName)
-        const matchStrategy = objectUtils.get(inputFields,
-          `${fieldName}.matchStrategy`,
-          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
-        )
         const isLocked = objectUtils.get(fieldSpec, ACTION.SPEC_FIELDS_OPT_LOCKED, false)
 
         if (!isLocked && (hasInput || hasDefault)) {
           const inputValue = (hasInput)
-            ? inputFields[fieldName].value
+            ? inputFields[fieldName]
             : defaultValue
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue, matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue)
         } else if (isLocked && hasDefault) {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue, matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue)
         }
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)

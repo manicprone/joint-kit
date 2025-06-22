@@ -62,7 +62,7 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
     if (trx) getItemOpts.transacting = trx
     const resource = await model.query((queryBuilder) => {
       Object.entries(lookupFieldData).forEach(([key, field]) => {
-        BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, key, field.value, field.matchStrategy)
+        BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, key, field)
       })
     }).fetch(getItemOpts)
 
@@ -93,7 +93,7 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
 
         if (!isLocked && !isLookup && (hasInput || hasDefault)) {
           updates[fieldName] = (hasInput)
-            ? inputFields[fieldName].value
+            ? inputFields[fieldName]
             : defaultValue
         } else if (isLocked && !isLookup && hasDefault) {
           updates[fieldName] = defaultValue

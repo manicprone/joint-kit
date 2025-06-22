@@ -67,7 +67,7 @@ module.exports = {
       action: 'getItems',
       spec: {
         fields: [
-          { name: 'username', type: 'String', operators: ['contains'] },
+          { name: 'username', type: 'String' },
           { name: 'preferred_locale', type: 'String' }
         ],
         fieldsToReturn: {
