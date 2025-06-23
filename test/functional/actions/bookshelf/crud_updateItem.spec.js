@@ -295,6 +295,54 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       `)
     })
 
+    describe('using advanced queries with object notation on the input value:', async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator (for case sensitive)`, async () => {
+        const specProject = {
+          modelName: 'Project',
+          fields: [
+            { name: 'name', type: 'String', required: true, lookup: true },
+            { name: 'alias', type: 'String' }
+          ]
+        }
+
+        const updateProjectByName = {
+          fields: {
+            name: {
+              contains: 'A'
+            },
+            alias: 'updated-alias'
+          }
+        }
+
+        const updatedProjectByName = await projectApp.updateItem(specProject, updateProjectByName, 'flat')
+        expect(updatedProjectByName.data.alias).toEqual('updated-alias')
+        expect(updatedProjectByName.data.name).toEqual('A - Project 008')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} property (for case insensitive)`, async () => {
+        const specProject = {
+          modelName: 'Project',
+          fields: [
+            { name: 'name', type: 'String', required: true, lookup: true },
+            { name: 'alias', type: 'String' }
+          ]
+        }
+
+        const updateProjectByName = {
+          fields: {
+            name: {
+              containsI: 'pickle'
+            },
+            alias: 'updated-alias'
+          }
+        }
+
+        const updatedProjectByName = await projectApp.updateItem(specProject, updateProjectByName, 'flat')
+        expect(updatedProjectByName.data.alias).toEqual('updated-alias')
+        expect(updatedProjectByName.data.name).toEqual('Turn Myself into a Pickle')
+      })
+    })
+
     it('should return in JSON API shape when payload format is set to "json-api"', async () => {
       const modelName = 'Project'
       const id = 2

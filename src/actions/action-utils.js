@@ -99,7 +99,7 @@ export function getLookupFieldData (fieldSpec = [], fieldData = {}) {
           lookupOrs.push(fieldName) // track all lookupOr fields
           if (hasInput) {
             if (!lookupData) lookupData = {}
-            lookupData[fieldName] = castValue(fieldData[fieldName], dataType)
+            lookupData[fieldName] = objectUtils.isPlainObject(fieldData[fieldName]) ? fieldData[fieldName] : castValue(fieldData[fieldName], dataType)
             isLookupOrSatisfied = true // mark as satisfied
           }
         } // end-if (isLookupOr && !isLookupOrSatisfied)
@@ -109,7 +109,7 @@ export function getLookupFieldData (fieldSpec = [], fieldData = {}) {
           if (hasInput || hasDefault) {
             if (!lookupData) lookupData = {}
             lookupData[fieldName] = (hasInput)
-              ? castValue(fieldData[fieldName], dataType)
+              ? objectUtils.isPlainObject(fieldData[fieldName]) ? fieldData[fieldName] : castValue(fieldData[fieldName], dataType)
               : castValue(field[ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE], dataType)
           }
         } // end-if (isLookup)

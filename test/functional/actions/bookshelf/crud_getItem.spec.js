@@ -92,64 +92,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
         })
     })
 
-    // TODO - Re-create with the new syntax !!!
-
-    // it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option with "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" and return the first row matching the input`, async () => {
-    //   const specUser = {
-    //     modelName: 'User',
-    //     fields: [
-    //       { name: 'id', type: 'Number', requiredOr: true },
-    //       {
-    //         name: 'username',
-    //         type: 'String',
-    //         requiredOr: true,
-    //         operators: ['contains']
-    //       }
-    //     ]
-    //   }
-
-    //   await blogApp.getItem(specUser, { fields: { id: 1 } }).then((model) => {
-    //     expect(model).to.have.nested.property('attributes.id', 1)
-    //   })
-
-    //   await blogApp
-    //     .getItem(specUser, { fields: { 'username.contains': 'ed' } })
-    //     .then((model) => {
-    //       expect(model)
-    //         .to.have.nested.property('attributes.username')
-    //         .that.contains('ed')
-    //     })
-    // })
-
-    // TODO - Re-create with the new syntax !!!
-
-    // it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option with "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" and return the first row matching the input`, async () => {
-    //   const specUser = {
-    //     modelName: 'User',
-    //     fields: [
-    //       { name: 'id', type: 'Number', requiredOr: true },
-    //       {
-    //         name: 'username',
-    //         type: 'String',
-    //         requiredOr: true,
-    //         operators: ['not_in']
-    //       }
-    //     ]
-    //   }
-
-    //   await blogApp.getItem(specUser, { fields: { id: 1 } }).then((model) => {
-    //     expect(model).to.have.nested.property('attributes.id', 1)
-    //   })
-
-    //   await blogApp
-    //     .getItem(specUser, { fields: { 'username.not_in': ['super-admin', 'admin'] } })
-    //     .then((model) => {
-    //       expect(model)
-    //         .to.have.nested.property('attributes.username')
-    //         .that.does.not.contain('admin')
-    //     })
-    // })
-
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, () => {
       const appID = 'app-001'
       const key = 'v2.0'
@@ -661,8 +603,61 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       expect(getUserByProfessionalTitle.data.username).toEqual('segmented')
     })
 
-    // describe('using advanced queries with object notation on the input value:', async () => {
-    // })
+    describe('using advanced queries with object notation on the input value:', async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator (for case sensitive)`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const user1FoundByContains = {
+          fields: {
+            display_name: {
+              contains: 'ed'
+            }
+          }
+        }
+        const user2FoundByContains = {
+          fields: {
+            display_name: {
+              contains: 'Ed'
+            }
+          }
+        }
+
+        const getUser1ByContains = await projectApp.getItem(specUser, user1FoundByContains, 'flat')
+        expect(getUser1ByContains.data.username).toEqual('segmented')
+
+        const getUser2ByContains = await projectApp.getItem(specUser, user2FoundByContains, 'flat')
+        expect(getUser2ByContains.data.username).toEqual('the_manic_edge')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} property (for case insensitive)`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const userFoundByContains = {
+          fields: {
+            display_name: {
+              containsI: 'ed'
+            }
+          }
+        }
+
+        const getUserByContains = await projectApp.getItem(specUser, userFoundByContains, 'flat')
+        expect(getUserByContains.data.username).toEqual('the_manic_edge')
+      })
+    })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const modelName = 'User'

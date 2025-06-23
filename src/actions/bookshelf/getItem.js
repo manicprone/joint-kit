@@ -20,14 +20,14 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING]
   const authContext = input[ACTION.INPUT_AUTH_CONTEXT]
 
-  // Reject if model does not exist...
+  // Reject if model does not exist
   const model = bookshelf.model(modelName)
   if (!model) {
     if (debug) console.log(`[JOINT] [action:getItem] The model "${modelName}" is not recognized`)
     return Promise.reject(StatusErrors.generateModelNotRecognizedError(modelName))
   }
 
-  // Reject when required fields are not provided...
+  // Reject when required fields are not provided
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
 
   if (!requiredFieldCheck.satisfied) {
@@ -35,21 +35,21 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
     return Promise.reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing))
   }
 
-  // Prepare action options...
+  // Prepare action options
   const actionOpts = { require: true }
   if (trx) actionOpts.transacting = trx
 
-  // Restrict columns to return with payload...
+  // Restrict columns to return with payload
   if (returnColsDef) {
-    // If a single set (array) is defined, honor the setting...
+    // If a single set (array) is defined, honor the setting
     if (Array.isArray(returnColsDef)) {
       actionOpts.columns = returnColsDef
 
-    // Otherwise, try to honor the set requested by the input...
+    // Otherwise, try to honor the set requested by the input
     } else if (input[ACTION.INPUT_FIELD_SET] && objectUtils.has(returnColsDef, input[ACTION.INPUT_FIELD_SET])) {
       actionOpts.columns = returnColsDef[input[ACTION.INPUT_FIELD_SET]]
 
-    // If the input does not declare a set, check for a "default" set...
+    // If the input does not declare a set, check for a "default" set
     } else if (returnColsDef.default && Array.isArray(returnColsDef.default)) {
       actionOpts.columns = returnColsDef.default
     }
@@ -58,24 +58,24 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
   // -------------------------------------------------------------------------
   // Include associations (associations & loadDirect will be combined)
   // -------------------------------------------------------------------------
-  // Handle "loadDirect" option...
+  // Handle "loadDirect" option
   const inputLoadDirectDef = input[ACTION.INPUT_LOAD_DIRECT] || []
   const loadDirectDef = (spec[ACTION.SPEC_FORCE_LOAD_DIRECT])
     ? spec[ACTION.SPEC_FORCE_LOAD_DIRECT].concat(inputLoadDirectDef)
     : inputLoadDirectDef
   const loadDirect = ActionUtils.parseLoadDirect(loadDirectDef)
-  // Handle "associations" option...
+  // Handle "associations" option
   const inputAssocs = input[ACTION.INPUT_ASSOCIATIONS] || []
   const assocs = (spec[ACTION.SPEC_FORCE_ASSOCIATIONS])
     ? objectUtils.union(spec[ACTION.SPEC_FORCE_ASSOCIATIONS], inputAssocs)
     : inputAssocs
-  // Combine...
+  // Combine
   const allAssociations = (loadDirect.associations && loadDirect.associations.length > 0)
     ? objectUtils.union(assocs, loadDirect.associations)
     : assocs
   if (allAssociations.length > 0) actionOpts.withRelated = allAssociations
 
-  // Prepare query...
+  // Prepare query
   const queryOpts = (queryBuilder) => {
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
@@ -97,14 +97,14 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
     } // end-if (inputFields && specFields)
   }
 
-  // Debug executing logic...
+  // Debug executing logic
   if (debug) console.log(`[JOINT] [action:getItem] EXECUTING => GET ${modelName} QUERY`, queryOpts)
 
   try {
-    // Get item...
+    // Get item
     const data = await model.query(queryOpts).fetch(actionOpts)
 
-    // Respect auth...
+    // Respect auth
     if (authRules) {
       const combinedFields = Object.assign({}, data.attributes, inputFields)
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
@@ -113,10 +113,10 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
       }
     } // end-if (authRules)
 
-    // Handle loadDirect requests...
+    // Handle loadDirect requests
     if (loadDirect.associations) BookshelfUtils.loadRelationsToItemBase(data, loadDirect, input.associations)
 
-    // Return data...
+    // Return data
     return handleDataResponse(joint, modelName, data, output)
   } catch (error) {
     return handleErrorResponse(error, 'getItem', modelName, inputAssocs)
