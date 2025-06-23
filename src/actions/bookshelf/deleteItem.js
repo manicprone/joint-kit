@@ -66,7 +66,7 @@ async function doLookupThenAction (joint, lookupFieldData, modelName, specFields
     const resource = await bookshelf.model(modelName).query((queryBuilder) => {
       Object.entries(lookupFieldData)
         .forEach(([fieldName, field]) => {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, field.value, field.matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, field)
         })
     }).fetch(getItemOpts)
 
@@ -102,12 +102,8 @@ async function doAction (joint, modelName, specFields, specAuth, ownerCreds, inp
       specFields.forEach((fieldSpec) => {
         const fieldName = fieldSpec.name
         const hasInput = objectUtils.has(inputFields, fieldName)
-        const matchStrategy = objectUtils.get(inputFields,
-          `${fieldName}.matchStrategy`,
-          ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT
-        )
         if (hasInput) {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputFields[fieldName].value, matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputFields[fieldName])
         }
       })
     } // end-if (inputFields && specFields)

@@ -8,7 +8,13 @@ module.exports = [
   {
     name: 'UserInfo',
     tableName: 'user_info',
-    timestamps: { created: 'created_at', updated: 'updated_at' }
+    timestamps: { created: 'created_at', updated: 'updated_at' },
+    associations: {
+      children: {
+        type: 'toMany',
+        path: 'user_id => User.father_user_id'
+      }
+    }
   },
 
   // The reference that maps a role to a user
@@ -35,6 +41,10 @@ module.exports = [
       profiles: {
         type: 'toMany',
         path: 'id => Profile.user_id'
+      },
+      children: {
+        type: 'toMany',
+        path: 'id => User.father_user_id'
       }
     }
   },

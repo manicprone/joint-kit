@@ -73,7 +73,7 @@ async function performUpsertItem (joint, spec = {}, input = {}, output) {
 
       if (!isLocked && !isLookup && (hasInput || hasDefault)) {
         upsertData[fieldName] = (hasInput)
-          ? inputFields[fieldName].value
+          ? inputFields[fieldName]
           : defaultValue
       } else if (isLocked && !isLookup && hasDefault) {
         upsertData[fieldName] = defaultValue
@@ -86,7 +86,7 @@ async function performUpsertItem (joint, spec = {}, input = {}, output) {
     const resource = await model.query((queryBuilder) => {
       Object.entries(lookupFieldData)
         .forEach(([fieldName, field]) => {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, field.value, field.matchStrategy)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, field)
         })
     }).fetch(actionOpts)
 
@@ -119,19 +119,11 @@ async function performUpsertItem (joint, spec = {}, input = {}, output) {
         }
       } // end-if (authRules)
 
-      // Prevent creating new resource with operators !== "contains"
-      if (
-        Object.values(lookupFieldData)
-          .some(({ matchStrategy }) => matchStrategy !== ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT)
-      ) {
-        return Promise.reject(StatusErrors.generateInvalidResourceCreationOperatorError())
-      }
-
       // Debug executing logic...
       if (debug) console.log(`[JOINT] [action:upsertItem] EXECUTING => CREATE ${modelName} WITH`, upsertData)
 
       // Perform create action...
-      const data = await model.forge(ActionUtils.getFieldValueMap(lookupFieldData)).save(upsertData, actionOpts)
+      const data = await model.forge(lookupFieldData).save(upsertData, actionOpts)
 
       // Return data...
       return handleDataResponse(joint, modelName, data, output)

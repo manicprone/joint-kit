@@ -2,10 +2,6 @@
 // Joint Action Constants
 // ----------------------
 
-const INPUT_FIELD_MATCHING_STRATEGY_EXACT = 'exact'
-const INPUT_FIELD_MATCHING_STRATEGY_CONTAINS = 'contains'
-export const INPUT_FIELD_MATCHING_STRATEGY_NOT_IN = 'not_in'
-
 export default {
   // ------------------------------- Association Options
   // Main Resource Wrapper
@@ -29,7 +25,6 @@ export default {
   SPEC_FIELDS_OPT_LOOKUP: 'lookup',
   SPEC_FIELDS_OPT_LOOKUP_OR: 'lookupOr',
   SPEC_FIELDS_OPT_LOCKED: 'locked',
-  SPEC_FIELDS_OPT_OPERATORS: 'operators',
 
   // Fields to Return / Field Set Definitions
   SPEC_FIELDS_TO_RETURN: 'fieldsToReturn',
@@ -50,18 +45,23 @@ export default {
   // Field Input
   INPUT_FIELDS: 'fields',
 
+  // Field Input Advanced Queries
+  INPUT_FIELD_QUERY_CONTAINS: 'contains',
+  INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE: 'containsI',
+  INPUT_FIELD_QUERY_NOT_CONTAINS: 'notContains',
+  INPUT_FIELD_QUERY_NOT_CONTAINS_INSENSITIVE: 'notContainsI',
+  INPUT_FIELD_QUERY_EXCLUDES: 'excludes',
+  INPUT_FIELD_QUERY_STARTS_WITH: 'startsWith',
+  INPUT_FIELD_QUERY_STARTS_WITH_INSENSITIVE: 'startsWithI',
+  INPUT_FIELD_QUERY_ENDS_WITH: 'endsWith',
+  INPUT_FIELD_QUERY_ENDS_WITH_INSENSITIVE: 'endsWithI',
+  INPUT_FIELD_QUERY_LESS_THAN: 'lt',
+  INPUT_FIELD_QUERY_LESS_THAN_OR_EQUAL: 'lte',
+  INPUT_FIELD_QUERY_GREATER_THAN: 'gt',
+  INPUT_FIELD_QUERY_GREATER_THAN_OR_EQUAL: 'gte',
+
   // Field Set
   INPUT_FIELD_SET: 'fieldSet',
-
-  // Field Input Matching Strategies
-  INPUT_FIELD_MATCHING_STRATEGY_EXACT,
-  INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
-  INPUT_FIELD_MATCHING_STRATEGY_NOT_IN,
-  INPUT_FIELD_MATCHING_STRATEGIES: [
-    INPUT_FIELD_MATCHING_STRATEGY_EXACT,
-    INPUT_FIELD_MATCHING_STRATEGY_CONTAINS,
-    INPUT_FIELD_MATCHING_STRATEGY_NOT_IN
-  ],
 
   // Sort Order
   INPUT_ORDER_BY: 'orderBy',

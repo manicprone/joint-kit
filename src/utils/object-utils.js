@@ -7,6 +7,7 @@ export default {
   get: lodashObject.get,
   has: lodashObject.has,
   isEmpty: lodashLang.isEmpty,
+  isPlainObject: lodashLang.isPlainObject,
   cloneDeep: lodashLang.cloneDeep,
   union: lodashArray.union,
   includes: lodashCollection.includes

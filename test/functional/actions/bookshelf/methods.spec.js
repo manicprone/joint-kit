@@ -9,7 +9,8 @@ import blogAppModels from '../../../scenarios/blog-app/model-config'
 import blogAppMethods from '../../../scenarios/blog-app/method-config'
 import bookshelf from '../../../db/bookshelf/service'
 import { resetDB } from '../../../db/bookshelf/db-utils'
-import { mapAttrs, objectWithTimestamps } from '../../../utils'
+// import { mapAttrs, objectWithTimestamps } from '../../../utils'
+import { objectWithTimestamps } from '../../../utils'
 
 let appMgmt = null
 let projectApp = null
@@ -822,26 +823,28 @@ describe('CUSTOM METHOD SIMULATION [bookshelf]', () => {
         expect.assertions(9)
       })
 
-      it('should return the filtered set of users when a ".contains" string query is provided', async () => {
-        const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
+      // TODO - This will be supported when the new syntax is implemented for routes !!!
 
-        expect(mapAttrs(data.models)).toMatchInlineSnapshot(`
-          [
-            {
-              "avatar_url": null,
-              "display_name": "Segmented",
-              "id": 5,
-              "username": "segmented",
-            },
-            {
-              "avatar_url": null,
-              "display_name": "The Manic Edge",
-              "id": 4,
-              "username": "the_manic_edge",
-            },
-          ]
-        `)
-      })
+      // it('should return the filtered set of users when a ".contains" string query is provided', async () => {
+      //   const data = await blogApp.method.User.getUsers({ fields: { 'username.contains': 'ed' } })
+
+      //   expect(mapAttrs(data.models)).toMatchInlineSnapshot(`
+      //     [
+      //       {
+      //         "avatar_url": null,
+      //         "display_name": "Segmented",
+      //         "id": 5,
+      //         "username": "segmented",
+      //       },
+      //       {
+      //         "avatar_url": null,
+      //         "display_name": "The Manic Edge",
+      //         "id": 4,
+      //         "username": "the_manic_edge",
+      //       },
+      //     ]
+      //   `)
+      // })
     }) // END - User.getUsers
 
     // -------------------------------------------------------------------------

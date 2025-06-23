@@ -47,7 +47,7 @@ export const specFixtures = {
     appSettingsOperatorContains: {
       modelName: 'AppSettings',
       fields: [
-        { name: 'app_id', type: 'String', required: true, lookup: true, operators: ['contains'] },
+        { name: 'app_id', type: 'String', required: true, lookup: true },
         { name: 'data', type: 'JSON', required: true }
       ]
     },
@@ -66,12 +66,6 @@ export const inputFixtures = {
     exact: (appId, data = { a: true, b: false, c: 'string-value' }) => ({
       fields: {
         app_id: appId,
-        data
-      }
-    }),
-    contains: (appId, data = { a: true, b: false, c: 'string-value' }) => ({
-      fields: {
-        'app_id.contains': appId,
         data
       }
     })

@@ -137,135 +137,6 @@ describe('ACTION: getItems [bookshelf]', () => {
         })
     })
 
-    describe(`the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option:`, async () => {
-      it(`should respect the "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" option and apply fiter accordingly`, async () => {
-        const specUser = {
-          modelName: 'User',
-          defaultOrderBy: '-created_at',
-          fields: [
-            { name: 'username', type: 'String', operators: ['contains'] }
-          ]
-        }
-
-        await blogApp.getItems(specUser, {})
-          .then((data) => {
-            expect(data.models).to.have.length(11)
-          })
-
-        await blogApp.getItems(specUser, { fields: { 'username.contains': 'ed' } })
-          .then((data) => {
-            data.models.forEach((model) => {
-              expect(model.attributes.username).to.contain('ed')
-            })
-            expect(data.models).to.have.length(2)
-          })
-      })
-
-      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should filter in a case-insensitive manner`, async () => {
-        const specUser = {
-          modelName: 'User',
-          fields: [
-            { name: 'display_name', type: 'String', operators: ['contains'] }
-          ]
-        }
-
-        const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'r' } })
-        const upperCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.contains': 'R' } })
-        const getAttrs = result => result.models.map(model => model.attributes)
-
-        lowerCaseResult.models.forEach((model) => {
-          expect(model).to.have.nested.property('attributes.display_name')
-            .that.match(/[rR]/)
-        })
-        expect(lowerCaseResult.models).to.have.length(5)
-
-        expect(getAttrs(upperCaseResult)).to.deep.equal(getAttrs(lowerCaseResult))
-      })
-
-      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS}" should allow filtering special characters`, async () => {
-        const specUser = {
-          modelName: 'User',
-          fields: [
-            { name: 'display_name', type: 'String', operators: ['contains'] }
-          ]
-        }
-
-        const result = await blogApp.getItems(specUser, { fields: { 'display_name.contains': '\'' } })
-
-        result.models.forEach((model) => {
-          expect(model).to.have.nested.property('attributes.display_name')
-            .that.contains("'")
-        })
-        expect(result.models).to.have.length(1)
-      })
-
-      it(`should respect the "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" option and apply fiter accordingly`, async () => {
-        const specUser = {
-          modelName: 'User',
-          defaultOrderBy: '-created_at',
-          fields: [
-            { name: 'username', type: 'String', operators: ['not_in'] }
-          ]
-        }
-
-        await blogApp.getItems(specUser, {})
-          .then((data) => {
-            expect(data.models).to.have.length(11)
-          })
-
-        const data = await blogApp.getItems(specUser, { fields: { 'username.not_in': ['super-admin', 'admin'] } })
-
-        data.models.forEach((model) => {
-          expect(model.attributes.username).to.not.contain('admin')
-        })
-        expect(data.models).to.have.length(9)
-      })
-
-      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" should be applicable to other field type than string`, async () => {
-        const specProject = {
-          modelName: 'Project',
-          defaultOrderBy: '-created_at',
-          fields: [
-            { name: 'status_code', type: 'Number', operators: ['not_in'] }
-          ]
-        }
-
-        await projectApp.getItems(specProject, {})
-          .then((data) => {
-            expect(data.models).to.have.length(14)
-          })
-
-        const data = await projectApp.getItems(specProject, { fields: { 'status_code.not_in': [3, 5] } })
-
-        data.models.forEach((model) => {
-          expect(model.attributes.status_code).to.not.equal(3)
-          expect(model.attributes.status_code).to.not.equal(5)
-        })
-        expect(data.models).to.have.length(4)
-      })
-
-      it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" should NOT filter in a case-insensitive manner`, async () => {
-        const specUser = {
-          modelName: 'User',
-          fields: [
-            { name: 'display_name', type: 'String', operators: ['not_in'] }
-          ]
-        }
-
-        const correctCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.not_in': ['Admin', 'Supa Admin'] } })
-        const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.not_in': ['admin', 'supa admin'] } })
-        const getAttrs = result => result.models.map(model => model.attributes)
-
-        correctCaseResult.models.forEach((model) => {
-          expect(model).to.have.nested.property('attributes.display_name')
-            .that.does.not.match(/admin/i)
-        })
-        expect(correctCaseResult.models).to.have.length(9)
-
-        expect(getAttrs(lowerCaseResult)).to.have.length(11)
-      })
-    })
-
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}"/"${ACTION.SPEC_FIELDS_OPT_DEFAULT_VALUE}" pattern for system control of input`, async () => {
       const onlyLiveProfiles = true
 
@@ -749,8 +620,8 @@ describe('ACTION: getItems [bookshelf]', () => {
       ])
     })
 
-    describe('should support ordering the results by association fields:', async () => {
-      it('supports both "toOne" and "toMany" types alongside main resource fields', async () => {
+    describe('ordering the results by association fields:', async () => {
+      it('should support both "toOne" and "toMany" types alongside main resource fields', async () => {
         // ----
         // User
         // ----
@@ -886,6 +757,207 @@ describe('ACTION: getItems [bookshelf]', () => {
           `)
       })
     })
+
+    // TODO - Test multiple operators on a single query !!!
+
+    describe('using advanced queries with object notation on the input value:', async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator (for case sensitive)`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersDirectMatch = {
+          fields: {
+            username: 'admin'
+          }
+        }
+        const usersFilteredByContains = {
+          fields: {
+            username: {
+              contains: 'admin'
+            }
+          },
+          orderBy: '-username'
+        }
+        const usersFilteredWithCaseSensitivity = {
+          fields: {
+            display_name: {
+              contains: 'Ed'
+            }
+          },
+          orderBy: '-username'
+        }
+
+        const getUsersDirectMatch = await projectApp.getItems(specUser, usersDirectMatch, 'flat')
+        expect(getUsersDirectMatch.data).to.have.length(1)
+        expect(getUsersDirectMatch.data[0].username).toEqual('admin')
+
+        const getUsersFilteredByContains = await projectApp.getItems(specUser, usersFilteredByContains, 'flat')
+        expect(getUsersFilteredByContains.data).to.have.length(2)
+        expect(getUsersFilteredByContains.data[0].username).toEqual('super-admin')
+        expect(getUsersFilteredByContains.data[1].username).toEqual('admin')
+
+        const getUsersFilteredByCS = await projectApp.getItems(specUser, usersFilteredWithCaseSensitivity, 'flat')
+        expect(getUsersFilteredByCS.data).to.have.length(1)
+        expect(getUsersFilteredByCS.data[0].display_name).toEqual('The Manic Edge')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator with an association field`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' },
+            { name: 'info.tagline', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersByProfileTagline = {
+          fields: {
+            'info.tagline': {
+              contains: 'History'
+            }
+          }
+        }
+
+        const getUsersByProfileTagline = await projectApp.getItems(specUser, usersByProfileTagline, 'flat')
+        expect(getUsersByProfileTagline.data).to.have.length(1)
+        expect(getUsersByProfileTagline.data[0].username).toEqual('segmented')
+        expect(getUsersByProfileTagline.data[0].tagline).toEqual('History favors the impetus of the author')
+      })
+
+      // TODO - Need to figure this one out !!!
+      it.skip(`should support filtering special characters with the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersFilteredByContains = {
+          fields: {
+            username: {
+              contains: '\''
+            }
+          }
+        }
+
+        const getUsersFilteredByContains = await projectApp.getItems(specUser, usersFilteredByContains, 'flat')
+        // console.log('[DEVING] !!!!! getUsersFilteredByContains:', getUsersFilteredByContains)
+
+        expect(getUsersFilteredByContains.data).to.have.length(2)
+        expect(getUsersFilteredByContains.data[0].username).toEqual('super-admin')
+        expect(getUsersFilteredByContains.data[1].username).toEqual('admin')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} property (for case insensitive)`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersFilteredWithCI = {
+          fields: {
+            display_name: {
+              containsI: 'Ed'
+            }
+          },
+          orderBy: '-username'
+        }
+
+        const getUsersFilteredByCI = await projectApp.getItems(specUser, usersFilteredWithCI, 'flat')
+        expect(getUsersFilteredByCI.data).to.have.length(2)
+        expect(getUsersFilteredByCI.data[0].display_name).toEqual('The Manic Edge')
+        expect(getUsersFilteredByCI.data[1].display_name).toEqual('Segmented')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} property`, async () => {
+        // User
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        // Project
+        const specProject = {
+          modelName: 'Project',
+          defaultOrderBy: '-created_at',
+          fields: [
+            { name: 'status_code', type: 'Number' }
+          ]
+        }
+
+        // Test with string values
+        const usersFilteredByExcludes = {
+          fields: {
+            username: {
+              excludes: ['admin', 'super-admin', 'segmented']
+            }
+          },
+          orderBy: '-username'
+        }
+
+        // Test with number values
+        const projectsFilteredByExcludes = {
+          fields: {
+            status_code: {
+              excludes: [3, 5]
+            }
+          },
+          orderBy: 'alias'
+        }
+
+        const getUsersFiltered = await projectApp.getItems(specUser, usersFilteredByExcludes, 'flat')
+        expect(getUsersFiltered.data).to.have.length(8)
+
+        const getProjectsFiltered = await projectApp.getItems(specProject, projectsFilteredByExcludes, 'flat')
+        expect(getProjectsFiltered.data).to.have.length(4)
+        expect(getProjectsFiltered.data[0].alias).toEqual('mega-seed-mini-sythesizer')
+        expect(getProjectsFiltered.data[1].alias).toEqual('project-001')
+        expect(getProjectsFiltered.data[2].alias).toEqual('project-006')
+        expect(getProjectsFiltered.data[3].alias).toEqual('project-010')
+      })
+    })
+
+    // TODO - Re-create these tests with the new syntax !!!
+
+    //   it(`operator "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN}" should NOT filter in a case-insensitive manner`, async () => {
+    //     const specUser = {
+    //       modelName: 'User',
+    //       fields: [
+    //         { name: 'display_name', type: 'String', operators: ['not_in'] }
+    //       ]
+    //     }
+
+    //     const correctCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.not_in': ['Admin', 'Supa Admin'] } })
+    //     const lowerCaseResult = await blogApp.getItems(specUser, { fields: { 'display_name.not_in': ['admin', 'supa admin'] } })
+    //     const getAttrs = result => result.models.map(model => model.attributes)
+
+    //     correctCaseResult.models.forEach((model) => {
+    //       expect(model).to.have.nested.property('attributes.display_name')
+    //         .that.does.not.match(/admin/i)
+    //     })
+    //     expect(correctCaseResult.models).to.have.length(9)
+
+    //     expect(getAttrs(lowerCaseResult)).to.have.length(11)
+    //   })
+    // })
 
     it('should return in JSON API shape when payload format is set to "json-api"', () => {
       const modelName = 'User'

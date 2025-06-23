@@ -5,6 +5,7 @@ import * as StatusErrors from '../../../core/errors/status-errors'
 import * as CoreUtils from '../../../core/core-utils'
 
 const debugLoadDirect = false
+const debugAppendWhereClause = false
 
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
@@ -107,32 +108,171 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 }
 
 // -----------------------------------------------------------------------------
-// Append a where query to an existing query builder, respecting the type of
-// field value and its matchStrategy.
+// Append a where clause to an existing query, per the provided input data.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, matchStrategy) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value) {
+  // Load assets for query logic
   const mainTableName = joint.model[modelName].prototype.tableName
-  switch (matchStrategy) {
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT:
-      if (Array.isArray(value)) queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
-      else queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
-      break
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_CONTAINS:
-      // Case insensitive LIKE query
-      // Note that case-sensitivity of LIKE differs per DBMS, comparing always
-      // with lowercase is potentially slower but more portable.
-      queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${value.toLowerCase()}%`])
-      break
-    case ACTION.INPUT_FIELD_MATCHING_STRATEGY_NOT_IN:
-      if (!Array.isArray(value)) {
-        throw new Error(`The "${matchStrategy}" operator can only be used with an array of string.`)
+  // Required for association field queries
+  const isAssocClause = fieldName.indexOf('.') !== -1
+  const assocParts = (isAssocClause) ? fieldName.split('.') : [] // parse an assoc field reference
+  const assocName = (assocParts.length > 0) ? assocParts[0] : null
+  const assocField = (assocParts.length > 1) ? assocParts[1] : null
+  const assocModelName = (assocName && joint.modelNameOfAssoc[modelName]) ? joint.modelNameOfAssoc[modelName][assocName] : null
+  const assocTableName = (assocModelName) ? joint.model[assocModelName].prototype.tableName : null
+  const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
+  const assocConfig = (assocName) ? mainModelConfig.associations[assocName] : null
+  const assocPathInfo = (assocConfig) ? CoreUtils.parseAssociationPath(assocConfig.path) : null
+  // console.log('[DEVING] assocPathInfo:', assocPathInfo)
+
+  // Detect dialect for query variations
+  const dialect = joint.service.knex?.client?.config?.client
+
+  // ---------------------------------------------------------------------------
+  // An array value is a "where in" clause
+  // ---------------------------------------------------------------------------
+  if (Array.isArray(value)) {
+    queryBuilder.where(`${mainTableName}.${fieldName}`, 'IN', value)
+
+  // ---------------------------------------------------------------------------
+  // An object value is an Advanced Query
+  // ---------------------------------------------------------------------------
+  } else if (value !== null && typeof value === 'object') {
+    if (debugAppendWhereClause) console.log(`[DEVING] WHERE CLAUSE with ADVANCED QUERY: ${mainTableName} => ${fieldName}:`, value)
+
+    for (const operator of Object.keys(value)) {
+      switch (operator) {
+        // OPERATOR: Contains (case sensitive)
+        case ACTION.INPUT_FIELD_QUERY_CONTAINS: {
+          if (debugAppendWhereClause) console.log('[DEVING] Detected dialect:', dialect)
+
+          const valueForQuery = value[operator]
+          // Operating on an Association Resource Field
+          if (isAssocClause) {
+            if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case sensitive) action via association field on:`, value[operator])
+
+            // TODO - Complete this with join logic !!!
+            if (dialect === 'sqlite3') {
+              const globValue = `*${valueForQuery}*` // use GLOB for case-sensitive matching
+              queryBuilder
+                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+                .whereRaw('?? GLOB ?', [`${assocTableName}.${assocField}`, globValue])
+            } else if (dialect === 'mysql' || dialect === 'mysql2') {
+              queryBuilder
+                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+                .whereRaw('?? LIKE BINARY ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
+            } else {
+              // default: Postgres, et al - LIKE defaults to case-sensitive matching
+              queryBuilder
+                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+                .whereRaw('?? LIKE ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
+            }
+
+          // Operating on a Main Resource Field
+          } else {
+            if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case sensitive) action on:`, value[operator])
+
+            if (dialect === 'sqlite3') {
+              const globValue = `*${valueForQuery}*` // use GLOB for case-sensitive matching
+              queryBuilder.whereRaw('?? GLOB ?', [`${mainTableName}.${fieldName}`, globValue])
+            } else if (dialect === 'mysql' || dialect === 'mysql2') {
+              queryBuilder.whereRaw('?? LIKE BINARY ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+            } else {
+              // default: Postgres, et al - LIKE defaults to case-sensitive matching
+              queryBuilder.whereRaw('?? LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+            }
+          }
+          break
+        }
+
+        // OPERATOR: Contains (case insensitive)
+        case ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case insensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator].toLowerCase()
+          queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `%${valueForQuery}%`])
+          break
+        }
+
+        // OPERATOR: Starts With (case sensitive)
+        case ACTION.INPUT_FIELD_QUERY_STARTS_WITH: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case sensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator]
+          if (dialect === 'sqlite3') {
+            const globValue = `${valueForQuery}*` // use GLOB for case-sensitive matching
+            queryBuilder.whereRaw('?? GLOB ?', [`${mainTableName}.${fieldName}`, globValue])
+          } else if (dialect === 'mysql' || dialect === 'mysql2') {
+            queryBuilder.whereRaw('?? LIKE BINARY ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          } else {
+            // default: Postgres, et al - LIKE defaults to case-sensitive matching
+            queryBuilder.whereRaw('?? LIKE ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          }
+          break
+        }
+
+        // OPERATOR: Starts With (case insensitive)
+        case ACTION.INPUT_FIELD_QUERY_STARTS_WITH_INSENSITIVE: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case insensitive) action on:`, value[operator])
+
+          const valueForQuery = value[operator].toLowerCase()
+          queryBuilder.whereRaw('LOWER( ?? ) LIKE ?', [`${mainTableName}.${fieldName}`, `${valueForQuery}%`])
+          break
+        }
+
+        // OPERATOR: Excludes (value must be an array)
+        case ACTION.INPUT_FIELD_QUERY_EXCLUDES: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" action on:`, value[operator])
+
+          if (!Array.isArray(value[operator])) {
+            throw new Error(`The "${operator}" operator requires an array of strings.`)
+          }
+
+          const valueForQuery = value[operator]
+          queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
+          break
+        }
+
+        default: {
+          // Throw error if operator not supported
+          throw new Error(`No action implemented for operator ${operator} on:`, value[operator])
+        }
+      }
+    }
+  // ---------------------------------------------------------------------------
+  // A primitive type is a direct match
+  // ---------------------------------------------------------------------------
+  } else {
+    // Direct match on ASSOCIATION RESOURCE
+    if (isAssocClause) {
+      // Throw error if association name is not recognized
+      if (!assocModelName) {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid as the association "${assocName}" does not exist for model "${modelName}"`)
       }
 
-      // NOT IN query
-      queryBuilder.whereRaw(`?? NOT IN (${value.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...value])
-      break
-    default:
-      throw new Error(`Unrecognized match strategy "${matchStrategy}"`)
+      // Throw error if association is not "toOne" (i.e. it is a "toMany" relationship)
+      if (assocConfig.type !== 'toOne') {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid because the association "${assocName}" is not of type "toOne".`)
+      }
+
+      // console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on ASSOC RESOURCE: ${mainTableName}.${assocName} => ${assocField}:`, value)
+
+      const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
+      // console.log('[DEVING] assocPathInfo:', assocPathInfo)
+
+      queryBuilder
+        .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+        .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+        .where(`${assocTableName}.${assocField}`, '=', value)
+
+    // Direct match on MAIN RESOURCE
+    } else {
+      // console.log(`[DEVING] WHERE CLAUSE with DIRECT MATCH on MAIN RESOURCE: ${mainTableName} => ${fieldName}:`, value)
+      queryBuilder.where(`${mainTableName}.${fieldName}`, '=', value)
+    }
   }
 }
 
@@ -178,7 +318,7 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
       const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
       const assocConfig = mainModelConfig.associations[assocName]
 
-      // Record error if association is not "toOne" (i.e. it is a "toMany" relationsip)
+      // Record error if association is not "toOne" (i.e. it is a "toMany" relationship)
       if (assocConfig.type !== 'toOne') {
         return [false, `The orderBy argument "${assocName}.${colName}" is invalid because the association "${assocName}" is not of type "toOne".`]
       }

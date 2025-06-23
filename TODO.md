@@ -115,3 +115,59 @@
 
 * Change the nomenclature of the package/service from "Joint" => "Joint Kit"
   (namely in the logging and error messages, et al).
+
+<br />
+
+## Advanced Operations
+
+Instead of the operands attribute in the spec, we just support overloaded input capabilities (via object notation).
+
+> You should not have to update the spec for these variations.
+
+### Examples
+
+``` javascript
+joint.method.Person.getMany({
+  fields: {
+    name: { contains: 'iam', endsWith: 'aw' }
+  }
+})
+```
+
+``` javascript
+joint.method.Person.getMany({
+  fields: {
+    name: { notContains: ['admin', 'manager'] }
+  }
+})
+```
+
+``` javascript
+joint.method.Order.getOne({
+  fields: {
+    delivered_at: { gt: startingDate, lte: today } // for numbers & dates
+  }
+})
+```
+
+We also need to be able to support performing a search operation on associations.
+
+### Example
+
+``` javascript
+joint.method.Org.getMany({
+  fields: {
+    'customer.cust_id': { contains: '567' }
+  }
+})
+```
+
+Hence, we must support:
+
+``` javascript
+joint.method.Org.getOne({
+  fields: {
+    'customer.cust_id': '1234567'
+  }
+})
+```

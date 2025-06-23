@@ -34,39 +34,39 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
   const trx = input[ACTION.INPUT_TRANSACTING]
   const authContext = input[ACTION.INPUT_AUTH_CONTEXT]
 
-  // Reject if model does not exist...
+  // Reject if model does not exist
   const model = bookshelf.model(modelName)
   if (!model) {
     if (debug) console.log(`[JOINT] [action:updateItem] The model "${modelName}" is not recognized`)
     return Promise.reject(StatusErrors.generateModelNotRecognizedError(modelName))
   }
 
-  // Reject when required fields are not provided...
+  // Reject when required fields are not provided
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
   if (!requiredFieldCheck.satisfied) {
     if (debug) console.log('[JOINT] [action:updateItem] Action has missing required fields:', requiredFieldCheck.missing)
     return Promise.reject(StatusErrors.generateMissingFieldsError(requiredFieldCheck.missing))
   }
 
-  // Determine lookup field to fetch item...
+  // Determine lookup field to fetch item
   const lookupFieldData = ActionUtils.getLookupFieldData(specFields, inputFields)
   if (!lookupFieldData) {
-    // Reject when a lookup field cannot be determined...
+    // Reject when a lookup field cannot be determined
     if (debug) console.log('[JOINT] [action:updateItem] Action did not define or provide a "lookup field"')
     return Promise.reject(StatusErrors.generateLookupFieldNotProvidedError())
   }
 
   try {
-    // Get item to perform the update action...
+    // Get item to perform the update action
     const getItemOpts = { require: true }
     if (trx) getItemOpts.transacting = trx
     const resource = await model.query((queryBuilder) => {
       Object.entries(lookupFieldData).forEach(([key, field]) => {
-        BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, key, field.value, field.matchStrategy)
+        BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, key, field)
       })
     }).fetch(getItemOpts)
 
-    // Respect auth...
+    // Respect auth
     if (authRules) {
       const combinedFields = Object.assign({}, resource.attributes, inputFields)
       const ownerCreds = ActionUtils.parseOwnerCreds(specAuth, combinedFields)
@@ -76,11 +76,11 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
       }
     } // end-if (authRules)
 
-    // Prepare update action options...
+    // Prepare update action options
     const actionOpts = { patch: true }
     if (trx) actionOpts.transacting = trx
 
-    // Build update package...
+    // Build update package
     const updates = {}
     if (inputFields && specFields) {
       specFields.forEach((fieldSpec) => {
@@ -93,7 +93,7 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
 
         if (!isLocked && !isLookup && (hasInput || hasDefault)) {
           updates[fieldName] = (hasInput)
-            ? inputFields[fieldName].value
+            ? inputFields[fieldName]
             : defaultValue
         } else if (isLocked && !isLookup && hasDefault) {
           updates[fieldName] = defaultValue
@@ -101,13 +101,13 @@ async function performUpdateItem (joint, spec = {}, input = {}, output) {
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)
 
-    // Debug executing logic...
+    // Debug executing logic
     if (debug) console.log(`[JOINT] [action:updateItem] EXECUTING => UPDATE ${modelName} WITH`, updates)
 
-    // Update item...
+    // Update item
     const data = await resource.save(updates, actionOpts)
 
-    // Return data...
+    // Return data
     return handleDataResponse(joint, modelName, data, output)
   } catch (error) {
     return handleErrorResponse(error, 'updateItem', modelName)
