@@ -807,6 +807,31 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getUsersFilteredByCS.data[0].display_name).toEqual('The Manic Edge')
       })
 
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator with an association field`, async () => {
+        const specUser = {
+          modelName: 'User',
+          fields: [
+            { name: 'username', type: 'String' },
+            { name: 'display_name', type: 'String' },
+            { name: 'info.tagline', type: 'String' }
+          ],
+          defaultOrderBy: 'username'
+        }
+
+        const usersByProfileTagline = {
+          fields: {
+            'info.tagline': {
+              contains: 'History'
+            }
+          }
+        }
+
+        const getUsersByProfileTagline = await projectApp.getItems(specUser, usersByProfileTagline, 'flat')
+        expect(getUsersByProfileTagline.data).to.have.length(1)
+        expect(getUsersByProfileTagline.data[0].username).toEqual('segmented')
+        expect(getUsersByProfileTagline.data[0].tagline).toEqual('History favors the impetus of the author')
+      })
+
       // TODO - Need to figure this one out !!!
       it.skip(`should support filtering special characters with the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator`, async () => {
         const specUser = {
