@@ -93,28 +93,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
      `)
     })
 
-    // TODO - Not sure if we need this test ??? Need to understand what is being tested.
-
-    // it(
-    //  `should throw an error if "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" other ` +
-    //  `than "${ACTION.INPUT_FIELD_MATCHING_STRATEGY_EXACT}" is used to ` +
-    //  'create a new resource',
-    //  async () => {
-    //    const spec = specFixtures.appMgmt.appSettingsOperatorContains
-    //    const input = {
-    //      fields: { 'app_id.contains': '999', data: { a: true, b: false, c: 'string-value' } }
-    //    }
-
-    //    await expect(appMgmt.upsertItem(spec, input)).rejects.toMatchInlineSnapshot(`
-    //      {
-    //        "message": "Unable to create a new resource using a lookup operator other than "exact".",
-    //        "name": "JointStatusError",
-    //        "status": 400,
-    //      }
-    //    `)
-    //  }
-    // )
-
     it('should perform an update action when the resource already exists', async () => {
       const spec = specFixtures.appMgmt.appSettings
       const input = inputFixtures.appMgmt.exact('app-12345', { a: true, b: false, c: 'updated-string-value' })

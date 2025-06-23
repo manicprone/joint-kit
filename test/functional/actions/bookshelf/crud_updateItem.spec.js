@@ -152,31 +152,6 @@ describe('CRUD ACTIONS [bookshelf]', () => {
       })
     })
 
-    // TODO - Re-create with the new synax !!!
-
-    // it(`should support the "${ACTION.SPEC_FIELDS_OPT_OPERATORS}" option and update the first resource matching the input`, async () => {
-    //   const spec = {
-    //     modelName: 'Project',
-    //     fields: [
-    //       { name: 'name', type: 'String', required: true, lookup: true, operators: ['contains'] },
-    //       { name: 'alias', type: 'String' }
-    //     ]
-    //   }
-
-    //   const input = {
-    //     fields: {
-    //       'name.contains': 'er',
-    //       alias: 'updated-alias'
-    //     }
-    //   }
-
-    //   // Perform update
-    //   const updated = await projectApp.updateItem(spec, input)
-
-    //   expect(updated).has.nested.property('attributes.name').that.contains('er')
-    //   expect(updated).has.nested.property('attributes.alias').that.equals('updated-alias')
-    // })
-
     it(`should support the "${ACTION.SPEC_FIELDS_OPT_LOCKED}" pattern for system control of input`, async () => {
       const id = 1
       const name = 'An Updated Name'

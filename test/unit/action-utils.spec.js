@@ -558,6 +558,8 @@ describe('ACTION-UTILS', () => {
   // Testing: prepareFieldData
   // -------------------------
   describe('prepareFieldData', () => {
+    // TODO - Add tests for advanced query casting / parsing !!!
+
     it('should cast all provided fieldData values to the data type specified in the spec', () => {
       const fieldSpec = [
         { name: 'user_id', type: 'Number' },
@@ -598,17 +600,5 @@ describe('ACTION-UTILS', () => {
         is_simple: false
       })
     })
-
-    // TODO - Add tests for advanced query casting / parsing !!!
-
-    // TODO - Re-create with new syntax !!!
-
-    // it('should throw error if a "contains" operator is used on a non-string field', () => {
-    //   const fieldSpec = [{ name: 'user_id', type: 'Number', operators: ['contains'] }]
-    //   const fieldData = { 'user_id.contains': '10' }
-
-    //   expect(() => ActionUtils.prepareFieldData(fieldSpec, fieldData))
-    //     .toThrowErrorMatchingInlineSnapshot('[Error: "contains" operator can only be applied to a string value.]')
-    // })
   }) // END - prepareFieldData
 })
