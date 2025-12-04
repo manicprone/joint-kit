@@ -30,14 +30,6 @@
 
 <br />
 
-## README To Do
-
-* Add general info / overview, once jointkit.org is ready.
-
-* Add software stack info, etc.
-
-<br />
-
 ## Backlog
 
 * `ActionUtils.prepareFieldData()` could populate the default value, so that in
@@ -48,8 +40,6 @@
 * Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Replace moment with date-fns !!!
-
-* Replace promises with `async/await` (esp in tests) !!!
 
 * Remove the quotes on the modelNames in the error messages.
 
@@ -150,7 +140,7 @@ joint.method.Order.getOne({
 })
 ```
 
-We also need to be able to support performing a search operation on associations.
+We also need to be able to support performing a query operation on associations.
 
 ### Example
 
