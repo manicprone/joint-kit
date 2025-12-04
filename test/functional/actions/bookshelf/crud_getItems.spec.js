@@ -758,8 +758,6 @@ describe('ACTION: getItems [bookshelf]', () => {
       })
     })
 
-    // TODO - Test multiple operators on a single query !!!
-
     describe('using advanced queries with object notation on the input value:', async () => {
       it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator (for case sensitive)`, async () => {
         const specUser = {
@@ -859,7 +857,7 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getUsersFilteredByContains.data[1].username).toEqual('admin')
       })
 
-      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} property (for case insensitive)`, async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS_INSENSITIVE} operator (for case insensitive)`, async () => {
         const specUser = {
           modelName: 'User',
           fields: [
@@ -884,7 +882,7 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getUsersFilteredByCI.data[1].display_name).toEqual('Segmented')
       })
 
-      it(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} property`, async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_EXCLUDES} operator`, async () => {
         // User
         const specUser = {
           modelName: 'User',
@@ -932,6 +930,116 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getProjectsFiltered.data[1].alias).toEqual('project-001')
         expect(getProjectsFiltered.data[2].alias).toEqual('project-006')
         expect(getProjectsFiltered.data[3].alias).toEqual('project-010')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_LESS_THAN} operator`, async () => {
+        const specProject = {
+          modelName: 'Project',
+          fields: [
+            { name: 'name', type: 'String' },
+            { name: 'status_code', type: 'Number' },
+            { name: 'started_at', type: 'Date' },
+            { name: 'finished_at', type: 'Date' },
+            { name: 'created_at', type: 'Date' }
+          ],
+          defaultOrderBy: 'alias'
+        }
+
+        const projectsFilteredByLessThanNumber = {
+          fields: {
+            status_code: {
+              lt: 4
+            }
+          }
+        }
+
+        const projectsFilteredByLessThanDate1 = {
+          fields: {
+            finished_at: {
+              lt: new Date('2016-09-01')
+            }
+          },
+          orderBy: '-alias'
+        }
+
+        const projectsFilteredByLessThanDate2 = {
+          fields: {
+            finished_at: {
+              lt: new Date('2017-08-01')
+            }
+          },
+          orderBy: '-alias'
+        }
+
+        const getProjectsLessThanNumber = await projectApp.getItems(specProject, projectsFilteredByLessThanNumber, 'flat')
+        // console.log('[DEVING] getProjectsLessThanNumber.data:', getProjectsLessThanNumber.data)
+        expect(getProjectsLessThanNumber.data).to.have.length(3)
+        expect(getProjectsLessThanNumber.data[0].status_code).toEqual(3)
+        expect(getProjectsLessThanNumber.data[0].alias).toEqual('blue-dreamsicles')
+
+        const getProjectsLessThanDate1 = await projectApp.getItems(specProject, projectsFilteredByLessThanDate1, 'flat')
+        // console.log('[DEVING] getProjectsLessThanDate1.data:', getProjectsLessThanDate1.data)
+        expect(getProjectsLessThanDate1.data).to.have.length(1)
+        expect(getProjectsLessThanDate1.data[0].alias).toEqual('mega-seed-mini-sythesizer')
+
+        const getProjectsLessThanDate2 = await projectApp.getItems(specProject, projectsFilteredByLessThanDate2, 'flat')
+        // console.log('[DEVING] getProjectsLessThanDate2.data:', getProjectsLessThanDate2.data)
+        expect(getProjectsLessThanDate2.data).to.have.length(4)
+        expect(getProjectsLessThanDate2.data[0].alias).toEqual('project-005')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_GREATER_THAN} operator`, async () => {
+        const specProject = {
+          modelName: 'Project',
+          fields: [
+            { name: 'name', type: 'String' },
+            { name: 'status_code', type: 'Number' },
+            { name: 'started_at', type: 'Date' },
+            { name: 'finished_at', type: 'Date' }
+          ],
+          defaultOrderBy: 'alias'
+        }
+
+        const projectsFilteredByGreaterThanDate = {
+          fields: {
+            finished_at: {
+              gt: new Date('2017-09-22')
+            }
+          },
+          orderBy: '-alias'
+        }
+
+        const getProjectsGreaterThanDate = await projectApp.getItems(specProject, projectsFilteredByGreaterThanDate, 'flat')
+        expect(getProjectsGreaterThanDate.data).to.have.length(2)
+        expect(getProjectsGreaterThanDate.data[0].alias).toEqual('project-009')
+      })
+
+      it('should support multiple operators on a single query', async () => {
+        const specProject = {
+          modelName: 'Project',
+          fields: [
+            { name: 'name', type: 'String' },
+            { name: 'status_code', type: 'Number' },
+            { name: 'started_at', type: 'Date' },
+            { name: 'finished_at', type: 'Date' }
+          ],
+          defaultOrderBy: 'alias'
+        }
+
+        const projectsFilteredByDateRange = {
+          fields: {
+            finished_at: {
+              gt: new Date('2017-09-22'),
+              lt: new Date('2017-11-01')
+            }
+          },
+          orderBy: '-alias'
+        }
+
+        const getProjectsInDateRange = await projectApp.getItems(specProject, projectsFilteredByDateRange, 'flat')
+        // console.log('[DEVING] getProjectsInDateRange.data:', getProjectsInDateRange.data)
+        expect(getProjectsInDateRange.data).to.have.length(1)
+        expect(getProjectsInDateRange.data[0].alias).toEqual('project-009')
       })
     })
 

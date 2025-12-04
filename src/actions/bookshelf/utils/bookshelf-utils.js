@@ -110,7 +110,7 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 // -----------------------------------------------------------------------------
 // Append a where clause to an existing query, per the provided input data.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, dataType) {
   // Load assets for query logic
   const mainTableName = joint.model[modelName].prototype.tableName
   // Required for association field queries
@@ -233,6 +233,65 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
           const valueForQuery = value[operator]
           queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
+          break
+        }
+
+        // OPERATORS: Comparison (lt, lte, gt, gte)
+        case ACTION.INPUT_FIELD_QUERY_LESS_THAN:
+        case ACTION.INPUT_FIELD_QUERY_LESS_THAN_OR_EQUAL:
+        case ACTION.INPUT_FIELD_QUERY_GREATER_THAN:
+        case ACTION.INPUT_FIELD_QUERY_GREATER_THAN_OR_EQUAL: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" action on:`, value[operator])
+
+          // Load comparison symbol
+          const comparisonOperatorMap = {
+            [ACTION.INPUT_FIELD_QUERY_LESS_THAN]: '<',
+            [ACTION.INPUT_FIELD_QUERY_LESS_THAN_OR_EQUAL]: '<=',
+            [ACTION.INPUT_FIELD_QUERY_GREATER_THAN]: '>',
+            [ACTION.INPUT_FIELD_QUERY_GREATER_THAN_OR_EQUAL]: '>='
+          }
+          const comparisonSymbol = comparisonOperatorMap[operator]
+
+          // Only allow comparisons on Numbers or Dates
+          const supportedDataTypes = ['Number', 'Date']
+          if (!supportedDataTypes.includes(dataType)) {
+            throw new Error(`The "${operator}" operator is only supported for Number or Date fields.`)
+          }
+
+          const valueForQuery = value[operator]
+          if (valueForQuery === null || valueForQuery === undefined) {
+            throw new Error(`The "${operator}" operator requires a value.`)
+          }
+
+          if (dataType === 'Number' && (typeof valueForQuery !== 'number' || Number.isNaN(valueForQuery))) {
+            throw new Error(`The "${operator}" operator requires a valid Number value.`)
+          }
+
+          if (dataType === 'Date' && (!(valueForQuery instanceof Date) || Number.isNaN(valueForQuery.valueOf()))) {
+            throw new Error(`The "${operator}" operator requires a valid Date value.`)
+          }
+
+          const bindingValue = (dataType === 'Date') ? valueForQuery.toISOString() : valueForQuery
+
+          // Operating on an Association Resource Field
+          if (isAssocClause) {
+            if (!assocModelName) {
+              throw new Error(`The query argument "${assocName}.${assocField}" is invalid as the association "${assocName}" does not exist for model "${modelName}"`)
+            }
+
+            if (assocConfig.type !== 'toOne') {
+              throw new Error(`The query argument "${assocName}.${assocField}" is invalid because the association "${assocName}" is not of type "toOne".`)
+            }
+
+            queryBuilder
+              .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+              .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+              .where(`${assocTableName}.${assocField}`, comparisonSymbol, bindingValue)
+
+          // Operating on a Main Resource Field
+          } else {
+            queryBuilder.where(`${mainTableName}.${fieldName}`, comparisonSymbol, bindingValue)
+          }
           break
         }
 

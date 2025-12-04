@@ -313,12 +313,13 @@ export function prepareFieldData (fieldSpec = [], fieldData = {}) {
 
       // Perform data type cast on provided field values
       if (fieldName && objectUtils.has(fieldData, fieldName)) {
-        if (objectUtils.isPlainObject(fieldData[fieldName])) {
-          // TODO - We will need to iterate the values of the object and cast appropriately !!!
-          // TDD with unit tests
+        if (objectUtils.isPlainObject(fieldData[fieldName]) && dataType !== 'JSON') {
           // Handle advanced queries and field set values
-          // console.log('[DEVING] prepareFieldData -- ADVANCED QUERY', fieldData[fieldName])
-          preparedFieldData[fieldName] = fieldData[fieldName]
+          // console.log(`[DEVING] prepareFieldData (${dataType}) -- ADVANCED QUERY`, fieldData[fieldName])
+          preparedFieldData[fieldName] = Object.entries(fieldData[fieldName]).reduce((acc, [key, value]) => {
+            acc[key] = castValue(value, dataType)
+            return acc
+          }, {})
         } else {
           preparedFieldData[fieldName] = castValue(fieldData[fieldName], dataType)
         }
@@ -358,6 +359,7 @@ export function castValue (value, dataType) {
     case 'Number': return Number(value)
     case 'Boolean': return (isNaN(value)) ? (value.toLowerCase() == 'true') : Boolean(value) // eslint-disable-line eqeqeq
     case 'JSON': return JSON.stringify(value)
+    case 'Date': return new Date(value)
     default: return String(value)
   }
 }

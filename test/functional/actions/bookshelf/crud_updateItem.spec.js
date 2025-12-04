@@ -271,7 +271,7 @@ describe('CRUD ACTIONS [bookshelf]', () => {
     })
 
     describe('using advanced queries with object notation on the input value:', async () => {
-      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} operator (for case sensitive)`, async () => {
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_CONTAINS} property (for case sensitive)`, async () => {
         const specProject = {
           modelName: 'Project',
           fields: [
