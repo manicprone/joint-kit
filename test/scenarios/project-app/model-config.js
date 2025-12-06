@@ -100,6 +100,10 @@ module.exports = [
       contributor: {
         type: 'toOne',
         path: 'user_id => User.id'
+      },
+      project: {
+        type: 'toOne',
+        path: 'project_id => Project.id'
       }
     }
   },

@@ -101,9 +101,9 @@ export default async function getItems (joint, spec = {}, input = {}, output) {
 
         if (!isLocked && (hasInput || hasDefault)) {
           const inputValue = (hasInput) ? inputFields[fieldName] : defaultValue
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue, fieldSpec.type)
         } else if (isLocked && hasDefault) {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue, fieldSpec.type)
         }
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)

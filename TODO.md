@@ -30,26 +30,20 @@
 
 <br />
 
-## README To Do
-
-* Add general info / overview, once jointkit.org is ready.
-
-* Add software stack info, etc.
-
-<br />
-
 ## Backlog
+
+* Support advanced comparison logic on toMany associations.
 
 * `ActionUtils.prepareFieldData()` could populate the default value, so that in
   each DB implementation the query can be built solely by the returned input
   fields, rather than using a combination of field specs and field data, making
   the logic DRY-er.
 
+* Clean up joint-error-serializer.js (since refactor of spec operators)
+
 * Complete `routeConfig` functional testing, using the updated db scenarios.
 
 * Replace moment with date-fns !!!
-
-* Replace promises with `async/await` (esp in tests) !!!
 
 * Remove the quotes on the modelNames in the error messages.
 
@@ -120,9 +114,7 @@
 
 ## Advanced Operations
 
-Instead of the operands attribute in the spec, we just support overloaded input capabilities (via object notation).
-
-> You should not have to update the spec for these variations.
+Using object notation for input values allows for advanced querying.
 
 ### Examples
 
@@ -150,7 +142,7 @@ joint.method.Order.getOne({
 })
 ```
 
-We also need to be able to support performing a search operation on associations.
+We also need to be able to support performing a query operation on associations.
 
 ### Example
 

@@ -7,6 +7,13 @@ import * as CoreUtils from '../../../core/core-utils'
 const debugLoadDirect = false
 const debugAppendWhereClause = false
 
+const comparisonOperatorMap = {
+  [ACTION.INPUT_FIELD_QUERY_LESS_THAN]: '<',
+  [ACTION.INPUT_FIELD_QUERY_LESS_THAN_OR_EQUAL]: '<=',
+  [ACTION.INPUT_FIELD_QUERY_GREATER_THAN]: '>',
+  [ACTION.INPUT_FIELD_QUERY_GREATER_THAN_OR_EQUAL]: '>='
+}
+
 // -----------------------------------------------------------------------------
 // Accepts the "orderBy" API field value and returns
 // the Bookshelf-compatible specification for an order-by clause.
@@ -110,7 +117,7 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 // -----------------------------------------------------------------------------
 // Append a where clause to an existing query, per the provided input data.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, dataType) {
   // Load assets for query logic
   const mainTableName = joint.model[modelName].prototype.tableName
   // Required for association field queries
@@ -140,6 +147,26 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
   } else if (value !== null && typeof value === 'object') {
     if (debugAppendWhereClause) console.log(`[DEVING] WHERE CLAUSE with ADVANCED QUERY: ${mainTableName} => ${fieldName}:`, value)
 
+    // Association query logic for reusability
+    let assocJoinApplied = false
+    const ensureAssociationJoin = () => {
+      if (!isAssocClause || assocJoinApplied) return
+
+      if (!assocModelName) {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid as the association "${assocName}" does not exist for model "${modelName}"`)
+      }
+
+      if (assocConfig.type !== 'toOne') {
+        throw new Error(`The query argument "${assocName}.${assocField}" is invalid because the association "${assocName}" is not of type "toOne".`)
+      }
+
+      queryBuilder
+        .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
+        .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+
+      assocJoinApplied = true
+    }
+
     for (const operator of Object.keys(value)) {
       switch (operator) {
         // OPERATOR: Contains (case sensitive)
@@ -151,24 +178,16 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
           if (isAssocClause) {
             if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" (case sensitive) action via association field on:`, value[operator])
 
-            // TODO - Complete this with join logic !!!
+            ensureAssociationJoin()
+
             if (dialect === 'sqlite3') {
               const globValue = `*${valueForQuery}*` // use GLOB for case-sensitive matching
-              queryBuilder
-                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
-                .whereRaw('?? GLOB ?', [`${assocTableName}.${assocField}`, globValue])
+              queryBuilder.whereRaw('?? GLOB ?', [`${assocTableName}.${assocField}`, globValue])
             } else if (dialect === 'mysql' || dialect === 'mysql2') {
-              queryBuilder
-                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
-                .whereRaw('?? LIKE BINARY ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
+              queryBuilder.whereRaw('?? LIKE BINARY ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
             } else {
               // default: Postgres, et al - LIKE defaults to case-sensitive matching
-              queryBuilder
-                .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-                .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
-                .whereRaw('?? LIKE ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
+              queryBuilder.whereRaw('?? LIKE ?', [`${assocTableName}.${assocField}`, `%${valueForQuery}%`])
             }
 
           // Operating on a Main Resource Field
@@ -233,6 +252,59 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
           const valueForQuery = value[operator]
           queryBuilder.whereRaw(`?? NOT IN (${valueForQuery.map(() => '?').join(', ')})`, [`${mainTableName}.${fieldName}`, ...valueForQuery])
+          break
+        }
+
+        // OPERATORS: Comparison (lt, lte, gt, gte)
+        case ACTION.INPUT_FIELD_QUERY_LESS_THAN:
+        case ACTION.INPUT_FIELD_QUERY_LESS_THAN_OR_EQUAL:
+        case ACTION.INPUT_FIELD_QUERY_GREATER_THAN:
+        case ACTION.INPUT_FIELD_QUERY_GREATER_THAN_OR_EQUAL: {
+          if (debugAppendWhereClause) console.log(`[DEVING] Handling "${operator}" action on:`, value[operator])
+
+          const comparisonSymbol = comparisonOperatorMap[operator]
+
+          // Only allow comparisons on Numbers or Dates
+          const supportedDataTypes = ['Number', 'Date']
+          if (!supportedDataTypes.includes(dataType)) {
+            throw new Error(`The "${operator}" operator is only supported for Number or Date fields.`)
+          }
+
+          const valueForQuery = value[operator]
+          if (valueForQuery === null || valueForQuery === undefined) {
+            throw new Error(`The "${operator}" operator requires a value.`)
+          }
+
+          if (dataType === 'Number' && (typeof valueForQuery !== 'number' || Number.isNaN(valueForQuery))) {
+            throw new Error(`The "${operator}" operator requires a valid Number value.`)
+          }
+
+          if (dataType === 'Date' && (!(valueForQuery instanceof Date) || Number.isNaN(valueForQuery.valueOf()))) {
+            throw new Error(`The "${operator}" operator requires a valid Date value.`)
+          }
+
+          const isDateComparison = dataType === 'Date'
+          const applyComparison = (columnRef) => {
+            if (isDateComparison) {
+              if (dialect === 'sqlite3') {
+                queryBuilder.whereRaw(`julianday(??) ${comparisonSymbol} julianday(?)`, [columnRef, valueForQuery.toISOString()])
+              } else {
+                queryBuilder.where(columnRef, comparisonSymbol, valueForQuery)
+              }
+            } else {
+              queryBuilder.where(columnRef, comparisonSymbol, valueForQuery)
+            }
+          }
+
+          // Operating on an Association Resource Field
+          if (isAssocClause) {
+            ensureAssociationJoin()
+            applyComparison(`${assocTableName}.${assocField}`)
+
+          // Operating on a Main Resource Field
+          } else {
+            applyComparison(`${mainTableName}.${fieldName}`)
+          }
           break
         }
 
