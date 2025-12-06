@@ -70,7 +70,7 @@ describe('ACTION: getItems [bookshelf]', () => {
   // getItems
   // ---------------------------------------------------------------------------
   describe('getItems', () => {
-    beforeEach(() => resetDB(['users', 'roles', 'profiles', 'projects']))
+    beforeEach(() => resetDB(['users', 'roles', 'profiles', 'projects', 'project_contributors']))
 
     it('should return all rows according to the provided spec and input', async () => {
       // ----
@@ -984,8 +984,51 @@ describe('ACTION: getItems [bookshelf]', () => {
 
         const getProjectsLessThanDate2 = await projectApp.getItems(specProject, projectsFilteredByLessThanDate2, 'flat')
         // console.log('[DEVING] getProjectsLessThanDate2.data:', getProjectsLessThanDate2.data)
-        expect(getProjectsLessThanDate2.data).to.have.length(4)
-        expect(getProjectsLessThanDate2.data[0].alias).toEqual('project-005')
+        expect(getProjectsLessThanDate2.data).to.have.length(3)
+        expect(getProjectsLessThanDate2.data[0].alias).toEqual('project-002')
+      })
+
+      it(`should support the ${ACTION.INPUT_FIELD_QUERY_LESS_THAN} operator with an association field`, async () => {
+        const specProjectContributor = {
+          modelName: 'ProjectContributor',
+          fields: [
+            { name: 'started_at', type: 'Date' },
+            { name: 'finished_at', type: 'Date' },
+            { name: 'project.started_at', type: 'Date' },
+            { name: 'project.finished_at', type: 'Date' }
+          ],
+          defaultOrderBy: 'user_id'
+        }
+
+        const projectsLessThanDate = {
+          fields: {
+            'project.started_at': {
+              lt: new Date('2017-03-11')
+            }
+          }
+        }
+
+        const projectsDateRange = {
+          fields: {
+            'project.finished_at': {
+              gte: new Date('2017-03-29'),
+              lt: new Date('2017-10-09')
+            }
+          },
+          orderBy: '-user_id'
+        }
+
+        const getContributorRefsForProjectLessThan = await projectApp.getItems(specProjectContributor, projectsLessThanDate, 'flat')
+        // console.log('[DEVING] getContributorRefsForProjectLessThan.data:', getContributorRefsForProjectLessThan.data)
+        expect(getContributorRefsForProjectLessThan.data).to.have.length(3)
+        expect(getContributorRefsForProjectLessThan.data[0].project_id).toEqual(3)
+        expect(getContributorRefsForProjectLessThan.data[0].user_id).toEqual(4)
+
+        const getContributorRefsForProjectDateRange = await projectApp.getItems(specProjectContributor, projectsDateRange, 'flat')
+        // console.log('[DEVING] getContributorRefsForProjectDateRange.data:', getContributorRefsForProjectDateRange.data)
+        expect(getContributorRefsForProjectDateRange.data).to.have.length(2)
+        expect(getContributorRefsForProjectDateRange.data[0].project_id).toEqual(3)
+        expect(getContributorRefsForProjectDateRange.data[0].user_id).toEqual(5)
       })
 
       it(`should support the ${ACTION.INPUT_FIELD_QUERY_GREATER_THAN} operator`, async () => {
@@ -1014,7 +1057,7 @@ describe('ACTION: getItems [bookshelf]', () => {
         expect(getProjectsGreaterThanDate.data[0].alias).toEqual('project-009')
       })
 
-      it('should support multiple operators on a single query', async () => {
+      it('should support multiple comparison operators on a single query', async () => {
         const specProject = {
           modelName: 'Project',
           fields: [

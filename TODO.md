@@ -32,10 +32,14 @@
 
 ## Backlog
 
+* Support advanced comparison logic on toMany associations.
+
 * `ActionUtils.prepareFieldData()` could populate the default value, so that in
   each DB implementation the query can be built solely by the returned input
   fields, rather than using a combination of field specs and field data, making
   the logic DRY-er.
+
+* Clean up joint-error-serializer.js (since refactor of spec operators)
 
 * Complete `routeConfig` functional testing, using the updated db scenarios.
 
@@ -110,9 +114,7 @@
 
 ## Advanced Operations
 
-Instead of the operands attribute in the spec, we just support overloaded input capabilities (via object notation).
-
-> You should not have to update the spec for these variations.
+Using object notation for input values allows for advanced querying.
 
 ### Examples
 
