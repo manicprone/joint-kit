@@ -148,7 +148,7 @@ const seeds = [
     is_internal: false,
     status_code: 4,
     started_at: '2017-08-22',
-    finished_at: null,
+    finished_at: 'infinity',
     created_by: null
   },
   {

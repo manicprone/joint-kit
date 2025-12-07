@@ -953,6 +953,7 @@ describe('ACTION: getItems [bookshelf]', () => {
           }
         }
 
+        // NOTE - This test includes a use case with 'infinity'
         const projectsFilteredByLessThanDate1 = {
           fields: {
             finished_at: {
@@ -962,13 +963,13 @@ describe('ACTION: getItems [bookshelf]', () => {
           orderBy: '-alias'
         }
 
+        // NOTE - This test includes a use case with 'infinity'
         const projectsFilteredByLessThanDate2 = {
           fields: {
             finished_at: {
               lt: new Date('2017-08-01')
             }
-          },
-          orderBy: '-alias'
+          }
         }
 
         const getProjectsLessThanNumber = await projectApp.getItems(specProject, projectsFilteredByLessThanNumber, 'flat')
@@ -979,13 +980,14 @@ describe('ACTION: getItems [bookshelf]', () => {
 
         const getProjectsLessThanDate1 = await projectApp.getItems(specProject, projectsFilteredByLessThanDate1, 'flat')
         // console.log('[DEVING] getProjectsLessThanDate1.data:', getProjectsLessThanDate1.data)
-        expect(getProjectsLessThanDate1.data).to.have.length(1)
-        expect(getProjectsLessThanDate1.data[0].alias).toEqual('mega-seed-mini-sythesizer')
+        expect(getProjectsLessThanDate1.data).to.have.length(2)
+        expect(getProjectsLessThanDate1.data[0].alias).toEqual('project-006')
+        expect(getProjectsLessThanDate1.data[0].finished_at).toEqual('infinity')
 
         const getProjectsLessThanDate2 = await projectApp.getItems(specProject, projectsFilteredByLessThanDate2, 'flat')
         // console.log('[DEVING] getProjectsLessThanDate2.data:', getProjectsLessThanDate2.data)
-        expect(getProjectsLessThanDate2.data).to.have.length(3)
-        expect(getProjectsLessThanDate2.data[0].alias).toEqual('project-002')
+        expect(getProjectsLessThanDate2.data).to.have.length(4)
+        expect(getProjectsLessThanDate2.data[0].alias).toEqual('doppelganger-finder')
       })
 
       it(`should support the ${ACTION.INPUT_FIELD_QUERY_LESS_THAN} operator with an association field`, async () => {
@@ -1040,21 +1042,24 @@ describe('ACTION: getItems [bookshelf]', () => {
             { name: 'started_at', type: 'Date' },
             { name: 'finished_at', type: 'Date' }
           ],
-          defaultOrderBy: 'alias'
+          defaultOrderBy: '-alias'
         }
 
+        // NOTE - This test includes a use case with 'infinity'
         const projectsFilteredByGreaterThanDate = {
           fields: {
             finished_at: {
               gt: new Date('2017-09-22')
             }
           },
-          orderBy: '-alias'
+          orderBy: 'alias'
         }
 
         const getProjectsGreaterThanDate = await projectApp.getItems(specProject, projectsFilteredByGreaterThanDate, 'flat')
-        expect(getProjectsGreaterThanDate.data).to.have.length(2)
-        expect(getProjectsGreaterThanDate.data[0].alias).toEqual('project-009')
+        // console.log('[DEVING] getProjectsGreaterThanDate.data:', getProjectsGreaterThanDate.data)
+        expect(getProjectsGreaterThanDate.data).to.have.length(3)
+        expect(getProjectsGreaterThanDate.data[0].alias).toEqual('project-006')
+        expect(getProjectsGreaterThanDate.data[0].finished_at).toEqual('infinity')
       })
 
       it('should support multiple comparison operators on a single query', async () => {
@@ -1066,23 +1071,24 @@ describe('ACTION: getItems [bookshelf]', () => {
             { name: 'started_at', type: 'Date' },
             { name: 'finished_at', type: 'Date' }
           ],
-          defaultOrderBy: 'alias'
+          defaultOrderBy: '-alias'
         }
 
+        // NOTE - This test includes a use case with 'infinity'
         const projectsFilteredByDateRange = {
           fields: {
             finished_at: {
               gt: new Date('2017-09-22'),
               lt: new Date('2017-11-01')
             }
-          },
-          orderBy: '-alias'
+          }
         }
 
         const getProjectsInDateRange = await projectApp.getItems(specProject, projectsFilteredByDateRange, 'flat')
         // console.log('[DEVING] getProjectsInDateRange.data:', getProjectsInDateRange.data)
-        expect(getProjectsInDateRange.data).to.have.length(1)
+        expect(getProjectsInDateRange.data).to.have.length(2)
         expect(getProjectsInDateRange.data[0].alias).toEqual('project-009')
+        expect(getProjectsInDateRange.data[1].finished_at).toEqual('infinity')
       })
     })
 

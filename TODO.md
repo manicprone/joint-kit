@@ -32,6 +32,8 @@
 
 ## Backlog
 
+* Support `infinity` with date comparison logic.
+
 * Support advanced comparison logic on toMany associations.
 
 * `ActionUtils.prepareFieldData()` could populate the default value, so that in

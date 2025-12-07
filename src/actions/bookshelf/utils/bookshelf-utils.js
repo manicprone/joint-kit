@@ -285,15 +285,21 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
           const isDateComparison = dataType === 'Date'
           const applyComparison = (columnRef) => {
-            if (isDateComparison) {
-              if (dialect === 'sqlite3') {
-                queryBuilder.whereRaw(`julianday(??) ${comparisonSymbol} julianday(?)`, [columnRef, valueForQuery.toISOString()])
+            queryBuilder.where(function comparisonClause () {
+              if (isDateComparison) {
+                if (dialect === 'sqlite3') {
+                  this.whereRaw(`julianday(??) ${comparisonSymbol} julianday(?)`, [columnRef, valueForQuery.toISOString()])
+                } else {
+                  this.where(columnRef, comparisonSymbol, valueForQuery)
+                }
               } else {
-                queryBuilder.where(columnRef, comparisonSymbol, valueForQuery)
+                this.where(columnRef, comparisonSymbol, valueForQuery)
               }
-            } else {
-              queryBuilder.where(columnRef, comparisonSymbol, valueForQuery)
-            }
+
+              if (isDateComparison && dialect === 'sqlite3') {
+                this.orWhereRaw('LOWER(??) = ?', [columnRef, 'infinity'])
+              }
+            })
           }
 
           // Operating on an Association Resource Field
