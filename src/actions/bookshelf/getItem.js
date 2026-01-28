@@ -26,6 +26,16 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
     if (debug) console.log(`[JOINT] [action:getItem] The model "${modelName}" is not recognized`)
     return Promise.reject(StatusErrors.generateModelNotRecognizedError(modelName))
   }
+  const mainTableName = joint.model[modelName].prototype.tableName
+
+  const ensureFlatIncludesId = (columns = []) => {
+    if (output !== 'flat' || !Array.isArray(columns)) return columns
+    if (columns.includes('*') || columns.includes(`${mainTableName}.*`)) return columns
+
+    const idColumn = `${mainTableName}.id`
+    const hasId = columns.includes('id') || columns.includes(idColumn)
+    return hasId ? columns : columns.concat(idColumn)
+  }
 
   // Reject when required fields are not provided
   const requiredFieldCheck = ActionUtils.checkRequiredFields(specFields, inputFields)
@@ -43,15 +53,15 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
   if (returnColsDef) {
     // If a single set (array) is defined, honor the setting
     if (Array.isArray(returnColsDef)) {
-      actionOpts.columns = returnColsDef
+      actionOpts.columns = ensureFlatIncludesId(returnColsDef)
 
     // Otherwise, try to honor the set requested by the input
     } else if (input[ACTION.INPUT_FIELD_SET] && objectUtils.has(returnColsDef, input[ACTION.INPUT_FIELD_SET])) {
-      actionOpts.columns = returnColsDef[input[ACTION.INPUT_FIELD_SET]]
+      actionOpts.columns = ensureFlatIncludesId(returnColsDef[input[ACTION.INPUT_FIELD_SET]])
 
     // If the input does not declare a set, check for a "default" set
     } else if (returnColsDef.default && Array.isArray(returnColsDef.default)) {
-      actionOpts.columns = returnColsDef.default
+      actionOpts.columns = ensureFlatIncludesId(returnColsDef.default)
     }
   } // end-if (returnColsDef)
 
@@ -89,9 +99,9 @@ export default async function getItem (joint, spec = {}, input = {}, output) {
           const inputValue = (hasInput)
             ? inputFields[fieldName]
             : defaultValue
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, inputValue, fieldSpec.type, { columns: actionOpts.columns })
         } else if (isLocked && hasDefault) {
-          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue)
+          BookshelfUtils.appendWhereClause(joint, queryBuilder, modelName, fieldName, defaultValue, fieldSpec.type, { columns: actionOpts.columns })
         }
       }) // end-specFields.forEach
     } // end-if (inputFields && specFields)

@@ -117,7 +117,7 @@ export function loadRelationsToItemBase (itemData, loadDirect = {}, keepAsRelati
 // -----------------------------------------------------------------------------
 // Append a where clause to an existing query, per the provided input data.
 // -----------------------------------------------------------------------------
-export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, dataType) {
+export function appendWhereClause (joint, queryBuilder, modelName, fieldName, value, dataType, options = {}) {
   // Load assets for query logic
   const mainTableName = joint.model[modelName].prototype.tableName
   // Required for association field queries
@@ -149,6 +149,16 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
     // Association query logic for reusability
     let assocJoinApplied = false
+    const columns = options.columns
+    const shouldSelectMainFields = () => {
+      if (!Array.isArray(columns) || columns.length === 0) return true
+      return columns.includes('*') || columns.includes(`${mainTableName}.*`)
+    }
+    const shouldSelectAssocField = () => {
+      if (!Array.isArray(columns) || columns.length === 0) return true
+      if (columns.includes('*') || columns.includes(`${mainTableName}.*`)) return false
+      return columns.includes(assocField) || columns.includes(`${assocTableName}.${assocField}`) || columns.includes(`${assocName}.${assocField}`)
+    }
     const ensureAssociationJoin = () => {
       if (!isAssocClause || assocJoinApplied) return
 
@@ -162,7 +172,12 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 
       queryBuilder
         .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-        .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
+      if (shouldSelectMainFields()) {
+        queryBuilder.select(`${mainTableName}.*`)
+      }
+      if (shouldSelectAssocField()) {
+        queryBuilder.select(`${assocTableName}.${assocField}`)
+      }
 
       assocJoinApplied = true
     }
@@ -341,10 +356,26 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
       const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
       // console.log('[DEVING] assocPathInfo:', assocPathInfo)
 
+      const columns = options.columns
+      const shouldSelectMainFields = () => {
+        if (!Array.isArray(columns) || columns.length === 0) return true
+        return columns.includes('*') || columns.includes(`${mainTableName}.*`)
+      }
+      const shouldSelectAssocField = () => {
+        if (!Array.isArray(columns) || columns.length === 0) return true
+        if (columns.includes('*') || columns.includes(`${mainTableName}.*`)) return false
+        return columns.includes(assocField) || columns.includes(`${assocTableName}.${assocField}`) || columns.includes(`${assocName}.${assocField}`)
+      }
+
       queryBuilder
         .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-        .select(`${mainTableName}.*`, `${assocTableName}.${assocField}`)
         .where(`${assocTableName}.${assocField}`, '=', value)
+      if (shouldSelectMainFields()) {
+        queryBuilder.select(`${mainTableName}.*`)
+      }
+      if (shouldSelectAssocField()) {
+        queryBuilder.select(`${assocTableName}.${assocField}`)
+      }
 
     // Direct match on MAIN RESOURCE
     } else {
@@ -372,11 +403,13 @@ export function appendWhereClause (joint, queryBuilder, modelName, fieldName, va
 // + NULLS are always returned last in both ASC and DESC orders.
 // -----------------------------------------------------------------------------
 export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue) {
+  const mainTableName = joint.model[modelName].prototype.tableName
+
   // Iterate orderBy arguments
   const results = buildOrderBy(fieldValue).map(orderOpt => {
     // Support column from main model
     if (!orderOpt.col.includes('.')) {
-      return [true, (_queryBuilder) => _queryBuilder.orderBy(orderOpt.col, orderOpt.order)]
+      return [true, (_queryBuilder) => _queryBuilder.orderBy(`${mainTableName}.${orderOpt.col}`, orderOpt.order)]
 
     // Support column from association
     } else {
@@ -391,7 +424,6 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
       }
 
       // Obtain model config info to build raw query
-      const mainTableName = joint.model[modelName].prototype.tableName
       const assocTableName = joint.model[assocModelName].prototype.tableName
       const mainModelConfig = joint.modelConfig.find(it => it.name === modelName)
       const assocConfig = mainModelConfig.associations[assocName]
@@ -405,7 +437,6 @@ export function appendOrderByClause (joint, queryBuilder, modelName, fieldValue)
       const assocPathInfo = CoreUtils.parseAssociationPath(assocConfig.path)
       return [true, (_queryBuilder) => _queryBuilder
         .leftJoin(assocTableName, `${mainTableName}.${assocPathInfo.sourceField}`, `${assocTableName}.${assocPathInfo.targetField}`)
-        .select(`${mainTableName}.*`, `${assocTableName}.${colName}`)
         .orderByRaw(`${assocTableName}.${colName} IS NULL, ${assocTableName}.${colName} ${orderOpt.order}`)
       ]
     }
