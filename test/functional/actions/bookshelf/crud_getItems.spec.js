@@ -234,6 +234,44 @@ describe('ACTION: getItems [bookshelf]', () => {
       `)
     })
 
+    it(`should support the "spec.${ACTION.SPEC_FIELDS_TO_RETURN}" option, permitting various sets of returned field data when searching by association field and flat options`, async () => {
+      const specColsWithDefault = {}
+      specColsWithDefault.fieldsToReturn = {
+        default: ['username', 'external_id'],
+        flat: ['_model', 'id', 'username', 'external_id']
+      }
+
+      const specUser = {
+        modelName: 'User',
+        fields: [
+          { name: 'preferred_locale', type: 'String' },
+          { name: 'info.professional_title', type: 'String' }
+        ],
+        fieldsToReturn: ['username', 'external_id'],
+        defaultOrderBy: '-created_at'
+      }
+      const usersInfoProTitle = {
+        fields: {
+          'info.professional_title': 'EdgeCaser'
+        }
+      }
+
+      const getSpecifiedColsFromUserFlat = projectApp.getItems(specUser, usersInfoProTitle, 'flat')
+        .then((user) => {
+          expect(user.data[0]).to.have.keys(specColsWithDefault.fieldsToReturn.flat)
+        })
+
+      const getSpecifiedColsFromUserWithoutFlat = projectApp.getItems(specUser, usersInfoProTitle)
+        .then((user) => {
+          expect(user.models[0].attributes).to.have.keys(specColsWithDefault.fieldsToReturn.default)
+        })
+
+      return Promise.all([
+        getSpecifiedColsFromUserFlat,
+        getSpecifiedColsFromUserWithoutFlat
+      ])
+    })
+
     it(`should support the "input.${ACTION.INPUT_FIELD_SET}" syntax, permitting various sets of returned field data`, () => {
       const specBase = {
         modelName: 'User',
